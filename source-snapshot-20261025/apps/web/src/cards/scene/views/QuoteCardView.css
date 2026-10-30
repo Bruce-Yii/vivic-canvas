@@ -1,0 +1,68 @@
+/* Quote card: a sticky note that fills the whole card (shell `bleed` + `bare`). */
+.vivic-quote {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  min-height: 168px;
+  padding: 16px 20px;
+  background:
+    radial-gradient(120% 80% at 100% 0%, color-mix(in oklab, var(--vivic-accent) 7%, transparent), transparent 62%),
+    var(--vivic-paper);
+  color: var(--vivic-paper-ink);
+}
+.vivic-scene[data-fixed] .vivic-quote { flex: 1 1 0; min-height: 0; contain: size; overflow: hidden; }
+.vivic-quote-glyph { position: absolute; top: 34px; right: 16px; color: var(--vivic-accent); opacity: 0.12; pointer-events: none; }
+.vivic-quote-kicker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  color: color-mix(in oklab, var(--vivic-paper-ink) 66%, var(--vivic-paper));
+}
+.vivic-quote-kicker svg { color: var(--vivic-accent); }
+
+.vivic-quote-fit { position: relative; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+.vivic-scene[data-fixed] .vivic-quote-fit { flex: 1 1 0; min-height: 0; overflow: hidden; }
+.vivic-quote-text {
+  margin: 0;
+  font-size: 19px;
+  line-height: 29px;
+  font-weight: 550;
+  letter-spacing: -0.005em;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+.vivic-scene[data-fixed] .vivic-quote-text { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+.vivic-quote[data-long] .vivic-quote-text { font-size: 15.5px; line-height: 24px; }
+
+.vivic-quote-by { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; font-size: 12.5px; line-height: 18px; }
+.vivic-quote-author { min-width: 0; overflow-wrap: anywhere; }
+.vivic-scene[data-mode="control"] .vivic-quote-by { flex-wrap: wrap; }
+.vivic-scene[data-mode="control"] .vivic-quote-author { flex: 1 1 14em; }
+.vivic-scene[data-fixed] .vivic-quote-author { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vivic-quote-author strong { font-weight: 600; color: color-mix(in oklab, var(--vivic-paper-ink) 90%, var(--vivic-paper)); }
+.vivic-quote-source { color: color-mix(in oklab, var(--vivic-paper-ink) 62%, var(--vivic-paper)); }
+.vivic-quote-tag {
+  flex-shrink: 0;
+  max-width: 45%;
+  margin-left: auto;
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--vivic-paper-ink) 22%, transparent);
+  font-size: 11.5px;
+  color: color-mix(in oklab, var(--vivic-paper-ink) 76%, var(--vivic-paper));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.vivic-quote-tools { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.vivic-quote-form { position: relative; display: grid; gap: 8px; }
+.vivic-quote-form textarea { height: auto; padding-block: 6px; line-height: 1.6; resize: vertical; }

@@ -1,0 +1,8 @@
+.atelier-cloud-layer{position:absolute;inset:0;overflow:hidden;pointer-events:none;background:radial-gradient(ellipse 52% 29% at 20% 88%,#fff 0 40%,transparent 82%),radial-gradient(ellipse 48% 34% at 68% 101%,#fff 0 44%,transparent 83%),linear-gradient(#c8dcee,#e6edf4)}
+.atelier-cloud-layer[data-cloud-theme=dark]{background:radial-gradient(ellipse 70% 29% at 50% 105%,#56627e,transparent 86%),linear-gradient(#171c2f,#32394b)}
+.atelier-cloud-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
+[data-space-effect=clouds]>.atelier-glow-layer{display:none}
+#vivic-background-seed[data-space-effect=clouds]{background:linear-gradient(#c8dcee,#e6edf4)}
+.atelier-effect-clouds{background:radial-gradient(ellipse 85% 75% at 32% 110%,#fff 0 45%,transparent 70%),radial-gradient(ellipse 74% 65% at 85% 110%,#fff 0 44%,transparent 73%),linear-gradient(#a8c7e0,#e4eff8)}
+.vivic-control-loading{display:none!important}
+@media(prefers-reduced-motion:reduce){.atelier-cloud-layer{animation:none!important}}

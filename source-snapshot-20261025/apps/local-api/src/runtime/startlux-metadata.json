@@ -1,0 +1,130 @@
+{
+  "0.8B": [
+    {
+      "name": "LICENSE",
+      "url": "https://huggingface.co/startlux-models/StartLux-Decision-v1.1-0.8B-Instant/resolve/6496ae641cc71b149ce9dad69bd97f2a44e7bf11/LICENSE",
+      "bytes": 19347,
+      "sha256": "41003d4a74749c0220e33dd415042164b5a1093ed401f36277234f772d22d3d0"
+    },
+    {
+      "name": "config.json",
+      "url": "https://huggingface.co/startlux-models/StartLux-Decision-v1.1-0.8B-Instant/resolve/6496ae641cc71b149ce9dad69bd97f2a44e7bf11/config.json",
+      "bytes": 2529,
+      "sha256": "deb8195b93c7a48fc9ecc644cc7220ffbb0ca96e7e7965a324bf26d8c45f2727"
+    },
+    {
+      "name": "decision_config.json",
+      "url": "https://huggingface.co/startlux-models/StartLux-Decision-v1.1-0.8B-Instant/resolve/6496ae641cc71b149ce9dad69bd97f2a44e7bf11/decision_config.json",
+      "bytes": 521,
+      "sha256": "565e66d26f46baac1eeffae32a28c240f68e7cea26b67c245f07e610910d3e32"
+    },
+    {
+      "name": "tokenizer.json",
+      "url": "https://huggingface.co/startlux-models/StartLux-Decision-v1.1-0.8B-Instant/resolve/6496ae641cc71b149ce9dad69bd97f2a44e7bf11/tokenizer.json",
+      "bytes": 12807196,
+      "sha256": "fe000e3ed39ed12b8d2481d527d44f93c65d37e87645d2dcc80d1bf9d50d2927"
+    },
+    {
+      "name": "tokenizer_config.json",
+      "url": "https://huggingface.co/startlux-models/StartLux-Decision-v1.1-0.8B-Instant/resolve/6496ae641cc71b149ce9dad69bd97f2a44e7bf11/tokenizer_config.json",
+      "bytes": 16712,
+      "sha256": "e611fbccc7c29ef3b1cafb1cb7ea548d189968632901d678fd62be68c47885de"
+    }
+  ],
+  "2B": [
+    {
+      "name": "LICENSE",
+      "url": "https://huggingface.co/startlux-models/StartLux-Decision-v1.1-2B-Instant/resolve/f1e6cd147dda82c9ffa3e8e725d5c1f175566fb1/LICENSE",
+      "bytes": 19347,
+      "sha256": "41003d4a74749c0220e33dd415042164b5a1093ed401f36277234f772d22d3d0"
+    },
+    {
+      "name": "config.json",
+      "url": "https://huggingface.co/startlux-models/StartLux-Decision-v1.1-2B-Instant/resolve/f1e6cd147dda82c9ffa3e8e725d5c1f175566fb1/config.json",
+      "bytes": 2530,
+      "sha256": "523ca31160b0e44549b03d6a32aa3359ca7abee88c40713b9612a4f788d5ce8f"
+    },
+    {
+      "name": "decision_config.json",
+      "url": "https://huggingface.co/startlux-models/StartLux-Decision-v1.1-2B-Instant/resolve/f1e6cd147dda82c9ffa3e8e725d5c1f175566fb1/decision_config.json",
+      "bytes": 521,
+      "sha256": "3bd3c0c3854b18be967c7a660d38b8340aa2b4c14648d8ce0260cd32f6e89c1a"
+    },
+    {
+      "name": "tokenizer.json",
+      "url": "https://huggingface.co/startlux-models/StartLux-Decision-v1.1-2B-Instant/resolve/f1e6cd147dda82c9ffa3e8e725d5c1f175566fb1/tokenizer.json",
+      "bytes": 12807982,
+      "sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42"
+    },
+    {
+      "name": "tokenizer_config.json",
+      "url": "https://huggingface.co/startlux-models/StartLux-Decision-v1.1-2B-Instant/resolve/f1e6cd147dda82c9ffa3e8e725d5c1f175566fb1/tokenizer_config.json",
+      "bytes": 16709,
+      "sha256": "49e2b6e395f959f077f1e992b338919c0d4a9732fc6e613995e06557f843500c"
+    }
+  ],
+  "4B": [
+    {
+      "name": "LICENSE",
+      "url": "https://huggingface.co/startlux-models/StartLux-Decision-v1.1-4B-Instant/resolve/416088f77cfce09633906a3675c7cd2e5dabcf10/LICENSE",
+      "bytes": 19347,
+      "sha256": "41003d4a74749c0220e33dd415042164b5a1093ed401f36277234f772d22d3d0"
+    },
+    {
+      "name": "config.json",
+      "url": "https://huggingface.co/startlux-models/StartLux-Decision-v1.1-4B-Instant/resolve/416088f77cfce09633906a3675c7cd2e5dabcf10/config.json",
+      "bytes": 2735,
+      "sha256": "355cbeb0d4966866bc9627e710b5a6bc223c2d3ca2153880bffa7657db457d8d"
+    },
+    {
+      "name": "decision_config.json",
+      "url": "https://huggingface.co/startlux-models/StartLux-Decision-v1.1-4B-Instant/resolve/416088f77cfce09633906a3675c7cd2e5dabcf10/decision_config.json",
+      "bytes": 521,
+      "sha256": "9ca014791b5c71996c212c7aed6275405c4d9b682a6b6eba325a3ab17bcccc08"
+    },
+    {
+      "name": "tokenizer.json",
+      "url": "https://huggingface.co/startlux-models/StartLux-Decision-v1.1-4B-Instant/resolve/416088f77cfce09633906a3675c7cd2e5dabcf10/tokenizer.json",
+      "bytes": 12807982,
+      "sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42"
+    },
+    {
+      "name": "tokenizer_config.json",
+      "url": "https://huggingface.co/startlux-models/StartLux-Decision-v1.1-4B-Instant/resolve/416088f77cfce09633906a3675c7cd2e5dabcf10/tokenizer_config.json",
+      "bytes": 16710,
+      "sha256": "316230d6a809701f4db5ea8f8fc862bc3a6f3229c937c174e674ff3ca0a64ac8"
+    }
+  ],
+  "9B": [
+    {
+      "name": "LICENSE",
+      "url": "https://huggingface.co/startlux-models/StartLux-Decision-v1.1-9B-Instant/resolve/18a17f734966b213b2f00fa9c915e8b9af2a9b20/LICENSE",
+      "bytes": 19347,
+      "sha256": "41003d4a74749c0220e33dd415042164b5a1093ed401f36277234f772d22d3d0"
+    },
+    {
+      "name": "config.json",
+      "url": "https://huggingface.co/startlux-models/StartLux-Decision-v1.1-9B-Instant/resolve/18a17f734966b213b2f00fa9c915e8b9af2a9b20/config.json",
+      "bytes": 2704,
+      "sha256": "d2379a69df44645e47f5b01e13590f2558f9e780455a5243a2507cb3daf8ba43"
+    },
+    {
+      "name": "decision_config.json",
+      "url": "https://huggingface.co/startlux-models/StartLux-Decision-v1.1-9B-Instant/resolve/18a17f734966b213b2f00fa9c915e8b9af2a9b20/decision_config.json",
+      "bytes": 521,
+      "sha256": "7941d0886698e7f9ed5591777422fb718c33f5c730e5c14c64b653ec534ab2ca"
+    },
+    {
+      "name": "tokenizer.json",
+      "url": "https://huggingface.co/startlux-models/StartLux-Decision-v1.1-9B-Instant/resolve/18a17f734966b213b2f00fa9c915e8b9af2a9b20/tokenizer.json",
+      "bytes": 12807982,
+      "sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42"
+    },
+    {
+      "name": "tokenizer_config.json",
+      "url": "https://huggingface.co/startlux-models/StartLux-Decision-v1.1-9B-Instant/resolve/18a17f734966b213b2f00fa9c915e8b9af2a9b20/tokenizer_config.json",
+      "bytes": 16710,
+      "sha256": "316230d6a809701f4db5ea8f8fc862bc3a6f3229c937c174e674ff3ca0a64ac8"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+# Rename this file to .worktreeinclude only after reviewing every entry.
+# Codex managed worktrees copy matching ignored files from the local checkout.
+# Do not include broad secret patterns without an explicit risk decision.
+#
+# Example of a non-secret local fixture:
+# config/local-fixture.json

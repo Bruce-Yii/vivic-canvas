@@ -1,0 +1,33 @@
+services:
+  vivic:
+    build:
+      context: ../..
+      dockerfile: deploy/online/Dockerfile
+      args:
+        VIVIC_CONNECTOR_CLIS: ${VIVIC_CONNECTOR_CLIS:-0}
+    environment:
+      VIVIC_ONLINE_ORIGIN: ${VIVIC_ONLINE_ORIGIN:?Set the public HTTPS origin}
+      VIVIC_SPACE_DATA_DIR: /data/vivic
+      VIVIC_SPACE_INVITE: ${VIVIC_SPACE_INVITE:?Set a one-use registration invitation}
+      VIVIC_MODEL_API_BASE_URL: ${VIVIC_MODEL_API_BASE_URL:-https://edsionc.top/api/v1}
+    volumes:
+      - vivic-space-data:/data/vivic
+    ports:
+      - "127.0.0.1:${VIVIC_ONLINE_PORT:-8790}:8790"
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 128
+    mem_limit: 1g
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8790/healthz').then(async r=>{const b=await r.json();if(!r.ok||b.service!=='vivic-space-api')process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+
+volumes:
+  vivic-space-data:

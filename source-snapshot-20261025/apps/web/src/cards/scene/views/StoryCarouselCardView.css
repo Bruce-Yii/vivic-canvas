@@ -1,0 +1,174 @@
+/* Photo story: the whole card is the current page; chrome floats over the photo. */
+.vivic-story {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+  background: var(--vivic-subtle);
+}
+.vivic-scene[data-fixed] .vivic-story { flex: 1 1 auto; }
+/* Without a reserved height (user page) the page keeps a 4:3 photo box. */
+.vivic-scene:not([data-fixed]) .vivic-story { flex: none; aspect-ratio: 4 / 3; }
+
+.vivic-story-slide { position: absolute; inset: 0; }
+.vivic-story-media { position: absolute; inset: 0; }
+.vivic-story-shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to top, rgb(0 0 0 / 0.74) 0%, rgb(0 0 0 / 0.42) 34%, rgb(0 0 0 / 0) 62%),
+    linear-gradient(to bottom, rgb(0 0 0 / 0.26) 0%, rgb(0 0 0 / 0) 24%);
+  pointer-events: none;
+}
+
+.vivic-story-copy {
+  position: absolute;
+  inset: auto 0 0;
+  display: grid;
+  gap: 4px;
+  padding: 0 20px 44px;
+  color: white;
+}
+.vivic-story[data-single] .vivic-story-copy { padding-bottom: 18px; }
+.vivic-story-heading {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-shadow: 0 1px 12px rgb(0 0 0 / 0.3);
+}
+.vivic-story-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgb(255 255 255 / 0.85);
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.vivic-story[data-compact] .vivic-story-text { -webkit-line-clamp: 2; }
+.vivic-story[data-compact] .vivic-story-heading { font-size: 17px; -webkit-line-clamp: 1; }
+/* A page without a photo keeps the card's own ink on the soft placeholder. */
+.vivic-story-slide[data-tone="plain"] .vivic-story-copy { color: var(--card-foreground); }
+.vivic-story-slide[data-tone="plain"] .vivic-story-heading { text-shadow: none; }
+.vivic-story-slide[data-tone="plain"] .vivic-story-text { color: var(--vivic-muted-ink); }
+
+.vivic-story-kicker {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  /* The card's subcard trigger lives in the top-right corner. */
+  max-width: calc(100% - 64px);
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.42);
+  color: white;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+  pointer-events: none;
+}
+.vivic-story-kicker > svg { flex-shrink: 0; }
+
+.vivic-story-nav {
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.42);
+  color: white;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-50%);
+  transition: opacity 0.18s ease, background 0.15s ease;
+}
+.vivic-story-nav[data-side="prev"] { left: 10px; }
+.vivic-story-nav[data-side="next"] { right: 10px; }
+.vivic-story-nav:hover { background: rgb(0 0 0 / 0.6); }
+.vivic-story-nav:focus-visible { opacity: 1; outline: 2px solid white; outline-offset: 2px; }
+.vivic-story:hover .vivic-story-nav { opacity: 1; }
+@media (hover: none) {
+  .vivic-story-nav { opacity: 1; }
+}
+.vivic-story[data-tone="plain"] .vivic-story-nav {
+  background: color-mix(in oklab, var(--card) 82%, transparent);
+  color: var(--card-foreground);
+  border: 1px solid var(--vivic-line);
+}
+.vivic-story[data-tone="plain"] .vivic-story-nav:focus-visible { outline-color: var(--ring); }
+
+.vivic-story-bar {
+  position: absolute;
+  inset: auto 16px 12px 14px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.vivic-story-dots { display: flex; flex-wrap: wrap; align-items: center; min-width: 0; }
+.vivic-story-dot {
+  display: grid;
+  place-items: center;
+  min-width: 16px;
+  height: 20px;
+  padding: 0 2px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.vivic-story-dot > i {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.5);
+  transition: width 0.3s cubic-bezier(0.25, 0.7, 0.25, 1), background 0.2s ease;
+}
+.vivic-story-dot:hover > i { background: rgb(255 255 255 / 0.8); }
+.vivic-story-dot[aria-current="true"] > i { width: 16px; background: white; }
+.vivic-story-dot:focus-visible { outline: 2px solid white; outline-offset: 0; }
+.vivic-story-count {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 550;
+  font-variant-numeric: tabular-nums;
+  color: rgb(255 255 255 / 0.88);
+  text-shadow: 0 1px 8px rgb(0 0 0 / 0.35);
+}
+.vivic-story[data-tone="plain"] .vivic-story-dot > i { background: color-mix(in oklab, var(--foreground) 25%, transparent); }
+.vivic-story[data-tone="plain"] .vivic-story-dot:hover > i { background: color-mix(in oklab, var(--foreground) 45%, transparent); }
+.vivic-story[data-tone="plain"] .vivic-story-dot[aria-current="true"] > i { background: var(--vivic-accent); }
+.vivic-story[data-tone="plain"] .vivic-story-dot:focus-visible { outline-color: var(--ring); }
+.vivic-story[data-tone="plain"] .vivic-story-count { color: var(--vivic-muted-ink); text-shadow: none; }
+
+/* User page editing sits below the photo, back on the card padding. */
+.vivic-story-editor {
+  display: grid;
+  gap: 8px;
+  padding: 6px var(--vivic-card-padding-x) var(--vivic-card-padding-y);
+}
+.vivic-story-textarea {
+  height: auto;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  line-height: 1.5;
+  resize: vertical;
+}

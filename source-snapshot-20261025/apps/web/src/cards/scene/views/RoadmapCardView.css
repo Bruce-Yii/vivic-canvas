@@ -1,0 +1,112 @@
+/* Roadmap: phases as columns joined by a status rail; a vertical stack on narrow containers. */
+.vivic-roadmap { --rm-gap: 14px; container: vivic-roadmap / inline-size; display: flex; flex-direction: column; min-width: 0; }
+.vivic-scene[data-fixed] .vivic-roadmap { flex: 1 1 0; min-height: 0; }
+.vivic-roadmap-phases { display: flex; gap: var(--rm-gap); margin: 0; padding: 3px 2px 0 3px; list-style: none; min-width: 0; }
+.vivic-scene[data-fixed] .vivic-roadmap-phases { flex: 1 1 0; min-height: 0; overflow-x: auto; overflow-y: hidden; }
+.vivic-roadmap-phases[data-many] { padding-bottom: 8px; }
+
+.vivic-roadmap-phase { position: relative; display: flex; flex-direction: column; gap: 3px; flex: 1 1 0; min-width: 0; min-height: 0; padding-top: 22px; }
+.vivic-roadmap-phases[data-many] .vivic-roadmap-phase { flex: 0 0 calc((100% - 3 * var(--rm-gap)) / 4); min-width: 120px; }
+/* Rail segment from this phase's dot to the next one. */
+.vivic-roadmap-phase::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 10px;
+  width: calc(100% + var(--rm-gap) - 10px);
+  height: 2px;
+  border-radius: 1px;
+  background: var(--vivic-track);
+}
+.vivic-roadmap-phase:last-child::before { display: none; }
+.vivic-roadmap-phase[data-status="done"]::before { background: color-mix(in oklab, var(--vivic-positive) 70%, transparent); }
+.vivic-roadmap-phase[data-status="active"]::before { background: linear-gradient(90deg, var(--vivic-accent), var(--vivic-track)); }
+.vivic-roadmap-phase::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid color-mix(in oklab, var(--foreground) 24%, transparent);
+  background: var(--card);
+}
+.vivic-roadmap-phase[data-status="done"]::after { border-color: var(--vivic-positive); background: var(--vivic-positive); }
+.vivic-roadmap-phase[data-status="active"]::after { border-color: var(--vivic-accent); background: var(--vivic-accent); box-shadow: 0 0 0 3px var(--vivic-accent-soft); }
+
+.vivic-roadmap-status {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--vivic-subtle);
+  color: var(--vivic-muted-ink);
+  font: inherit;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+}
+.vivic-roadmap-status[data-status="done"] { background: color-mix(in oklab, var(--vivic-positive) 16%, transparent); color: color-mix(in oklab, var(--vivic-positive) 72%, var(--foreground)); }
+.vivic-roadmap-status[data-status="active"] { background: var(--vivic-accent-soft); color: color-mix(in oklab, var(--vivic-accent) 85%, var(--foreground)); }
+button.vivic-roadmap-status { cursor: pointer; transition: box-shadow 140ms; }
+button.vivic-roadmap-status:hover { box-shadow: inset 0 0 0 1px color-mix(in oklab, currentColor 40%, transparent); }
+button.vivic-roadmap-status:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+
+.vivic-roadmap-name { margin-top: 2px; font-size: 14px; font-weight: 650; line-height: 1.35; }
+.vivic-roadmap-period { overflow: hidden; font-size: 11.5px; line-height: 1.4; color: var(--vivic-muted-ink); white-space: nowrap; text-overflow: ellipsis; }
+.vivic-roadmap-goal { margin: 0; font-size: 12px; line-height: 1.45; color: var(--vivic-muted-ink); }
+.vivic-roadmap-none { margin-top: 4px; font-size: 11.5px; color: var(--vivic-muted-ink); }
+
+.vivic-roadmap-milestones { position: relative; display: flex; flex-direction: column; gap: 4px; margin: 5px 0 0; padding: 0; list-style: none; min-height: 0; }
+.vivic-scene[data-fixed] .vivic-roadmap-milestones { flex: 1 1 0; overflow: hidden; }
+.vivic-roadmap-milestones > li[data-clipped] { visibility: hidden; }
+.vivic-roadmap-milestone {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--card-foreground);
+  font: inherit;
+  font-size: 12.5px;
+  line-height: 1.4;
+  text-align: left;
+}
+.vivic-roadmap-milestone svg { flex-shrink: 0; margin-top: 2px; }
+.vivic-roadmap-check { color: var(--vivic-positive); }
+.vivic-roadmap-open { color: color-mix(in oklab, var(--foreground) 32%, transparent); }
+.vivic-roadmap-milestone[data-done] > span { color: var(--vivic-muted-ink); }
+button.vivic-roadmap-milestone { cursor: pointer; border-radius: 4px; }
+button.vivic-roadmap-milestone:hover .vivic-roadmap-open { color: var(--vivic-accent); }
+button.vivic-roadmap-milestone:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.vivic-roadmap-more {
+  position: absolute;
+  inset: auto 0 0;
+  height: 18px;
+  padding-left: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--vivic-muted-ink);
+  background: color-mix(in oklab, var(--card) 92%, transparent);
+}
+
+/* Narrow containers: phases stack vertically, the rail runs down the left edge. */
+@container vivic-roadmap (max-width: 439px) {
+  .vivic-roadmap-phases { flex-direction: column; gap: 14px; }
+  .vivic-scene[data-fixed] .vivic-roadmap-phases { overflow-x: hidden; overflow-y: auto; }
+  .vivic-roadmap-phase,
+  .vivic-roadmap-phases[data-many] .vivic-roadmap-phase { flex: none; min-width: 0; padding: 0 0 0 22px; }
+  .vivic-roadmap-phase::before { top: 14px; left: 4px; width: 2px; height: calc(100% + var(--rm-gap) - 14px); }
+  .vivic-roadmap-phase[data-status="active"]::before { background: linear-gradient(180deg, var(--vivic-accent), var(--vivic-track)); }
+  .vivic-roadmap-phase::after { top: 3px; }
+  .vivic-scene[data-fixed] .vivic-roadmap-milestones { flex: none; overflow: visible; }
+}

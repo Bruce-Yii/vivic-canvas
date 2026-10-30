@@ -1,0 +1,84 @@
+/* D card density adaptation. Source typography, glyphs, material alpha and
+   continuous geometry stay in HarkPrimitives/source-theme.css. */
+.vh-hark :is(.vivic-user-card,.vivic-card).hark-surface {
+  --surface-stroke:transparent;
+  --surface-blur:blur(18px);
+  box-shadow:0 6px 28px rgb(29 29 31 / .07);
+  font-family:var(--hark-font);
+}
+.vh-hark .vivic-card.hark-surface[data-focused] {
+  box-shadow:0 18px 56px rgb(20 32 53 / .17),0 0 0 1px rgb(207 229 255 / .7),0 0 48px rgb(160 204 255 / .16);
+}
+.vh-hark .vivic-card.hark-surface[data-highlighted] { box-shadow:0 8px 40px rgb(29 29 31 / .12),0 0 0 2px #84baff; }
+.vh-hark .vivic-card[data-dimmed] { opacity:.4; }
+.vh-hark :is(.vivic-card,.vivic-user-card).hark-surface { animation:vivic-card-arrive 420ms cubic-bezier(.16,1,.3,1) backwards; }
+.vh-hark .vivic-card.hark-surface[data-exiting] { animation:none;transform:translateY(10px) scale(.88);opacity:0; }
+.vh-hark .vivic-card.hark-surface[data-focused] { transform:translateY(-2px); }
+.vh-hark [data-vivic-canvas] .react-flow__node:not(.dragging) { transition:transform 520ms cubic-bezier(.22,.8,.24,1); }
+.vh-hark [data-vivic-canvas] .react-flow__node.dragging { transition:none; }
+@keyframes vivic-card-arrive { from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none} }
+.vh-hark .vivic-scene { gap:16px;font:400 15px/21px var(--hark-font); }
+.vh-hark .vivic-scene-head { align-items:flex-start;gap:10px; }
+.vh-hark .vivic-scene-heading { display:flex;align-items:flex-start;gap:9px;min-width:0;flex:1; }
+.vh-hark .vivic-scene-mark { display:inline-flex;align-items:center;justify-content:center;flex:none;width:18px;height:26px;color:var(--hark-secondary); }
+.vh-hark .vivic-scene-title { font:500 20px/26px var(--hark-serif);letter-spacing:0;min-width:0;margin:0; }
+.vh-hark .vivic-scene[data-mode=control] .vivic-scene-title { display:block; }
+.vh-hark .vivic-scene-kicker { font:500 15px/26px var(--hark-font);letter-spacing:0;text-transform:none;color:var(--hark-ink); }
+.vh-hark .vivic-scene-badge { flex-shrink:0;max-width:45%;padding:4px 0 0;border:0;border-radius:0;font:400 11px/18px var(--hark-font);color:var(--hark-secondary);background:transparent;white-space:normal;text-align:right; }
+.vh-hark .vivic-scene-badge[data-tone=caution],.vh-hark .vivic-scene-badge[data-tone=danger] { padding:3px 7px;border-radius:8px;background:color-mix(in srgb,var(--vivic-caution) 12%,transparent);color:color-mix(in srgb,var(--vivic-caution) 72%,var(--foreground)); }
+.vh-hark .vivic-scene-badge[data-tone=danger] { background:color-mix(in srgb,var(--vivic-danger) 10%,transparent);color:var(--vivic-danger); }
+.vh-hark .vivic-scene-meta { margin:-8px 0 0;font:400 13px/19px var(--hark-font);color:var(--hark-secondary); }
+.vh-hark .vivic-scene-body { gap:12px; }
+.vh-hark .vivic-scene-foot { font:400 12px/18px var(--hark-font);gap:8px;color:var(--hark-secondary); }
+.vh-hark .vivic-scene-chip { background:var(--hark-wash);border:0;border-radius:8px;padding:3px 7px;font-weight:400; }
+.vh-hark .vivic-scene-empty { border:0;background:var(--hark-wash);border-radius:16px;padding:20px 12px;font-size:13px; }
+.vh-hark .vivic-scene-action { border:0;min-height:32px;padding:0 12px;border-radius:16px;background:var(--hark-wash);font-weight:500; }
+.vh-hark .vivic-scene-action[data-variant=primary] { background:var(--hark-primary);color:var(--hark-on-fill); }
+.vh-hark .vivic-scene-icon-button { border-radius:50%; }
+.vh-hark .vivic-scene-bar { height:3px; }
+.vh-hark .vivic-note-content { font:400 16px/28px var(--hark-font); }
+.vh-hark [data-vivic-todo-card] { gap:12px; }
+.vh-hark [data-vivic-todo-header] { padding-bottom:4px;gap:12px; }
+.vh-hark [data-vivic-todo-row] { border-radius:10px;padding:3px 0; }
+.vh-hark .vivic-search-content > div { display:flex;flex-direction:column;gap:12px; }
+.vh-hark .vivic-search-content [data-aui=col] { gap:12px; }
+.vh-hark .vivic-search-content [data-aui=col] > [data-aui=text]:first-child { font:500 20px/26px var(--hark-serif); }
+.vh-hark .vivic-search-content [data-vivic-source-link] { color:var(--hark-secondary);font-size:12px; }
+/* Office lists use one outer glass surface, simple rows and genuine status. */
+.vh-hark .vivic-office-row.hark-surface { --surface-fill:transparent;--surface-stroke:transparent;--surface-radius:12px;box-shadow:none;min-height:52px;padding:10px 0;gap:12px; }
+.vh-hark .vivic-office-row:hover { --surface-fill:transparent; }
+.vh-hark .vivic-office-row + .vivic-office-row { border-top:1px solid color-mix(in srgb,var(--hark-stroke) 50%,transparent);border-radius:0; }
+.vh-hark .vivic-office-group { gap:0; }
+.vh-hark .vivic-office-content { gap:14px; }
+.vh-hark .vivic-office-context { font-size:13px;line-height:19px; }
+.vh-hark .vivic-office-progress strong { font-size:15px; }
+.vh-hark .vivic-office-row-meta { margin-top:4px; }
+.vh-hark .vivic-office-note { font-size:12px;line-height:18px; }
+.vh-hark .vivic-week-day { background:transparent;border-radius:12px; }
+.vh-hark .vivic-week-day + .vivic-week-day { border-left-color:color-mix(in srgb,var(--hark-stroke) 45%,transparent); }
+.vh-hark .vivic-week-day[data-today] { background:var(--hark-wash);border-color:transparent; }
+.vh-hark .vivic-week-event { border-left-width:2px;background:var(--hark-wash);border-radius:7px;font-weight:400; }
+.vh-hark .vivic-week-day[data-today] .vivic-week-event { background:var(--hark-fill); }
+.vh-hark .vivic-week-none { opacity:.5; }
+.vh-hark .vivic-subcard-trigger { border-radius:50%; }
+.vh-hark .vivic-card-portal[data-dragging]::before { content:"";position:absolute;inset:-16px -26px;pointer-events:none;border-radius:50%;background:radial-gradient(ellipse,rgb(180 218 255 / .42),transparent 70%);animation:vivic-portal-breathe 1.5s ease-in-out infinite alternate; }
+.vh-hark .vivic-card-portal[data-receiving]::before { background:radial-gradient(ellipse,rgb(210 235 255 / .7),transparent 70%); }
+@keyframes vivic-portal-breathe { from{opacity:.5;transform:scale(.9)}to{opacity:1;transform:scale(1.12)} }
+@media(hover:hover) and (pointer:fine) {
+ .vh-hark .vivic-office-row .vivic-scene-icon-button { opacity:0;transition:opacity 160ms ease; }
+ .vh-hark .vivic-office-row:is(:hover,:focus-within) .vivic-scene-icon-button { opacity:1; }
+}
+@container vivic-card-content (max-width:300px) {
+ .vh-hark .vivic-scene-head { flex-wrap:wrap; }
+ .vh-hark .vivic-scene-heading { flex-basis:100%; }
+ .vh-hark .vivic-scene-badge { max-width:100%;text-align:left;padding-top:0; }
+}
+[data-reduced-motion=true] :is(.vivic-card,.vivic-user-card).hark-surface,
+[data-space-motion=off] :is(.vivic-card,.vivic-user-card).hark-surface { animation:none!important; }
+[data-reduced-motion=true] [data-vivic-canvas] .react-flow__node { transition:none!important; }
+[data-reduced-motion=true] .vivic-card-portal::before { animation:none!important; }
+@media(prefers-reduced-motion:reduce) {
+ .vh-hark :is(.vivic-card,.vivic-user-card).hark-surface { animation:none!important; }
+ .vh-hark [data-vivic-canvas] .react-flow__node { transition:none!important; }
+ .vh-hark .vivic-card-portal::before { animation:none!important; }
+}

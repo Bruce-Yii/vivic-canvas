@@ -1,0 +1,22 @@
+{
+  "name": "@vivic/mobile-console-prototype",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "files": ["*.ts"],
+  "exports": {
+    "./client": "./client.ts",
+    "./connector": "./connector.ts",
+    "./protocol": "./protocol.ts",
+    "./transport": "./transport.ts",
+    "./vivicHostAdapter": "./vivicHostAdapter.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "relay": "tsx server.ts"
+  },
+  "dependencies": { "ws": "^8.18.3", "zod": "^4.6.7" },
+  "devDependencies": { "@playwright/test": "^1.64.0", "@types/node": "^24.13.3", "@types/ws": "^8.18.1", "tsx": "^4.21.0", "typescript": "~6.0.2", "vitest": "^5.0.4" },
+  "engines": { "node": ">=22" }
+}

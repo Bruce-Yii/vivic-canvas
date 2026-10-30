@@ -1,0 +1,13 @@
+{
+  "classification": "B source helpers, D module wrapper",
+  "sourcePath": "../../historical-assets/code/continuous-corner-algorithm.raw.js",
+  "sourceSha256": "a688ce381cc1a400d25e49b6319b63b981a28a58841a9487ae2fef6cb6be4c0f",
+  "sourceSliceUnicodeChars": [
+    0,
+    964
+  ],
+  "sliceSha256": "21db07423d1031bec121db66554206d89eb8524fe4ad49f2a71d346cdebfc133",
+  "method": "Exact prefix ending before const cb=; no renamed constants or geometry changes",
+  "retainedSourceEpoch": "H15 captured 2026-10-15 Shanghai",
+  "notCurrentSourceEvidence": true
+}

@@ -1,0 +1,109 @@
+/* Hark Web 26ac2724 source roles and surfaces, D adaptation to Vivic's two canvases.
+   Business coordinates, card metrics, owner actions, React Flow and approved Orb stay intact. */
+.vh-hark .vivic-composer-menu[hidden],.vh-hark .vivic-composer [hidden] { display:none!important; }
+.vh-hark .vivic-composer-menu { width:min(264px,calc(100vw - 32px)); padding:8px; z-index:60; --surface-fill:var(--hark-solid); --surface-stroke:transparent; --surface-radius:24px; box-shadow:0 8px 40px rgb(29 29 31 / .12); }
+.vivic-composer-menu :is(.vivic-menu-action,.vc-query-toggle,[data-vivic-upload-files]) { width:100%; display:flex; align-items:center; justify-content:flex-start; gap:12px; min-height:44px; padding:0 14px; border:0; border-radius:16px; background:transparent; color:var(--hark-ink); opacity:1; font:400 15px/19px var(--hark-font); }
+.vivic-composer-menu :is(.vivic-menu-action,.vc-query-toggle,[data-vivic-upload-files]):hover { background:var(--hark-wash); }
+.vivic-composer-menu .vivic-file-upload { display:block; }
+.vivic-composer-menu .vivic-file-limit { display:block; padding:0 14px 12px; font-size:11px; line-height:16px; }
+.vivic-composer-menu .vivic-composer-menu-toggle { display:flex; align-items:center; justify-content:space-between; gap:16px; min-height:44px; margin:6px 8px 0; padding:8px 6px 2px; border-top:1px solid var(--hark-stroke); font-size:13px; color:var(--hark-secondary); }
+.vivic-composer-menu-toggle input { accent-color:var(--hark-primary); }
+.vh-hark .vivic-upload-status { align-self:center; max-width:512px; padding:10px 16px; background:var(--hark-solid); border-radius:20px; font:400 13px/18px var(--hark-font); }
+.vh-hark .vivic-user-canvas-controls :is(.vivic-portal-compact,.vivic-display-compact) { width:44px; height:44px; min-width:44px; padding:0; }
+.vivic-control-root.vh-hark {
+  --vc-ink:var(--hark-ink); --vc-ink-muted:var(--hark-secondary);
+  --vc-glass:var(--hark-fill); --vc-glass-user:var(--hark-user); --vc-glass-strong:var(--hark-solid);
+  --vc-glass-border:var(--hark-stroke); --vc-glass-border-strong:var(--stroke-composer);
+  --vc-chip:var(--hark-wash); --vc-chip-hover:var(--hark-fill); --vc-send:var(--hark-primary); --vc-send-ink:var(--hark-on-fill);
+  --vc-focus:#84baff; --vc-error:var(--color-error); --vc-shadow:rgb(29 29 31 / .12);
+  color:var(--hark-ink);
+}
+.vivic-control-loading { display:grid; place-items:center; min-height:100dvh; background:#c0d2e0; color:var(--hark-secondary); }
+.vh-hark .vivic-chat-header { min-height:80px; padding:16px 24px; align-items:center; }
+.vh-hark .vivic-round-button,.vh-hark .vivic-avatar { width:44px; height:44px; background:var(--hark-composer); color:var(--hark-ink); border:0; box-shadow:none; backdrop-filter:blur(50px); -webkit-backdrop-filter:blur(50px); }
+.vh-hark .vivic-round-button:hover { background:var(--hark-fill); transform:none; }
+.vh-hark .vivic-chat-footer { padding:0 16px max(32px,env(safe-area-inset-bottom)); }
+.vh-hark .vivic-composer { max-width:512px; gap:8px; }
+.vh-hark .vivic-composer-shell { --surface-fill:var(--hark-composer); --surface-stroke:var(--stroke-composer); --surface-radius:24px; --surface-blur:blur(50px); box-shadow:0 8px 40px rgb(29 29 31 / .08); }
+.vh-hark .vivic-composer-bar { min-height:48px; padding:0 8px 0 16px; gap:2px; border:0; border-radius:24px; background:transparent; backdrop-filter:none; -webkit-backdrop-filter:none; box-shadow:none; }
+.vh-hark .vivic-composer-bar:focus-within { outline:1px solid var(--hark-stroke); outline-offset:2px; }
+.vh-hark .vivic-composer-input { min-height:48px; height:48px; font:400 15px/19px var(--hark-font); padding:0 4px 0 0; color:var(--hark-ink); }
+.vh-hark .vivic-composer-input::placeholder { color:var(--hark-secondary); }
+.vh-hark .vivic-composer-icon { width:32px; height:44px; border-radius:22px; color:var(--hark-secondary); }
+.vh-hark .vivic-composer-icon[aria-pressed="true"] { color:white; background:var(--system-red); }
+.vh-hark .vivic-composer-send { width:32px; height:32px; margin:0 0 0 4px; color:var(--hark-on-fill); background:var(--hark-primary); box-shadow:none; }
+.vh-hark .vivic-composer-send:not(:disabled):hover { transform:none; }
+.vh-hark .vivic-composer-meta { font-size:11px; line-height:16px; color:var(--hark-secondary); gap:6px 12px; }
+.vh-hark .vivic-composer-note { font-size:12px; line-height:17px; }
+.vh-hark .vivic-composer-card { --surface-fill:var(--hark-solid); --surface-stroke:transparent; --surface-blur:none; padding:12px 16px; border:0; background:transparent; backdrop-filter:none; -webkit-backdrop-filter:none; }
+.vh-hark .vivic-composer-progress { padding:8px 12px; min-height:36px; color:var(--hark-ink); background:var(--hark-solid); border:0; box-shadow:none; backdrop-filter:none; -webkit-backdrop-filter:none; font-size:13px; line-height:18px; }
+.vh-hark .vivic-chip { min-height:32px; padding:6px 12px; border:0; color:var(--hark-ink); background:var(--hark-fill); font-size:13px; line-height:18px; backdrop-filter:none; -webkit-backdrop-filter:none; }
+.vh-hark .vivic-chip:hover:not(:disabled) { background:var(--hark-solid); }
+.vh-hark .vivic-chip-quiet { color:var(--hark-secondary); background:transparent; }
+.vh-hark .vivic-toggle input { accent-color:var(--hark-primary); }
+.vh-hark .vivic-chat-status,.vh-hark .vivic-user-layer-notice { background:var(--hark-solid); color:var(--hark-ink); border:0; font-size:13px; line-height:18px; padding:10px 16px; border-radius:20px; backdrop-filter:none; -webkit-backdrop-filter:none; }
+.vh-hark .vivic-readonly-notice { background:var(--hark-solid); color:var(--hark-ink); border-color:var(--hark-stroke); font-size:13px; }
+.vh-hark :is(.vivic-user-canvas-controls>button,.vivic-portal-trigger,.vivic-view-buttons,.vivic-display-card-actions,.vivic-user-card-tools) { background:var(--hark-composer); color:var(--hark-ink); border-color:var(--hark-stroke); border-radius:24px; box-shadow:none; backdrop-filter:blur(50px); -webkit-backdrop-filter:blur(50px); }
+.vh-hark :is(.vivic-user-canvas-controls>button,.vivic-portal-trigger) { min-height:44px; font-size:13px; font-weight:400; padding-inline:14px; }
+.vh-hark .vivic-user-canvas-controls { gap:6px; }
+.vh-hark .vivic-portal-count { color:var(--hark-secondary); background:var(--hark-wash); font-weight:400; }
+.vh-hark :is(.vivic-user-canvas-controls>button,.vivic-view-buttons button,.vivic-display-card-actions button):hover:not(:disabled) { background:var(--hark-wash); }
+.vh-hark .vivic-view-buttons button { background:transparent; color:var(--hark-ink); border-radius:20px; font-weight:400; }
+.vh-hark .vivic-canvas-connection { color:var(--hark-secondary); }
+.vh-hark .vivic-portal-message { background:var(--hark-solid); color:var(--hark-ink); border:0; border-radius:16px; padding:12px 16px; }
+.vh-hark .vivic-user-card.hark-surface,.vh-hark .vivic-card.hark-surface { --surface-fill:var(--hark-fill); --surface-stroke:transparent; --surface-radius:24px; --surface-blur:blur(18px); border:0; background:transparent; color:var(--hark-ink); border-radius:24px; box-shadow:0 6px 28px rgb(29 29 31 / .07); }
+.vh-hark .vivic-card.hark-surface[data-focused] { box-shadow:0 18px 56px rgb(20 32 53 / .17),0 0 0 1px rgb(207 229 255 / .7),0 0 48px rgb(160 204 255 / .16); }
+.vh-hark .vivic-card.hark-surface[data-highlighted] { box-shadow:0 8px 40px rgb(29 29 31 / .12),0 0 0 2px #84baff; }
+.vh-hark .vivic-user-card.hark-surface:has(.vivic-office),.vh-hark .vivic-card.hark-surface:has(.vivic-office) { --surface-fill:var(--hark-fill); --surface-blur:blur(50px); }
+.vh-hark :is(.vivic-user-card,.vivic-card)[data-scene-type=CountdownCard]:has(.vivic-countdown) { --surface-fill:transparent; --surface-stroke:transparent; box-shadow:none; }
+.vh-hark :is(.vivic-user-card,.vivic-card):has(.vivic-scene[data-bleed]) { --surface-fill:transparent; --surface-stroke:transparent; }
+.vh-hark :is(.vivic-user-card,.vivic-card) {
+  --vivic-accent:var(--hark-accent); --vivic-accent-2:var(--hark-accent); --vivic-accent-soft:var(--hark-wash);
+  --vivic-line:var(--hark-stroke); --vivic-muted-ink:var(--hark-secondary); --vivic-subtle:var(--hark-wash); --vivic-track:var(--hark-wash);
+  --aui-color-primary:var(--hark-ink); --aui-color-secondary:var(--hark-secondary); --background:var(--hark-agent); --muted:var(--hark-wash); font-family:var(--hark-font);
+}
+.vh-hark .vivic-scene { color:var(--hark-ink); font-size:15px; line-height:21px; }
+.vh-hark .vivic-scene-title { font:500 20px/26px var(--hark-serif); letter-spacing:0; }
+.vh-hark .vivic-scene-kicker { color:var(--hark-secondary); font-size:13px; font-weight:400; letter-spacing:0; text-transform:none; }
+.vh-hark .vivic-scene-kicker svg { color:inherit; }
+.vh-hark .vivic-scene-badge { font-size:11px; line-height:18px; font-weight:400; color:var(--hark-secondary); }
+.vh-hark .vivic-scene-meta,.vh-hark .vivic-scene-foot { color:var(--hark-secondary); font-size:13px; line-height:18px; }
+.vh-hark .vivic-scene-action { min-height:36px; padding:8px 12px; border:0; border-radius:20px; background:var(--hark-wash); color:var(--hark-ink); font:400 13px/18px var(--hark-font); }
+.vh-hark .vivic-scene-action:hover { background:var(--hark-fill); }
+.vh-hark .vivic-scene-empty { font-size:13px; line-height:19px; border:0; background:var(--hark-wash); color:var(--hark-secondary); border-radius:16px; padding:16px; }
+.vh-hark .vivic-note-content { font-size:16px; line-height:28px; }
+.vh-hark :is(.vivic-card,.vivic-user-card) [data-aui="text"] { font-family:var(--hark-font); }
+.vh-hark :is(.vivic-card,.vivic-user-card) :is(pre,code) { font-family:var(--hark-mono); font-size:14px; line-height:20px; }
+.vh-hark .vivic-subcard-popover,.vivic-subcard-popover.vh-hark { --background:var(--hark-solid); --muted:var(--hark-wash); background:var(--hark-solid); color:var(--hark-ink); border-color:var(--hark-stroke); border-radius:24px; }
+.vh-hark .vivic-quote { background:var(--hark-agent); color:var(--hark-ink); --vivic-paper:var(--hark-agent); --vivic-paper-ink:var(--hark-ink); }
+.vh-hark :is(.vivic-quote-text,.vivic-book-gen,.vivic-cover-title) { font-family:var(--hark-serif); }
+.vivic-hark-dialog-overlay { background:rgb(0 0 0 / .35); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
+.vivic-control-dialog.vh-hark { width:min(720px,calc(100vw - 48px)); background:transparent; color:var(--hark-ink); border:0; border-radius:24px; box-shadow:0 8px 40px rgb(29 29 31 / .12); }
+.vivic-hark-dialog-surface { display:flex; flex-direction:column; flex:1; min-height:0; max-height:inherit; overflow:hidden; --surface-fill:var(--hark-solid); --surface-stroke:transparent; --surface-radius:24px; }
+.vivic-control-dialog.vh-hark .vivic-dialog-header { padding:28px 32px 24px; border-bottom-color:var(--hark-stroke); }
+.vivic-control-dialog.vh-hark .vivic-reading-title { font:500 32px/41.6px var(--hark-serif); letter-spacing:0; }
+.vivic-control-dialog.vh-hark .vivic-reading-caption { color:var(--hark-secondary); font-size:13px; line-height:18px; }
+.vivic-control-dialog.vh-hark .vivic-reading-body { font:400 18px/25.2px var(--hark-font); }
+.vivic-control-dialog.vh-hark .vivic-details-scroll { padding:24px 32px 32px; }
+.vivic-control-dialog.vh-hark .vivic-portal-summary,.vivic-control-dialog.vivic-portal-dialog button { background:transparent; color:var(--hark-ink); }
+.vivic-control-dialog.vh-hark :is(.vivic-portal-summary,.vivic-portal-footer) { border-color:var(--hark-stroke); }
+.vivic-control-dialog.vh-hark .vivic-portal-search input { height:44px; background:var(--hark-wash); color:var(--hark-ink); border-color:var(--hark-stroke); border-radius:12px; font-size:15px; }
+.vivic-control-dialog.vh-hark :is(.vivic-portal-row,.vivic-portal-footer,.vivic-dialog-header) { border-color:var(--hark-stroke); }
+.vivic-control-dialog.vh-hark .vivic-portal-card-title strong { font-size:15px; line-height:19px; }
+.vivic-control-dialog.vh-hark :is(.vivic-portal-row small,.vivic-portal-footer,.vivic-portal-list h3) { color:var(--hark-secondary); font-size:13px; font-weight:400; line-height:18px; }
+.vh-hark [data-vivic-fullscreen-hint]>div,.vh-hark [data-vivic-fullscreen-error] { background:var(--hark-composer); color:var(--hark-ink); border-color:var(--hark-stroke); box-shadow:none; backdrop-filter:blur(50px); -webkit-backdrop-filter:blur(50px); }
+.vh-hark [data-vivic-fullscreen-hint] p { color:var(--hark-secondary); }
+@media(max-width:600px) {
+  .vh-hark .vivic-chat-header { padding:16px; min-height:80px; gap:8px; }
+  .vh-hark .vivic-user-canvas-controls { gap:6px; }
+  .vh-hark :is(.vivic-user-canvas-controls>button,.vivic-portal-trigger) { font-size:12px; padding-inline:12px; }
+  .vh-hark .vivic-chat-footer { padding-bottom:max(20px,env(safe-area-inset-bottom)); }
+  .vivic-control-dialog.vh-hark { width:calc(100vw - 24px); max-height:calc(100dvh - 24px); }
+  .vivic-control-dialog.vh-hark .vivic-dialog-header { padding:24px 20px 20px; }
+  .vivic-control-dialog.vh-hark .vivic-reading-title { font-size:28px; line-height:36.4px; }
+  .vivic-control-dialog.vh-hark .vivic-details-scroll { padding:20px; }
+  .vh-hark .vivic-composer-icon { width:28px; }
+}
+
+/* One quiet navigation row on narrow screens. */
+@media(max-width:600px){.vh-hark .vivic-chat-header{padding:12px 16px;min-height:68px;flex-wrap:nowrap;gap:8px}.vh-hark .vivic-user-canvas-controls{order:0;flex-basis:auto;flex-wrap:nowrap;gap:4px;margin-left:auto}.vh-hark .vivic-chat-header .vivic-readonly-notice{position:absolute;top:76px;left:16px;right:16px}}

@@ -1,0 +1,38 @@
+{
+  "model": "hexgrad/Kokoro-82M-v1.1-zh",
+  "modelRevision": "01e7505bd6a7a2ac4975463114c3a7650a9f7218",
+  "onnxSource": "csukuangfj/kokoro-multi-lang-v1_1",
+  "onnxRevision": "914313412b607d95400bcd12446233fbd1248801",
+  "speaker": 3,
+  "speed": 1.05,
+  "generation": "sherpa-onnx 1.12.32 / numpy 2.3.3; offline file generation, no playback",
+  "files": [
+    {
+      "id": "checking",
+      "text": "我看看",
+      "file": "checking.mp3",
+      "bytes": 7917,
+      "sha256": "01d3b89938e8f94e29b7d73f3deeb8b7cfc6e9e41d2a5e42291dd7325ce0a167",
+      "sampleRate": 24000,
+      "durationMs": 894
+    },
+    {
+      "id": "waiting",
+      "text": "稍等",
+      "file": "waiting.mp3",
+      "bytes": 6381,
+      "sha256": "ec5193af3e8a46563911ec3b9a7d983de2a1ad5649805c9ed6febfe27609f227",
+      "sampleRate": 24000,
+      "durationMs": 699
+    },
+    {
+      "id": "okay",
+      "text": "好的",
+      "file": "okay.mp3",
+      "bytes": 5613,
+      "sha256": "50e279d16c94c68f8a66b772282469dcb788d9d10b09e126886d24bd1ba102a1",
+      "sampleRate": 24000,
+      "durationMs": 622
+    }
+  ]
+}

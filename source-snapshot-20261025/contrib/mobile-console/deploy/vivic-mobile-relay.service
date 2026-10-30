@@ -1,0 +1,19 @@
+[Unit]
+Description=Vivic mobile relay
+After=network-online.target
+Wants=network-online.target
+[Service]
+Type=simple
+DynamicUser=yes
+WorkingDirectory=/opt/vivic-mobile/current
+EnvironmentFile=/etc/vivic-mobile-relay.env
+ExecStart=/opt/node-v24.19.0/bin/node /opt/vivic-mobile/current/server.mjs
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+[Install]
+WantedBy=multi-user.target

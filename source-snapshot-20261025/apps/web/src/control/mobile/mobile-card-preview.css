@@ -1,0 +1,41 @@
+.mobile-card-preview { min-width:0; color:var(--hark-ink); font:400 15px/21px var(--hark-font); }
+.mobile-card-preview-header { display:flex; align-items:flex-start; gap:12px; margin-bottom:16px; }
+.mobile-card-preview-mark { display:flex; align-items:center; justify-content:center; width:36px; height:36px; flex:none; border-radius:12px; background:var(--hark-wash); }
+.mobile-card-preview h2 { flex:1; min-width:0; margin:4px 0 0; font:500 20px/26px var(--hark-serif); overflow-wrap:anywhere; }
+.mobile-card-preview-body { margin:0; white-space:pre-wrap; overflow-wrap:anywhere; }
+.mobile-card-preview-muted { margin:0; font-size:13px; line-height:19px; color:var(--hark-secondary); }
+.mobile-card-preview-more { margin-top:16px; }
+.mobile-card-preview-stat { display:flex; align-items:baseline; flex-wrap:wrap; gap:8px; margin:0 0 16px; overflow-wrap:anywhere; }
+.mobile-card-preview-stat strong { font:400 32px/42px var(--hark-font); }
+.mobile-card-preview-stat span { color:var(--hark-secondary); }
+.mobile-card-preview-items { padding:0; margin:12px 0 0; list-style:none; }
+.mobile-card-preview-items li { display:flex; align-items:flex-start; gap:12px; padding:12px 0; border-bottom:1px solid var(--hark-stroke); min-width:0; }
+.mobile-card-preview-items li:first-child { padding-top:0; }
+.mobile-card-preview-items li:last-child { border:0; padding-bottom:0; }
+.mobile-card-preview-items li>div { min-width:0; }
+.mobile-card-preview-items p { margin:0; white-space:pre-wrap; overflow-wrap:anywhere; }
+.mobile-card-preview-items small { display:block; color:var(--hark-secondary); font:400 13px/18px var(--hark-font); margin-top:4px; white-space:pre-wrap; overflow-wrap:anywhere; }
+.mobile-card-preview-check { display:flex; align-items:center; justify-content:center; flex:none; width:18px; height:18px; border:1px solid var(--hark-stroke); border-radius:50%; margin-top:2px; }
+.mobile-card-preview-items [data-completed] .mobile-card-preview-check { background:var(--hark-primary); color:var(--hark-on-fill); border-color:transparent; }
+.mobile-card-preview-items [data-completed] p { color:var(--hark-secondary); text-decoration:line-through; }
+.mobile-card-preview-timeline li { padding-left:14px; border-left:1px solid var(--hark-stroke); margin-left:3px; }
+.mobile-card-preview-table { width:100%; min-width:0; overflow:auto; scrollbar-width:thin; margin-top:12px; }
+.mobile-card-preview-table table { border-collapse:collapse; min-width:100%; font:400 13px/19px var(--hark-font); text-align:left; }
+.mobile-card-preview-table th { font-weight:500; color:var(--hark-secondary); }
+.mobile-card-preview-table :is(td,th) { border-bottom:1px solid var(--hark-stroke); padding:10px 12px; min-width:72px; max-width:240px; overflow-wrap:anywhere; vertical-align:top; }
+.mobile-card-preview-table :is(td,th):first-child { padding-left:0; }
+.mobile-card-preview-chart { min-width:0; width:100%; height:176px; margin-top:12px; }
+.mobile-card-preview-header > :last-child:not(h2) { flex-shrink:0; }
+.mobile-card-preview-stat strong { min-width:0; max-width:100%; overflow-wrap:anywhere; font-variant-numeric:tabular-nums; }
+.mobile-card-preview-table:focus-visible { outline:2px solid var(--hark-accent); outline-offset:-2px; }
+.mobile-card-preview-data { margin-top:12px; font-size:13px; line-height:19px; }
+.mobile-card-preview-data summary { cursor:pointer; min-height:36px; display:list-item; align-content:center; color:var(--hark-secondary); }
+.mobile-card-preview-data dl { margin:4px 0 0; }
+.mobile-card-preview-data dl > div { display:flex; gap:16px; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--hark-stroke); }
+.mobile-card-preview-data dt { min-width:0; overflow-wrap:anywhere; }
+.mobile-card-preview-data dd { margin:0; flex-shrink:0; font-variant-numeric:tabular-nums; }
+.mobile-card-countdown { position:relative; display:flex; flex-wrap:wrap; align-items:center; gap:12px; }
+.mobile-card-countdown h2 { flex:1 1 100%; margin:0; padding-right:40px; }
+.mobile-card-countdown-digits { margin:0; font:400 clamp(32px,10vw,48px)/1.2 var(--hark-font); font-variant-numeric:tabular-nums; letter-spacing:-.03em; overflow-wrap:anywhere; min-width:0; }
+.mobile-card-countdown[data-mobile-countdown=timer] { justify-content:center; min-height:80px; padding-inline:32px; }
+.mobile-card-countdown-action { position:absolute; right:0; top:0; }

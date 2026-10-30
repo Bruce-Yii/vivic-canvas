@@ -1,0 +1,53 @@
+/* Hark source type roles and layered continuous surfaces, adapted to validated Office data (D). */
+.vivic-office.vh-hark { color:var(--hark-ink); gap:12px; font:400 15px/19px var(--hark-font); }
+.vivic-office .vivic-scene-title { font:500 20px/26px var(--hark-serif); letter-spacing:0; }
+.vivic-office .vivic-scene-kicker { font-size:13px; font-weight:400; letter-spacing:0; text-transform:none; color:var(--hark-secondary); }
+.vivic-office .vivic-scene-kicker svg { color:inherit; }
+.vivic-office .vivic-scene-badge { font-size:11px; font-weight:400; background:var(--hark-wash); color:var(--hark-secondary); }
+.vivic-office-content { display:flex; flex-direction:column; gap:16px; min-width:0; height:100%; }
+.vivic-office-context { margin:0; font-size:15px; line-height:21px; white-space:pre-wrap; overflow-wrap:anywhere; color:var(--hark-secondary); }
+.vivic-office-progress { display:flex; align-items:center; flex-wrap:wrap; gap:8px 12px; font-size:13px; color:var(--hark-secondary); }
+.vivic-office-progress strong { font-size:18px; font-weight:500; color:var(--hark-ink); font-variant-numeric:tabular-nums; }
+.vivic-office-progress progress { display:block; width:100%; height:4px; accent-color:var(--hark-primary); border:0; border-radius:999px; overflow:hidden; }
+.vivic-office-progress progress::-webkit-progress-bar { background:var(--hark-wash); }
+.vivic-office-progress progress::-webkit-progress-value { background:var(--hark-primary); border-radius:999px; }
+.vivic-office-blocked { color:var(--color-error); margin-left:auto; }
+.vivic-office-list { min-height:0; }
+.vivic-office[data-fixed] .vivic-office-list { flex:1; overflow:auto; }
+.vivic-office[data-fixed] .vivic-office-content { min-height:0; overflow:auto; overscroll-behavior:contain; scrollbar-width:thin; }
+.vivic-office[data-fixed] .vivic-office-content > * { flex-shrink:0; }
+.vivic-office[data-fixed] .vivic-office-list { flex:none; overflow:visible; }
+.vivic-office-group { display:flex; flex-direction:column; gap:8px; }
+.vivic-office-group + .vivic-office-group { margin-top:20px; }
+.vivic-office-day { margin:0 0 4px; display:flex; justify-content:space-between; font-size:13px; line-height:18px; font-weight:400; color:var(--hark-secondary); }
+.vivic-office-day span { font-variant-numeric:tabular-nums; }
+.vivic-office-row.hark-surface { display:flex; align-items:flex-start; gap:12px; padding:16px; min-height:70px; --surface-fill:var(--hark-agent); --surface-stroke:transparent; --surface-radius:24px; border:0; box-shadow:0 8px 40px rgb(29 29 31 / .04); }
+.vivic-office-row:hover { --surface-fill:var(--hark-solid); }
+.vivic-office-row-body { min-width:0; flex:1; }
+.vivic-office-item-title { margin:0; overflow-wrap:anywhere; font-size:15px; font-weight:500; line-height:19px; color:var(--hark-ink); }
+.vivic-office-row[data-status="完成"] .vivic-office-item-title { color:var(--hark-secondary); text-decoration:line-through; text-decoration-thickness:1px; }
+.vivic-office-check { display:flex; align-items:center; justify-content:center; flex-shrink:0; width:20px; height:20px; margin-top:0; border:1px solid var(--hark-stroke); border-radius:50%; background:transparent; color:transparent; }
+button.vivic-office-check { cursor:pointer; }
+.vivic-office-row[data-status="完成"] .vivic-office-check { background:var(--hark-primary); border-color:var(--hark-primary); color:var(--hark-on-fill); }
+.vivic-office-row-meta { display:flex; flex-wrap:wrap; gap:4px 8px; margin-top:6px; font-size:12px; line-height:17px; color:var(--hark-secondary); overflow-wrap:anywhere; }
+.vivic-office-status { margin-left:auto; }
+.vivic-office-row[data-status="受阻"] .vivic-office-status { color:var(--color-error); }
+.vivic-office-row[data-status="进行中"] .vivic-office-status, .vivic-office-priority { color:var(--hark-accent); }
+.vivic-office-note { margin:8px 0 0; font-size:13px; line-height:19px; white-space:pre-wrap; overflow-wrap:anywhere; color:var(--hark-secondary); }
+.vivic-office-row .vivic-scene-icon-button { width:32px; height:32px; border-radius:50%; align-self:center; background:transparent; color:var(--hark-secondary); }
+.vivic-office-toolbar, .vivic-office-form-actions { display:flex; gap:8px; flex-wrap:wrap; }
+.vivic-office-form { display:flex; flex-direction:column; gap:16px; padding:16px; border:1px solid var(--hark-stroke); border-radius:20px; }
+.vivic-office-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.vivic-office-field { display:flex; flex-direction:column; gap:8px; min-width:0; font-size:13px; color:var(--hark-secondary); }
+.vivic-office-field .vivic-scene-input { width:100%; min-width:0; min-height:44px; padding:10px 12px; border:1px solid var(--hark-stroke); border-radius:12px; background:var(--hark-wash); color:var(--hark-ink); font:400 15px/20px var(--hark-font); }
+.vivic-office-field textarea { resize:vertical; min-height:88px!important; }
+.vivic-office-remove { margin-left:auto; color:var(--color-error); }
+.vivic-office-error { color:var(--color-error); font-size:13px; line-height:19px; }
+.vivic-office .vivic-scene-foot { color:var(--hark-secondary); font-size:12px; line-height:18px; }
+.vivic-office :is(button,input,textarea,select):focus-visible { outline:2px solid #84baff; outline-offset:3px; }
+.vivic-office button:disabled { opacity:.35; cursor:default; }
+.vivic-office-editor-body { padding:24px 32px 32px; overflow:auto; min-height:0; }
+.vivic-office-editor .vivic-office-form { border:0; padding:0; }
+.vivic-office-editor :is(input,textarea,select) { color:var(--hark-ink); }
+@media(max-width:600px) { .vivic-office-editor-body { padding:20px; }.vivic-office-fields { gap:10px; }.vivic-office-row.hark-surface { padding:14px 12px; gap:10px; } }
+@container vivic-card-content (max-width:300px) { .vivic-office-row.hark-surface { padding:12px; gap:8px; }.vivic-office-row-meta { gap:4px 6px; }.vivic-office-status { margin-left:0; } }

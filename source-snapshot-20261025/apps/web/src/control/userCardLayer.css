@@ -1,0 +1,101 @@
+/* User page card layer: free-floating cards over the shared background. */
+.vivic-user-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  color: var(--card-foreground);
+}
+.vivic-user-layer-drop {
+  position: fixed;
+  inset: 12px;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  border: 2px dashed rgb(255 255 255 / 0.65);
+  border-radius: 28px;
+  background: rgb(255 255 255 / 0.08);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  text-shadow: 0 1px 10px rgb(0 0 0 / 0.45);
+  pointer-events: none;
+}
+.vivic-user-card {
+  position: absolute;
+  min-width: 0;
+  padding: var(--vivic-card-padding-y) var(--vivic-card-padding-x);
+  border-radius: var(--radius-xl);
+  border: 1px solid color-mix(in oklab, var(--border) 55%, transparent);
+  background: color-mix(in oklab, var(--card) 92%, transparent);
+  color: var(--card-foreground);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 18px 44px -20px rgb(0 0 0 / 0.38);
+}
+.vivic-user-card-tools {
+  position: absolute;
+  top: -15px;
+  right: 12px;
+  border: 1px solid var(--vivic-line);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.18);
+  z-index: 6;
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 10px;
+  background: color-mix(in oklab, var(--card) 92%, transparent);
+  opacity: 0;
+  transition: opacity 160ms;
+}
+.vivic-user-card:hover .vivic-user-card-tools, .vivic-user-card:focus-within .vivic-user-card-tools { opacity: 1; }
+.vivic-user-card-tools [data-vivic-send-display] { display: inline-flex; align-items: center; gap: 5px; width: auto; padding: 6px 8px; white-space: nowrap; }
+.vivic-user-layer-notice {
+  position: fixed;
+  top: 74px;
+  left: 50%;
+  z-index: 30;
+  max-width: min(520px, calc(100vw - 140px));
+  margin: 0;
+  padding: 8px 14px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: var(--vc-glass-strong);
+  border: 1px solid var(--vc-glass-border);
+  color: var(--vc-ink);
+  font-size: 13px;
+  text-align: center;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+@media (hover: none) {
+  .vivic-user-card .vivic-move-handle, .vivic-user-card-tools { opacity: 1; }
+}
+@media (max-width: 600px) { .vivic-user-layer-notice { top: 122px; } }
+
+/* The page chrome floats above the card layer but only its controls take pointer events. */
+.vivic-chat-header, .vivic-chat-footer { position: relative; z-index: 2; pointer-events: none; }
+.vivic-chat-header > *, .vivic-chat-footer > * { pointer-events: auto; }
+.vivic-chat-space { flex: 1; min-height: 0; pointer-events: none; }
+.vivic-chat-status {
+  width: fit-content;
+  max-width: min(640px, 100%);
+  margin: 0 auto 10px;
+  padding: 8px 14px;
+  border-radius: 14px;
+  background: var(--vc-glass);
+  border: 1px solid var(--vc-glass-border);
+  color: var(--vc-ink);
+  font-size: 13px;
+  line-height: 1.6;
+  text-align: center;
+  overflow-wrap: anywhere;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  pointer-events: none;
+}
+.vivic-chat-status[data-visible] { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .vivic-chat-status { transition: none; } }

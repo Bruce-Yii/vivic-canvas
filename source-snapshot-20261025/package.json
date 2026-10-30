@@ -1,0 +1,32 @@
+{
+  "name": "vivic",
+  "private": true,
+  "version": "0.6.0",
+  "type": "module",
+  "packageManager": "pnpm@12.11.2",
+  "scripts": {
+    "package:windows": "node scripts/package-windows.mjs",
+    "package:macos": "node scripts/package-macos.mjs",
+    "package:online": "node scripts/package-online.mjs",
+    "package:relay": "node scripts/package-mobile-relay.mjs",
+    "dev": "node scripts/dev.mjs",
+    "dev:legacy": "node scripts/dev.mjs --legacy",
+    "test:dev": "node --test scripts/dev.test.mjs",
+    "dev:web": "node scripts/dev.mjs --web",
+    "dev:api": "node scripts/dev.mjs --api",
+    "build": "pnpm --filter @vivic/web build && pnpm --filter @vivic/web build:mobile",
+    "lint": "oxlint apps packages scripts",
+    "test": "pnpm --parallel --filter @vivic/web --filter @vivic/local-api --filter @vivic/mobile-console-prototype test --maxWorkers=4",
+    "test:e2e:smoke": "pnpm --filter @vivic/web test:e2e landing.spec.ts dualwindow.spec.ts",
+    "card:check": "pnpm --filter @vivic/local-api exec tsx ../../packages/card-runtime/src/cli.ts",
+    "card:pack": "pnpm --filter @vivic/local-api exec tsx ../../packages/card-runtime/src/pack.ts",
+    "eval:intents": "pnpm --filter @vivic/local-api exec tsx evals/run.ts",
+    "test:live": "pnpm --filter @vivic/local-api test:live",
+    "typecheck": "pnpm -r typecheck",
+    "contracts:generate": "pnpm --filter @vivic/local-api exec tsx ../../scripts/generate-contract-schemas.ts",
+    "contracts:check": "pnpm --filter @vivic/local-api exec tsx ../../scripts/generate-contract-schemas.ts --check"
+  },
+  "devDependencies": {
+    "oxlint": "^1.81.0"
+  }
+}

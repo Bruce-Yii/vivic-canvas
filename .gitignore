@@ -1,0 +1,38 @@
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+
+# Dependencies and virtual environments
+node_modules/
+.venv/
+venv/
+
+# Build and test output
+dist/
+build/
+coverage/
+.coverage
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+__pycache__/
+*.py[cod]
+
+# Editors, OS and logs
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.log
+
+# Intermediate work is disposable and does not move through Git worktrees.
+work/*
+!work/README.md
+
+# outputs/ is intentionally NOT ignored. Each project decides whether large
+# deliverables should be versioned, published with LFS, or excluded explicitly.

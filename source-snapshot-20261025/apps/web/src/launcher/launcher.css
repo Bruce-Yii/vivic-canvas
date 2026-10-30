@@ -1,0 +1,46 @@
+/* Hark 26ac2724: original type, alpha surfaces and continuous corners.
+   D adaptation: one compact local-service panel in the 512px content band. */
+.vivic-launcher.vh-hark { position:fixed; inset:0; isolation:isolate; overflow-y:auto; overflow-x:hidden; color:var(--hark-ink); font:400 15px/19px var(--hark-font); color-scheme:light dark; }
+.launcher-panel { width:min(100%,560px); margin:clamp(24px,7vh,72px) auto; padding:0 24px max(24px,env(safe-area-inset-bottom)); box-sizing:border-box; }
+.launcher-topbar { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:24px; }
+.launcher-brand { color:var(--hark-secondary); font-size:13px; line-height:18px; }
+.launcher-topbar h1 { margin:6px 0 0; font:400 28px/37px var(--hark-font); }
+.launcher-primary { display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; gap:8px; min-height:44px; padding:0 16px; border-radius:24px; background:var(--hark-primary); color:var(--hark-on-fill); font-weight:500; }
+.launcher-primary:hover { opacity:.85; }
+.launcher-runtime { padding:20px; margin-top:12px; --surface-fill:var(--hark-fill); --surface-blur:blur(50px); --surface-radius:24px; }
+.launcher-card-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.launcher-card-heading h2 { display:flex; align-items:center; gap:10px; margin:0; font:500 15px/20px var(--hark-font); }
+.launcher-tag { color:var(--hark-secondary); font-size:12px; white-space:nowrap; }
+.launcher-model-name { margin:12px 0 0; color:var(--hark-secondary); font-size:13px; line-height:19px; overflow-wrap:anywhere; }
+.launcher-runtime-status { display:flex; align-items:center; gap:8px; margin-top:20px; font-size:13px; line-height:19px; }
+.launcher-runtime-status strong { font-weight:400; }
+.launcher-runtime-status.is-ready { color:var(--hark-ink); }
+.launcher-dot { width:6px; height:6px; border-radius:50%; background:currentColor; flex:none; }
+.launcher-download { margin-top:16px; }
+.launcher-download progress { width:100%; height:6px; accent-color:var(--hark-primary); }
+.launcher-download>div { display:flex; justify-content:space-between; gap:12px; color:var(--hark-secondary); font-size:12px; margin-top:6px; }
+.launcher-alert { display:flex; align-items:flex-start; gap:8px; color:var(--color-error); margin-top:12px; font-size:13px; line-height:19px; overflow-wrap:anywhere; }
+.launcher-alert svg { flex:none; margin-top:2px; }
+.launcher-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:20px; }
+.vivic-launcher .launcher-secondary { min-height:44px; border:0; border-radius:22px; padding:10px 14px; color:var(--hark-ink); background:var(--hark-composer); font:400 13px/18px var(--hark-font); box-shadow:none; white-space:normal; }
+.vivic-launcher .launcher-secondary:hover:not(:disabled) { background:var(--hark-solid); }
+.vivic-launcher .launcher-secondary:disabled { opacity:.4; }
+.launcher-runtime-footer { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; border-top:1px solid var(--hark-stroke); margin-top:16px; padding-top:8px; color:var(--hark-secondary); font-size:12px; line-height:18px; }
+.launcher-runtime-footer a { display:inline-flex; align-items:center; gap:8px; min-height:44px; }
+.vivic-launcher .launcher-text-button { min-height:44px; padding:8px; background:transparent; color:var(--hark-secondary); border:0; border-radius:16px; font:400 12px/18px var(--hark-font); box-shadow:none; }
+.vivic-launcher .launcher-text-button:hover:not(:disabled) { background:var(--hark-wash); color:var(--hark-ink); }
+.launcher-local-voice>summary { display:flex; align-items:center; justify-content:space-between; min-height:28px; cursor:pointer; font-weight:500; list-style:none; }
+.launcher-local-voice>summary::-webkit-details-marker { display:none; }
+.launcher-local-voice[open]>summary { margin-bottom:16px; }
+.launcher-local-voice[open]>summary>svg { rotate:180deg; }
+.launcher-local-voice .se-row { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; }
+.launcher-local-voice .se-caption { margin:8px 0; color:var(--hark-secondary); font-size:12px; line-height:18px; }
+.launcher-local-voice .se-error { margin:12px 0 0; color:var(--color-error); font-size:13px; line-height:19px; }
+.launcher-refresh { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:8px; color:var(--hark-secondary); font-size:12px; line-height:18px; }
+.launcher-footer { color:var(--hark-secondary); margin:8px 0 0; font-size:12px; line-height:18px; }
+.launcher-footer strong { font:400 11px/18px var(--hark-mono); }
+.vivic-launcher :is(button,a,select,summary):focus-visible { outline:2px solid #84baff; outline-offset:3px; }
+.launcher-spinner { animation:launcher-spin 1.4s linear infinite; }
+@keyframes launcher-spin { to { transform:rotate(360deg); } }
+@media(max-width:600px) { .launcher-panel { margin:24px auto; padding:env(safe-area-inset-top) 16px max(24px,env(safe-area-inset-bottom)); } .launcher-runtime { padding:16px; } }
+@media(prefers-reduced-motion:reduce) { .vivic-launcher * { animation:none!important; transition:none!important; } }

@@ -1,0 +1,110 @@
+{
+  "repository": "ECdison6227/rea-ui-library",
+  "commit": "26ac2724",
+  "sourceRoot": "platforms/web/hark",
+  "classification": "B retained source assets; D React wrappers and Vivic domain mapping",
+  "scope": "local owner preview and private test packages",
+  "items": [
+    {
+      "type": "font",
+      "source": "research-2026-10-22/public/resources/gt-standard-l-standard-regular.09tdz1i3kmgj1.woff2",
+      "target": "components/hark/assets/gt-standard-l-standard-regular.woff2",
+      "sha256": "4105a4600c0ff156188f57155493072eb7ba04ee1361b26b987ee7706e30244b",
+      "mode": "unchanged bytes; D target face registration"
+    },
+    {
+      "type": "font",
+      "source": "research-2026-10-22/public/resources/gt-standard-l-standard-medium.1788_3rwow92_.woff2",
+      "target": "components/hark/assets/gt-standard-l-standard-medium.woff2",
+      "sha256": "faabee27a4bb26b35c9fba04560a6993db1701689942cdce0922c0af1ec9d1a6",
+      "mode": "unchanged bytes; D target face registration"
+    },
+    {
+      "type": "font",
+      "source": "research-2026-10-22/public/resources/gt-standard-l-standard-semibold.3dc3_751vyn1r.woff2",
+      "target": "components/hark/assets/gt-standard-l-standard-semibold.woff2",
+      "sha256": "d9d63bc7ef617ae81d92abd182a448f3715db8e2a2a9bc2858b76ccbf56b1c8c",
+      "mode": "unchanged bytes; D target face registration"
+    },
+    {
+      "type": "font",
+      "source": "research-2026-10-22/current-app/fonts/GT-Standard-L-Standard-Bold.woff2",
+      "target": "components/hark/assets/gt-standard-l-standard-bold.woff2",
+      "sha256": "0fc289f07c7f9fe0a9bda757ea01f274dc291b643f8596f7262099046b4f4e85",
+      "mode": "unchanged bytes; D target face registration"
+    },
+    {
+      "type": "font",
+      "source": "research-2026-10-22/public/resources/hark-serif-light.3qkalivet-2sm.woff2",
+      "target": "components/hark/assets/hark-serif-light.woff2",
+      "sha256": "a3e2748ae42f23b4c6443f350e443a33cc5ecf1ae06b7646b5d06d0fabc97bbc",
+      "mode": "unchanged bytes; D target face registration"
+    },
+    {
+      "type": "font",
+      "source": "research-2026-10-22/public/resources/hark-serif-medium.0scjs-gvhp6fa.woff2",
+      "target": "components/hark/assets/hark-serif-medium.woff2",
+      "sha256": "28869b1c7357a9166f12a37ef28185669519181400da57dac68baa1a6cd9cbb9",
+      "mode": "unchanged bytes; D target face registration"
+    },
+    {
+      "type": "font",
+      "source": "research-2026-10-22/public/resources/gt-standard-mono-standard-regular.2iqqf_4_8fw_b.woff2",
+      "target": "components/hark/assets/gt-standard-mono-standard-regular.woff2",
+      "sha256": "521593eca0cabbca965df1b8ddb7448707e8d70399fa18d445a873559f9d5fcd",
+      "mode": "unchanged bytes; D target face registration"
+    },
+    {
+      "type": "glyphs",
+      "source": "research-2026-10-22/current-app/icons.json",
+      "target": "components/hark/glyphs.json",
+      "sha256": "0f228a523574edb6680352a9e60569bc72c566764bd3ff26164af431619449c1",
+      "mode": "74 original decodedBody paths; D JSON serialization"
+    },
+    {
+      "source": "research-2026-10-22/reference/assets/corner-path.mjs",
+      "target": "components/hark/corner-path.mjs",
+      "sha256": "e7d88d29d0e95267b91a82d3c347cd8653524ca1fe4d304f203e0834714688f7",
+      "mode": "unchanged bytes"
+    },
+    {
+      "source": "research-2026-10-22/reference/assets/corner-path-provenance.json",
+      "target": "components/hark/corner-path-provenance.json",
+      "sha256": "c651085776722512f746147157c42745dc44cf513162c26beaa6f77c50f2713e",
+      "mode": "unchanged bytes"
+    },
+    {
+      "source": "research-2026-10-22/current-app/resources/C87UuXAZ.css",
+      "sourceSha256": "823adc0da2cf0249d31c9115dbf4d0ef96f9a34052f5325bbac28bda20aee5d5",
+      "target": "components/hark/source-theme.css",
+      "sha256": "85f8acbec0d562b6274b83479e2912b02d6af2b6cad9f54ae12e5ed4f7846082",
+      "mode": "exact 66 variable declarations per theme; D scoped selectors"
+    },
+    {
+      "theme": "light",
+      "hour": 13,
+      "target": "components/hark/assets/sky-light.webp",
+      "bytes": 45792,
+      "sha256": "c2f9731a758b28cbd6b3e94933c89830ab96f50e1adaa137fc1e6f530685939f",
+      "source": "research-2026-10-22/current-app/resources/wallpaper_core.html",
+      "mode": "D frozen source shader frame; offline scene, no GPU at product runtime"
+    },
+    {
+      "theme": "dark",
+      "hour": 23,
+      "target": "components/hark/assets/sky-dark.webp",
+      "bytes": 36690,
+      "sha256": "dd5c6516a0ba98332a99a16b535fd47d250f49208d10a67eda453efe5899f218",
+      "source": "research-2026-10-22/current-app/resources/wallpaper_core.html",
+      "mode": "D frozen source shader frame; offline scene, no GPU at product runtime"
+    }
+  ],
+  "differences": [
+    "React and ResizeObserver host uses layout border box to support React Flow zoom.",
+    "SVG inter-element whitespace only is removed at render; original path geometry stays unchanged.",
+    "Hark source shader is rendered offline with frozen date/weather; product retains those frames with D compositor light/transform animation, no weather/geolocation/GPU context.",
+    "Chinese uses an explicit PingFang/Microsoft YaHei/Noto Sans CJK sans-serif fallback as original custom fonts do not cover CJK.",
+    "Existing Vivic task descriptions and planner schemas stay as domain data; no TODAY layout/CSS remains.",
+    "Existing Orb, React Flow, Assistant UI, Radix, charts and maps retained under Hark visual roles."
+  ]
+}

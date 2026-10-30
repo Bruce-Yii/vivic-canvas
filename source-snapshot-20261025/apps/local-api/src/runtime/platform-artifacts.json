@@ -1,0 +1,38 @@
+[
+  {
+    "name": "llama-b11550-bin-win-cpu-x64.zip",
+    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11550/llama-b11550-bin-win-cpu-x64.zip",
+    "bytes": 19521077,
+    "sha256": "e61c4aa5dd87f62c081d941115725e5de26f04ed04e07dd2a5f30e697767dcab"
+  },
+  {
+    "name": "llama-b11550-bin-macos-arm64.tar.gz",
+    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11550/llama-b11550-bin-macos-arm64.tar.gz",
+    "bytes": 12080145,
+    "sha256": "3dcbbba52d493f3875d86602a273f8ef742e1b411295ceb1e9c2de80aa80950b"
+  },
+  {
+    "name": "llama-b11550-bin-macos-x64.tar.gz",
+    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11550/llama-b11550-bin-macos-x64.tar.gz",
+    "bytes": 11607566,
+    "sha256": "48a3f733cd19b1b620997656ea77c109176aa5605b7d98ef26d81d11989001cb"
+  },
+  {
+    "name": "uv-x86_64-pc-windows-msvc.zip",
+    "url": "https://github.com/astral-sh/uv/releases/download/0.12.24/uv-x86_64-pc-windows-msvc.zip",
+    "bytes": 15685515,
+    "sha256": "7c38608c8a18ee137d748a1773053b07ec8f3a30fab49aebaa6f4e4efeceb019"
+  },
+  {
+    "name": "uv-aarch64-apple-darwin.tar.gz",
+    "url": "https://github.com/astral-sh/uv/releases/download/0.12.24/uv-aarch64-apple-darwin.tar.gz",
+    "bytes": 14650202,
+    "sha256": "0c4346de7abdb49495b393b9ec809fe387aa43e586be20fecb972216c1e71732"
+  },
+  {
+    "name": "uv-x86_64-apple-darwin.tar.gz",
+    "url": "https://github.com/astral-sh/uv/releases/download/0.12.24/uv-x86_64-apple-darwin.tar.gz",
+    "bytes": 18120254,
+    "sha256": "4fa82e37cb94767661f532b001e470b67a186c7260e305bd84ddb78fd545c0b6"
+  }
+]
