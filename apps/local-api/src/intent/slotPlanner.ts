@@ -60,6 +60,9 @@ interface SlotDeps {
   definitions: CardDefinition[]; page?: ScenePage; travel?: TravelProvider; signal?: AbortSignal;
   usedProvider: IntentResult["usedProvider"];
   allowTargetCandidates?: boolean;
+  /** `VIVIC_DECISION_POLICY=main-only`: no route hint exists, so lexical cues
+   * must keep the right operation contracts in front of the planner. */
+  mainOnly?: boolean;
   /** Successful plan provenance (clause index is relative to the planner input). */
   report?(plans: Array<{ clause: number; contract: string; cardIds: string[] }>): void;
   generate(messages: ChatMessage[], attempt: number): Promise<StepfunResult<unknown>>;
@@ -75,6 +78,21 @@ function fallbackCandidates(text: string): string[] {
   if (/待办|代办|清单|任务|\bto\s*do\b/i.test(text)) return ["todo", "generate", "note"];
   if (/便笺|便签|记一下|记下来|记住|先记着|\bnote\b/i.test(text)) return ["note", "generate", "answer"];
   return ["generate", "answer", "note"];
+}
+/** Main-only replacement for the 4B's operation routing: a lexical cue only
+ * decides which contracts the planner may choose from, never that it executes.
+ * It is deliberately wider than a classifier would be and stays out of `full`
+ * so the existing route hint remains the only candidate source there. */
+const operationCues: ReadonlyArray<readonly [RegExp, string]> = [
+  [/聚焦|定位|放大/, "focus"],
+  [/高亮|标亮/, "highlight"],
+  [/改|修改|改成|换成|标成|勾选|打勾|重命名|编辑|完成/, "edit"],
+  [/删除|删掉|删了|移除|扔掉|丢掉|清掉/, "delete"],
+  [/移动|固定|取消固定|排列|整理|布局/, "arrange"],
+  [/撤销|撤回|重做/, "undo"],
+];
+function operationCandidates(text: string): string[] {
+  return operationCues.filter(([pattern]) => pattern.test(text)).map(([, id]) => id);
 }
 function extensionParameters(def: CardDefinition): ValueSchema {
   return { type: "object", additionalProperties: false, properties: { config: def.configSchema,
@@ -141,11 +159,14 @@ export async function runSlotPlanner(req: IntentRequest, deps: SlotDeps): Promis
   const selected = hasImages ? "image_analysis" : !multi && !dateCountdown && route?.route && !route.none && route.probability >= .5 && route.route !== "generate" ? route.route : undefined;
   // Verified search adapters do not require another model call.
   if (selected === "search" && !req.continuation && !req.taskContext && !/不要|不用|别|如果|要是|解释|什么意思|[“”「」]/.test(req.text)) return deps.lookup({ kind: "search", query: req.text.slice(0, 200) });
+  const ranked = route ? Object.entries(route.probabilities).sort((a, b) => b[1] - a[1]).map(([id]) => id)
+    .filter(id => availableIds.includes(id)) : [];
   const candidates = selected ? [selected] : multi ? [...allIds.filter(id => id !== "image_analysis"), ...relevantExtensions]
     : dateCountdown ? ["generate"]
-    : route?.route === "generate" ? ["generate", "note", ...Object.entries(route.probabilities).sort((a, b) => b[1] - a[1]).map(([id]) => id)
-      .filter(id => availableIds.includes(id) && !["generate", "note", "chat", "unsupported"].includes(id)), "answer"].slice(0, 3)
-    : [...new Set([...(route ? Object.entries(route.probabilities).sort((a, b) => b[1] - a[1]).map(([id]) => id).filter(id => availableIds.includes(id)) : []), ...fallbackCandidates(req.text)])].slice(0, 3);
+    : route?.route === "generate" ? ["generate", "note", ...ranked
+      .filter(id => !["generate", "note", "chat", "unsupported"].includes(id)), "answer"].slice(0, 3)
+    : [...new Set([...ranked, ...fallbackCandidates(req.text), ...(deps.mainOnly ? operationCandidates(req.text) : [])])]
+      .slice(0, deps.mainOnly ? 5 : 3);
   if (candidates.some(id => !availableIds.includes(id))) return { kind: "clarify", message: "这张扩展卡已停用或未安装，请重新选择。", usedProvider: deps.usedProvider };
   if (candidates.some(id => extensions.has(id) && JSON.stringify(extensionParameters(extensions.get(id)!)).length > 12000))
     return { kind: "clarify", message: "所选卡片的参数表较大，请精简卡片参数或在参数面板填写。", usedProvider: deps.usedProvider };

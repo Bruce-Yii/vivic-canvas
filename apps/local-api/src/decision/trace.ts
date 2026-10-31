@@ -32,7 +32,10 @@ const built = z.strictObject({ cards: z.array(z.string().max(80)).max(12), n: z.
 const decision = z.strictObject({ text: z.string().max(500), route: route.nullable(),
   probability: z.number().min(0).max(1), probabilities: z.record(z.string(), z.number().min(0).max(1)),
   none: z.boolean(), latencyMs: z.number().nonnegative(), failed: z.boolean(), target: target.optional(),
-  built: built.optional(), source: z.enum(["rules", "decision"]).optional() });
+  built: built.optional(), source: z.enum(["rules", "decision"]).optional(),
+  // `route` stays null when no classifier ran; this says where it came from:
+  // rules, the 4B model, a skipped classifier, or the main planner's contract.
+  routeSource: z.enum(["rules", "model", "skipped", "planner"]).optional() });
 const plan = z.strictObject({ clause: z.int().min(0).max(2), contract: z.string().min(1).max(100),
   cardIds: z.array(z.string().max(128)).max(12), source: z.enum(["rules", "planner"]) });
 export const DecisionTraceSchema = z.strictObject({
@@ -52,6 +55,8 @@ export const DecisionTraceSchema = z.strictObject({
   legacyCardTypes: z.array(z.string().max(80)).max(32),
   plannerCalls: z.int().min(0).max(100).optional(),
   directClauses: z.int().min(0).max(3).optional(),
+  /** Which routing policy produced this turn; absent means `full` (older traces). */
+  policy: z.enum(["full", "main-only"]).optional(),
   /** First published feedback sentence, in ms from the planner stage start. Absent when none was sent. */
   firstFeedbackMs: z.number().nonnegative().optional(),
   /** Backward-compatible: absent unless this turn committed an envelope. */
@@ -65,6 +70,10 @@ export async function observeDecision(req: IntentRequest, deps: PipelineDeps, si
   if (!["shadow", "on"].includes(deps.router?.mode ?? "") || req.task?.receipt || req.task?.cancel) return legacy();
   const router = deps.router, clauses = splitClauses(req.text), id = `decision_${randomUUID()}`;
   if (!router || !clauses.length) return legacy();
+  // `main-only` never calls the 4B. The observer still publishes rule rows and
+  // explicit "skipped" rows so the plan/execution path sees the same clause
+  // shape, and telemetry can tell a skipped classifier apart from a failure.
+  const mainOnly = router.policy === "main-only";
   const start = performance.now(), controller = new AbortController();
   const abort = () => controller.abort();
   signal?.addEventListener("abort", abort, { once: true });
@@ -85,8 +94,14 @@ export async function observeDecision(req: IntentRequest, deps: PipelineDeps, si
         const exact = router.mode === "on" && !req.attachments?.length && !req.continuation && !req.resolvedTargetId && !req.resolvedTargets
           ? literalRoute(text, shadowContext, router) : undefined;
         const value = exact ? { route: exact, probability: 1, probabilities: { [exact]: 1 }, none: false,
-          latencyMs: performance.now() - clauseStarted } : await router.routeUtterance(text, shadowContext, controller.signal);
-        const targetPromise = value?.route && isBuiltinRoute(value.route) ? resolveTarget(text, shadowContext, value.route, router, controller.signal) : Promise.resolve(undefined);
+          latencyMs: performance.now() - clauseStarted }
+          : mainOnly ? { route: null, probability: 0, probabilities: {}, none: true,
+            latencyMs: Math.round(performance.now() - clauseStarted) }
+          : await router.routeUtterance(text, shadowContext, controller.signal);
+        // Main-only has no model target: the plan resolves it deterministically
+        // from the user's words, and ambiguity still asks the user.
+        const targetPromise = mainOnly ? Promise.resolve(undefined)
+          : value?.route && isBuiltinRoute(value.route) ? resolveTarget(text, shadowContext, value.route, router, controller.signal) : Promise.resolve(undefined);
         if (!output.length) publishHint({ result: value, target: targetPromise, all });
         const selected = await targetPromise;
         // The host may have frozen a candidate the user already picked; the trace
@@ -94,8 +109,11 @@ export async function observeDecision(req: IntentRequest, deps: PipelineDeps, si
         const frozen = req.resolvedTargets?.[String(index)];
         const target = frozen ? { targetId: frozen, source: "user_pick" as const }
           : clauses.length === 1 && req.resolvedTargetId ? { targetId: req.resolvedTargetId, source: "frozen" as const } : selected;
-        output.push(value ? { text, ...value, source: exact ? "rules" : "decision", failed: false, ...(target ? { target } : {}) }
-          : { text, route: null, probability: 0, probabilities: {}, none: true, latencyMs: Math.round(performance.now() - clauseStarted), failed: true });
+        output.push(value ? { text, ...value, ...(exact ? { source: "rules" as const } : mainOnly ? {} : { source: "decision" as const }),
+          failed: false, ...(target ? { target } : {}),
+          ...(mainOnly ? { routeSource: exact ? "rules" as const : "skipped" as const } : {}) }
+          : { text, route: null, probability: 0, probabilities: {}, none: true, latencyMs: Math.round(performance.now() - clauseStarted),
+            failed: true, ...(mainOnly ? { routeSource: "skipped" as const } : {}) });
         if (value?.route === "focus" && value.probability >= .8 && selected && "targetId" in selected) {
           shadowContext = { ...shadowContext, focusHistory: [...shadowContext.focusHistory, selected.targetId].slice(-20) };
         }
@@ -149,8 +167,11 @@ export async function observeDecision(req: IntentRequest, deps: PipelineDeps, si
     // Built cards are only reported by on-mode after the batch passed validation.
     const builds = new Map((deps.decisionTelemetry?.built ?? []).map(entry => [entry.clause, entry]));
     const decisions = rows?.map((row, index) => {
+      // Main-only: a committed plan's contract is the only routing evidence.
+      const planned = mainOnly && row.routeSource === "skipped" ? plans?.find(entry => entry.clause === index) : undefined;
+      const next = planned ? { ...row, routeSource: "planner" as const } : row;
       const entry = builds.get(index);
-      return entry ? { ...row, built: { cards: entry.cards, n: entry.n } } : row;
+      return entry ? { ...next, built: { cards: entry.cards, n: entry.n } } : next;
     }) ?? [];
     return { id, mode: router.mode === "on" ? "on" : "shadow", status: !rows ? "pending" : failures ? "failed" : "complete",
       ...(req.task?.id ? { taskId: req.task.id } : {}),
@@ -163,6 +184,7 @@ export async function observeDecision(req: IntentRequest, deps: PipelineDeps, si
       legacyActionTypes: [...actions.map(action => action.type), ...(result.hostOperation ? [result.hostOperation.kind] : [])],
       legacyCardTypes: actions.flatMap(action => action.type === "card.create" ? [action.card.type] : []),
       ...(deps.decisionTelemetry ? { plannerCalls: deps.decisionTelemetry.plannerCalls, directClauses: deps.decisionTelemetry.directClauses } : {}),
+      ...(mainOnly ? { policy: "main-only" as const } : {}),
       ...(deps.decisionTelemetry?.firstFeedbackMs !== undefined ? { firstFeedbackMs: deps.decisionTelemetry.firstFeedbackMs } : {}),
       ...(plans?.length ? { plans } : {}),
     };
