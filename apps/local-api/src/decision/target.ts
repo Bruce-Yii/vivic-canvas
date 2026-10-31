@@ -133,6 +133,8 @@ export async function resolveTarget(text: string, context: CanvasContext, route:
   const criteria = Object.fromEntries(pool.map(card => [card.id, cardLabel(card)]));
   Object.assign(criteria, { ambiguous: "用户指的卡片不唯一，需要追问", missing: "画布上没有用户说的卡片" });
   const result = await router?.chooseTarget(text, context, criteria, signal);
+  // Threshold 0.8 (docs/decisions/decision-thresholds.md): only a confident
+  // target classifier decision is accepted; otherwise the host asks the user.
   if (result?.choice === "missing" && result.probability >= .8) return { missing: true, source: "missing" };
   if (result?.choice && result.probability >= .8 && pool.some(card => card.id === result.choice)) {
     return { targetId: result.choice, source: "classifier" };
