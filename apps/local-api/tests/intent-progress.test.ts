@@ -52,6 +52,9 @@ describe("VIVIC_STREAM_FEEDBACK deployment switch", () => {
     const final = JSON.parse(text.split("event: result\ndata: ")[1]!.trim());
     expect(final).toMatchObject({ kind: "envelope" });
     expect(final.task?.status).toBe("awaiting_execution");
+    // The published first sentence is timestamped in the same trace, not a second chain.
+    expect(typeof final.trace?.firstFeedbackMs).toBe("number");
+    expect(final.trace.firstFeedbackMs).toBeGreaterThanOrEqual(0);
     expect(final.envelope.actions).toContainEqual(expect.objectContaining({ type: "card.create" }));
   });
   it("off never requests stream:true and sends no feedback, while the task still completes", async () => {
@@ -65,6 +68,8 @@ describe("VIVIC_STREAM_FEEDBACK deployment switch", () => {
     const final = JSON.parse(text.split("event: result\ndata: ")[1]!.trim());
     expect(final).toMatchObject({ kind: "envelope" });
     expect(final.task?.status).toBe("awaiting_execution");
+    // No feedback was sent, so the optional field must stay absent (not 0/null).
+    expect(final.trace).not.toHaveProperty("firstFeedbackMs");
     expect(final.envelope.actions).toContainEqual(expect.objectContaining({ type: "card.create" }));
   });
   it("never leaks into ordinary JSON clients even when the switch is on", async () => {

@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { DatabaseSync } from "node:sqlite";
 import { createHostedService } from "../src/hosted/service.js";
 import type { DecisionTrace } from "../src/decision/trace.js";
+import { DecisionTraceSchema } from "../src/decision/trace.js";
 import { emptyContext } from "./helpers.js";
 
 const ORIGIN = "https://unit.test";
@@ -46,6 +47,13 @@ async function fixture() {
   return { service, dir, a, b, aSpace, bSpace, first, second, request, advance: (ms: number) => { clock += ms; } };
 }
 describe("private decision log", () => {
+  it("keeps old stepfun traces readable after adding the deepseek label", () => {
+    expect(DecisionTraceSchema.parse({ ...trace("old-stepfun"), legacyUsedProvider: "stepfun" }).legacyUsedProvider).toBe("stepfun");
+    const { legacyUsedProvider: _provider, ...older } = trace("older-no-provider");
+    expect(DecisionTraceSchema.parse(older).legacyUsedProvider).toBeUndefined();
+    expect(DecisionTraceSchema.parse({ ...trace("new-deepseek"), legacyUsedProvider: "deepseek" }).legacyUsedProvider)
+      .toBe("deepseek");
+  });
   it("isolates authenticated owners and enforces the read limit", async () => {
     const f = await fixture();
     f.service.store.recordDecisionLog(f.a, { text: "alpha", path: "browser", trace: trace("same-id"), spaceId: f.aSpace });
@@ -161,5 +169,15 @@ describe("private decision log", () => {
     expect(f.service.store.listDecisionLogs(f.a)).toHaveLength(1);
     expect(f.service.store.listDecisionLogs(f.a)[0]!.trace.taskId).toBe("browser-task");
     expect(f.service.store.listDecisionLogs(f.b)).toHaveLength(0);
+  });
+  it("persists the HTTP request id beside the decision id for cross-source joins", async () => {
+    const f = await fixture();
+    const response = await f.request(f.first.token, "/api/intent", { text: "显示全部", canvasContext: { ...emptyContext(), canvasId: f.aSpace } });
+    const body = await response.json(), requestId = response.headers.get("x-request-id");
+    expect(requestId).toBeTruthy();
+    expect(body.trace.requestId).toBe(requestId);
+    await vi.waitFor(() => expect(f.service.store.listDecisionLogs(f.a)).toHaveLength(1));
+    expect(f.service.store.listDecisionLogs(f.a)[0]!.trace).toMatchObject({ requestId, id: body.trace.id });
+    expect(body.trace.id).not.toBe(requestId);
   });
 });

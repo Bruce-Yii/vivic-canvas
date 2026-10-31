@@ -6,7 +6,7 @@ import { HOST_OPERATION_PROMPT, hostOperationIssue } from "../decision/hostOpera
 import type { CredentialStore } from "../credentials.js";
 import type { CanvasContext } from "../schemas.js";
 import { chatJson, type StepfunDeps, type ChatMessage, type StepfunResult } from "../stepfun.js";
-import { INTENT_BUDGET_MS } from "../config.js";
+import { INTENT_BUDGET_MS, PLAN_MAX_TOKENS, type MainProvider } from "../config.js";
 import { buildSystemPrompt, buildReminderSystemPrompt, buildUserPrompt } from "./prompt.js";
 import { matchRules } from "./rules.js";
 import { providerRecoveryHint } from "../providerError.js";
@@ -35,7 +35,7 @@ import { incompleteCanvasIssue } from "./contextSafety.js";
 import type { DecisionManager } from "../decision/manager.js";
 import type { IntentRouter } from "../decision/router.js";
 import type { CardDefinition } from "@vivic/card-runtime";
-import { observeDecision, type ClausePlan, type DecisionTrace, type PlannerRouteHint } from "../decision/trace.js";
+import { observeDecision, type ClauseBuild, type ClausePlan, type DecisionTrace, type PlannerRouteHint } from "../decision/trace.js";
 import { runSlotPlanner } from "./slotPlanner.js";
 import { applyOutputChannels, normalizeOutputChannels } from "./channels.js";
 import { splitClauses } from "../decision/split.js";
@@ -47,6 +47,8 @@ export interface IntentRequest { text: string; canvasContext: CanvasContext; att
   offlineReferenceCompatibility?: boolean;
   /** Authenticated host metadata; never accepted by the HTTP body schema. */
   tracePath?: "browser" | "task";
+  /** HTTP/task request id from the authenticated host; joins logs to the decision trace. */
+  requestId?: string;
   /** Set only by the authenticated host, never HTTP JSON. */
   trustedImageRef?: string;
   /** A selection frozen and resolved by the session task manager, never HTTP JSON. */
@@ -64,7 +66,7 @@ export interface IntentResult {
   envelope?: z.infer<typeof ActionEnvelopeSchema>;
   message?: string;
   suggestions?: string[];
-  usedProvider?: "rules" | "stepfun" | "gpt" | "rules-offline" | "search" | "decision";
+  usedProvider?: "rules" | "stepfun" | "deepseek" | "gpt" | "rules-offline" | "search" | "decision";
   trace?: DecisionTrace;
   /** Internal clarification handoff; the task manager removes it from the wire. */
   targetCandidates?: Array<{ id: string; label: string }>;
@@ -78,9 +80,11 @@ export interface PipelineDeps {
   router?: IntentRouter;
   /** Preserve the same on-mode router through the task wrapper without observing twice. */
   executionRouter?: IntentRouter;
-  decisionTelemetry?: { plannerCalls: number; directClauses: number; plans?: ClausePlan[] };
+  decisionTelemetry?: { plannerCalls: number; directClauses: number; plans?: ClausePlan[]; built?: ClauseBuild[]; firstFeedbackMs?: number };
   /** Internal multi-card switch (default `VIVIC_MULTI_CARD_MODE`, itself "off"). */
   multiCard?: MultiCardMode;
+  /** True only for `VIVIC_DECISION_POLICY=main-only`; widens planner candidates and never calls the 4B. */
+  mainOnly?: boolean;
   /** Keep verified data/search/schedule adapters, while on-mode fallback skips old broad fast rules. */
   skipFastRules?: boolean;
   slotPlanning?: boolean;
@@ -89,6 +93,10 @@ export interface PipelineDeps {
   onDecisionTrace?: (request: IntentRequest, trace: DecisionTrace, result: IntentResult) => void | Promise<void>;
   credentials: CredentialStore;
   stepfun: StepfunDeps;
+  /** Main planner transport label; unset preserves the existing StepFun wording. */
+  mainProvider?: MainProvider;
+  /** Planner output cap (config default 4096); reminders keep their own 4096. */
+  planMaxTokens?: number;
   onPlannerCall?: (attempt: number) => void;
   /** Only the authenticated SSE transport opts in; ordinary JSON clients retain their request format. */
   streamFeedback?: boolean;
@@ -134,8 +142,12 @@ const assembleEnvelope = (actions: Action[], canvasId: string, spokenText?: stri
  * validation repair. The 90s turn deadline is never restarted by a retry. */
 export const runIntent = async (req: IntentRequest, deps: PipelineDeps, signal?: AbortSignal, adapterOnly = false, plannerOnly = false): Promise<IntentResult> => {
   const router = deps.executionRouter ?? deps.router;
+  const mainOnly = router?.policy === "main-only";
   // Resolve the opt-in switch once per request; "off" keeps every path unchanged.
-  deps = { ...deps, multiCard: deps.multiCard ?? multiCardMode(), decisionTelemetry: deps.decisionTelemetry ?? { plannerCalls: 0, directClauses: 0 } };
+  // Main-only needs the hybrid shape by definition: literal clauses stay local
+  // and the remaining subset costs exactly one planner call.
+  deps = { ...deps, mainOnly, multiCard: deps.multiCard ?? (mainOnly ? "hybrid" : multiCardMode()),
+    decisionTelemetry: deps.decisionTelemetry ?? { plannerCalls: 0, directClauses: 0 } };
   const slotPlanning = router?.mode === "on" || (deps.slotPlanning ?? router?.mode === "shadow");
   const legacy = async (routeHint = deps.routeHint, request = req, onlyPlanner = plannerOnly, requestSignal = signal, skipFastRules = false) => {
     const result = await runLegacyIntent(request, { ...deps, slotPlanning, executionRouter: router, skipFastRules,
@@ -166,6 +178,7 @@ const runLegacyIntent = async (
   plannerOnly = false,
 ): Promise<IntentResult> => {
   const budget = createBudget(INTENT_BUDGET_MS, [signal, deps.stepfun.signal]);
+  const planMaxTokens = deps.planMaxTokens ?? PLAN_MAX_TOKENS;
   const startedAt = performance.now();
   const report = (stage: Parameters<NonNullable<PipelineDeps["onStage"]>>[0]["stage"], status: "started" | "completed" | "failed", elapsedMs?: number) => {
     try { deps.onStage?.({ stage, status, ...(elapsedMs === undefined ? {} : { elapsedMs: Math.round(elapsedMs) }) }); } catch { /* telemetry is noncritical */ }
@@ -186,6 +199,10 @@ const runLegacyIntent = async (
       if (feedbackPublished || budget.signal.aborted || deps.isSessionCurrent?.() === false
         || (deps.planner ? !deps.planner.isCurrent() : deps.credentials.getSecret() !== credential)) return;
       feedbackPublished = true;
+      // Only the first sentence of the turn is measured; absent means none was sent.
+      if (deps.decisionTelemetry && deps.decisionTelemetry.firstFeedbackMs === undefined) {
+        deps.decisionTelemetry.firstFeedbackMs = Math.round(performance.now() - startedAt);
+      }
       try { deps.onStage?.({ stage: "planner", status: "started", feedback: text }); } catch { /* advisory */ }
     });
     const input = deps.streamFeedback ? messages.map(message => message.role === "system" ? { ...message, content: message.content + FEEDBACK_PROMPT } : message) : messages;
@@ -310,9 +327,15 @@ const runLegacyIntent = async (
       // No model to plan with: an informational question still goes online.
       const offlineQuery = deps.search && !hasImages && !continuation ? offlineSearchQuery(req.text) : null;
       if (offlineQuery) return await runIntent({ text: `搜索 ${offlineQuery}`, canvasContext: req.canvasContext }, deps, budget.signal, true);
+      if (!deps.planner && deps.mainProvider === "deepseek") {
+        // Never fall through to a StepFun key: the operator asked for DeepSeek.
+        return { kind: "error", usedProvider: "rules-offline",
+          message: "未配置 DEEPSEEK_API_KEY，DeepSeek 官方快路径不可用。请设置该环境变量并重启本地服务；不会回退 StepFun。" };
+      }
       return { kind: "unknown", message: deps.planner ? "GPT 未连接；本地文字指令仍可使用。请先连接 GPT 或选择 StepFun。" : OFFLINE_MESSAGE, usedProvider: "rules-offline" };
     }
-    usedProvider = deps.planner?.provider ?? "stepfun";
+    usedProvider = deps.planner?.provider
+      ?? (deps.mainProvider === "deepseek" || deps.stepfun.provider === "deepseek" ? "deepseek" : "stepfun");
     // "生日倒计时" / "距离考试还有 30 天" are date countdown cards, not minute timers.
     const reminderMode = !hasImages && !continuation && !req.taskContext && isReminderCreation(req.text) && !looksLikeDateCountdown(req.text);
     // A link the user wants summarised or saved is read once by the verified reader; its text is evidence only.
@@ -332,7 +355,10 @@ const runLegacyIntent = async (
     if (deps.slotPlanning) {
       const planned = await budget.run(() => runSlotPlanner(req, {
         hint: deps.routeHint, definitions, page, travel: deps.travel, signal: budget.signal, usedProvider,
+        // Cache identity: provider wins, otherwise the selected model id.
+        model: deps.planner ? "gpt" : credential?.defaultModel ?? deps.mainProvider ?? deps.stepfun.provider ?? "unknown",
         allowTargetCandidates: deps.executionRouter?.mode === "on",
+        mainOnly: deps.mainOnly === true,
         // A hybrid planner call maps its active clause subset back to the original split.
         ...(deps.multiCard !== "off" ? { report: (plans: Array<{ clause: number; contract: string; cardIds: string[] }>) => {
           if (!deps.decisionTelemetry) return;
@@ -343,7 +369,7 @@ const runLegacyIntent = async (
         } } : {}),
         generate: async (messages, attempt) => {
           plannerCall(attempt);
-          const result = await generate(messages, credential, 8192);
+          const result = await generate(messages, credential, planMaxTokens);
           budget.signal.throwIfAborted();
           return result;
         },
@@ -378,7 +404,7 @@ const runLegacyIntent = async (
       const messages: ChatMessage[] = [
         { role: "system", content: system }, { role: "user", content: user + feedback, ...(hasImages ? { images: req.attachments } : {}) },
       ];
-      const res = await generate(messages, credential, reminderMode ? 4096 : 8192);
+      const res = await generate(messages, credential, reminderMode ? 4096 : planMaxTokens);
       budget.signal.throwIfAborted();
       if ((deps.planner ? !deps.planner.isCurrent() : deps.credentials.getSecret() !== credential)
         || (deps.isSessionCurrent && !deps.isSessionCurrent())) return { kind: "error", message: "请求已取消：模型连接已变更。", usedProvider };

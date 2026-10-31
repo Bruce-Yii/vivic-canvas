@@ -80,7 +80,7 @@ export const IntentResponseSchema = z.strictObject({
   suggestions: z.array(z.string().min(1).max(100)).max(5).optional(),
   locale: z.strictObject({ name: z.string().min(1).max(80), admin1: z.string().max(80).optional(),
     country: z.string().max(80).optional(), basis: z.enum(["device", "network"]), answer: z.string().min(1).max(200) }).optional(),
-  usedProvider: z.enum(["rules", "stepfun", "gpt", "rules-offline", "search", "decision"]).optional(),
+  usedProvider: z.enum(["rules", "stepfun", "deepseek", "gpt", "rules-offline", "search", "decision"]).optional(),
 }).superRefine((response, ctx) => {
   if (response.hostOperation && response.envelope || response.kind === "host-operation" && !response.hostOperation
     || response.hostOperation && response.kind !== "host-operation") ctx.addIssue({ code: "custom", message: "宿主操作与 ActionEnvelope 必须二选一。" });

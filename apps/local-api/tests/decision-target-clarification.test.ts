@@ -33,14 +33,15 @@ const route = (id: RouteResult["route"], probability = .99): RouteResult =>
   ({ route: id, probability, probabilities: { [id!]: probability }, none: false, latencyMs: 1 });
 const titles = canvas().cards.map(item => item.displayProps.title ?? item.displayProps.text);
 
-function setup(routeFor: (text: string) => RouteResult["route"], chooseTarget: IntentRouter["chooseTarget"] = async () => null) {
+function setup(routeFor: (text: string) => RouteResult["route"], chooseTarget: IntentRouter["chooseTarget"] = async () => null,
+  modelReply: unknown = { clarify: "模型不应被调用" }) {
   const router: IntentRouter = { mode: "on", directRoutes: new Set(["countdown", "todo", "note", "overview", "restore"]),
     routeUtterance: vi.fn(async (text: string) => route(routeFor(text))), chooseTarget: vi.fn(chooseTarget) };
   // A credential lets the slot planner run; the model must stay unused when the
   // observer already resolved the target.
   const credentials = new CredentialStore();
   credentials.set({ apiKey: "TEST-target-model-key", defaultModel: "step-3.7-flash", models: ["step-3.7-flash"], checkedAt: new Date().toISOString() });
-  const model = vi.fn(async () => Response.json({ choices: [{ message: { content: JSON.stringify({ clarify: "模型不应被调用" }) } }] }));
+  const model = vi.fn(async () => Response.json({ choices: [{ message: { content: JSON.stringify(modelReply) } }] }));
   const app = createApp({ config, mode: "online", credentials, router, fetchImpl: model as typeof fetch });
   apps.push(app);
   async function post(body: unknown): Promise<IntentResult> {
@@ -161,7 +162,7 @@ describe("delete clarification text matches the frozen numbered payload", () => 
 
 describe("a missing card gets zero unrelated candidates", () => {
   it("reports an explicit absent card as missing even without a target classifier", async () => {
-    expect(await resolveTarget("聚焦一下日程卡", canvas(), "focus")).toEqual({ missing: true });
+    expect(await resolveTarget("聚焦一下日程卡", canvas(), "focus")).toEqual({ missing: true, source: "missing" });
   });
 
   it("treats 聚焦一下日程卡 as missing instead of offering the whole canvas", async () => {
@@ -182,5 +183,58 @@ describe("a missing card gets zero unrelated candidates", () => {
     const result = await f.post({ text: "聚焦那个会议卡", canvasContext: canvas() });
     expect(result.kind, JSON.stringify(result)).toBe("envelope");
     expect(result.envelope?.actions).toContainEqual({ type: "card.focus", targetId: "note_meeting" });
+  });
+
+  it("treats an edit of an absent card as missing without asking the model", async () => {
+    const f = setup(text => /改|编辑/.test(text) ? "edit" : "chat", async () => null,
+      { contract: "edit", slots: { mode: "note", text: "新的正文" } });
+    const result = await f.post({ text: "改一下日程卡", canvasContext: canvas() });
+    expect(result.kind).toBe("clarify");
+    expect(result.message).toBe("没有找到要操作的卡片，请说明卡名。");
+    expect(result.task?.clarification?.candidates ?? []).toHaveLength(0);
+    for (const title of titles) expect(result.message ?? "").not.toContain(title!);
+    expect(result.envelope).toBeUndefined();
+    expect(f.model).not.toHaveBeenCalled();
+  });
+});
+
+describe("an ambiguous operation lists only same-type candidates", () => {
+  it("asks which todo to surface instead of choosing one", async () => {
+    const f = setup(text => /传到用户页|传送/.test(text) ? "arrange" : "chat");
+    const result = await f.post({ text: "把待办传到用户页我要编辑", canvasContext: canvas() });
+    expect(result.kind).toBe("clarify");
+    expect(result.message).toBe("你要操作哪一张？1. 本周待办 2. 购物清单");
+    expect(result.task?.clarification?.candidates).toEqual([
+      { number: 1, id: "todo_week", label: "本周待办" },
+      { number: 2, id: "todo_shop", label: "购物清单" },
+    ]);
+    expect(result.envelope).toBeUndefined();
+    expect(result.hostOperation).toBeUndefined();
+    for (const title of ["会议记录", "读书笔记", "上海天气", "Google 公司介绍"]) {
+      expect(result.message ?? "").not.toContain(title);
+    }
+    expect(f.model).not.toHaveBeenCalled();
+  });
+
+  it("asks which todo to focus on the two-todo canvas", async () => {
+    const f = setup(text => /聚焦/.test(text) ? "focus" : "chat");
+    const result = await f.post({ text: "聚焦待办", canvasContext: canvas() });
+    expect(result.kind).toBe("clarify");
+    expect(result.message).toBe("你要操作哪一张？1. 本周待办 2. 购物清单");
+    expect(result.envelope).toBeUndefined();
+    expect(f.model).not.toHaveBeenCalled();
+  });
+
+  it("offers candidates for a bare pronoun when nothing was focused yet", async () => {
+    const f = setup(text => /聚焦/.test(text) ? "focus" : "chat");
+    const unfocused = canvas();
+    unfocused.focusHistory = [];
+    const result = await f.post({ text: "聚焦它", canvasContext: unfocused });
+    expect(result.kind).toBe("clarify");
+    expect(result.envelope).toBeUndefined();
+    expect(result.task?.clarification?.candidates?.length).toBe(5);
+    for (const candidate of result.task?.clarification?.candidates ?? []) {
+      expect(result.message).toContain(`${candidate.number}. ${candidate.label}`);
+    }
   });
 });

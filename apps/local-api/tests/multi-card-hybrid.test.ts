@@ -2,7 +2,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { ActionEnvelopeSchema, CardRecordSchema, type IntentRouteId } from "@vivic/contracts";
 import { CredentialStore } from "../src/credentials.js";
 import { IntentResponseSchema, type CanvasContext } from "../src/schemas.js";
-import { runIntent, type IntentResult, type PipelineDeps } from "../src/intent/pipeline.js";
+import { runIntent, type IntentRequest, type IntentResult, type PipelineDeps } from "../src/intent/pipeline.js";
+import { isInitialTask } from "../src/decision/on.js";
+import { DecisionTaskManager } from "../src/decision/taskV2.js";
 import type { IntentRouter, RouteResult } from "../src/decision/router.js";
 import { SEARCH_PROVIDER, type SearchEvidence } from "../src/search/index.js";
 import type { ChatMessage, StepfunResult } from "../src/stepfun.js";
@@ -19,6 +21,10 @@ const context = (cards: CanvasContext["cards"] = []): CanvasContext =>
   ({ canvasId: "TEST-multi", stage: "WORKSPACE", viewport: { x: 0, y: 0, zoom: 1 }, focusHistory: [], cards });
 const route = (id: IntentRouteId, probability = .99): RouteResult =>
   ({ route: id, probability, probabilities: { [id]: probability }, none: false, latencyMs: 1 });
+/** The task wrapper always scopes a multi-clause request with its own state;
+ * it must not hide rule provenance or shift the planner's clause indexes. */
+const hostTask = (text: string, completed: string[] = []) => ({ original_goal: text, completed_steps: completed, observations: [],
+  instruction: "只完成尚未执行的目标，不得重复已成功步骤。" });
 
 /** Sentence text → the classifier answer the observer/decider would share. */
 const routeFor = (text: string): IntentRouteId => {
@@ -133,6 +139,10 @@ describe("VIVIC_MULTI_CARD_MODE=hybrid proposes literal clauses and plans only t
     ]);
     const created = cards(r).map(card => card.id);
     expect(plans.flatMap(plan => plan.cardIds).sort()).toEqual([...created].sort());
+    // Clause-order coverage in the same trace: one card per clause, types only.
+    expect(r.trace?.decisions.map(row => row.built)).toEqual([
+      { cards: ["NoteCard"], n: 1 }, { cards: ["CountdownCard"], n: 1 }, { cards: ["CountdownCard"], n: 1 },
+    ]);
     // The trace augmentation must still be accepted by the strict wire schema.
     expect(IntentResponseSchema.safeParse(r).success).toBe(true);
     await new Promise<void>(resolve => setImmediate(resolve));
@@ -173,6 +183,137 @@ describe("VIVIC_MULTI_CARD_MODE=hybrid proposes literal clauses and plans only t
     expect(r.envelope!.actions.filter(action => action.type === "canvas.fit")).toHaveLength(1);
     // The planner's spoken channel survives the merge instead of being replaced.
     expect(r.envelope!.spokenText).toBe("已设置计时。");
+  });
+
+  it("runs hybrid on the host's initial task context instead of per-clause", async () => {
+    process.env.VIVIC_MULTI_CARD_MODE = "hybrid";
+    const f = setup();
+    // Production `taskV2` scopes every on-mode turn, including the first one.
+    const text = "帮我记个便签明天交周报，然后过五分钟叫我休息";
+    const r = await runIntent({ text, canvasContext: context(), taskContext: hostTask(text) }, f.deps);
+    expect(r.kind, JSON.stringify(r)).toBe("envelope");
+    // One planner call for the remaining clause subset, not one per clause.
+    expect(f.generate).toHaveBeenCalledTimes(1);
+    expect(f.requests[0]!.clauses).toEqual(["过五分钟叫我休息"]);
+    expect(f.requests[0]!.taskState).toMatchObject({ active_clauses: ["过五分钟叫我休息"], active_clause_indexes: [1] });
+    const created = cards(r);
+    expect(created.map(card => card.type)).toEqual(["NoteCard", "CountdownCard"]);
+    expect(created[0]!.displayProps).toEqual({ text: "明天交周报" });
+    expect(seconds(created[1]!)).toBe(300);
+    expect(r.trace?.plans?.map(plan => [plan.clause, plan.contract, plan.source])).toEqual([
+      [0, "note", "rules"], [1, "countdown", "planner"],
+    ]);
+    expect(r.trace).toMatchObject({ plannerCalls: 1, directClauses: 1 });
+  });
+
+  it("reaches hybrid through the real task wrapper's first fallback turn", async () => {
+    process.env.VIVIC_MULTI_CARD_MODE = "hybrid";
+    const f = setup();
+    const text = "过五分钟叫我休息，然后记个便签交周报，再过十分钟叫我喝水";
+    const tasks = new DecisionTaskManager();
+    // No native provider: taskV2's first turn hands runIntent the injected initial
+    // taskContext, which is exactly the production shape that used to bypass hybrid.
+    const r = await tasks.run({ text, canvasContext: context() },
+      { legacy: (request, signal) => runIntent(request, f.deps, signal) });
+    expect(r.kind, JSON.stringify(r)).toBe("envelope");
+    expect(r.task?.status).toBe("awaiting_execution");
+    expect(f.generate).toHaveBeenCalledTimes(1);
+    expect(f.requests[0]!.clauses).toEqual(["过五分钟叫我休息", "过十分钟叫我喝水"]);
+    expect(cards(r).map(card => card.type)).toEqual(["CountdownCard", "NoteCard", "CountdownCard"]);
+    expect(r.trace?.plans?.map(plan => [plan.clause, plan.contract, plan.source])).toEqual([
+      [0, "countdown", "planner"], [1, "note", "rules"], [2, "countdown", "planner"],
+    ]);
+  });
+
+  it("keeps rule and planner provenance under the host task context", async () => {
+    process.env.VIVIC_MULTI_CARD_MODE = "hybrid";
+    const f = setup();
+    const text = "记个便笺明天交周报，再过五分钟叫我休息";
+    const r = await runIntent({ text, canvasContext: context(), taskContext: hostTask(text) }, f.deps);
+    expect(r.kind, JSON.stringify(r)).toBe("envelope");
+    const created = cards(r);
+    expect(created.map(card => card.type)).toEqual(["NoteCard", "CountdownCard"]);
+    expect(created[0]!.displayProps).toEqual({ text: "明天交周报" });
+    expect(seconds(created[1]!)).toBe(300);
+    // The planner only saw clause 1, yet provenance stays on the user's clause.
+    expect(f.generate).toHaveBeenCalledTimes(1);
+    expect(f.requests[0]!.utterance).toBe("过五分钟叫我休息");
+    expect(f.requests[0]!.taskState).toMatchObject({ active_clause_indexes: [1] });
+    expect(r.trace?.plans?.map(plan => [plan.clause, plan.contract, plan.source])).toEqual([
+      [0, "note", "rules"], [1, "countdown", "planner"],
+    ]);
+    expect(r.trace?.plans?.flatMap(plan => plan.cardIds).sort()).toEqual(created.map(card => card.id).sort());
+    expect(r.trace).toMatchObject({ plannerCalls: 1, directClauses: 1 });
+  });
+
+  it("keeps interleaved clause indexes under the host task context", async () => {
+    process.env.VIVIC_MULTI_CARD_MODE = "hybrid";
+    const f = setup();
+    const text = "过五分钟叫我休息，然后记个便签交周报，再过十分钟叫我喝水";
+    const r = await runIntent({ text, canvasContext: context(), taskContext: hostTask(text) }, f.deps);
+    expect(r.kind, JSON.stringify(r)).toBe("envelope");
+    // [planner, rule, planner] must stay in user order with ONE planner call.
+    expect(f.generate).toHaveBeenCalledTimes(1);
+    expect(f.requests[0]!.clauses).toEqual(["过五分钟叫我休息", "过十分钟叫我喝水"]);
+    expect(f.requests[0]!.taskState).toMatchObject({ active_clause_indexes: [0, 2] });
+    const created = cards(r);
+    expect(created.map(card => card.type)).toEqual(["CountdownCard", "NoteCard", "CountdownCard"]);
+    expect(created[1]!.displayProps).toEqual({ text: "交周报" });
+    expect(r.trace?.plans?.map(plan => [plan.clause, plan.contract, plan.source])).toEqual([
+      [0, "countdown", "planner"], [1, "note", "rules"], [2, "countdown", "planner"],
+    ]);
+    expect(new Set(r.trace?.plans?.map(plan => plan.clause)).size).toBe(3);
+  });
+
+  it("keeps a task that already completed a step on the per-clause path", async () => {
+    process.env.VIVIC_MULTI_CARD_MODE = "hybrid";
+    const f = setup();
+    const text = "过五分钟叫我休息，然后记个便签交周报，再过十分钟叫我喝水";
+    const r = await runIntent({ text, canvasContext: context(), taskContext: hostTask(text, ["validated_plan"]) }, f.deps);
+    expect(r.kind, JSON.stringify(r)).toBe("envelope");
+    // Completed steps mean a follow-up: one planner call per unparsed clause.
+    expect(f.generate).toHaveBeenCalledTimes(2);
+    expect(f.requests.map(request => request.utterance)).toEqual(["过五分钟叫我休息", "过十分钟叫我喝水"]);
+    expect(f.requests.map(request => request.taskState?.active_clauses)).toEqual([undefined, undefined]);
+    expect(cards(r).map(card => card.type)).toEqual(["CountdownCard", "NoteCard", "CountdownCard"]);
+  });
+
+  it("treats only the host's first-turn fallback shape as initial", () => {
+    const req = (taskContext?: unknown, extra: Record<string, unknown> = {}) =>
+      ({ text: "记个便签，再过五分钟叫我休息", canvasContext: context(), ...(taskContext === undefined ? {} : { taskContext }),
+        ...extra }) as unknown as IntentRequest;
+    const instruction = "只完成尚未执行的目标，不得重复已成功步骤。";
+    expect(isInitialTask(req())).toBe(true);
+    expect(isInitialTask(req(hostTask("记个便签，再过五分钟叫我休息")))).toBe(true);
+    expect(isInitialTask(req({ original_goal: "目标", instruction }))).toBe(true);
+    expect(isInitialTask(req(hostTask("目标", ["validated_plan"])))).toBe(false);
+    expect(isInitialTask(req({ original_goal: "目标", completed_steps: [], observations: [{ kind: "tool" }], instruction }))).toBe(false);
+    expect(isInitialTask(req({ original_goal: "目标", instruction: "只处理当前子句，其他子句由宿主合并。" }))).toBe(false);
+    expect(isInitialTask(req({ original_goal: "目标", active_clause: "子句", instruction }))).toBe(false);
+    expect(isInitialTask(req({ original_goal: "目标", active_clauses: ["子句"], instruction }))).toBe(false);
+    expect(isInitialTask(req({ original_goal: "目标", instruction }, { resolvedTargetId: "n1" }))).toBe(false);
+    expect(isInitialTask(req(hostTask("目标"), { continuation: { utterance: "目标", question: "还要什么？" } }))).toBe(false);
+  });
+
+  it("does not report plans when the host task turn commits nothing", async () => {
+    process.env.VIVIC_MULTI_CARD_MODE = "hybrid";
+    const f = setup(() => ({ clarify: "要计时多久？" }));
+    const text = "记个便笺明天交周报，再过五分钟叫我休息";
+    const r = await runIntent({ text, canvasContext: context(), taskContext: hostTask(text) }, f.deps);
+    expect(r.kind).toBe("clarify");
+    expect(r.envelope).toBeUndefined();
+    expect(r.trace?.plans).toBeUndefined();
+    expect(cards(r)).toHaveLength(0);
+  });
+
+  it("does not report plans in off mode even with the host task context", async () => {
+    process.env.VIVIC_MULTI_CARD_MODE = "off";
+    const f = setup();
+    const text = "记个便笺明天交周报，再过五分钟叫我休息";
+    const r = await runIntent({ text, canvasContext: context(), taskContext: hostTask(text) }, f.deps);
+    expect(r.kind, JSON.stringify(r)).toBe("envelope");
+    expect(cards(r).map(card => card.type)).toEqual(["NoteCard", "CountdownCard"]);
+    expect(r.trace?.plans).toBeUndefined();
   });
 
   it("covers three clauses with three cards without any model call when every clause is literal", async () => {
@@ -246,6 +387,19 @@ describe("hybrid stays atomic when any clause is uncertain", () => {
     expect(r.kind).toBe("clarify");
     expect(r.envelope).toBeUndefined();
     expect(r.message).toContain("提醒什么");
+    expect(f.generate).toHaveBeenCalledTimes(1);
+  });
+
+  it("clarifies when the remaining clause never said how long the countdown is", async () => {
+    process.env.VIVIC_MULTI_CARD_MODE = "hybrid";
+    // The literal note clause must not be saved while the timer length is invented.
+    const f = setup(() => ({ plans: [{ contract: "countdown", clause: 0,
+      slots: { seconds: 300, text: "喝水" } }], say: "已设置计时。", text: "已设置 5 分钟计时。" }));
+    const r = await runIntent({ text: "帮我记个便签明天交周报，然后设一个倒计时", canvasContext: context() }, f.deps);
+    expect(r.kind).toBe("clarify");
+    expect(r.envelope).toBeUndefined();
+    expect(cards(r)).toHaveLength(0);
+    expect(r.message).toContain("多久");
     expect(f.generate).toHaveBeenCalledTimes(1);
   });
 

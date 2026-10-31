@@ -13,7 +13,7 @@ import { looksLikeDateCountdown } from "../scenes/index.js";
 import { splitClauses } from "./split.js";
 import { resolveTarget } from "./target.js";
 import { isBuiltinRoute, type IntentRouter } from "./router.js";
-import type { ClausePlan, PlannerRouteHint, DecisionTrace } from "./trace.js";
+import type { ClauseBuild, ClausePlan, PlannerRouteHint, DecisionTrace } from "./trace.js";
 
 /** One sentence may carry several card intents. "off" keeps the pre-existing
  * rules / per-clause / whole-sentence paths; "plans" plans it once; "hybrid"
@@ -21,6 +21,29 @@ import type { ClausePlan, PlannerRouteHint, DecisionTrace } from "./trace.js";
 export type MultiCardMode = "off" | "plans" | "hybrid";
 export function multiCardMode(value: string | undefined = process.env.VIVIC_MULTI_CARD_MODE): MultiCardMode {
   return value === "plans" || value === "hybrid" ? value : "off";
+}
+
+/** The host task wrapper (`taskV2`) always sends `taskContext`, so its presence
+ * alone cannot mean "a follow-up". An initial task is the first fallback turn:
+ * nothing has completed or been observed, no target/continuation has been frozen,
+ * and the host did not scope an active-clause/subtask partition. Only the explicit
+ * hybrid mode consumes this; off/plans and the host's receipt/confirmation state
+ * are untouched. */
+export function isInitialTask(req: IntentRequest): boolean {
+  if (req.continuation || req.resolvedTargetId || req.resolvedTargets) return false;
+  const value = req.taskContext;
+  if (value === undefined || value === null) return true;
+  if (typeof value !== "object" || Array.isArray(value)) return false;
+  const state = value as Record<string, unknown>;
+  const empty = (item: unknown) => item === undefined || item === null || (Array.isArray(item) && item.length === 0);
+  if (!empty(state.completed_steps) || !empty(state.observations)) return false;
+  // `active_clause*`/`subtask` only exist after the host split or scoped this turn.
+  if (["active_clause", "active_clauses", "active_clause_indexes", "subtask"].some(key => Object.hasOwn(state, key))) return false;
+  // The initial fallback instruction is "只完成尚未执行的目标，不得重复已成功步骤。";
+  // anything about continuing, supplementing or handling one clause is a follow-up.
+  const instruction = state.instruction;
+  if (typeof instruction === "string" && /继续|补充|只处理|当前子句|子任务/.test(instruction)) return false;
+  return true;
 }
 
 interface OnDeps {
@@ -43,7 +66,7 @@ export function literalRoute(text: string, context: IntentRequest["canvasContext
 }
 
 type HybridOutcome =
-  | { kind: "actions"; actions: Action[]; directClauses: number; provider?: IntentResult["usedProvider"]; say?: string; plans: ClausePlan[] }
+  | { kind: "actions"; actions: Action[]; directClauses: number; provider?: IntentResult["usedProvider"]; say?: string; plans: ClausePlan[]; builds: ClauseBuild[] }
   | { kind: "whole" }
   | { kind: "result"; result: IntentResult };
 
@@ -69,6 +92,12 @@ async function hybridProposal(input: HybridInput): Promise<HybridOutcome> {
   const ruleByClause = new Map<number, Action[]>();
   const plans: ClausePlan[] = [];
   const remaining: number[] = [];
+  // Trace telemetry only: card types and counts per clause, never card text.
+  const clauseBuild = (index: number, actions: Action[]): ClauseBuild => {
+    const cards = actions.flatMap(action => action.type === "card.create" ? [action.card.type] : []);
+    return { clause: index, cards, n: cards.length };
+  };
+  const ruleBuilds = () => clauses.map((_, index) => clauseBuild(index, ruleByClause.get(index) ?? []));
   for (const [index, text] of clauses.entries()) {
     check();
     const row = rows[index];
@@ -106,7 +135,7 @@ async function hybridProposal(input: HybridInput): Promise<HybridOutcome> {
     plans.push({ clause: index, contract: contract.id, source: "rules",
       cardIds: placed.flatMap(action => action.type === "card.create" ? [action.card.id] : []) });
   }
-  if (!remaining.length) return { kind: "actions", actions: [...ruleByClause.values()].flat(), directClauses: ruleByClause.size, plans };
+  if (!remaining.length) return { kind: "actions", actions: [...ruleByClause.values()].flat(), directClauses: ruleByClause.size, plans, builds: ruleBuilds() };
   // Nothing is literal: keep the existing single whole-sentence planner path.
   if (remaining.length === clauses.length) return { kind: "whole" };
   const remainingText = remaining.map(index => clauses[index]!).join("，");
@@ -191,7 +220,8 @@ async function hybridProposal(input: HybridInput): Promise<HybridOutcome> {
   }
   actions.push(...batchActions);
   return { kind: "actions", actions, directClauses: ruleByClause.size, provider: planned.usedProvider,
-    say: planned.envelope.spokenText, plans };
+    say: planned.envelope.spokenText, plans,
+    builds: clauses.map((_, index) => clauseBuild(index, [...(ruleByClause.get(index) ?? []), ...(modelByClause.get(index) ?? [])])) };
 }
 
 /** Approved routes may build proposals; the real owner/task executor still commits them. */
@@ -200,6 +230,9 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
   const check = () => { budget.signal.throwIfAborted(); if (deps.isCurrent && !deps.isCurrent()) throw new Error("connection_changed"); };
   const fallback = (request = req, hint = deps.hint) => budget.run(() => deps.plan(request, hint, budget.signal));
   const mode = deps.multiCard ?? multiCardMode();
+  // `main-only` never consults a classifier: the observer publishes rule rows
+  // plus explicit skipped rows, and the main planner owns the rest.
+  const mainOnly = deps.router.policy === "main-only";
   try {
     check();
     // Images use the trusted current-attachment path, never a text-only label.
@@ -207,7 +240,7 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
     if (req.continuation || req.resolvedTargetId || req.resolvedTargets) {
       const text = req.continuation ? `${req.continuation.utterance}\n用户补充：${req.text}` : req.text;
       const value = await budget.run(() => deps.router.routeUtterance(text, req.canvasContext, budget.signal));
-      const target = req.resolvedTargetId ? Promise.resolve({ targetId: req.resolvedTargetId })
+      const target = req.resolvedTargetId ? Promise.resolve({ targetId: req.resolvedTargetId, source: "frozen" as const })
         : value?.route && isBuiltinRoute(value.route) ? resolveTarget(text, req.canvasContext, value.route, deps.router, budget.signal) : Promise.resolve(undefined);
       return await fallback(req, Promise.resolve({ result: value, target }));
     }
@@ -216,14 +249,22 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
     let ruleFallback = false;
     let rows: Row[];
     if (!hint?.result) {
-      // A router outage must not disable already-supported literal local tasks.
-      // Only uniquely parsed contracts in the explicit allow-list qualify.
-      const parsed = clauses.map(text => Object.values(CARD_CONTRACTS).filter(contract => deps.router.directRoutes?.has(contract.id as IntentRouteId)
-        && contract.parse?.(text, req.canvasContext) != null));
-      if (parsed.some(matches => matches.length !== 1)) return await fallback();
-      rows = clauses.map((text, index) => ({ text, route: parsed[index]![0]!.id as Row["route"], probability: 1,
-        probabilities: {}, none: false, latencyMs: 0, failed: false }));
-      ruleFallback = true;
+      if (mainOnly) {
+        // No classifier row exists by design. Rule clauses keep their literal
+        // route; every other clause stays unresolved for the planner (which
+        // must cover it) instead of being guessed here.
+        rows = hint?.all ? await budget.run(() => hint.all!) : clauses.map(text => ({ text, route: null,
+          probability: 0, probabilities: {}, none: true, latencyMs: 0, failed: false, routeSource: "skipped" as const }));
+      } else {
+        // A router outage must not disable already-supported literal local tasks.
+        // Only uniquely parsed contracts in the explicit allow-list qualify.
+        const parsed = clauses.map(text => Object.values(CARD_CONTRACTS).filter(contract => deps.router.directRoutes?.has(contract.id as IntentRouteId)
+          && contract.parse?.(text, req.canvasContext) != null));
+        if (parsed.some(matches => matches.length !== 1)) return await fallback();
+        rows = clauses.map((text, index) => ({ text, route: parsed[index]![0]!.id as Row["route"], probability: 1,
+          probabilities: {}, none: false, latencyMs: 0, failed: false }));
+        ruleFallback = true;
+      }
     } else rows = hint.all ? await budget.run(() => hint.all!) : clauses.length === 1
       ? [{ text: clauses[0]!, ...hint.result, failed: false }] : [];
     check();
@@ -251,41 +292,62 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
     let directClauses = 0;
     let say: string | undefined;
     let rulePlans: ClausePlan[] = [];
-    let usedProvider: IntentResult["usedProvider"] = ruleFallback ? "rules-offline" : rows.every(row => row.source === "rules") ? "rules" : "decision";
-    if (mode === "hybrid" && clauses.length > 1 && !req.taskContext) {
+    let builds: ClauseBuild[] = [];
+    let usedProvider: IntentResult["usedProvider"] = ruleFallback ? "rules-offline" : rows.every(row => row.source === "rules") ? "rules"
+      // main-only has no classifier decision to attribute; the planner label wins.
+      : mainOnly ? undefined : "decision";
+    // M3 also covers the production initial turn: the task wrapper injects
+    // taskContext for every on-mode request, but an initial task has no prior
+    // step, so its clauses may still propose locally before the one planner call.
+    // Follow-ups (completed steps, observation, continuation or frozen target)
+    // stay on the existing path.
+    if (mode === "hybrid" && clauses.length > 1 && (!req.taskContext || isInitialTask(req))) {
       // M3: literal clauses propose first, the remaining subset costs one planner call.
       const outcome = await hybridProposal({ req, clauses, rows, deps, signal: budget.signal, check, run: budget.run, plan: (request, partHint) => fallback(request, partHint) });
       if (outcome.kind === "whole") return await fallback();
       if (outcome.kind === "result") return outcome.result;
-      actions = outcome.actions; directClauses = outcome.directClauses;
+      actions = outcome.actions; directClauses = outcome.directClauses; builds = outcome.builds;
       usedProvider = outcome.provider ?? usedProvider; say = outcome.say; rulePlans = outcome.plans;
     } else {
       if (!directRows) return await fallback();
-      for (const row of rows) {
+      for (const [index, row] of rows.entries()) {
         check();
         const contract = CARD_CONTRACTS[row.route!];
         let built: Action[];
+        let builtByRules = false;
         // Preserve the existing verified scheduled-reminder adapter as a parser.
         const schedule = row.route === "countdown" ? scheduledReminderIntent(row.text, context) : null;
         if (schedule) {
           if (!schedule.actions) return { kind: "clarify", message: schedule.message, usedProvider: "decision" };
-          built = schedule.actions; directClauses++;
+          built = schedule.actions; directClauses++; builtByRules = true;
         } else {
           const slots = row.route === "countdown" && looksLikeDateCountdown(row.text) ? null : contract.parse?.(row.text, context);
           if (slots !== null && slots !== undefined) {
             const value = await budget.run(async () => contract.build(slots, context, new Date()));
             if (!Array.isArray(value)) return { kind: "clarify", message: "本次包含需要单独处理的操作，请分开发送。", usedProvider: "decision" };
-            built = value; directClauses++;
+            built = value; directClauses++; builtByRules = true;
           } else {
             const partHint: PlannerRouteHint = { result: { ...row, route: row.route as IntentRouteId }, target: Promise.resolve(row.target) };
             const partRequest: IntentRequest = rows.length === 1 ? req : { ...req, text: row.text, canvasContext: context,
-              taskContext: { original_goal: req.text, active_clause: row.text, instruction: "只处理当前子句，其他子句由宿主合并，不得重复或遗漏。" } };
+              taskContext: { original_goal: req.text, active_clause: row.text,
+                // The host task wrapper scopes one clause; the planner reports
+                // clause 0 for it. Keep the original split index so provenance
+                // lands on the user's clause, not the one-clause subset.
+                ...(mode !== "off" ? { active_clause_indexes: [index] } : {}),
+                instruction: "只处理当前子句，其他子句由宿主合并，不得重复或遗漏。" } };
             const planned = await fallback(partRequest, Promise.resolve(partHint));
             check();
             if (!planned.envelope) return planned.hostOperation ? { kind: "clarify", message: "这些操作需要分别处理，本次没有执行任何部分。", usedProvider: "decision" } : planned;
             usedProvider = planned.usedProvider ?? usedProvider;
             built = planned.envelope.actions;
           }
+        }
+        // A follow-up keeps this per-clause path even when hybrid is selected; a
+        // locally built clause is still a rule proposal and belongs in the trace
+        // next to the planner's plans.
+        if (builtByRules && mode === "hybrid") {
+          rulePlans.push({ clause: index, contract: row.route!, source: "rules",
+            cardIds: built.flatMap(action => action.type === "card.create" ? [action.card.id] : []) });
         }
         for (const action of built) {
           const placed = action.type === "card.create" ? { ...action, card: { ...action.card,
@@ -296,6 +358,8 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
             displayProps: placed.card.displayProps, sourceDataSummary: placed.card.sourceData, layout: placed.card.layout });
           if (action.type === "card.focus") context.focusHistory = [...context.focusHistory, action.targetId].slice(-20);
         }
+        const builtCards = built.flatMap(action => action.type === "card.create" ? [action.card.type] : []);
+        builds.push({ clause: index, cards: builtCards, n: builtCards.length });
       }
     }
     check();
@@ -311,7 +375,21 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
       canvasId: req.canvasContext.canvasId, ...applyOutputChannels(merged, channels) });
     if (!envelope.success) return { kind: "clarify", message: "这句话包含的操作过多或参数不完整，请分开发送。", usedProvider: "decision" };
     if (!ruleFallback) deps.telemetry.directClauses += directClauses;
-    if (rulePlans.length) deps.telemetry.plans = [...(deps.telemetry.plans ?? []), ...rulePlans];
+    // Rule and planner segments share one provenance list: user clause order,
+    // no duplicates, and each plan only after the whole batch commits.
+    if (mode !== "off" && (rulePlans.length || deps.telemetry.plans?.length)) {
+      const seen = new Set<string>();
+      deps.telemetry.plans = [...(deps.telemetry.plans ?? []), ...rulePlans]
+        .filter(plan => {
+          const key = `${plan.source}\u0000${plan.clause}\u0000${plan.contract}\u0000${plan.cardIds.join(",")}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        })
+        .sort((a, b) => a.clause - b.clause);
+    }
+    // Only a validated, committed proposal may claim which cards each clause built.
+    if (builds.length) deps.telemetry.built = builds;
     return { kind: "envelope", envelope: envelope.data, usedProvider };
   } catch {
     return { kind: "error", message: budget.signal.reason?.name === "TimeoutError" ? "本次请求超时，未执行任何动作。" : "请求已取消或连接已变更，未执行任何动作。", usedProvider: "decision" };

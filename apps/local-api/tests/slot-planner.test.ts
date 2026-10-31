@@ -2,12 +2,16 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { ActionEnvelopeSchema, CardRecordSchema, type Action, type IntentRouteId } from "@vivic/contracts";
 import { CredentialStore } from "../src/credentials.js";
 import { runIntent, type IntentResult, type PipelineDeps } from "../src/intent/pipeline.js";
+import { normalizePlanSlots, relativeYear } from "../src/intent/slotNormalize.js";
+import { runSlotPlanner } from "../src/intent/slotPlanner.js";
+import { planCache, resetPlanCache } from "../src/intent/planCache.js";
+import { COMPACT_PROMPT_PREFIX } from "../src/intent/promptCompact.js";
 import type { IntentRouter, RouteResult } from "../src/decision/router.js";
 import type { ChatMessage, StepfunResult } from "../src/stepfun.js";
 import { demoTravelProvider } from "../src/providers/travel.js";
 import type { CanvasContext } from "../src/schemas.js";
 
-afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers(); });
+afterEach(() => { vi.unstubAllEnvs(); vi.restoreAllMocks(); vi.useRealTimers(); resetPlanCache(); });
 
 const emptyContext = (cards: CanvasContext["cards"] = []): CanvasContext => ({
   canvasId: "TEST-canvas", stage: "WORKSPACE", viewport: { x: 0, y: 0, zoom: 1 }, focusHistory: [], cards,
@@ -205,7 +209,7 @@ describe("runIntent slot planning with the shared shadow route", () => {
     expect(result.envelope!.actions).toContainEqual({ type: "card.focus", targetId: "TEST-right" });
     expect(f.router.routeUtterance).toHaveBeenCalledTimes(1);
     expect(f.router.chooseTarget).toHaveBeenCalledTimes(1);
-    expect(result.trace?.target).toEqual({ targetId: "TEST-right" });
+    expect(result.trace?.target).toEqual({ targetId: "TEST-right", source: "classifier" });
   });
 
   it("builds a general knowledge answer as NewsCard without requiring an article", async () => {
@@ -404,6 +408,178 @@ describe("multi-intent slot proposals are complete and atomic", () => {
   });
 });
 
+describe("host normalization only fills what the user's words already fix", () => {
+  const today = "2026-10-31";
+  const fiveMinutes = { text: "帮我把计时器设成五分钟", today };
+  const slots = (value: unknown) => normalizePlanSlots("countdown", { seconds: value }, fiveMinutes);
+
+  it.each([["300", 300], ["5分钟", 300], ["五分钟", 300], [300, 300], ["300.0", 300]])(
+    "reads %s as 300 seconds", (_label, value) => {
+      expect(slots(value)).toEqual({ slots: { seconds: 300 } });
+    });
+
+  it.each(["一会儿", "", "five minutes", -30, 30.5])("asks instead of guessing %s", value => {
+    const result = slots(value);
+    expect("clarify" in result ? result.clarify : "").toContain("时长");
+  });
+
+  it("refuses a duration beyond the contract instead of truncating it", () => {
+    const result = normalizePlanSlots("countdown", { seconds: 90_000 }, { text: "帮我倒计时三天", today });
+    expect("clarify" in result ? result.clarify : "").toContain("24 小时");
+  });
+
+  it("does not accept a duration the user never gave", () => {
+    const result = normalizePlanSlots("countdown", { seconds: 300 }, { text: "帮我设一个倒计时", today });
+    expect("clarify" in result ? result.clarify : "").toContain("多久");
+  });
+
+  it("keeps the one duration the user actually said", () => {
+    expect(normalizePlanSlots("countdown", { seconds: 600 }, fiveMinutes)).toEqual({ slots: { seconds: 300 } });
+  });
+
+  it.each([["", undefined], [null, undefined], ["   ", undefined], ["https://example.test/a", "https://example.test/a"]])(
+    "drops the empty optional url %s", (value, expected) => {
+      const result = normalizePlanSlots("answer", { headline: "标题", summary: "摘要", keyPoints: ["要点"], url: value }, fiveMinutes);
+      expect("slots" in result && result.slots.url).toBe(expected);
+    });
+
+  it.each([
+    [{ itemIndex: "1", done: "true" }, { itemIndex: 1, done: true }],
+    [{ itemIndex: "0", done: "false" }, { itemIndex: 0, done: false }],
+    [{ itemIndex: "2", done: "已完成" }, { itemIndex: 2, done: true }],
+    [{ itemIndex: "3", done: "未完成" }, { itemIndex: 3, done: false }],
+  ])("coerces the string fields of an edit %o", (values, expected) => {
+    expect(normalizePlanSlots("edit", { mode: "todo", operation: "update", ...values }, fiveMinutes))
+      .toEqual({ slots: { mode: "todo", operation: "update", ...expected } });
+  });
+
+  it("leaves an edit value it cannot read to validation", () => {
+    const result = normalizePlanSlots("edit", { mode: "todo", operation: "update", itemIndex: "abc", done: "maybe" }, fiveMinutes);
+    expect(result).toEqual({ slots: { mode: "todo", operation: "update", itemIndex: "abc", done: "maybe" } });
+  });
+
+  it("reads a relative year against the user's today", () => {
+    expect(relativeYear("帮我数着还有多少天到我生日，明年三月十五号", today)).toBe(2027);
+    expect(relativeYear("后年三月十五号", today)).toBe(2028);
+    expect(relativeYear("今年三月十五号", today)).toBe(2026);
+    // An explicit four-digit year is the user's own word: never rewritten.
+    expect(relativeYear("2026年3月15日生日倒计时", today)).toBeUndefined();
+    expect(relativeYear("明年和今年哪个更近", today)).toBeUndefined();
+  });
+
+  it("corrects a date whose year contradicts the relative word", () => {
+    const result = normalizePlanSlots("generate", { scene_id: "countdown",
+      data: { title: "生日", targetDate: "2026-03-15" } }, { text: "明年三月十五号生日倒计时", today });
+    expect(result).toEqual({ slots: { scene_id: "countdown", data: { title: "生日", targetDate: "2027-03-15" } } });
+  });
+
+  it("keeps an explicitly written year even when a relative word is also present", () => {
+    const payload = { scene_id: "countdown", data: { title: "生日", targetDate: "2026-12-15" } };
+    expect(normalizePlanSlots("generate", payload, { text: "2026年12月15日生日倒计时", today })).toEqual({ slots: payload });
+  });
+
+  it("asks for a date that has already passed instead of counting backwards", () => {
+    const result = normalizePlanSlots("generate", { scene_id: "countdown",
+      data: { title: "生日", targetDate: "2026-03-15" } }, { text: "今年三月十五号生日倒计时", today });
+    expect("clarify" in result ? result.clarify : "").toContain("过去");
+  });
+
+  it("asks when the corrected year has no such day", () => {
+    const result = normalizePlanSlots("generate", { scene_id: "countdown",
+      data: { title: "生日", targetDate: "2026-02-29" } }, { text: "明年二月二十九号生日倒计时", today });
+    expect("clarify" in result ? result.clarify : "").toContain("不存在");
+  });
+});
+
+describe("a countdown never invents the duration the user omitted", () => {
+  it("builds the duration the user said even when the model wrote it as text", async () => {
+    const f = setup("countdown", [{ slots: { seconds: "5分钟" } }]);
+    const result = await runIntent({ text: "帮我把计时器设成五分钟", canvasContext: emptyContext() }, f.deps);
+    expect(result.kind, JSON.stringify(result)).toBe("envelope");
+    const [card] = cards(result);
+    expect(card).toMatchObject({ type: "CountdownCard" });
+    const source = card!.sourceData as { targetAt?: string; startedAt?: string };
+    expect(Math.round((Date.parse(String(source.targetAt)) - Date.parse(String(source.startedAt))) / 1000)).toBe(300);
+    expect(f.generate).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([["一会儿", "时长"], [90_000, "24 小时"]] as const)("clarifies instead of storing the invalid duration %s", async (seconds, hint) => {
+    const f = setup("countdown", [{ slots: { seconds } }]);
+    const result = await runIntent({ text: "帮我把计时器设成五分钟", canvasContext: emptyContext() }, f.deps);
+    noExecution(result);
+    expect(result.message).toContain(hint);
+    // The host knows the answer is undecidable: no repair round is spent on it.
+    expect(f.generate).toHaveBeenCalledTimes(1);
+  });
+
+  it("clarifies when the clause carries no duration at all", async () => {
+    const f = setup("countdown", [{ slots: { seconds: 300, text: "喝水" } }]);
+    const result = await runIntent({ text: "帮我把计时器设一下", canvasContext: emptyContext() }, f.deps);
+    noExecution(result);
+    expect(result.message).toContain("多久");
+    expect(f.generate).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("dates and years keep the user's calendar", () => {
+  // A fixed clock keeps the relative-word assertions stable.
+  const freeze = () => { vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date("2026-10-31T04:00:00.000Z")); };
+  const birthday = (targetDate: string) => ({ contract: "countdown",
+    slots: { title: "生日", targetDate }, say: "已建好生日倒计时。", text: "已按你说的日期建卡。" });
+
+  it("turns the model's 2026 into the 2027 the user said", async () => {
+    freeze();
+    const f = setup("countdown", [birthday("2026-03-15")]);
+    const result = await runIntent({ text: "帮我数着还有多少天到我生日，明年三月十五号", canvasContext: emptyContext() }, f.deps);
+    expect(result.kind, JSON.stringify(result)).toBe("envelope");
+    expect(cards(result)[0]).toMatchObject({ type: "CountdownCard",
+      sourceData: { event: { title: "生日", date: "2027-03-15" } } });
+    expect(f.generate).toHaveBeenCalledTimes(1);
+  });
+
+  it("asks instead of building a countdown to a day that already passed", async () => {
+    freeze();
+    const f = setup("countdown", [birthday("2026-03-15")]);
+    const result = await runIntent({ text: "帮我数着到生日还有多少天，今年三月十五号", canvasContext: emptyContext() }, f.deps);
+    noExecution(result);
+    expect(result.message).toContain("过去");
+    expect(f.generate).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("edits read the string fields the model sends", () => {
+  const oneTodo = () => emptyContext([{ id: "TEST-todo", type: "TodoCard",
+    displayProps: { title: "购物清单", items: [{ id: "TEST-a", text: "预约牙医", done: false }, { id: "TEST-b", text: "买牛奶", done: false }] },
+    sourceDataSummary: {}, layout: { x: 0, y: 0, width: 288, height: 160, pinned: false } }]);
+
+  it("marks the addressed item done without a repair round", async () => {
+    const f = setup("edit", [{ slots: { mode: "todo", operation: "update", itemIndex: "0", done: "true" } }]);
+    const result = await runIntent({ text: "把待办里预约牙医那条标记完成", canvasContext: oneTodo() }, f.deps);
+    expect(result.kind, JSON.stringify(result)).toBe("envelope");
+    const update = result.envelope!.actions.find((action): action is Extract<Action, { type: "card.update" }> => action.type === "card.update");
+    expect(update?.displayProps?.items).toEqual([
+      expect.objectContaining({ text: "预约牙医", done: true }), expect.objectContaining({ text: "买牛奶", done: false }),
+    ]);
+    expect(f.generate).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not guess an unreadable item index", async () => {
+    const f = setup("edit", [{ slots: { mode: "todo", operation: "update", itemIndex: "第二条", done: "true" } }]);
+    noExecution(await runIntent({ text: "把待办里预约牙医那条标记完成", canvasContext: oneTodo() }, f.deps));
+    expect(f.generate).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("an empty optional answer url is dropped, not repaired", () => {
+  it("saves the answer card on the first attempt", async () => {
+    const f = setup("answer", [{ slots: { ...answer, url: "" }, say: "这是光合作用的基本原理。" }]);
+    const result = await runIntent({ text: "介绍一下光合作用", canvasContext: emptyContext() }, f.deps);
+    expect(result.kind, JSON.stringify(result)).toBe("envelope");
+    expect(cards(result)[0]!.displayProps).not.toHaveProperty("url");
+    expect(f.generate).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe("connection changes and cancellation reject stale slot results", () => {
   it.each(["model", "session"] as const)("rejects a %s connection change while the planner is running", async which => {
     const f = setup(), entered = deferred<void>(), release = deferred<void>();
@@ -512,5 +688,189 @@ describe("generate fallback preserves business slots validation", () => {
     release.resolve();
     noExecution(await pending, "error");
     expect(f.generate).toHaveBeenCalledTimes(3);
+  });
+});
+
+function capturedPrompt(f: ReturnType<typeof setup>) {
+  const messages = f.generate.mock.calls.at(-1)![0];
+  return { system: messages[0]!.content, user: messages[1]!.content,
+    payload: JSON.parse(messages[1]!.content) as { canvas: { cards: Array<Record<string, unknown>> } } };
+}
+
+const targetCard = (): CanvasContext["cards"][number] => ({
+  id: "TEST-google", type: "NewsCard",
+  displayProps: { headline: "Google 公司介绍", summary: "谷歌总部位于美国加州山景城，1998 年由佩奇和布林创立。",
+    keyPoints: ["总部山景城", "1998 年创立"] },
+  sourceDataSummary: {}, layout: { x: 0, y: 0, width: 640, height: 480 },
+});
+
+describe("compact planner prompt (VIVIC_COMPACT_PROMPT)", () => {
+  it("is off by default and keeps today's full prompt and canvas", async () => {
+    const f = setup("note", [mixedPlan]);
+    const ctx = todoContext();
+    await runIntent({ text: mixedText, canvasContext: ctx }, f.deps);
+    const { system, payload } = capturedPrompt(f);
+    expect(system).toContain("photo_memory");
+    expect((system.match(/"id":/g) ?? []).length).toBeGreaterThan(3);
+    expect(payload.canvas.cards[0]!.layout).toMatchObject({ x: 0, y: 0, width: 288 });
+  });
+
+  it("sends at most three contracts over a stable prefix and keeps plans/clause", async () => {
+    vi.stubEnv("VIVIC_COMPACT_PROMPT", "on");
+    const f = setup("note", [mixedPlan]);
+    const result = await runIntent({ text: mixedText, canvasContext: emptyContext() }, f.deps);
+    expect(result.kind).toBe("envelope");
+    expect(cards(result).map(card => card.type)).toEqual(["NoteCard", "CountdownCard"]);
+    const { system } = capturedPrompt(f);
+    expect(system.startsWith(COMPACT_PROMPT_PREFIX)).toBe(true);
+    expect(system).toContain('"plans"');
+    expect(system).toContain("clause");
+    expect((system.match(/"id":/g) ?? []).length).toBeLessThanOrEqual(3);
+    expect(system).toContain('"id":"note"');
+    expect(system).toContain('"id":"countdown"');
+  });
+
+  it("cuts the planner prompt size on a multi-clause turn", async () => {
+    const full = setup("note", [mixedPlan]);
+    await runIntent({ text: mixedText, canvasContext: emptyContext() }, full.deps);
+    const fullSystem = capturedPrompt(full).system;
+    vi.stubEnv("VIVIC_COMPACT_PROMPT", "on");
+    const compact = setup("note", [mixedPlan]);
+    await runIntent({ text: mixedText, canvasContext: emptyContext() }, compact.deps);
+    const compactSystem = capturedPrompt(compact).system;
+    expect(compactSystem.length).toBeLessThan(fullSystem.length * 0.5);
+  });
+
+  it("keeps the target card title and body for an answer about that card", async () => {
+    vi.stubEnv("VIVIC_COMPACT_PROMPT", "on");
+    const f = setup("answer", [{ slots: { headline: "Google 公司介绍", summary: "谷歌总部位于山景城，1998 年创立。",
+      keyPoints: ["总部山景城", "1998 年创立"] } }]);
+    const ctx = emptyContext([targetCard()]);
+    ctx.selectedCardIds = ["TEST-google"];
+    const result = await runIntent({ text: "这张卡讲了什么？", canvasContext: ctx }, f.deps);
+    expect(result.kind).toBe("envelope");
+    const { payload } = capturedPrompt(f);
+    const target = payload.canvas.cards.find(card => card.id === "TEST-google")!;
+    expect((target.displayProps as Record<string, unknown>).headline).toBe("Google 公司介绍");
+    expect((target.displayProps as Record<string, unknown>).summary).toContain("山景城");
+    expect((target.displayProps as Record<string, unknown>).keyPoints).toContain("1998 年创立");
+  });
+
+  it("keeps the confusable travel/schedule scenes and drops unrelated rows", async () => {
+    vi.stubEnv("VIVIC_COMPACT_PROMPT", "on");
+    const f = setup("generate", [{ clarify: "请问是几月几号出发？" }]);
+    const result = await runIntent({ text: "帮我规划一个成都三天旅行行程", canvasContext: emptyContext() }, f.deps);
+    expect(result.kind).toBe("clarify");
+    const { system } = capturedPrompt(f);
+    expect(system).toContain("travel_offers");
+    expect(system).toContain("weekly_schedule");
+    expect(system).toContain("project_roadmap");
+    expect(system).not.toContain("photo_memory");
+    expect((system.match(/data结构=/g) ?? []).length).toBeLessThanOrEqual(3);
+  });
+
+  it("keeps edit mode/operation enumerations and still updates the card", async () => {
+    vi.stubEnv("VIVIC_COMPACT_PROMPT", "on");
+    const f = setup("edit", [{ contract: "edit", slots: { mode: "todo", operation: "update", itemIndex: 0, text: "交周报", done: true } }]);
+    const result = await runIntent({ text: "把工作清单里的交周报勾掉", canvasContext: todoContext() }, f.deps);
+    expect(result.kind).toBe("envelope");
+    expect(result.envelope!.actions.some(action => action.type === "card.update")).toBe(true);
+    const { system } = capturedPrompt(f);
+    expect(system).toContain('"operation"');
+    expect(system).toContain('"append"');
+    expect(system).toContain('"pause"');
+    expect(system).toContain('"resume"');
+  });
+
+  it("still builds a grounded scene card with only the relevant guide", async () => {
+    vi.stubEnv("VIVIC_COMPACT_PROMPT", "on");
+    const f = setup("generate", [{ contract: "generate", slots: { scene_id: "data_visualization",
+      data: { chartKind: "bar", points: [{ x: "一月", y: 10 }, { x: "二月", y: 20 }, { x: "三月", y: 15 }] } } }]);
+    const result = await runIntent({ text: "用这些数字画个柱状图：一月10 二月20 三月15", canvasContext: emptyContext() }, f.deps);
+    expect(result.kind).toBe("envelope");
+    expect(cards(result).map(card => card.type)).toEqual(["ChartCard"]);
+    const { system } = capturedPrompt(f);
+    expect(system).toContain("data_visualization");
+    expect(system).toContain("option_comparison");
+    expect(system).not.toContain("photo_memory");
+  });
+});
+
+describe("local plan cache (VIVIC_PLAN_CACHE)", () => {
+  const cachedNoteText = "帮我记一下明天交周报";
+
+  it("is off by default, so every request reaches the model", async () => {
+    const f = setup("note", [note]);
+    await runIntent({ text: noteText, canvasContext: emptyContext() }, f.deps);
+    await runIntent({ text: noteText, canvasContext: emptyContext() }, f.deps);
+    expect(f.generate).toHaveBeenCalledTimes(2);
+    expect(planCache.size).toBe(0);
+  });
+
+  it("replays parsed plans without a second model call and rebuilds the card", async () => {
+    vi.stubEnv("VIVIC_PLAN_CACHE", "on");
+    const f = setup("note", [note]);
+    const first = await runIntent({ text: cachedNoteText, canvasContext: emptyContext() }, f.deps);
+    const second = await runIntent({ text: cachedNoteText, canvasContext: emptyContext() }, f.deps);
+    expect(first.kind).toBe("envelope");
+    expect(second.kind).toBe("envelope");
+    expect(f.generate).toHaveBeenCalledTimes(1);
+    // The host still executes: a fresh card is built from the cached slots.
+    expect(cards(second).map(card => card.type)).toEqual(["NoteCard"]);
+    expect(cards(second)[0]!.id).not.toBe(cards(first)[0]!.id);
+    expect(cards(second)[0]!.displayProps).toEqual({ text: "明天交周报" });
+  });
+
+  it("misses when the canvas changes", async () => {
+    vi.stubEnv("VIVIC_PLAN_CACHE", "on");
+    const f = setup("note", [note]);
+    const first = await runIntent({ text: cachedNoteText, canvasContext: emptyContext() }, f.deps);
+    const second = await runIntent({ text: cachedNoteText,
+      canvasContext: emptyContext([{ id: "TEST-other", type: "NoteCard", displayProps: { text: "旧卡" }, sourceDataSummary: {},
+        layout: { x: 0, y: 0, width: 320, height: 120 } }]) }, f.deps);
+    expect(first.kind).toBe("envelope");
+    expect(second.kind).toBe("envelope");
+    expect(f.generate).toHaveBeenCalledTimes(2);
+  });
+
+  it("misses when the model changes", async () => {
+    vi.stubEnv("VIVIC_PLAN_CACHE", "on");
+    const run = (model: string) => {
+      const generate = vi.fn(async () => ({ ok: true as const, value: note }));
+      const deps = { definitions: [], usedProvider: "stepfun" as const, model,
+        hint: Promise.resolve({ result: decision("note"), target: Promise.resolve(undefined) }),
+        generate, isCurrent: () => true, lookup: async () => ({ kind: "error" as const, message: "TEST lookup forbidden" }) };
+      return { deps, generate };
+    };
+    const first = run("deepseek-flash"), second = run("step-3.7-flash");
+    expect((await runSlotPlanner({ text: cachedNoteText, canvasContext: emptyContext() }, first.deps)).kind).toBe("envelope");
+    expect((await runSlotPlanner({ text: cachedNoteText, canvasContext: emptyContext() }, second.deps)).kind).toBe("envelope");
+    expect(first.generate).toHaveBeenCalledTimes(1);
+    expect(second.generate).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not share a cache entry between compact and full prompts", async () => {
+    vi.stubEnv("VIVIC_PLAN_CACHE", "on");
+    const f = setup("note", [note]);
+    vi.stubEnv("VIVIC_COMPACT_PROMPT", "on");
+    await runIntent({ text: cachedNoteText, canvasContext: emptyContext() }, f.deps);
+    vi.stubEnv("VIVIC_COMPACT_PROMPT", "off");
+    await runIntent({ text: cachedNoteText, canvasContext: emptyContext() }, f.deps);
+    expect(f.generate).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not cache per-turn evidence and writes no card text to logs", async () => {
+    vi.stubEnv("VIVIC_PLAN_CACHE", "on");
+    const info = vi.spyOn(console, "info"), log = vi.spyOn(console, "log");
+    const warn = vi.spyOn(console, "warn"), error = vi.spyOn(console, "error");
+    const f = setup("note", [note]);
+    await runIntent({ text: cachedNoteText, canvasContext: emptyContext() }, f.deps);
+    await runIntent({ text: cachedNoteText, canvasContext: emptyContext() }, f.deps);
+    expect(f.generate).toHaveBeenCalledTimes(1);
+    for (const spy of [info, log, warn, error]) {
+      for (const call of spy.mock.calls) expect(JSON.stringify(call)).not.toContain("周报");
+    }
+    // Only parsed plans/slots and the two subtitle channels are stored.
+    expect(planCache.size).toBe(1);
   });
 });

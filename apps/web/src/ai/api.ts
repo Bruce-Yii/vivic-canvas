@@ -49,7 +49,7 @@ export interface IntentResult {
   envelope?: ActionEnvelope;
   message?: string;
   suggestions?: string[];
-  usedProvider?: "rules" | "stepfun" | "gpt" | "rules-offline" | "search" | "decision";
+  usedProvider?: "rules" | "stepfun" | "deepseek" | "gpt" | "rules-offline" | "search" | "decision";
 }
 
 export interface CanvasContextPayload {

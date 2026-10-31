@@ -52,6 +52,16 @@ describe("approved on-mode contract execution", () => {
     expect(f.generate).not.toHaveBeenCalled();
     expect(f.router.routeUtterance).not.toHaveBeenCalled();
   });
+  it("records which cards each clause built without storing card text", async () => {
+    const f = setup(text => /便签/.test(text) ? "note" : "countdown");
+    const r = await runIntent({ text: "帮我记个便签明天交周报，再设个50分钟倒计时", canvasContext: context() }, f.deps);
+    expect(r.kind).toBe("envelope");
+    expect(r.trace?.decisions.map(row => row.built)).toEqual([
+      { cards: ["NoteCard"], n: 1 }, { cards: ["CountdownCard"], n: 1 },
+    ]);
+    // Card types and counts only: no clause text, title or body reaches the field.
+    expect(JSON.stringify(r.trace?.decisions.map(row => row.built))).not.toContain("交周报");
+  });
   it("fills only the unparsed clause, then merges it with the deterministic clause", async () => {
     const f = setup(text => /便签/.test(text) ? "note" : "countdown", { slots: { seconds: 300, text: "休息" } });
     const r = await runIntent({ text: "帮我记个便签明天交周报，然后过五分钟叫我休息", canvasContext: context() }, f.deps);
@@ -66,6 +76,18 @@ describe("approved on-mode contract execution", () => {
     expect(r.kind).toBe("clarify");
     expect(r.envelope).toBeUndefined();
     expect(r.trace).toMatchObject({ plannerCalls: 1, directClauses: 0 });
+    // A turn that committed nothing must not claim per-clause cards.
+    expect(r.trace?.decisions.every(row => row.built === undefined)).toBe(true);
+  });
+  it("does not turn an invented timer length into a real countdown", async () => {
+    // The user never said how long: a model-supplied 300 s is a guess, not a slot.
+    const f = setup(text => /便签/.test(text) ? "note" : "countdown", { slots: { seconds: 300, text: "喝水" } });
+    const r = await runIntent({ text: "帮我记个便签明天交周报，然后设一个倒计时", canvasContext: context() }, f.deps);
+    expect(r.kind).toBe("clarify");
+    expect(r.envelope).toBeUndefined();
+    expect(created(r)).toHaveLength(0);
+    expect(r.message).toContain("多久");
+    expect(f.generate).toHaveBeenCalledTimes(1);
   });
   it("uses the whole slots planner for a non-approved clause and does not partially build", async () => {
     const f = setup(text => /便签/.test(text) ? "note" : "focus", { clarify: "请选择要查看的卡片。" });

@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from "vitest";
-import { buildState, cardLabel, cardTitle, createIntentRouter } from "../src/decision/router.js";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { buildState, cardLabel, cardTitle, createIntentRouter, parseDecisionTimeoutMs } from "../src/decision/router.js";
 import { resolveTarget } from "../src/decision/target.js";
 import { splitClauses } from "../src/decision/split.js";
 import { emptyContext } from "./helpers.js";
@@ -66,6 +66,52 @@ describe("independent route classification", () => {
     expect(cardTitle(timer)).toBe("喝水提醒");expect(cardLabel(timer)).toContain("18分钟");
   });
 });
+describe("decision timeout", () => {
+  afterEach(() => { vi.useRealTimers(); vi.unstubAllEnvs(); });
+  it.each([
+    [undefined, 6000], ["", 6000], ["6000", 6000], ["1000", 1000], ["15000", 15000],
+    ["3000", 3000], ["999", 6000], ["15001", 6000], ["abc", 6000], ["6000.5", 6000],
+  ] as const)("parses %j to %i ms", (value, expected) => {
+    expect(parseDecisionTimeoutMs(value)).toBe(expected);
+  });
+  const hanging = () => vi.fn((_url: string | URL | Request, init?: RequestInit) => new Promise<Response>((_resolve, reject) => {
+    init?.signal?.addEventListener("abort", () => reject(new DOMException("cancelled", "AbortError")), { once: true });
+  })) as unknown as typeof fetch;
+  const start = () => {
+    let settled = false;
+    const pending = createIntentRouter({ url: "https://unit.test", apiKey: "unit-only", fetchImpl: hanging() })
+      .routeUtterance("你好", emptyContext())
+      .finally(() => { settled = true; });
+    return { pending, settled: () => settled };
+  };
+  it("uses the 6000ms default instead of the old hard 4000ms limit", async () => {
+    vi.useFakeTimers();
+    vi.stubEnv("VIVIC_DECISION_TIMEOUT_MS", "");
+    const { pending, settled } = start();
+    await vi.advanceTimersByTimeAsync(5999);
+    expect(settled()).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
+    await expect(pending).resolves.toBeNull();
+  });
+  it("honors a valid VIVIC_DECISION_TIMEOUT_MS override without retrying", async () => {
+    vi.useFakeTimers();
+    vi.stubEnv("VIVIC_DECISION_TIMEOUT_MS", "12000");
+    const { pending, settled } = start();
+    await vi.advanceTimersByTimeAsync(11999);
+    expect(settled()).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
+    await expect(pending).resolves.toBeNull();
+  });
+  it("falls back to the default outside 1000–15000 or on an invalid value", async () => {
+    vi.useFakeTimers();
+    vi.stubEnv("VIVIC_DECISION_TIMEOUT_MS", "15001");
+    const { pending, settled } = start();
+    await vi.advanceTimersByTimeAsync(5999);
+    expect(settled()).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
+    await expect(pending).resolves.toBeNull();
+  });
+});
 describe("clause splitting", () => {
   it("splits multiple actions, preserving quoted content and at most three parts", () => {
     expect(splitClauses("我要记得周五之前缴电费，加到待办里")).toEqual(["我要记得周五之前缴电费，加到待办里"]);
@@ -84,23 +130,26 @@ describe("target resolution", () => {
     card("todo-right", "购物清单", "TodoCard", 200), card("note1", "读书笔记", "NoteCard", 0)]);
   it("resolves title, focus, position and unique type without a model request", async () => {
     const model = { chooseTarget: vi.fn() };
-    expect(await resolveTarget("聚焦购物清单", context, "focus", model)).toEqual({ targetId: "todo-right" });
-    expect(await resolveTarget("高亮左边的待办", context, "highlight", model)).toEqual({ targetId: "todo-left" });
-    expect(await resolveTarget("打开便签", context, "focus", model)).toEqual({ targetId: "note1" });
-    expect(await resolveTarget("这张闪一下", { ...context, focusHistory: ["note1"] }, "highlight", model)).toEqual({ targetId: "note1" });
+    expect(await resolveTarget("聚焦购物清单", context, "focus", model)).toEqual({ targetId: "todo-right", source: "title" });
+    expect(await resolveTarget("高亮左边的待办", context, "highlight", model)).toEqual({ targetId: "todo-left", source: "spatial" });
+    expect(await resolveTarget("打开便签", context, "focus", model)).toEqual({ targetId: "note1", source: "type" });
+    expect(await resolveTarget("这张闪一下", { ...context, focusHistory: ["note1"] }, "highlight", model)).toEqual({ targetId: "note1", source: "focus" });
+    // A name only present in aliases is reported as alias, not as the title path.
+    const aliased = { ...card("alias-1", "本周工作"), aliases: ["便签本"] };
+    expect(await resolveTarget("打开便签本", emptyContext([aliased]), "focus", model)).toEqual({ targetId: "alias-1", source: "alias" });
     expect(model.chooseTarget).not.toHaveBeenCalled();
   });
   it("asks the model once when necessary, never guessing from low confidence", async () => {
     const model = { chooseTarget: vi.fn(async () => ({ choice: "todo-right", probability: .95, latencyMs: 20 })) };
-    expect(await resolveTarget("打开买东西那个", context, "focus", model)).toEqual({ targetId: "todo-right" });
+    expect(await resolveTarget("打开买东西那个", context, "focus", model)).toEqual({ targetId: "todo-right", source: "classifier" });
     expect(model.chooseTarget).toHaveBeenCalledTimes(1);
     model.chooseTarget.mockResolvedValueOnce({ choice: "todo-right", probability: .4, latencyMs: 20 });
-    expect(await resolveTarget("打开那个", context, "focus", model)).toHaveProperty("ambiguous");
+    expect(await resolveTarget("打开那个", context, "focus", model)).toMatchObject({ source: "ambiguous" });
   });
   it("reports spatial ties and missing targets; non-target routes do no work", async () => {
     const model = { chooseTarget: vi.fn() };
     expect(await resolveTarget("左边的待办", emptyContext([card("a", "甲任务"), card("b", "乙任务")]), "focus", model)).toHaveProperty("ambiguous");
-    expect(await resolveTarget("打开天气", context, "focus", model)).toEqual({ missing: true });
+    expect(await resolveTarget("打开天气", context, "focus", model)).toEqual({ missing: true, source: "missing" });
     expect(await resolveTarget("显示全部", context, "overview", model)).toBeUndefined();
     expect(model.chooseTarget).not.toHaveBeenCalled();
   });

@@ -20,6 +20,8 @@ Mac 安装入口为 `install.py`，之后按顺序运行 `verify.py`、`wire_wor
 
 `VIVIC_DECISION_MODE=off|shadow|on` 由后端环境控制。C 阶段只支持 off/影子观察，on 不会提前启用执行；真正执行必须等卡片契约和 E 阶段检查点批准。
 
+`VIVIC_DECISION_POLICY=full|main-only` 是 B 方案试点开关，默认 `full`（现状：每子句一次 4B route/target）。`main-only` 不创建也不调用 4B router：白名单（仍由 `VIVIC_DECISION_ROUTES` 控制）规则先直执，其余由主模型一次完成 contract/actions/slots（多子句仍是“规则先做 + 剩余子句一次 planner”），目标由宿主按原话/画布确定，不唯一时澄清。它同时把执行路径固定为 on，不改变确认、原子提交或回执。回滚只需删除该变量（或设回 `full`）并重启后端；未配置 = 行为与今天一致。trace 中该模式会写 `policy:"main-only"`，被跳过的分类行 `route:null`、`probability:0`、`routeSource:"skipped"|"planner"`，不会伪造概率。
+
 报告命令 `node scripts/decision-report.mjs --hours 24` 从服务器只读取动作、类型、路由与耗时等聚合所需字段，不输出原话或卡片内容。“与旧流程一致率”不是人工标注准确率。
 
 影子回放由 `prepare_shadow_eval.py` 创建一次性邀请码并通过正常注册接口创建独立测试账号。测试账号不继承其他人的大模型连接；会话凭据保存在服务器私有文件中。关闭影子的基线在只监听回环的克隆数据容器中运行，不再为对比重复重启生产后端。回放只操作该测试账号的 Space，并在结束时清空，随后删除克隆容器和数据。
