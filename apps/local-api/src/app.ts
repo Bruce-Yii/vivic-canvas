@@ -50,6 +50,7 @@ import { ConnectionManager } from "./connections/manager.js";
 import { createConnectionRoutes } from "./connections/routes.js";
 import { ConnectionError } from "./connections/types.js";
 import { createFileReadRoutes, FILE_READ_BODY_LIMIT } from "./files/routes.js";
+import { ProviderStore, ProviderClient, createProviderRoutes, type ProviderProtocol } from "./providers/index.js";
 
 /**
  * Vivic local decision API. Loopback only, bearer-guarded, zod on every
@@ -83,6 +84,8 @@ export interface AppDeps {
   preferences?: PreferenceStore;
   mobileBroker?: Pick<MobileSessionBroker, "status" | "create" | "dispose"> & Partial<Pick<MobileSessionBroker, "resume" | "end">>;
   localTts?: Pick<ManagedLocalTts, "status" | "prepare" | "enable" | "stop" | "clear" | "synthesize">;
+  /** Generic model-provider settings. Absent = in-memory store under ~/.vivic (local mode). */
+  providerStore?: ProviderStore;
 }
 
 const tokenOk = (presented: string, expected: string): boolean => {
@@ -112,6 +115,15 @@ export const createApp = (deps: AppDeps) => {
     create: async (): Promise<never> => { throw new Error("unavailable_online"); }, dispose: () => undefined }
     : deps.mobileBroker ?? new MobileSessionBroker(path.join(homedir(), ".vivic", "mobile-relay.json"));
   const credentials = deps.credentials ?? new CredentialStore();
+  // Generic provider settings. Local sessions persist to ~/.vivic/providers.json;
+  // online sessions keep them in memory so one user never inherits another's.
+  const providerStore = deps.providerStore ?? new ProviderStore({
+    dataDir: path.join(homedir(), ".vivic"),
+    persist: !online,
+  });
+  const savedMain = online ? undefined : providerStore.findForRole("main");
+  const savedMainKey = savedMain ? providerStore.getApiKey(savedMain.id) : undefined;
+  const savedDecision = online ? undefined : providerStore.findForRole("decision");
   // `VIVIC_MAIN_PROVIDER=deepseek` only changes the main planner transport. A
   // separate in-memory store keeps speech/ASR on their StepFun credential, and
   // the key comes from DEEPSEEK_API_KEY without touching disk or logs.
@@ -123,6 +135,16 @@ export const createApp = (deps: AppDeps) => {
     if (deepseekKey) mainCredentials.set({ apiKey: deepseekKey, models: [deepseekModel], defaultModel: deepseekModel, checkedAt: new Date().toISOString() });
     else mainCredentials.recordError("未配置 DEEPSEEK_API_KEY，DeepSeek 官方快路径不可用；不会回退 StepFun。");
   }
+  // Settings win over env: an explicitly configured "main" provider replaces
+  // the env-seeded key and model. With no saved provider, nothing changes.
+  if (savedMain && savedMainKey && savedMain.model) {
+    mainCredentials.set({
+      apiKey: savedMainKey,
+      models: [savedMain.model],
+      defaultModel: savedMain.model,
+      checkedAt: new Date().toISOString(),
+    });
+  }
   const platform = new PlatformCredentialStore();
   let platformRevision = 0;
   let platformAttempt: AbortController | undefined;
@@ -133,6 +155,27 @@ export const createApp = (deps: AppDeps) => {
   // Even status() on the legacy manager inspects its cache. A disabled,
   // non-local provider avoids all filesystem/process work for cloud sessions.
   const configuredProvider: DecisionProvider | undefined = online ? { decide: async () => ({ state: "disabled" }) } : deps.decisionProvider ?? (() => {
+    // A saved decision provider (settings) wins over the env-configured one.
+    const decisionProtocol = (protocol: ProviderProtocol) => protocol === "startlux-native" ? "startlux" as const
+      : protocol === "legacy-2b" ? "adapter" as const : "local-chat" as const;
+    if (savedDecision) {
+      try {
+        const protocol = decisionProtocol(savedDecision.protocol);
+        return new HttpDecisionProvider(savedDecision.baseUrl, {
+          name: protocol === "local-chat" ? "local" : "api",
+          timeoutMs: config.decisionProviderTimeoutMs,
+          fetchImpl: deps.fetchImpl,
+          protocol,
+          model: savedDecision.model,
+          getToken: () => providerStore.getApiKey(savedDecision.id),
+        });
+      } catch {
+        decisionConfigurationError = "已保存的决策服务配置无效，已回退到原有指令流程。请检查地址、协议和模型名称。";
+        console.warn(JSON.stringify({ event: "decision.configuration_invalid", source: "settings" }));
+        safeDiagnostic(deps.onDiagnostic, { event: "decision.configuration_invalid" });
+        return undefined;
+      }
+    }
     if (deps.decision || !config.decisionProviderUrl) return undefined;
     try {
     const primary = new HttpDecisionProvider(config.decisionProviderUrl, {
@@ -209,8 +252,11 @@ export const createApp = (deps: AppDeps) => {
     timeoutMs: config.requestTimeoutMs,
   };
   // Only the planner uses the DeepSeek fast path; speech/ASR/readers keep the
-  // StepFun deps and credential above.
-  const mainModel = mainProvider === "deepseek"
+  // StepFun deps and credential above. A saved main provider overrides both.
+  const mainModel = savedMain && savedMainKey && savedMain.model
+    ? { baseUrl: savedMain.baseUrl, fetchImpl: deps.fetchImpl, timeoutMs: config.requestTimeoutMs,
+        ...(savedMain.presetId === "deepseek" ? { provider: "deepseek" as const } : {}) }
+    : mainProvider === "deepseek"
     ? { baseUrl: config.deepseekBaseUrl ?? DEEPSEEK_BASE_URL, provider: "deepseek" as const,
       fetchImpl: deps.fetchImpl, timeoutMs: config.requestTimeoutMs }
     : stepfun;
@@ -471,6 +517,13 @@ export const createApp = (deps: AppDeps) => {
     preferences?.update({ gptSource: undefined, gptModel: undefined });
     return c.json({ ok: true });
   });
+
+  // Generic model-provider management. Registered AFTER the legacy
+  // /api/providers/status|select|model handlers so those keep winning.
+  app.route("/api/providers", createProviderRoutes({
+    store: providerStore,
+    ...(deps.fetchImpl ? { client: new ProviderClient({ fetchImpl: deps.fetchImpl }) } : {}),
+  }));
 
   app.get("/api/speech/voices", (c) => {
     c.header("Cache-Control", "no-store");

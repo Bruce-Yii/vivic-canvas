@@ -1,99 +1,66 @@
-# Model Platform Settings UI
+# 模型平台设置（Model Platform Settings）
 
-独立的模型平台配置界面组件，支持预设平台和自定义 URL，自动发现模型列表。
+让用户自带模型服务（BYO）：选预设或填自定义 Base URL + Key，点「获取模型」从平台拉取模型列表并选择，测连接、保存、按角色分配。
 
-## 功能
+## 现状
 
-- ✅ 预设平台选择（本地 API、自定义）
-- ✅ 自定义平台 URL 配置
-- ✅ API Key 验证与连接测试
-- ✅ 连接状态实时刷新
-- ✅ 断开连接功能
-- ✅ 完整的单元测试覆盖
+**已集成**：渲染在 `/control` 设置页 →「连接」分组，位于原有 StepFun / GPT 连接面板下方（`apps/web/src/control/ControlApp.tsx` 的 `renderPanels` 里，`connections` 槽位）。原有 StepFun 界面与默认行为不变。
 
-## 使用方式
+## 组件
 
 ```tsx
 import { ModelPlatformSettings } from "@/settings";
 
-// 基础使用
-<ModelPlatformSettings />
-
-// 带回调
 <ModelPlatformSettings
-  disabled={backendOffline}
-  onConnectionChange={(connected) => {
-    console.log("Platform connection:", connected);
-  }}
+  disabled={readonly || !snap.ready}
+  onConnectionChange={(connected) => { /* 可选 */ }}
 />
 ```
 
-## API 端点
+## 后端端点（`apps/local-api/src/providers/`）
 
-组件使用现有后端端点：
+| 方法 | 路径 | 用途 |
+|---|---|---|
+| GET | `/api/providers/presets` | 预设目录（平台名、Base URL、鉴权方式、默认模型） |
+| GET | `/api/providers` | 已保存平台 + 连接状态（**不含 Key**，只给掩码提示） |
+| POST | `/api/providers` | 新建 |
+| PATCH | `/api/providers/:id` | 修改（`clearApiKey: true` 清除 Key） |
+| DELETE | `/api/providers/:id` | 删除 |
+| POST | `/api/providers/:id/test` | **真实推理**探针（不是 /health） |
+| POST | `/api/providers/:id/models` | 代理 `GET {baseUrl}/models`，解析 `data[].id` 并分类 |
+| POST | `/api/providers/preview/test` | 未保存配置的探针（UI 里"先测后存"） |
+| POST | `/api/providers/preview/models` | 未保存配置的模型发现 |
 
-- `POST /api/credentials/platform/validate` - 验证 API Key 并测试连接
-- `POST /api/credentials/platform/disconnect` - 断开连接
-- `GET /api/providers/status` - 获取平台连接状态
+旧的 `/api/providers/status|select|model` 保持原样、优先匹配，老客户端不受影响。
 
-## 集成待办
+## 协议
 
-**当前状态：** 组件已完成但未集成到 `/control` 页面。
+| 协议 | 请求形状 | 典型模型 |
+|---|---|---|
+| `openai-compatible` | `POST {base}/chat/completions` | GPT / DeepSeek / Qwen / 本地 vLLM、Ollama、LM Studio |
+| `stepfun-v1` | 同上，`https://api.stepfun.com/v1` | StepFun 普通 API Key |
+| `stepfun-plan` | 同上，`https://api.stepfun.com/step_plan/v1` | 需 Step Plan 订阅 |
+| `startlux-native` | `POST {base}/decisions` + `{state, questions}` | `startlux-decision-4b` |
+| `legacy-2b` | `POST {base}/decisions` + `{input, labels}` | `startlux-decision-2b`、GLiNER、Laya |
 
-**下一步（决策层窗口负责）：**
+**4B 与旧协议、2B 与原生协议在保存/测试前就被拒绝**，并给出明确原因——这正是"本地模型连不上"的真正根因（同一端点混两套协议），不允许再配出这个组合。
 
-1. 在 `apps/web/src/control/ControlApp.tsx` 中导入组件
-2. 添加到设置页面的合适位置（建议在 AI 连接设置之后）
-3. 可选：将 `onConnectionChange` 回调连接到全局状态
+## 安全
 
-### 集成示例
+- Key 用 AES-256-GCM 加密后写入 `~/.vivic/providers.json`（文件 0600，密钥在同目录 `.secret-key`，0600）。
+- API 响应永远不含 Key，只给 `hasApiKey` 与 `apiKeyHint`（如 `2v0U••••T4Bb`）。
+- Key 不进日志、不进测试 fixture；测试用注入的假 codec 与内存文件系统。
+- 线上模式（`mode: "online"`）用 `persist: false` 的内存 store，用户之间不串数据。
 
-```tsx
-// apps/web/src/control/ControlApp.tsx
-import { ModelPlatformSettings } from "@/settings";
+## 设置优先于 env
 
-// 在设置区域添加
-<div className="settings-section">
-  <ModelPlatformSettings
-    disabled={!snap.ready}
-    onConnectionChange={handlePlatformConnectionChange}
-  />
-</div>
-```
+存在 `roles: ["main"]` 的平台时，它覆盖 `VIVIC_MAIN_PROVIDER` / `DEEPSEEK_API_KEY` 的主模型 Key、模型与 Base URL；存在 `roles: ["decision"]` 时覆盖 `VIVIC_DECISION_*`。**没有保存任何平台时行为与原先完全一致。**
 
 ## 测试
 
 ```bash
-# 运行组件测试
-pnpm --filter @vivic/web test apps/web/src/settings
-
-# 运行所有前端测试
-pnpm --filter @vivic/web test
+pnpm --filter @vivic/local-api test tests/providers.test.ts tests/provider-routes.test.ts
+pnpm --filter @vivic/web test src/settings
 ```
 
-## 设计原则
-
-- **独立性**：不依赖 control/** 内部状态，可在任何位置渲染
-- **最小依赖**：仅使用现有 UI 组件和 API 端点，无新依赖
-- **完整测试**：所有交互场景都有单元测试覆盖
-- **清晰边界**：组件负责 UI 和 API 调用，不处理路由或全局状态
-
-## 文件结构
-
-```
-apps/web/src/settings/
-├── README.md                          # 本文档
-├── index.ts                           # 导出入口
-├── types.ts                           # 类型定义和预设配置
-├── api.ts                             # API 客户端函数
-├── ModelPlatformSettings.tsx          # 主组件
-└── __tests__/
-    └── ModelPlatformSettings.test.tsx # 组件测试
-```
-
-## 未来增强（可选）
-
-1. **模型列表获取**：后端暴露 `/api/platform/models` 代理端点
-2. **模型选择器**：连接成功后显示可用模型列表
-3. **预设扩展**：添加更多常见平台预设（如 Ollama、LM Studio）
-4. **连接诊断**：详细的连接失败原因和修复建议
+真实验证脚本（一次性、不提交）：`work/verify/mock-provider.mjs`、`work/verify/mock-gateway.mjs`。

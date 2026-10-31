@@ -1,11 +1,11 @@
 /**
- * Model Platform Settings UI
- * 
- * Standalone module for configuring user's own model API provider.
- * Ready for integration into the control settings page.
+ * Model-platform settings UI.
+ *
+ * Standalone panel for configuring the user's own model provider.
+ * Mounted by the Control settings page.
  */
 
 export { ModelPlatformSettings } from "./ModelPlatformSettings";
 export type { ModelPlatformSettingsProps } from "./ModelPlatformSettings";
 export * from "./types";
-export * from "./api";
+export * as modelPlatformApi from "./api";

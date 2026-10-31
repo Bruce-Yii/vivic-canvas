@@ -1,107 +1,85 @@
 /**
- * Model platform settings API client.
- * Calls existing backend endpoints for platform validation and model discovery.
+ * Model-platform settings API client.
+ *
+ * All calls are same-origin through the Vite dev proxy, which injects the
+ * session bearer server-side. API keys travel browser → loopback API only and
+ * are never persisted client-side.
  */
 
-import type { ModelInfo, PlatformStatus } from "./types";
+import type {
+  DraftProvider, ModelsResult, ProviderPreset, ProviderStatus, TestResult,
+} from "./types";
 
-export interface ValidatePlatformResult {
-  ok: boolean;
-  connected: boolean;
-  error?: string;
-}
-
-export interface GetModelsResult {
-  ok: boolean;
-  models?: ModelInfo[];
-  error?: string;
-}
-
-/**
- * Validate platform API key and test connectivity.
- * Uses existing POST /api/credentials/platform/validate endpoint.
- */
-export const validatePlatformConnection = async (
-  apiKey: string,
-  signal?: AbortSignal,
-): Promise<ValidatePlatformResult> => {
-  try {
-    const res = await fetch("/api/credentials/platform/validate", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ apiKey }),
-      signal,
-    });
-    const data = await res.json();
-    return data as ValidatePlatformResult;
-  } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") {
-      return { ok: false, connected: false, error: "请求已取消" };
-    }
-    return {
-      ok: false,
-      connected: false,
-      error: "连接失败：无法访问本地服务",
-    };
+const post = async <T>(url: string, body: unknown, signal?: AbortSignal): Promise<T> => {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+    signal,
+  });
+  const text = await response.text();
+  let parsed: unknown;
+  try { parsed = JSON.parse(text); } catch { parsed = undefined; }
+  if (!response.ok && (!parsed || typeof parsed !== "object")) {
+    throw new Error(`请求失败（HTTP ${response.status}）`);
   }
+  return parsed as T;
 };
 
-/**
- * Disconnect platform API key.
- * Uses existing POST /api/credentials/platform/disconnect endpoint.
- */
-export const disconnectPlatform = async (
-  signal?: AbortSignal,
-): Promise<{ ok: boolean; connected: boolean }> => {
-  try {
-    const res = await fetch("/api/credentials/platform/disconnect", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({}),
-      signal,
-    });
-    return (await res.json()) as { ok: boolean; connected: boolean };
-  } catch {
-    return { ok: false, connected: false };
-  }
+const del = async (url: string, signal?: AbortSignal): Promise<void> => {
+  const response = await fetch(url, { method: "DELETE", signal });
+  if (!response.ok) throw new Error(`删除失败（HTTP ${response.status}）`);
 };
 
-/**
- * Get current platform status including connection state and available models.
- * Reads from existing GET /api/providers/status endpoint.
- */
-export const getPlatformStatus = async (
-  signal?: AbortSignal,
-): Promise<PlatformStatus> => {
-  try {
-    const res = await fetch("/api/providers/status", { signal });
-    if (!res.ok) {
-      return { connected: false, lastError: "服务不可用" };
-    }
-    const data = await res.json();
-    return {
-      connected: data.platform?.connected ?? false,
-      lastError: data.platform?.lastError,
-    };
-  } catch {
-    return { connected: false, lastError: "无法连接到本地服务" };
-  }
+export const fetchPresets = async (signal?: AbortSignal): Promise<ProviderPreset[]> => {
+  const response = await fetch("/api/providers/presets", { signal });
+  if (!response.ok) throw new Error(`无法读取预设（HTTP ${response.status}）`);
+  const body = await response.json() as { presets?: ProviderPreset[] };
+  return body.presets ?? [];
 };
 
-/**
- * Fetch available models from the configured platform.
- * This would typically call GET /models on the user's platform,
- * but the current backend validates connectivity through /api/credentials/platform/validate.
- * 
- * For now, returns empty list. Future enhancement: expose platform's /models through local-api proxy.
- */
-export const getAvailableModels = async (
-  signal?: AbortSignal,
-): Promise<GetModelsResult> => {
-  // TODO: Backend needs to expose platform's GET /models through a proxy endpoint
-  // Current implementation: platform validation happens at connection time
-  return {
-    ok: true,
-    models: [],
-  };
+export const fetchProviders = async (signal?: AbortSignal): Promise<ProviderStatus[]> => {
+  const response = await fetch("/api/providers", { signal });
+  if (!response.ok) throw new Error(`无法读取模型平台（HTTP ${response.status}）`);
+  const body = await response.json() as { providers?: ProviderStatus[] };
+  return body.providers ?? [];
 };
+
+export const createProvider = async (
+  draft: DraftProvider,
+  signal?: AbortSignal,
+): Promise<{ ok: boolean; error?: string; provider?: ProviderStatus }> =>
+  post("/api/providers", draft, signal);
+
+export const updateProvider = async (
+  id: string,
+  updates: Partial<DraftProvider> & { clearApiKey?: boolean },
+  signal?: AbortSignal,
+): Promise<{ ok: boolean; error?: string; provider?: ProviderStatus }> => {
+  const response = await fetch(`/api/providers/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(updates),
+    signal,
+  });
+  return (await response.json()) as { ok: boolean; error?: string; provider?: ProviderStatus };
+};
+
+export const deleteProvider = (id: string, signal?: AbortSignal): Promise<void> =>
+  del(`/api/providers/${encodeURIComponent(id)}`, signal);
+
+/** Live model discovery for an unsaved configuration. */
+export const previewModels = (draft: DraftProvider, signal?: AbortSignal): Promise<ModelsResult> =>
+  post("/api/providers/preview/models", draft, signal);
+
+/** Real inference probe for an unsaved configuration. */
+export const previewTest = (draft: DraftProvider, signal?: AbortSignal): Promise<TestResult> =>
+  post("/api/providers/preview/test", draft, signal);
+
+/** Live model discovery for a saved provider. */
+export const fetchProviderModels = (id: string, signal?: AbortSignal): Promise<ModelsResult> =>
+  post(`/api/providers/${encodeURIComponent(id)}/models`, {}, signal);
+
+/** Real inference probe for a saved provider. */
+export const testProvider = (id: string, signal?: AbortSignal): Promise<TestResult> =>
+  post(`/api/providers/${encodeURIComponent(id)}/test`, {}, signal);

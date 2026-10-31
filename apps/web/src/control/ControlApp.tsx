@@ -22,6 +22,7 @@ import { canvasStore, useDisplayPreferences } from "@/state/canvasStore";
 import { getControlHost } from "@/sync/browserRuntime";
 import type { ControlHost } from "@/sync/controlHost";
 import { AiSection } from "./AiSection";
+import { ModelPlatformSettings } from "@/settings";
 import type { ClarifyState } from "./ChatComposer";
 import { ChatPage } from "./ChatPage";
 import { BackgroundSettings } from "./BackgroundSettings";
@@ -823,7 +824,7 @@ const ControlShell = (props: ShellProps) => {
         hidden={props.view !== "settings"}
         onBack={() => props.onNavigate("chat")}
         notice={props.view === "settings" ? readonlyNotice : null}
-        connections={connection}
+        connections={<>{connection}<ModelPlatformSettings disabled={readonly || !snap.ready} /></>}
         services={<ConnectionPanel active={props.view === "settings"} />}
         voice={voice}
         appearance={<>
