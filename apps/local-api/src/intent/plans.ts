@@ -329,7 +329,28 @@ export async function planDeterministic(text: string, ctx: CanvasContext, now = 
   // "暂停喝水倒计时" is one existing card and one closed-form host operation:
   // the rules own the target, the owner still applies and reports it.
   const control = parseCountdownControl(text, ctx);
-  if (!control) return null;
+  // Narrow to the timer operations this entry point can resolve a target for.
+  if (control?.kind !== "countdown.pause" && control?.kind !== "countdown.resume") return null;
+  const targetId = control.targetId;
+  if (!targetId) return null;
+  // Never claim the timer was already paused/resumed: this is a proposal that
+  // still needs the owner's receipt. Name the resolved card instead.
+  const target = ctx.cards.find(card => card.id === targetId);
+  const label = (target?.aliases?.[0] ?? (target ? titleOf(target) : "")).slice(0, 40);
+  const verb = control.kind === "countdown.pause" ? "暂停" : "继续";
   return { actions: [], groups: [], routes: ["edit"], hostOperation: control,
-    say: control.kind === "countdown.pause" ? "已暂停这个计时。" : "已继续这个计时。" };
+    say: label ? `已提交「${label}」的${verb}，等待执行确认。` : `已提交计时${verb}，等待执行确认。` };
+}
+
+/** The target guard for a rules-resolved countdown host operation: the target
+ *  must still be a loaded CountdownCard. Null means "proposal may proceed";
+ *  otherwise the caller must ask instead of submitting anything. */
+export function countdownControlIssue(operation: HostOperation, ctx: CanvasContext): string | null {
+  const verb = operation.kind === "countdown.resume" ? "继续" : "暂停";
+  if (operation.kind !== "countdown.pause" && operation.kind !== "countdown.resume") return null;
+  if (!operation.targetId) return `没有找到要${verb}的计时卡片，请指明卡名。`;
+  const target = ctx.cards.find(card => card.id === operation.targetId);
+  if (!target) return `没有找到要${verb}的计时卡片，请指明卡名。`;
+  if (target.type !== "CountdownCard") return `「${target.aliases?.[0] ?? target.id}」不是计时卡片，请指明要${verb}的计时。`;
+  return null;
 }

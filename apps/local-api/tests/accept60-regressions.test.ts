@@ -195,6 +195,40 @@ describe("accept60: pausing a named timer is a closed-form host operation", () =
     expect(hostOperationIssue({ kind: "countdown.pause", targetId: "cd_water" }, canvas())).toBe("计时状态尚未完整加载。");
     expect(hostOperationIssue({ kind: "countdown.pause", targetId: "cd_water" }, canvas(), { allowUnloadedCountdownState: true })).toBeNull();
   });
+
+  it("never submits or announces a pause whose timer is not on the canvas", async () => {
+    const context = canvas();
+    context.cards = context.cards.filter(card => card.id !== "cd_water");
+    const f = setup(["edit"], [{ clarify: "模型不应被调用" }]);
+    const result = await runIntent({ text: "暂停喝水倒计时", canvasContext: context }, f.deps);
+    expect(result.kind, JSON.stringify(result)).toBe("clarify");
+    expect(result.hostOperation).toBeUndefined();
+    // No false completion wording: nothing was submitted, nothing was paused.
+    expect(result.message ?? "").not.toMatch(/已暂停|已继续|已完成|已提交/);
+    // Either the rules guard or the existing target guard asks for the card.
+    expect(result.message ?? "").toMatch(/计时卡片|指明|卡名/);
+  });
+
+  it("asks instead of pausing a card that is not a timer", async () => {
+    const context = canvas();
+    context.cards.push(card("note_water", "喝水提醒", "NoteCard", 1200));
+    const f = setup(["edit"], [{ clarify: "模型不应被调用" }]);
+    // Two candidates: the note must not be paused, and the timer name alone is
+    // ambiguous only because the note carries the same label.
+    const result = await runIntent({ text: "暂停喝水提醒倒计时", canvasContext: context }, f.deps);
+    expect(result.hostOperation?.kind === "countdown.pause" ? result.hostOperation.targetId : "none").not.toBe("note_water");
+    expect(result.message ?? "").not.toMatch(/已暂停/);
+  });
+
+  it("announces the resolved card without claiming the timer is already paused", async () => {
+    const f = setup(["edit"], [{ clarify: "模型不应被调用" }]);
+    const result = await runIntent({ text: "暂停喝水倒计时", canvasContext: canvas() }, f.deps);
+    expect(result.kind).toBe("host-operation");
+    expect(result.hostOperation).toEqual({ kind: "countdown.pause", targetId: "cd_water" });
+    expect(result.message).toContain("喝水提醒");
+    expect(result.message).toMatch(/等待执行确认/);
+    expect(result.message).not.toMatch(/已暂停|已继续/);
+  });
 });
 
 describe("accept60: weekly plan content is generation, not invented user facts", () => {

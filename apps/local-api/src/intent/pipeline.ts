@@ -39,7 +39,7 @@ import { observeDecision, type ClauseBuild, type ClausePlan, type DecisionTrace,
 import { runSlotPlanner } from "./slotPlanner.js";
 import { applyOutputChannels, normalizeOutputChannels } from "./channels.js";
 import { splitClauses } from "../decision/split.js";
-import { planDeterministic } from "./plans.js";
+import { planDeterministic, countdownControlIssue } from "./plans.js";
 import { runDecisionOn, multiCardMode, type MultiCardMode } from "../decision/on.js";
 import { feedbackReader, FEEDBACK_PROMPT, withoutFeedback } from "./feedback.js";
 
@@ -258,9 +258,11 @@ const runLegacyIntent = async (
       ? await planDeterministic(req.text, req.canvasContext) : null;
     if (deterministic) {
       // A closed-form host operation resolved by the rules stays exclusive of an
-      // action envelope; the owner still applies it and reports a receipt.
+      // action envelope; the owner still applies it and reports a receipt. An
+      // unresolved/non-timer target is asked about, never submitted or announced.
       if (deterministic.hostOperation) {
-        const problem = hostOperationIssue(deterministic.hostOperation, req.canvasContext, { allowUnloadedCountdownState: true });
+        const problem = countdownControlIssue(deterministic.hostOperation, req.canvasContext)
+          ?? hostOperationIssue(deterministic.hostOperation, req.canvasContext, { allowUnloadedCountdownState: true });
         if (problem) return { kind: "clarify", message: problem, usedProvider: "rules" };
         report("rules", "completed", performance.now() - startedAt);
         return { kind: "host-operation", hostOperation: deterministic.hostOperation, message: deterministic.say, usedProvider: "rules" };

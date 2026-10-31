@@ -11,7 +11,7 @@ import { normalizeOutputChannels, applyOutputChannels } from "../intent/channels
 import { scheduledReminderIntent } from "../intent/scheduledReminders.js";
 import { looksLikeDateCountdown } from "../scenes/index.js";
 import { splitClauses } from "./split.js";
-import { planDeterministic } from "../intent/plans.js";
+import { planDeterministic, countdownControlIssue } from "../intent/plans.js";
 import { hostOperationIssue } from "./hostOperations.js";
 import { resolveTarget } from "./target.js";
 import { numberedChoiceQuestion } from "./confirmation.js";
@@ -349,8 +349,11 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
       check();
       // A closed-form host operation (pause/resume one named timer) is exclusive
       // of an action envelope: the rules resolved the target, the owner applies it.
+      // An unresolved or non-timer target must never be submitted, and the turn
+      // must never announce it as done: ask which timer (pre-rules clarification).
       if (deterministic.hostOperation) {
-        const issue = hostOperationIssue(deterministic.hostOperation, req.canvasContext, { allowUnloadedCountdownState: true });
+        const issue = countdownControlIssue(deterministic.hostOperation, req.canvasContext)
+          ?? hostOperationIssue(deterministic.hostOperation, req.canvasContext, { allowUnloadedCountdownState: true });
         if (issue) return { kind: "clarify", message: issue, usedProvider: "rules" };
         deps.telemetry.directClauses += 1;
         return { kind: "host-operation", hostOperation: deterministic.hostOperation, message: deterministic.say, usedProvider: "rules" };
