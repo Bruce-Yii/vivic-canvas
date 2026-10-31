@@ -11,8 +11,7 @@ import { normalizeOutputChannels, applyOutputChannels } from "../intent/channels
 import { scheduledReminderIntent } from "../intent/scheduledReminders.js";
 import { looksLikeDateCountdown } from "../scenes/index.js";
 import { splitClauses } from "./split.js";
-import { planDeterministic, countdownControlIssue } from "../intent/plans.js";
-import { hostOperationIssue } from "./hostOperations.js";
+import { planDeterministic } from "../intent/plans.js";
 import { resolveTarget } from "./target.js";
 import { numberedChoiceQuestion } from "./confirmation.js";
 import { isBuiltinRoute, type IntentRouter } from "./router.js";
@@ -77,14 +76,6 @@ export function literalRoute(text: string, context: IntentRequest["canvasContext
   if (matches.length === 1) return matches[0]!.id as IntentRouteId;
 }
 
-/** The same literal check without the classifier's allow-list: main-only has no
- * classifier, and the row itself came from an approved contract parse. */
-export function literalContractRoute(text: string, context: IntentRequest["canvasContext"]): IntentRouteId | undefined {
-  if (/不要|不用|别|如果|要是|什么意思|解释|不想|不需要|如何|怎么|是否|能否|[？?]|(?:吗|么)[。！!]?\s*$/.test(text)) return;
-  const matches = Object.values(CARD_CONTRACTS).filter(contract => contract.parse?.(text, context) != null);
-  if (matches.length === 1) return matches[0]!.id as IntentRouteId;
-}
-
 type HybridOutcome =
   | { kind: "actions"; actions: Action[]; directClauses: number; provider?: IntentResult["usedProvider"]; say?: string; plans: ClausePlan[]; builds: ClauseBuild[] }
   | { kind: "whole" }
@@ -118,19 +109,12 @@ async function hybridProposal(input: HybridInput): Promise<HybridOutcome> {
     return { clause: index, cards, n: cards.length };
   };
   const ruleBuilds = () => clauses.map((_, index) => clauseBuild(index, ruleByClause.get(index) ?? []));
-  const mainOnly = deps.router.policy === "main-only";
   for (const [index, text] of clauses.entries()) {
     check();
     const row = rows[index];
     const route = row?.route;
     // Only a confident, approved route owning a unique literal parse may propose.
-    // Main-only has no classifier allow-list to satisfy: its row already came
-    // from an approved contract parse, so it may propose even when the operator
-    // configured no allow-list.
-    const allowedRoute = route
-      ? deps.router.directRoutes?.has(route as IntentRouteId) || (mainOnly && row?.routeSource === "rules")
-      : false;
-    const contract = route && isBuiltinRoute(route) && allowedRoute && Object.hasOwn(CARD_CONTRACTS, route)
+    const contract = route && isBuiltinRoute(route) && deps.router.directRoutes?.has(route) && Object.hasOwn(CARD_CONTRACTS, route)
       ? CARD_CONTRACTS[route] : undefined;
     // Threshold 0.8: only a clause whose approved route is at least this
     // confident may be built by rules; everything else is planned.
@@ -331,14 +315,8 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
     // when every clause is a confident (>= .8), approved, uniquely parsed row.
     // One weaker row sends the whole sentence to the planner (hybrid instead
     // keeps the confident clauses local).
-    // The allow-list exists to constrain the *classifier*: with no classifier at
-    // all (main-only), a row the trace published from an approved contract parse
-    // is stronger evidence than a classifier hit and may build even when the
-    // operator configured no allow-list.
-    const ruleRow = (row: Row) => mainOnly && row.routeSource === "rules" && !row.failed && !row.none;
     const directRows = rows.every(row => !row.failed && row.route && row.probability >= .8
-      && !row.none && isBuiltinRoute(row.route) && Object.hasOwn(CARD_CONTRACTS, row.route)
-      && (deps.router.directRoutes?.has(row.route) || ruleRow(row)));
+      && !row.none && isBuiltinRoute(row.route) && deps.router.directRoutes?.has(row.route) && Object.hasOwn(CARD_CONTRACTS, row.route));
     let context: CardBuildContext = { ...req.canvasContext, cards: [...req.canvasContext.cards], focusHistory: [...req.canvasContext.focusHistory] };
     // A numbered list ("1. … 2. … 3. …") or an explicit weekly-plan request
     // that the existing contracts build end-to-end never waits for a planner.
@@ -347,17 +325,6 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
     const deterministic = await planDeterministic(req.text, req.canvasContext);
     if (deterministic) {
       check();
-      // A closed-form host operation (pause/resume one named timer) is exclusive
-      // of an action envelope: the rules resolved the target, the owner applies it.
-      // An unresolved or non-timer target must never be submitted, and the turn
-      // must never announce it as done: ask which timer (pre-rules clarification).
-      if (deterministic.hostOperation) {
-        const issue = countdownControlIssue(deterministic.hostOperation, req.canvasContext)
-          ?? hostOperationIssue(deterministic.hostOperation, req.canvasContext, { allowUnloadedCountdownState: true });
-        if (issue) return { kind: "clarify", message: issue, usedProvider: "rules" };
-        deps.telemetry.directClauses += 1;
-        return { kind: "host-operation", hostOperation: deterministic.hostOperation, message: deterministic.say, usedProvider: "rules" };
-      }
       const prebuilt = new Set(deterministic.groups.flatMap(group => group.cardIds));
       const issue = actionExecutionIssue(deterministic.actions, req.canvasContext, prebuilt);
       if (issue) return { kind: "clarify", message: "本次提案未通过校验，请补充或分开提出要求。", usedProvider: "rules" };

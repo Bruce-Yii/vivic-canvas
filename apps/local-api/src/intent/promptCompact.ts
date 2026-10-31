@@ -15,7 +15,7 @@ export const compactPromptEnabled = (value: string | undefined = process.env.VIV
   value?.trim().toLowerCase() === "on";
 
 /** Bumped when the planner prompt text changes; part of the local cache key. */
-export const SLOT_PROMPT_VERSION = "vivic-slot-prompt-v2";
+export const SLOT_PROMPT_VERSION = "vivic-slot-prompt-v3";
 
 export const slotPromptVersion = (compact: boolean): string => `${SLOT_PROMPT_VERSION}-${compact ? "compact" : "full"}`;
 

@@ -6,8 +6,8 @@ import { splitClauses } from "./split.js";
 import { planDeterministic } from "../intent/plans.js";
 import { hasExplicitCardReference, resolveTarget, targetedRoutes } from "./target.js";
 import type { TargetResult } from "./target.js";
-import { isBuiltinRoute, type DecisionRouteId, type RouteResult } from "./router.js";
-import { immediateGreeting, literalContractRoute, literalRoute } from "./on.js";
+import { isBuiltinRoute, type RouteResult } from "./router.js";
+import { immediateGreeting, literalRoute } from "./on.js";
 
 /** The planner shares the observer's first RPC and target lookup. */
 export interface PlannerRouteHint {
@@ -65,34 +65,6 @@ export const DecisionTraceSchema = z.strictObject({
 });
 export type DecisionTrace = z.infer<typeof DecisionTraceSchema>;
 
-/** Which approved route the rules just committed, read from the outcome only.
- *  Used solely for main-only provenance when no classifier row exists; a mixed
- *  or unrecognized batch derives nothing. */
-const derivedRuleRoute = (result: IntentResult): DecisionRouteId | undefined => {
-  const envelope = result.envelope;
-  if (!envelope || (result.usedProvider ?? "") !== "rules") return undefined;
-  const actions = envelope.actions;
-  const created = [...new Set(actions.flatMap(action => action.type === "card.create" ? [action.card.type] : []))];
-  const byCard: Record<string, DecisionRouteId> = { TodoCard: "todo", NoteCard: "note", CountdownCard: "countdown",
-    AnswerCard: "answer", WeeklyScheduleCard: "generate" };
-  if (created.length === 1 && byCard[created[0]!]) return byCard[created[0]!];
-  // A single element mutation is one route; a scene card (any other type) is generate.
-  if (!created.length) {
-    const mutations = [...new Set(actions.flatMap(action => action.type === "card.update" ? ["edit"]
-      : action.type === "card.focus" ? ["focus"] : action.type === "card.delete" ? ["delete"]
-        : action.type === "card.highlight" ? ["highlight"] : action.type === "canvas.fit" ? ["overview"]
-          : action.type === "canvas.restore" ? ["restore"] : []))];
-    const only = mutations[0];
-    if (mutations.length === 1 && only) return only as DecisionRouteId;
-    if (actions.every(action => action.type === "subtitle.show" || action.type === "subtitle.hide")) return "answer";
-  }
-  const hostRoute: Partial<Record<string, DecisionRouteId>> = { "card.move": "arrange", "card.pin": "arrange",
-    "card.surface": "arrange", "canvas.arrange": "arrange", "canvas.organize.preview": "arrange",
-    "countdown.pause": "edit", "countdown.resume": "edit", "history.undo": "undo", "history.redo": "undo" };
-  const host = result.hostOperation?.kind;
-  return host ? hostRoute[host] : undefined;
-};
-
 /** Advisory only. The old execution path remains authoritative in shadow mode. */
 export async function observeDecision(req: IntentRequest, deps: PipelineDeps, signal: AbortSignal | undefined,
   legacy: (hint?: Promise<PlannerRouteHint | null>) => Promise<IntentResult>): Promise<IntentResult> {
@@ -143,7 +115,7 @@ export async function observeDecision(req: IntentRequest, deps: PipelineDeps, si
       try {
         if (router.mode === "on") controller.signal.throwIfAborted();
         const exact = greeting ? "chat" : router.mode === "on" && !req.attachments?.length && !req.continuation && !req.resolvedTargetId && !req.resolvedTargets
-          ? mainOnly ? literalContractRoute(text, shadowContext) : literalRoute(text, shadowContext, router) : undefined;
+          ? literalRoute(text, shadowContext, router) : undefined;
         const value = exact ? { route: exact, probability: 1, probabilities: { [exact]: 1 }, none: false,
           latencyMs: performance.now() - clauseStarted }
           : mainOnly ? { route: null, probability: 0, probabilities: {}, none: true,
@@ -228,18 +200,11 @@ export async function observeDecision(req: IntentRequest, deps: PipelineDeps, si
       const entry = builds.get(index);
       return entry ? { ...next, built: { cards: entry.cards, n: entry.n } } : next;
     }) ?? [];
-    // Main-only rules may answer a sentence the classifier would have labelled
-    // (a plain rule envelope or host operation). Provenance must not read
-    // "no route" when the rules actually produced one: derive it from what was
-    // committed, and only for a single-clause turn where it is unambiguous.
-    const derived = mainOnly && decisions.length === 1 && !decisions[0]!.route ? derivedRuleRoute(result) : undefined;
-    const routed = derived ? [{ ...decisions[0]!, route: derived, probability: 1,
-      probabilities: { [derived]: 1 }, none: false, routeSource: "rules" as const }] : decisions;
     return { id, mode: router.mode === "on" ? "on" : "shadow", status: !rows ? "pending" : failures ? "failed" : "complete",
       ...(req.task?.id ? { taskId: req.task.id } : {}),
       ...(req.requestId ? { requestId: req.requestId } : {}),
-      clauses, decisions: routed, route: routed[0]?.route ?? null, probability: routed[0]?.probability ?? 0,
-      ...(routed[0]?.target ? { target: routed[0].target } : {}),
+      clauses, decisions, route: first?.route ?? null, probability: first?.probability ?? 0,
+      ...(first?.target ? { target: first.target } : {}),
       latencyMs: decisionElapsedMs ?? Math.round(performance.now() - start), routeLatencyMs: first?.latencyMs ?? 0,
       legacyElapsedMs, shadowWaitMs, failedCount: failures, legacyKind: result.kind,
       ...(result.usedProvider ? { legacyUsedProvider: result.usedProvider } : {}),

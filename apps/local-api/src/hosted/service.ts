@@ -1,7 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
 import path from "node:path";
-import { existsSync } from "node:fs";
-import { ProviderStore } from "../providers/store.js";
 import { z } from "zod";
 import { createSpaceHandler, SpaceError, type SpaceIdentity } from "../space/index.js";
 import { createOnlineSessionApp } from "../online/appFactory.js";
@@ -19,6 +17,7 @@ import type { PipelineDeps } from "../intent/pipeline.js";
 import { IntentRequestSchema } from "../schemas.js";
 import { imageInputErrorMessage } from "../images.js";
 import { cardPackageRoute, readEnabledCardDefinitions } from "./cardPackages.js";
+import { createFixedSetup, DEMO_DECISION_MODEL } from "./setup.js";
 
 type SessionApp = ReturnType<typeof createOnlineSessionApp>;
 interface AccountApp { app: SessionApp; token: string; created: number; touched: number }
@@ -52,6 +51,11 @@ export function createHostedService(options: HostedServiceOptions) {
     policy: process.env.VIVIC_DECISION_POLICY?.trim().toLowerCase() === "full" ? "full" : "main-only" });
   const space = createSpaceHandler({ origin: options.origin, dataDir: options.dataDir, inviteCode: options.inviteCode, now });
   const apps = new Map<string, AccountApp>(), models = new Map<string, ModelConnection>();
+  const setup = createFixedSetup({ ...options, store: space.store, changed: accountId => {
+    const app = apps.get(accountId); if (app) { void app.app.dispose(); apps.delete(accountId); }
+    const model = models.get(accountId); if (model) { model.controller.abort(); models.delete(accountId); }
+    disabledModels.delete(accountId);
+  } });
   const disabledModels = new Set<string>();
   const assets = createHostedAssetService({ store: space.store, dataDir: options.dataDir, now });
   const reminders = createHostedReminderScheduler(space.store, { now, autoStart: options.autoStartReminders });
@@ -88,16 +92,16 @@ export function createHostedService(options: HostedServiceOptions) {
       // Existing deployment settings were intentionally shared operator defaults.
       // Copy them once, through their encrypted stores, before account-local edits.
       // Never use another account's private directory as a template.
-      if (!existsSync(path.join(providerDataDir, "providers.json")) && existsSync(path.join(options.dataDir, "providers.json"))) {
-        const defaults = new ProviderStore({ dataDir: options.dataDir });
-        const scoped = new ProviderStore({ dataDir: providerDataDir });
-        for (const entry of defaults.list()) scoped.create({ name: entry.name, protocol: entry.protocol, baseUrl: entry.baseUrl,
-          apiKey: entry.apiKey, model: entry.model, headers: entry.headers, roles: entry.roles, presetId: entry.presetId, enabled: entry.enabled });
-      }
+      // New accounts configure their own three keys. Operator defaults are never copied.
+      const decisionStore = setup.providerStore(accountId), decision = decisionStore.findForRole("decision");
+      const decisionKey = decision && decisionStore.getApiKey(decision.id);
+      const accountRouter = options.router ?? (decisionKey ? createIntentRouter({ mode: "on", policy: "full", model: DEMO_DECISION_MODEL,
+        url: `${decision!.baseUrl.replace(/\/+$/, "")}/decisions`, apiKey: decisionKey, timeoutMs: 1500, fetchImpl: options.fetchImpl,
+        directRoutes: ["countdown", "todo", "note", "overview", "restore"] }) : router);
       // Provider settings share the deployment's durable data root, so a saved
       // main/decision provider survives session turnover and process restarts.
       value = { token, app: createOnlineSessionApp({ token, origin: options.origin },
-        { ...sessionOptions(accountId), providerDataDir }), created: now(), touched: now() };
+        { ...sessionOptions(accountId), router: accountRouter, providerDataDir, providerSeed: false }), created: now(), touched: now() };
       apps.set(accountId, value);
     }
     if (activity) value.touched = now(); return value;
@@ -124,8 +128,10 @@ export function createHostedService(options: HostedServiceOptions) {
     if (session && (now() - session.created >= MAX_AGE || now() - session.touched >= IDLE)) {
       session.key = undefined; session.controller.abort(); models.delete(accountId); session = undefined;
     }
-    if (!session && options.modelApiToken && !disabledModels.has(accountId)) {
-      session = connection(options.modelApiToken); models.set(accountId, session);
+    const saved = setup.providerStore(accountId), provider = saved.findForRole("decision");
+    const key = provider && saved.getApiKey(provider.id);
+    if (!session && key && !disabledModels.has(accountId)) {
+      session = connection(key); session.decision = { model: DEMO_DECISION_MODEL, connectedAt: provider!.updatedAt }; models.set(accountId, session);
     }
     return session;
   }
@@ -260,6 +266,7 @@ export function createHostedService(options: HostedServiceOptions) {
         return await value.app.fetch(new Request(`${options.origin}${route}`, { method: "POST", signal: request.signal,
           headers: { authorization: `Bearer ${value.token}`, origin: options.origin, "content-type": request.headers.get("content-type") ?? "" }, body: bytes }));
       }
+      const configured = await setup.handle(request, identity); if (configured) return configured;
       if (route.startsWith("/api/space/models/")) return await modelRoute(request, identity);
       if (route === "/api/space/reminders/status" && request.method === "GET") return hostedJson(reminders.status());
       const migrationResult = await migration.handle(request, identity); if (migrationResult) return migrationResult;

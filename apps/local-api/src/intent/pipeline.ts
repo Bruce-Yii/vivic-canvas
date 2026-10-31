@@ -39,11 +39,12 @@ import { observeDecision, type ClauseBuild, type ClausePlan, type DecisionTrace,
 import { runSlotPlanner } from "./slotPlanner.js";
 import { applyOutputChannels, normalizeOutputChannels } from "./channels.js";
 import { splitClauses } from "../decision/split.js";
-import { planDeterministic, countdownControlIssue } from "./plans.js";
+import { planDeterministic } from "./plans.js";
 import { runDecisionOn, multiCardMode, type MultiCardMode } from "../decision/on.js";
 import { feedbackReader, FEEDBACK_PROMPT, withoutFeedback } from "./feedback.js";
 
-export interface IntentRequest { text: string; canvasContext: CanvasContext; attachments?: Attachment[]; continuation?: { utterance: string; question: string }; deviceLocation?: DevicePosition; extensionDefinitions?: unknown[]; task?: DecisionTaskRequest; taskContext?: unknown;  /** Internal task-manager opt-in, never accepted from the HTTP request schema. */
+export interface IntentRequest { text: string; canvasContext: CanvasContext; attachments?: Attachment[]; continuation?: { utterance: string; question: string }; deviceLocation?: DevicePosition; extensionDefinitions?: unknown[]; task?: DecisionTaskRequest; taskContext?: unknown;
+  /** Internal task-manager opt-in, never accepted from the HTTP request schema. */
   offlineReferenceCompatibility?: boolean;
   /** Authenticated host metadata; never accepted by the HTTP body schema. */
   tracePath?: "browser" | "task";
@@ -66,7 +67,7 @@ export interface IntentResult {
   envelope?: z.infer<typeof ActionEnvelopeSchema>;
   message?: string;
   suggestions?: string[];
-  usedProvider?: "rules" | "stepfun" | "deepseek" | "gpt" | "rules-offline" | "search" | "decision";
+  usedProvider?: "rules" | "stepfun" | "gpt" | "deepseek" | "rules-offline" | "search" | "decision";
   trace?: DecisionTrace;
   /** Internal clarification handoff; the task manager removes it from the wire. */
   targetCandidates?: Array<{ id: string; label: string }>;
@@ -88,6 +89,7 @@ export interface PipelineDeps {
   /** Keep verified data/search/schedule adapters, while on-mode fallback skips old broad fast rules. */
   skipFastRules?: boolean;
   slotPlanning?: boolean;
+  compactContext?: boolean;
   routeHint?: Promise<PlannerRouteHint | null>;
   /** Same trace id may arrive pending then complete; persistence must upsert it. */
   onDecisionTrace?: (request: IntentRequest, trace: DecisionTrace, result: IntentResult) => void | Promise<void>;
@@ -102,11 +104,7 @@ export interface PipelineDeps {
   streamFeedback?: boolean;
   search?: { webSearch: (query: string, signal?: AbortSignal) => Promise<SearchEvidence[]>;
     fetchContent?: (url: string, signal?: AbortSignal, article?: boolean) => Promise<FetchEvidence> };
-  planner?: { provider: "gpt" | "stepfun" | "deepseek"; connected: boolean;
-    /** Transport order is (messages, signal, maxTokens, onTextDelta): the token
-     *  cap and the streamed-delta sink are positional, so a sink passed as
-     *  maxTokens silently disables streaming and mis-types the cap. */
-    generate: (messages: ChatMessage[], signal?: AbortSignal, maxTokens?: number, onTextDelta?: (delta: string) => void) => Promise<StepfunResult<unknown>>; isCurrent: () => boolean; };
+  planner?: { readonly provider: "gpt" | "stepfun" | "deepseek"; readonly model?: string; connected: boolean; generate: (messages: ChatMessage[], signal?: AbortSignal, maxTokens?: number, onTextDelta?: (delta: string) => void) => Promise<StepfunResult<unknown>>; isCurrent: () => boolean; };
   isSessionCurrent?: () => boolean;
   data?: { handleDataIntent: (text: string, context: CanvasContext, signal?: AbortSignal, position?: DevicePosition) => Promise<IntentResult | null>;
     locale?: (position?: DevicePosition, signal?: AbortSignal) => Promise<{ kind: "locale"; name: string; admin1?: string; country?: string; country_code?: string; basis: "device" | "network" } | { kind: "clarify" | "error"; message: string }> };
@@ -127,18 +125,6 @@ const PlannerOutputSchema = z.union([
     clarify: z.string().trim().min(1).max(180).optional() }).refine(output => !Object.hasOwn(output, "hostOperation") && (output.actions !== undefined || output.cards !== undefined)),
 ]);
 const OFFLINE_MESSAGE = "未连接模型，当前只做本地规则：这条指令我还不会处理。连接 GPT 或 StepFun 后重试，或先用「倒计时/加待办/显示全部/恢复原视图」。";
-/** The host task wrapper injects a context for every turn. A context that only
- * repeats the whole goal (no clause subset, no subtask, no completed step) is
- * still the user's own sentence, so the rules may answer it. */
-const isScopedSubtask = (taskContext: unknown): boolean => {
-  if (!taskContext || typeof taskContext !== "object" || Array.isArray(taskContext)) return false;
-  const context = taskContext as { active_clause?: unknown; active_clauses?: unknown; active_clause_indexes?: unknown;
-    subtask?: unknown; completed_steps?: unknown; observations?: unknown };
-  return context.active_clause !== undefined || context.active_clauses !== undefined
-    || context.active_clause_indexes !== undefined || context.subtask !== undefined
-    || (Array.isArray(context.completed_steps) && context.completed_steps.length > 0)
-    || (Array.isArray(context.observations) && context.observations.length > 0);
-};
 /** Hybrid planning hands the planner a clause subset; this maps it back to the
  * original split so trace provenance keeps the user's clause numbering. */
 const partialClauseIndexes = (taskContext: unknown): number[] | undefined => {
@@ -181,15 +167,7 @@ export const runIntent = async (req: IntentRequest, deps: PipelineDeps, signal?:
   };
   const execute = (hint = deps.routeHint) => router?.mode === "on" ? runDecisionOn(req, {
     router, hint, telemetry: deps.decisionTelemetry!, isCurrent: deps.isSessionCurrent, multiCard: deps.multiCard,
-    plan: (request, routeHint, planSignal) => {
-      // Main-only has no classifier: the only route evidence is the rules, so a
-      // plan call for the *whole* user sentence must still try them first. A
-      // subset call (the clauses a hybrid pass left over) keeps them skipped so
-      // a leftover clause is never answered by rules that own another clause.
-      const wholeSentence = request.text === req.text && !isScopedSubtask(request.taskContext);
-      const skipFastRules = !(mainOnly && wholeSentence);
-      return legacy(routeHint, { ...request, offlineReferenceCompatibility: false }, false, planSignal, skipFastRules);
-    },
+    plan: (request, routeHint, planSignal) => legacy(routeHint, { ...request, offlineReferenceCompatibility: false }, false, planSignal, true),
   }, signal) : legacy(hint);
   return adapterOnly || plannerOnly ? legacy() : observeDecision(req, deps, signal, execute);
 };
@@ -230,11 +208,9 @@ const runLegacyIntent = async (
       try { deps.onStage?.({ stage: "planner", status: "started", feedback: text }); } catch { /* advisory */ }
     });
     const input = deps.streamFeedback ? messages.map(message => message.role === "system" ? { ...message, content: message.content + FEEDBACK_PROMPT } : message) : messages;
-    // Both transports take (…, maxTokens, onTextDelta): passing the delta sink in
-    // the cap position meant the planner never streamed a first sentence.
-    const result = await measured("planner", () => deps.planner
-      ? deps.planner.generate(input, budget.signal, maxTokens, deps.streamFeedback ? onTextDelta : undefined)
+    const result = await measured("planner", () => deps.planner ? deps.planner.generate(input, budget.signal, maxTokens, deps.streamFeedback ? onTextDelta : undefined)
       : chatJson(credential!, input, { ...deps.stepfun, signal: budget.signal }, { maxTokens, ...(deps.streamFeedback ? { onTextDelta } : {}) }));
+    usedProvider = deps.planner?.provider ?? (deps.stepfun.provider === "deepseek" ? "deepseek" : "stepfun");
     budget.signal.throwIfAborted();
     return result.ok ? { ...result, value: withoutFeedback(result.value) } : result;
   };
@@ -250,23 +226,10 @@ const runLegacyIntent = async (
     const hasImages = Boolean(req.attachments?.length);
     if (!plannerOnly) {
     report("rules", "started");
-    // A numbered list ("1. … 2. … 3. …") or an explicit weekly-plan request
-    // that the existing literal contracts and scene builder can build
-    // end-to-end is deterministic: no classifier or planner call, and no
-    // partial commit of only the first item.
+    // Preserve the deployed all-or-nothing numbered-list / weekly-plan path.
     const deterministic = !hasImages && !continuation && !adapterOnly
       ? await planDeterministic(req.text, req.canvasContext) : null;
     if (deterministic) {
-      // A closed-form host operation resolved by the rules stays exclusive of an
-      // action envelope; the owner still applies it and reports a receipt. An
-      // unresolved/non-timer target is asked about, never submitted or announced.
-      if (deterministic.hostOperation) {
-        const problem = countdownControlIssue(deterministic.hostOperation, req.canvasContext)
-          ?? hostOperationIssue(deterministic.hostOperation, req.canvasContext, { allowUnloadedCountdownState: true });
-        if (problem) return { kind: "clarify", message: problem, usedProvider: "rules" };
-        report("rules", "completed", performance.now() - startedAt);
-        return { kind: "host-operation", hostOperation: deterministic.hostOperation, message: deterministic.say, usedProvider: "rules" };
-      }
       const envelope = assembleEnvelope(deterministic.actions, req.canvasContext.canvasId, deterministic.say);
       if (envelope) {
         report("rules", "completed", performance.now() - startedAt);
@@ -382,7 +345,7 @@ const runLegacyIntent = async (
         return { kind: "error", usedProvider: "rules-offline",
           message: "未配置 DEEPSEEK_API_KEY，DeepSeek 官方快路径不可用。请设置该环境变量并重启本地服务；不会回退 StepFun。" };
       }
-      return { kind: "unknown", message: deps.planner ? "GPT 未连接；本地文字指令仍可使用。请先连接 GPT 或选择 StepFun。" : OFFLINE_MESSAGE, usedProvider: "rules-offline" };
+      return { kind: "unknown", message: deps.planner?.provider === "gpt" ? "GPT 未连接；本地文字指令仍可使用。请先连接 GPT 或选择 StepFun。" : OFFLINE_MESSAGE, usedProvider: "rules-offline" };
     }
     usedProvider = deps.planner?.provider
       ?? (deps.mainProvider === "deepseek" || deps.stepfun.provider === "deepseek" ? "deepseek" : "stepfun");
@@ -418,9 +381,10 @@ const runLegacyIntent = async (
       const planned = await budget.run(() => runSlotPlanner(req, {
         hint: deps.routeHint, definitions, page, travel: deps.travel, signal: budget.signal, usedProvider,
         // Cache identity: provider wins, otherwise the selected model id.
-        model: deps.planner ? "gpt" : credential?.defaultModel ?? deps.mainProvider ?? deps.stepfun.provider ?? "unknown",
+        model: deps.planner?.model ?? deps.planner?.provider ?? credential?.defaultModel ?? deps.mainProvider ?? deps.stepfun.provider ?? "unknown",
         allowTargetCandidates: deps.executionRouter?.mode === "on",
         mainOnly: deps.mainOnly === true,
+        compactContext: deps.compactContext,
         // A hybrid planner call maps its active clause subset back to the original split.
         ...(deps.multiCard !== "off" ? { report: (plans: Array<{ clause: number; contract: string; cardIds: string[] }>) => {
           if (!deps.decisionTelemetry) return;
@@ -445,7 +409,8 @@ const runLegacyIntent = async (
       }));
       if ((deps.planner ? !deps.planner.isCurrent() : deps.credentials.getSecret() !== credential)
         || (deps.isSessionCurrent && !deps.isSessionCurrent())) return { kind: "error", message: "模型连接已变更，旧结果已丢弃。", usedProvider };
-      return planned;
+      return planned.usedProvider && ["stepfun", "gpt", "deepseek"].includes(planned.usedProvider)
+        ? { ...planned, usedProvider: deps.planner?.provider ?? "stepfun" } : planned;
     }
     const system = (reminderMode ? buildReminderSystemPrompt() : buildSystemPrompt() + buildScenePrompt() + extensionScenePrompt(definitions, req.text) + HOST_OPERATION_PROMPT)
       + (req.taskContext ? "\n当前由宿主多阶段任务调度。user JSON 中 task_state 是可信宿主提供的子任务边界，original_goal 是完整目标；只生成本次子任务的内容/动作提案，已执行步骤不要重复。移动/固定/传送/撤销/暂停恢复由宿主后续执行，不因尚有这些步骤而拒绝已完整的内容生成。LLM输出不代表已执行。" : "") + (hasImages

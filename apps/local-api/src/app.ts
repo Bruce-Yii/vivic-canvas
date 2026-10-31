@@ -866,6 +866,7 @@ export const createApp = (deps: AppDeps) => {
       router: requestRouter, onDecisionTrace: deps.onDecisionTrace,
       decisionTelemetry: { plannerCalls: 0, directClauses: 0 },
       slotPlanning: requestRouter?.mode === "shadow" || requestRouter?.mode === "on",
+      compactContext: online && mainProvider === "deepseek" ? true : undefined,
       isSessionCurrent: () => version === providerRevision,
       planner: makePlanner(),
       };
