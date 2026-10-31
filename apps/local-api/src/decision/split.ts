@@ -23,13 +23,63 @@ const SENTENCE_END = /^(?:。|！|!)$/u;
 const trimClause = (text: string): string =>
   text.replace(/^[，,；;。！!\s]+/u, "").replace(/[，,；;。！!\s]+$/u, "").trim();
 
+/** Explicit item markers: "1." / "2、" / "3)" / "（四）" / "一、" / "①". Only a
+ * marker that opens an item counts — at the start, after a newline, or after
+ * sentence punctuation — so a decimal ("1.5 小时") and prose stay content. */
+const ITEM_MARKER = /(?:\d{1,2}\s*[.、)）]|[（(]\s*(?:\d{1,3}|[一二三四五六七八九十]{1,3})\s*[)）]|[一二三四五六七八九十]{1,3}\s*[、.]|[①-⑳])\s*/gu;
+const PUNCTUATION_BOUNDARY = /(?:^|[\n。；;！!？?，,])\s*$/u;
+
+/** A parenthesized or circled item ("（1）", "(二)", "①") is self-delimiting;
+ * an Arabic or bare Chinese marker also needs a real boundary before it so
+ * "版本1.5" and "统一、" stay prose. */
+function opensItem(text: string, index: number, marker: string): boolean {
+  if (index === 0 || /^[（(①-⑳]/u.test(marker)) return true;
+  const before = text.slice(0, index);
+  if (PUNCTUATION_BOUNDARY.test(before)) return true;
+  // A whitespace-separated item ("一、… 二、…", "1. … 2. …"), but never a
+  // marker glued to a number, Latin word or ordinal prefix.
+  return /^\s$/u.test(before.slice(-1)) && !/[A-Za-z0-9第]$/u.test(before.trimEnd());
+}
+
+/** The item texts of an explicit numbered list, or `[]` when the text is not
+ * one. A list is structural input ("1. … 2. …"), never note body. */
+function markedItems(text: string): string[] {
+  const starts: Array<{ index: number; end: number }> = [];
+  for (const match of text.matchAll(ITEM_MARKER)) {
+    const index = match.index ?? 0;
+    if (!opensItem(text, index, match[0])) continue;
+    const next = text.slice(index + match[0].length, index + match[0].length + 1);
+    // "1.5" is a decimal; "1、5个" is item 1 whose content starts with a digit.
+    if (/\.$/u.test(match[0].trimEnd()) && /\d/u.test(next)) continue;
+    starts.push({ index, end: index + match[0].length });
+  }
+  if (starts.length < 2) return [];
+  return starts.map((start, index) => trimClause(text.slice(start.end, starts[index + 1]?.index ?? text.length)))
+    .filter(Boolean);
+}
+
+/** True when the text carries at least two explicit list markers. */
+export const isNumberedList = (text: string): boolean => markedItems(text.trim()).length > 1;
+
 /** Split only independent clauses; quoted content and conditional/negative requests stay intact. */
 export function splitClauses(text: string): string[] {
   const original = text.trim();
   if (!original || /不要|别|如果|要是/.test(original)) return original ? [original] : [];
   // Explicit literal list grammar owns its contents, including verbs such as
-  // “写周报”. Its parser refuses subsequent card/host operations and conditions.
+  // "写周报". Its parser refuses subsequent card/host operations and conditions.
   if (parseTodoSlots(original) != null) return [original];
+  // "1. … 2. … 3. …" (also 一、/（1）/①, with or without newlines) is a list of
+  // separate requests: every item is split, then the release cap folds overflow
+  // into the last clause instead of dropping it.
+  const items = markedItems(original);
+  if (items.length > 1) {
+    const clauses = items.flatMap(item => splitSentences(item));
+    return clauses.length <= 3 ? clauses : [clauses[0]!, clauses[1]!, clauses.slice(2).join("，")];
+  }
+  return splitSentences(original);
+}
+
+function splitSentences(original: string): string[] {
   const quoteEnds: Record<string, string> = { "“": "”", "‘": "’", '"': '"', "'": "'", "「": "」", "『": "』" };
   const parts: string[] = [];
   let start = 0, quote = "";

@@ -11,6 +11,7 @@ import { normalizeOutputChannels, applyOutputChannels } from "../intent/channels
 import { scheduledReminderIntent } from "../intent/scheduledReminders.js";
 import { looksLikeDateCountdown } from "../scenes/index.js";
 import { splitClauses } from "./split.js";
+import { planDeterministic } from "../intent/plans.js";
 import { resolveTarget } from "./target.js";
 import { numberedChoiceQuestion } from "./confirmation.js";
 import { isBuiltinRoute, type IntentRouter } from "./router.js";
@@ -300,6 +301,28 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
     const directRows = rows.every(row => !row.failed && row.route && row.probability >= .8
       && !row.none && isBuiltinRoute(row.route) && deps.router.directRoutes?.has(row.route) && Object.hasOwn(CARD_CONTRACTS, row.route));
     let context: CardBuildContext = { ...req.canvasContext, cards: [...req.canvasContext.cards], focusHistory: [...req.canvasContext.focusHistory] };
+    // A numbered list ("1. … 2. … 3. …") or an explicit weekly-plan request
+    // that the existing contracts build end-to-end never waits for a planner.
+    // Every clause is built and validated together; one clause can never be
+    // committed while the rest are silently dropped.
+    const deterministic = await planDeterministic(req.text, req.canvasContext);
+    if (deterministic) {
+      check();
+      const prebuilt = new Set(deterministic.groups.flatMap(group => group.cardIds));
+      const issue = actionExecutionIssue(deterministic.actions, req.canvasContext, prebuilt);
+      if (issue) return { kind: "clarify", message: "本次提案未通过校验，请补充或分开提出要求。", usedProvider: "rules" };
+      const channels = normalizeOutputChannels({ say: deterministic.say },
+        clauses.length > 1 ? "已处理这几项要求。" : "已处理。");
+      const envelope = ActionEnvelopeSchema.safeParse({ schemaVersion: "0.6", requestId: `direct_${randomUUID()}`,
+        canvasId: req.canvasContext.canvasId, ...applyOutputChannels(deterministic.actions, channels) });
+      if (!envelope.success) return { kind: "clarify", message: "这句话包含的操作过多或参数不完整，请分开发送。", usedProvider: "rules" };
+      deps.telemetry.directClauses += deterministic.groups.length;
+      deps.telemetry.plans = [...(deps.telemetry.plans ?? []),
+        ...deterministic.groups.map(group => ({ clause: group.clause, contract: group.contract,
+          cardIds: group.cardIds, source: "rules" as const }))].sort((a, b) => a.clause - b.clause);
+      deps.telemetry.built = deterministic.groups.map(group => ({ clause: group.clause, cards: group.cards, n: group.cards.length }));
+      return { kind: "envelope", envelope: envelope.data, usedProvider: "rules" };
+    }
     let actions: Action[] = [];
     let directClauses = 0;
     let say: string | undefined;

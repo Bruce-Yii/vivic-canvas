@@ -3,6 +3,7 @@ import { z } from "zod";
 import { ROUTES } from "@vivic/contracts";
 import type { IntentRequest, IntentResult, PipelineDeps } from "../intent/pipeline.js";
 import { splitClauses } from "./split.js";
+import { planDeterministic } from "../intent/plans.js";
 import { hasExplicitCardReference, resolveTarget, targetedRoutes } from "./target.js";
 import type { TargetResult } from "./target.js";
 import { isBuiltinRoute, type RouteResult } from "./router.js";
@@ -89,6 +90,25 @@ export async function observeDecision(req: IntentRequest, deps: PipelineDeps, si
     let shadowContext = req.canvasContext;
     // A focus clause sets the working card for a follow-up that names none.
     let inheritedTargetId: string | undefined;
+    // A deterministic numbered list or weekly-plan request needs no classifier:
+    // publish rule rows for every clause so the trace keeps route provenance and
+    // the proposal path commits all clauses in one batch.
+    const deterministic = !req.attachments?.length && !req.continuation
+      ? await planDeterministic(req.text, req.canvasContext) : null;
+    if (deterministic && deterministic.routes.length === clauses.length) {
+      for (const [index, text] of clauses.entries()) {
+        const route = deterministic.routes[index]!;
+        output.push({ text, route, probability: 1, probabilities: { [route]: 1 }, none: false, latencyMs: 0,
+          failed: false, source: "rules", routeSource: "rules" });
+      }
+      rows = output;
+      publishAll(output);
+      const route = deterministic.routes[0]!;
+      publishHint({ result: { route, probability: 1, probabilities: { [route]: 1 }, none: false, latencyMs: 0 },
+        target: Promise.resolve(undefined), all: Promise.resolve(output) });
+      decisionElapsedMs = Math.round(performance.now() - start);
+      return output;
+    }
     for (const [index, text] of clauses.entries()) {
       const clauseStarted = performance.now();
       try {

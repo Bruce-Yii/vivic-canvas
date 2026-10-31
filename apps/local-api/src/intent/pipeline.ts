@@ -39,6 +39,7 @@ import { observeDecision, type ClauseBuild, type ClausePlan, type DecisionTrace,
 import { runSlotPlanner } from "./slotPlanner.js";
 import { applyOutputChannels, normalizeOutputChannels } from "./channels.js";
 import { splitClauses } from "../decision/split.js";
+import { planDeterministic } from "./plans.js";
 import { runDecisionOn, multiCardMode, type MultiCardMode } from "../decision/on.js";
 import { feedbackReader, FEEDBACK_PROMPT, withoutFeedback } from "./feedback.js";
 
@@ -223,6 +224,19 @@ const runLegacyIntent = async (
     const hasImages = Boolean(req.attachments?.length);
     if (!plannerOnly) {
     report("rules", "started");
+    // A numbered list ("1. … 2. … 3. …") or an explicit weekly-plan request
+    // that the existing literal contracts and scene builder can build
+    // end-to-end is deterministic: no classifier or planner call, and no
+    // partial commit of only the first item.
+    const deterministic = !hasImages && !continuation && !adapterOnly
+      ? await planDeterministic(req.text, req.canvasContext) : null;
+    if (deterministic) {
+      const envelope = assembleEnvelope(deterministic.actions, req.canvasContext.canvasId, deterministic.say);
+      if (envelope) {
+        report("rules", "completed", performance.now() - startedAt);
+        return { kind: "envelope", envelope, usedProvider: "rules" };
+      }
+    }
     const scheduled = !hasImages && !continuation && !(deps.slotPlanning && splitClauses(req.text).length > 1)
       ? scheduledReminderIntent(req.text, req.canvasContext) : null;
     if (scheduled) {
