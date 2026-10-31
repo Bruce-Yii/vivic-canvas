@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { fetchWeatherHere } from "@/ai/api";
 import { FEEDBACK_RANK, newFeedbackSlot, reduceFeedback, type FeedbackEvent, type FeedbackSlot } from "@/ai/intentStream";
+import { planPreset } from "@/ai/presetFeedback";
 import { runDecisionTask, cancelDecisionTask } from "@/ai/decisionTask";
 import { cancelWakeActivity, getWakeActivity, isWakeInputBusy, subscribeWakeActivity } from "@/ai/wakeActivity";
 import { fixForRequest, freshFix, looksLikeWeather, subscribeLocation } from "@/location/deviceLocation";
@@ -120,6 +121,8 @@ export const ControlApp = () => {
     slowTimer: ReturnType<typeof setTimeout>;
     deadlineTimer: ReturnType<typeof setTimeout>;
     feedbackTimer: ReturnType<typeof setTimeout>;
+    /** Pending quiet delay before a known route's scene copy may paint. */
+    presetTimer?: ReturnType<typeof setTimeout>;
     expiresAt: number;
     /** The single visible feedback slot; `text` never changes outside its reducer. */
     slot: FeedbackSlot;
@@ -155,6 +158,7 @@ export const ControlApp = () => {
     clearTimeout(current.slowTimer);
     clearTimeout(current.deadlineTimer);
     clearTimeout(current.feedbackTimer);
+    clearTimeout(current.presetTimer);
     host?.setActivity(current.requestId, null);
     setBusy(false);
     setFeedback("已取消本次请求");
@@ -480,6 +484,7 @@ export const ControlApp = () => {
       const finish = (text: string) => {
         const current = pending.current;
         if (current && current.requestId === requestId) {
+          if (current.presetTimer !== undefined) { clearTimeout(current.presetTimer); current.presetTimer = undefined; }
           const next = reduceFeedback(current.slot, { type: "settle", text, requestId,
             elapsedMs: Date.now() - submittedAt, quiet: QUIET_SUCCESS_FEEDBACK.has(text.trim()) });
           current.slot = next;
@@ -499,10 +504,32 @@ export const ControlApp = () => {
           if (!isCurrent()) return;
           // The slow hint may only replace a still-neutral line; the reducer keeps
           // every later stage frame (and a second hint) from overwriting it.
-          if (applyFeedback({ type: "slow", text: "响应较慢，仍在处理…", requestId }))
+          if (applyFeedback({ type: "slow", text: "响应较慢，仍在处理…", requestId })) {
+            const active = pending.current;
+            if (active) { clearTimeout(active.presetTimer); active.presetTimer = undefined; }
             void speakShortFeedback("稍等", { requestId: `${requestId}:slow`, signal: controller.signal });
+          }
         }, 5000),
         expiresAt, slot: newFeedbackSlot(requestId, "让我想想…"),
+      };
+      // A route hint is telemetry first. Its scene copy waits out the quiet delay
+      // so a fast completion never flashes it; a model sentence, a slow hint or a
+      // result all win without waiting for the delay or a minimum display time.
+      const schedulePreset = (route: string) => {
+        const current = pending.current;
+        if (!current || current.requestId !== requestId) return;
+        const plan = planPreset(route, { now: Date.now(), tier: current.slot.tier,
+          settled: current.slot.settled, scheduled: current.presetTimer !== undefined });
+        if (!plan) return;
+        current.presetTimer = setTimeout(() => {
+          current.presetTimer = undefined;
+          if (!isCurrent()) return;
+          if (current.slot.settled || current.slot.tier !== "neutral") return;
+          if (!applyFeedback({ type: "preset", text: plan.text, route: plan.route, at: Date.now(), requestId })) return;
+          // Scene copy owns the line now; drop the 300ms "我看看" short voice.
+          clearTimeout(current.feedbackTimer);
+          cancelShortFeedback(requestId);
+        }, plan.delayMs);
       };
       setBusy(true);
       setFeedback("正在理解你的指令…");
@@ -528,6 +555,9 @@ export const ControlApp = () => {
               const sentence = event.feedback && (event.stage === "planner" || event.feedbackSource === "preset")
                 ? event.feedback : undefined;
               if (sentence) {
+                // A model sentence replaces the neutral line (or a visible preset)
+                // immediately; its pending scene copy must not fire afterwards.
+                if (current.presetTimer !== undefined) { clearTimeout(current.presetTimer); current.presetTimer = undefined; }
                 if (applyFeedback({ type: "progress", stage: event.stage, feedback: sentence,
                   feedbackSource: event.feedbackSource, route: event.route, requestId })) {
                   clearTimeout(current.slowTimer);
@@ -540,6 +570,9 @@ export const ControlApp = () => {
               // without writing the visible line, so they cannot overwrite neutral,
               // the slow hint, a preset sentence or the model first sentence.
               applyFeedback({ type: "progress", stage: event.stage, route: event.route, feedbackSource: event.feedbackSource, requestId });
+              // The route is decided; its scene copy may paint after the quiet delay
+              // only if the line is still neutral at that point.
+              if (!event.feedback && event.route) schedulePreset(event.route);
               window.dispatchEvent(new CustomEvent("vivic:feedback-trace", { detail: { requestId, source: "stage",
                 stage: event.stage, ...(event.route ? { route: event.route } : {}), suppressed: true, at: Date.now() } }));
             },
@@ -637,6 +670,7 @@ export const ControlApp = () => {
             clearTimeout(pending.current.slowTimer);
             clearTimeout(pending.current.deadlineTimer);
             clearTimeout(pending.current.feedbackTimer);
+            clearTimeout(pending.current.presetTimer);
             pending.current = null;
             host.setActivity(requestId, null);
             setBusy(false);
