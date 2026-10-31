@@ -47,7 +47,7 @@ describe("same-call feedback metadata", () => {
   it("publishes during the same generation, preserves final slots and ignores aborted late feedback", async () => {
     const events: unknown[] = [], controller = new AbortController();
     let delta: ((value: string) => void) | undefined;
-    const generate = vi.fn(async (_messages, _signal, onTextDelta) => {
+    const generate = vi.fn(async (_messages, _signal, _maxTokens, onTextDelta) => {
       delta = onTextDelta;
       onTextDelta('{"feedback":"我来整理这份内容。",');
       expect(events).toContainEqual(expect.objectContaining({ feedback: "我来整理这份内容。" }));
@@ -96,8 +96,10 @@ describe("same-call feedback metadata", () => {
     } finally { app.dispose(); }
   });
   it("keeps ordinary JSON client planning unchanged", async () => {
-    const generate = vi.fn(async (messages, _signal, onTextDelta) => {
+    const generate = vi.fn(async (messages, _signal, maxTokens, onTextDelta) => {
       expect(onTextDelta).toBeUndefined(); expect(messages[0].content).not.toContain('"feedback"字段');
+      // The token cap stays a number: the delta sink is positional after it.
+      expect(typeof maxTokens).toBe("number");
       return { ok: true as const, value: { contract: "note", slots: { text: "阅读草稿" } } };
     });
     const result = await runIntent({ text: "整理一份阅读草稿", canvasContext: emptyContext() }, {
