@@ -4,6 +4,7 @@ import { runIntent, type PipelineDeps } from "../src/intent/pipeline.js";
 import { CredentialStore } from "../src/credentials.js";
 import { splitClauses } from "../src/decision/split.js";
 import { emptyContext } from "./helpers.js";
+import { matchRules } from "../src/intent/rules.js";
 
 function setup(reply: unknown = { clarify: "请补充要求。" }) {
   const classify = vi.fn(async (text: string) => {
@@ -88,5 +89,11 @@ describe("complete approved contracts precede classification", () => {
     expect(splitClauses(text)).toEqual(["加待办：买牛奶", operation]);
     const result = await runIntent({ text, canvasContext: emptyContext() }, f.deps);
     expect(result.envelope).toBeUndefined(); expect(f.generate).toHaveBeenCalled();
+  });
+  it.each(["帮我创建一个倒计时 30 分钟。", "创建倒计时30分钟", "倒计时30分钟", "30分钟倒计时"])("fast-paths countdown regardless of word order: %s", text => {
+    const hit = matchRules(text, emptyContext());
+    expect(hit).not.toBeNull();
+    const create = hit!.actions.find(action => action.type === "card.create");
+    expect(create?.type === "card.create" && create.card.type).toBe("CountdownCard");
   });
 });
