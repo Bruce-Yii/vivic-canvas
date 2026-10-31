@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { offlineReference } from "./offlineReference.js";
 import { z } from "zod";
-import { ActionEnvelopeSchema, CardRecordSchema, HostOperationSchema, type Action, type DecisionTaskRequest, type DecisionTaskStatus, type HostOperation } from "@vivic/contracts";
+import { ActionEnvelopeSchema, CardRecordSchema, HostOperationSchema, type Action, type DecisionTaskRequest, type DecisionTaskStatus, type FeedbackScene, type FeedbackTargetState, type HostOperation } from "@vivic/contracts";
 import { HOST_OPERATION_PROMPT, hostOperationIssue } from "../decision/hostOperations.js";
 import type { CredentialStore } from "../credentials.js";
 import type { CanvasContext } from "../schemas.js";
@@ -75,7 +75,7 @@ export interface IntentResult {
 export interface PipelineDeps {
   travel?: TravelProvider;
   /** Metadata only. Observer failures must never affect a user's request. */
-  onStage?: (event: { stage: "rules" | "data" | "search" | "decision" | "planner" | "validation" | "travel" | "total"; status: "started" | "completed" | "failed"; elapsedMs?: number; feedback?: string }) => void;
+  onStage?: (event: { stage: "rules" | "data" | "search" | "decision" | "planner" | "validation" | "travel" | "total"; status: "started" | "completed" | "failed"; elapsedMs?: number; feedback?: string; route?: string; scene?: FeedbackScene; targetState?: FeedbackTargetState; feedbackSource?: "model" | "preset" }) => void;
   decision?: Pick<DecisionManager, "score">;
   router?: IntentRouter;
   /** Preserve the same on-mode router through the task wrapper without observing twice. */

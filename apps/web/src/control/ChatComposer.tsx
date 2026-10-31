@@ -64,7 +64,6 @@ export const ChatComposer = ({
   const [text, setText] = useState(templateDraft);
   useEffect(() => { if (templateDraft) consumeTemplateDraft(templateDraft); }, [templateDraft]);
   const composing = useRef(false);
-  const [elapsed, setElapsed] = useState(0);
   const latestDraft = useRef(text); latestDraft.current = text;
   const [templateNotice, setTemplateNotice] = useState("");
   useEffect(() => {
@@ -107,12 +106,6 @@ export const ChatComposer = ({
     window.addEventListener("vivic:voice-config-change", clear);
     return () => { active = false; clearInterval(timer); window.removeEventListener("vivic:provider-change", clear); window.removeEventListener("vivic:voice-config-change", clear); };
   }, []);
-  useEffect(() => {
-    if (!busy) { setElapsed(0); return; }
-    const began = Date.now();
-    const timer = setInterval(() => setElapsed(Math.floor((Date.now() - began) / 1000)), 1000);
-    return () => clearInterval(timer);
-  }, [busy]);
 
   const submit = () => {
     const value = text.trim();
@@ -173,13 +166,9 @@ export const ChatComposer = ({
           <p className="vivic-composer-card-hint">你在识别期间改过输入，已保留现有文字。</p>
           <button type="button" className="vivic-chip" onClick={() => { setText(unappliedVoice); setUnappliedVoice(null); }}>使用这段转写</button>
         </HarkSurface>}
-        {(busy || speech.status === "loading" || speech.status === "playing") && <div className="vivic-composer-progress" data-vivic-command-progress>
-          {speech.status === "playing" && !busy ? <HarkIcon name="volume" size={16} aria-hidden="true" /> : <HarkIcon name="refresh" className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />}
-          <span>{busy ? "正在处理…" : speech.status === "loading" ? "正在准备语音" : "正在说话"}</span>
-          {busy && <span className="vivic-composer-progress-time" data-vivic-wait-seconds>{elapsed} 秒</span>}
-          {busy && <button type="button" className="vivic-chip vivic-chip-quiet" onClick={() => { setWakeCancelKey(value => value + 1); onCancel(); }} data-vivic-command-cancel>
-            取消
-          </button>}
+        {(speech.status === "loading" || speech.status === "playing") && <div className="vivic-composer-progress" data-vivic-command-progress>
+          {speech.status === "playing" ? <HarkIcon name="volume" size={16} aria-hidden="true" /> : <HarkIcon name="refresh" className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />}
+          <span>{speech.status === "loading" ? "正在准备语音" : "正在说话"}</span>
         </div>}
         <VoiceNote autoExecute={autoVoice && voiceConfig.stt !== "local"} />
         <div hidden={!parts.active}>

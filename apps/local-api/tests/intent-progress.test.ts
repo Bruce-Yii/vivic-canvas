@@ -131,6 +131,36 @@ describe("intent progress and metadata diagnostics", () => {
       for (const privateValue of ["倒计时一分钟", authed.authorization, "test-token-0123456789"]) expect(log).not.toContain(privateValue);
     } finally { app.dispose(); }
   });
+  it("publishes targetState after the route hint so the client can gate action copy", async () => {
+    const router: IntentRouter = { mode: "on", directRoutes: new Set(),
+      routeUtterance: async () => ({ route: "focus", probability: .99, probabilities: { focus: .99 }, none: false, latencyMs: 0 }),
+      chooseTarget: async () => null };
+    const app = createApp({ config: testConfig(), router });
+    try {
+      const response = await app.request("/api/intent", { method: "POST", headers: { ...authed, accept: "text/event-stream" },
+        body: JSON.stringify({ text: "聚焦便签「会议记录」", canvasContext: emptyContext([{ id: "card-1", type: "NoteCard",
+          displayProps: { text: "会议记录" }, sourceDataSummary: {},
+          layout: { x: 0, y: 0, width: 320, height: 120, pinned: false } }]) }) });
+      const text = await response.text();
+      expect(text).toContain('"route":"focus"');
+      expect(text).toContain('"targetState":"resolved"');
+    } finally { app.dispose(); }
+  });
+  it("publishes a safe scene hint for multi-clause and continuation paths instead of an empty wait", async () => {
+    const app = createApp({ config: testConfig() });
+    try {
+      const multi = await app.request("/api/intent", { method: "POST", headers: { ...authed, accept: "text/event-stream" },
+        body: JSON.stringify({ text: "帮我记个便笺：明天交周报；加一个待办：买牛奶", canvasContext: emptyContext() }) });
+      const multiText = await multi.text();
+      expect(multiText).toContain('"scene":"multi"');
+      expect(multiText).toContain("event: result");
+
+      const follow = await app.request("/api/intent", { method: "POST", headers: { ...authed, accept: "text/event-stream" },
+        body: JSON.stringify({ text: "杭州", continuation: { utterance: "明天天气", question: "你在哪个城市？" },
+          canvasContext: emptyContext() }) });
+      expect(await follow.text()).toContain('"scene":"continuation"');
+    } finally { app.dispose(); }
+  });
   it("preserves authentication, strict input validation and JSON clients", async () => {
     const app = createApp({ config: testConfig(), onDiagnostic: () => { throw new Error("observer failure"); } });
     try {

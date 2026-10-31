@@ -107,6 +107,10 @@
   line-height: 1.6;
   text-align: center;
   overflow-wrap: anywhere;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   opacity: 0;
@@ -115,6 +119,7 @@
   pointer-events: none;
 }
 .vivic-chat-status[data-visible] { opacity: 1; transform: none; }
+.vivic-chat-status-cancel { flex: none; display: inline-flex; align-items: center; gap: 4px; pointer-events: auto; }
 @media (prefers-reduced-motion: reduce) {
   .vivic-chat-status { transition: none; }
   .vivic-user-card, .vivic-user-layer-drop, .vivic-user-layer-notice { animation: none; }
