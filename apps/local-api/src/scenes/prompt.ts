@@ -30,7 +30,7 @@ const INTENT: Record<(typeof SCENES)[number]["id"], string> = {
   countdown: "关注距离某个日期还剩多久（生日/考试/纪念日/假期），包括“离…还有多少天”这类提问：建卡，并在 spokenText 里直接说出天数。用户说“还有 N 天”时 targetDate 就是 today 加 N 天（如 today=2026-10-17、还有 25 天 → 2026-11-11），直接建卡，不要追问具体日期",
   academic_paper: "整理学术论文：标题、作者、来源、DOI、摘要",
   photo_gallery: "展示多张相互独立的照片",
-  weekly_schedule: "一周内或某天具体几点做什么的安排",
+  weekly_schedule: "一周内或某天具体几点做什么的安排。只给出上午/下午/晚上等时段、没有给出钟点时，不得填写 start/end；必须把时段词原样写进该事项的 title（如「上午 开会」，契约允许的文本字段），不要编造具体钟点，也不要因为缺少钟点就省略时段",
   todo_list: "一系列需要勾选完成的任务",
   project_roadmap: "多阶段、有里程碑的长期项目规划",
   data_visualization: "用户给出的数值的趋势、分布或统计",

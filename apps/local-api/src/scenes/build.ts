@@ -41,7 +41,7 @@ function groundingIssue(scene: ParsedScene, context: SceneBuildContext): SceneIs
   const day = (value: string | undefined, field: string) => value === undefined || groundedDate(corpus, value) ? null
     : { issue: `${scene.scene}.${field} 日期不在用户的话里，不能推测；缺日期时请 clarify`, ask: "请告诉我具体日期，我再生成卡片。" };
   const clock = (value: string | undefined, field: string) => value === undefined || groundedTime(corpus, value) ? null
-    : { issue: `${scene.scene}.${field} 时间不在用户的话里，不能推测；没有时间就省略` };
+    : { issue: `${scene.scene}.${field} 时间不在用户的话里，不能推测；把用户说的时段原样写进该事项标题，不要编造钟点、不要追问` };
   const first = (...checks: Array<SceneIssue | null>) => checks.find(Boolean) ?? null;
   switch (scene.scene) {
     case "travel_offers": return { issue: "旅游卡必须由服务适配器构建，禁止模型直接创建结果" };
