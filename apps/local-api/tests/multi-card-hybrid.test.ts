@@ -4,6 +4,7 @@ import { CredentialStore } from "../src/credentials.js";
 import { IntentResponseSchema, type CanvasContext } from "../src/schemas.js";
 import { runIntent, type IntentResult, type PipelineDeps } from "../src/intent/pipeline.js";
 import type { IntentRouter, RouteResult } from "../src/decision/router.js";
+import { SEARCH_PROVIDER, type SearchEvidence } from "../src/search/index.js";
 import type { ChatMessage, StepfunResult } from "../src/stepfun.js";
 
 const originalMode = process.env.VIVIC_MULTI_CARD_MODE;
@@ -24,6 +25,8 @@ const routeFor = (text: string): IntentRouteId => {
   if (/显示全部/.test(text)) return "overview";
   if (/恢复原视图/.test(text)) return "restore";
   if (/撤销/.test(text)) return "undo" as IntentRouteId;
+  if (/查|搜|天气/.test(text)) return "search";
+  if (/笑话|聊天/.test(text)) return "chat";
   if (/聚焦|看看这张/.test(text)) return "focus";
   if (/便签|便笺|笔记/.test(text)) return "note";
   if (/待办|清单/.test(text)) return "todo";
@@ -65,6 +68,10 @@ const cards = (result: IntentResult) =>
   result.envelope?.actions.flatMap(action => action.type === "card.create" ? [CardRecordSchema.parse(action.card)] : []) ?? [];
 const seconds = (card: { sourceData: Record<string, unknown> }) =>
   Math.round((Date.parse(String(card.sourceData.targetAt)) - Date.parse(String(card.sourceData.startedAt))) / 1000);
+const searchRows: SearchEvidence[] = ["结果一", "结果二"].map((title, index) => ({
+  title, url: `https://example.com/hybrid/${index}`, snippet: `${title} 的摘要。`,
+  provider: SEARCH_PROVIDER, fetchedAt: "2026-10-15T06:00:00.000Z", readFullPage: false,
+}));
 
 // Two rule clauses, two clauses that need the model in one sentence.
 const mixed = "帮我记个便签交周报，然后过五分钟叫我休息，再过十分钟叫我喝水";
@@ -198,6 +205,25 @@ describe("VIVIC_MULTI_CARD_MODE=hybrid proposes literal clauses and plans only t
     expect(r.trace).toMatchObject({ plannerCalls: 1, directClauses: 2 });
   });
 
+  it("preserves clause order when a literal clause sits between two planned clauses", async () => {
+    process.env.VIVIC_MULTI_CARD_MODE = "hybrid";
+    const f = setup();
+    // [planner(0), rule(1), planner(2)]: the old merge hoisted both planned
+    // segments to clause 0 and would emit timer, timer, note.
+    const r = await runIntent({ text: "过五分钟叫我休息，然后记个便签交周报，再过十分钟叫我喝水", canvasContext: context() }, f.deps);
+    expect(r.kind, JSON.stringify(r)).toBe("envelope");
+    expect(f.generate).toHaveBeenCalledTimes(1);
+    expect(f.requests[0]!.clauses).toEqual(["过五分钟叫我休息", "过十分钟叫我喝水"]);
+    const created = cards(r);
+    expect(created.map(card => card.type)).toEqual(["CountdownCard", "NoteCard", "CountdownCard"]);
+    expect(created[1]!.displayProps).toEqual({ text: "交周报" });
+    expect(created.slice(0, 1).concat(created.slice(2)).map(card => seconds(card))).toEqual([300, 600]);
+    expect(r.trace?.plans?.map(plan => [plan.clause, plan.contract, plan.source])).toEqual([
+      [0, "countdown", "planner"], [1, "note", "rules"], [2, "countdown", "planner"],
+    ]);
+    expect(r.trace).toMatchObject({ plannerCalls: 1, directClauses: 1 });
+  });
+
   it("keeps a single-card multi-item request as one card with zero planner calls", async () => {
     process.env.VIVIC_MULTI_CARD_MODE = "hybrid";
     const f = setup();
@@ -231,6 +257,52 @@ describe("hybrid stays atomic when any clause is uncertain", () => {
     expect(r.kind).toBe("clarify");
     expect(r.envelope).toBeUndefined();
     expect(f.generate).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([
+    ["a duplicate clause", [
+      { contract: "countdown", clause: 0, slots: { seconds: 300, text: "休息" } },
+      { contract: "countdown", clause: 0, slots: { seconds: 600, text: "喝水" } },
+    ]],
+    ["an out-of-subset clause", [
+      { contract: "countdown", clause: 0, slots: { seconds: 300, text: "休息" } },
+      { contract: "countdown", clause: 2, slots: { seconds: 600, text: "喝水" } },
+    ]],
+    ["an extra plan", [
+      { contract: "countdown", clause: 0, slots: { seconds: 300, text: "休息" } },
+      { contract: "countdown", clause: 1, slots: { seconds: 600, text: "喝水" } },
+      { contract: "note", clause: 1, slots: { text: "多出来的一项" } },
+    ]],
+  ])("clarifies on %s instead of committing extra or reordered cards", async (_label, plans) => {
+    process.env.VIVIC_MULTI_CARD_MODE = "hybrid";
+    const f = setup(() => ({ plans, say: "已完成。", text: "已完成。" }));
+    const r = await runIntent({ text: mixed, canvasContext: context() }, f.deps);
+    expect(r.kind).toBe("clarify");
+    expect(r.envelope).toBeUndefined();
+    expect(cards(r)).toHaveLength(0);
+    expect(f.generate).toHaveBeenCalledTimes(2);
+  });
+
+  it("clarifies when a single remaining clause resolves to a search instead of committing the literal segment", async () => {
+    process.env.VIVIC_MULTI_CARD_MODE = "hybrid";
+    const f = setup(() => ({ contract: "search", slots: { kind: "search", query: "明天天气" },
+      say: "正在查询。", text: "正在查询明天天气。" }));
+    f.deps.search = { webSearch: async () => searchRows };
+    const r = await runIntent({ text: "帮我记个便签交周报，然后明天北京天气", canvasContext: context() }, f.deps);
+    expect(r.kind).toBe("clarify");
+    expect(r.envelope).toBeUndefined();
+    expect(cards(r)).toHaveLength(0);
+    expect(f.generate).toHaveBeenCalledTimes(1);
+  });
+
+  it("clarifies when a single remaining clause returns only channels and no card", async () => {
+    process.env.VIVIC_MULTI_CARD_MODE = "hybrid";
+    const f = setup(() => ({ contract: "chat", slots: {}, say: "好的。", text: "好的。" }));
+    const r = await runIntent({ text: "帮我记个便签交周报，然后讲个笑话", canvasContext: context() }, f.deps);
+    expect(r.kind).toBe("clarify");
+    expect(r.envelope).toBeUndefined();
+    expect(cards(r)).toHaveLength(0);
+    expect(f.generate).toHaveBeenCalledTimes(1);
   });
 
   it("clarifies when the remaining clause resolves to a host operation", async () => {
