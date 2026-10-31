@@ -76,6 +76,16 @@ function todoContext() {
   ]);
 }
 
+/** accept20b sc-30 fixture: one todo card whose second item is 买牛奶. */
+function accept20bTodoContext() {
+  return emptyContext([
+    { id: "TEST-week", type: "TodoCard", displayProps: { title: "本周待办", items: [
+      { id: "item-1", text: "交周报", done: false }, { id: "item-2", text: "买牛奶", done: false },
+      { id: "item-3", text: "预约牙医", done: false },
+    ] }, sourceDataSummary: {}, layout: { x: 0, y: 0, width: 288, height: 185, pinned: false } },
+  ]);
+}
+
 describe("runIntent slot planning with the shared shadow route", () => {
   it("canonicalizes a registered scene label while preserving slots and grounding checks", async () => {
     const f = setup("generate", [{ contract: "option_comparison", slots: { title: "参数对比", options: ["iPhone", "华为"], criteria: [{ name: "尺寸", values: [6.1, 6.7], unit: "寸" }] } }]);
@@ -370,6 +380,26 @@ describe("multi-intent slot proposals are complete and atomic", () => {
     expect(result.kind).toBe("envelope");
     expect(result.envelope!.actions).toContainEqual({ type: "card.focus", targetId: "TEST-left" });
     expect(result.envelope!.actions).toContainEqual({ type: "card.highlight", targetId: "TEST-left", itemId: "TEST-second" });
+  });
+
+  // accept20b sc-30: the item was named by its own text ("买牛奶那条"), not an
+  // ordinal, so the host must resolve item-2 instead of highlighting the card.
+  it("highlights the todo item named by its text instead of the whole card", async () => {
+    const f = setup("highlight", [{ contract: "highlight", slots: {}, say: "已高亮。", text: "已高亮买牛奶。" }]);
+    vi.mocked(f.router.chooseTarget).mockResolvedValue({ choice: "TEST-week", probability: .97, latencyMs: 1 });
+    const result = await runIntent({ text: "高亮一下买牛奶那条", canvasContext: accept20bTodoContext() }, f.deps);
+    expect(result.kind, JSON.stringify(result)).toBe("envelope");
+    expect(result.envelope!.actions).toContainEqual({ type: "card.highlight", targetId: "TEST-week", itemId: "item-2" });
+  });
+
+  it("keeps a card-level highlight when the clause names no item", async () => {
+    const f = setup("highlight", [{ contract: "highlight", slots: {}, say: "已高亮。", text: "已高亮。" }]);
+    vi.mocked(f.router.chooseTarget).mockResolvedValue({ choice: "TEST-week", probability: .97, latencyMs: 1 });
+    const result = await runIntent({ text: "高亮一下本周待办", canvasContext: accept20bTodoContext() }, f.deps);
+    expect(result.kind, JSON.stringify(result)).toBe("envelope");
+    const highlight = result.envelope!.actions.find((action): action is Extract<Action, { type: "card.highlight" }> =>
+      action.type === "card.highlight");
+    expect(highlight).toEqual({ type: "card.highlight", targetId: "TEST-week" });
   });
 
   it("retains the first append when a second edit targets the same todo card", async () => {
