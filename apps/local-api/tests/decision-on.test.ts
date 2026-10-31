@@ -79,6 +79,16 @@ describe("approved on-mode contract execution", () => {
     // A turn that committed nothing must not claim per-clause cards.
     expect(r.trace?.decisions.every(row => row.built === undefined)).toBe(true);
   });
+  it("does not turn an invented timer length into a real countdown", async () => {
+    // The user never said how long: a model-supplied 300 s is a guess, not a slot.
+    const f = setup(text => /便签/.test(text) ? "note" : "countdown", { slots: { seconds: 300, text: "喝水" } });
+    const r = await runIntent({ text: "帮我记个便签明天交周报，然后设一个倒计时", canvasContext: context() }, f.deps);
+    expect(r.kind).toBe("clarify");
+    expect(r.envelope).toBeUndefined();
+    expect(created(r)).toHaveLength(0);
+    expect(r.message).toContain("多久");
+    expect(f.generate).toHaveBeenCalledTimes(1);
+  });
   it("uses the whole slots planner for a non-approved clause and does not partially build", async () => {
     const f = setup(text => /便签/.test(text) ? "note" : "focus", { clarify: "请选择要查看的卡片。" });
     const r = await runIntent({ text: "帮我记个便签明天交周报，然后聚焦一张卡片", canvasContext: context() }, f.deps);

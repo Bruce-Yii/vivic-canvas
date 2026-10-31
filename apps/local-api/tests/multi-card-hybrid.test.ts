@@ -390,6 +390,19 @@ describe("hybrid stays atomic when any clause is uncertain", () => {
     expect(f.generate).toHaveBeenCalledTimes(1);
   });
 
+  it("clarifies when the remaining clause never said how long the countdown is", async () => {
+    process.env.VIVIC_MULTI_CARD_MODE = "hybrid";
+    // The literal note clause must not be saved while the timer length is invented.
+    const f = setup(() => ({ plans: [{ contract: "countdown", clause: 0,
+      slots: { seconds: 300, text: "喝水" } }], say: "已设置计时。", text: "已设置 5 分钟计时。" }));
+    const r = await runIntent({ text: "帮我记个便签明天交周报，然后设一个倒计时", canvasContext: context() }, f.deps);
+    expect(r.kind).toBe("clarify");
+    expect(r.envelope).toBeUndefined();
+    expect(cards(r)).toHaveLength(0);
+    expect(r.message).toContain("多久");
+    expect(f.generate).toHaveBeenCalledTimes(1);
+  });
+
   it("rejects a planner segment that drops one active clause instead of saving the others", async () => {
     process.env.VIVIC_MULTI_CARD_MODE = "hybrid";
     const f = setup(() => ({ plans: [{ contract: "countdown", clause: 0,
