@@ -90,7 +90,7 @@ describe("complete approved contracts precede classification", () => {
     const result = await runIntent({ text, canvasContext: emptyContext() }, f.deps);
     expect(result.envelope).toBeUndefined(); expect(f.generate).toHaveBeenCalled();
   });
-  it.each(["帮我创建一个倒计时 30 分钟。", "创建倒计时30分钟", "倒计时30分钟", "30分钟倒计时"])("fast-paths countdown regardless of word order: %s", text => {
+  it.each(["帮我创建一个倒计时 30 分钟。", "创建倒计时30分钟", "倒计时30分钟", "30分钟倒计时", "创建一个 10 分钟的倒计时。", "30 分钟的倒计时。"])("fast-paths countdown regardless of word order: %s", text => {
     const hit = matchRules(text, emptyContext());
     expect(hit).not.toBeNull();
     const create = hit!.actions.find(action => action.type === "card.create");

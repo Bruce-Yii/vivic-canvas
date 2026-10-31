@@ -28,11 +28,16 @@ describe("offline references retain owner receipts after backend-first routing",
     expect((await send("放大倒计时", { ...ctx(), version: 4 }, { id: "offline-case", receipt: { executionId: first.task!.executionId!, status: "succeeded" } })).task?.status).toBe("completed");
     expect(transport).not.toHaveBeenCalled();
   });
-  it("keeps unique delete recoverable through the same task proposal", async () => {
-    const { send } = setup(); const result = await send("删除这个");
-    expect(result.envelope?.actions).toEqual([{ type: "card.delete", targetId: "timer-1" }]);
-    expect(result.task?.status).toBe("awaiting_execution");
-    expect(result.envelope?.spokenText).toContain("可撤销");
+  it("keeps unique delete recoverable only after the host confirmation", async () => {
+    const { send } = setup();
+    const first = await send("删除这个");
+    expect(first.kind).toBe("clarify");
+    expect(first.message).toContain("确定删除");
+    expect(first.envelope).toBeUndefined();
+    const confirmed = await send("确定", ctx(), { id: first.task!.id });
+    expect(confirmed.envelope?.actions).toEqual([{ type: "card.delete", targetId: "timer-1" }]);
+    expect(confirmed.task?.status).toBe("awaiting_execution");
+    expect(confirmed.envelope?.spokenText).toContain("可撤销");
   });
   it.each(["放大倒计时", "删除那个卡片"])("clarifies ambiguous %s without a proposal", async text => {
     const { send } = setup(); const result = await send(text, ctx([timer(), timer("timer-2", 300)]));

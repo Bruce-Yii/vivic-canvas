@@ -96,7 +96,7 @@ export const matchRules = (rawText: string, ctx: CanvasContext): RuleHit | null 
   // "帮我创建一个倒计时 30 分钟" phrasing, and trailing punctuation.
   const countdownText = input.replace(/[。！!]+$/, "").trim();
   const countdownMatch =
-    countdownText.match(/^(?:请|帮我|请帮我)?\s*(?:创建|新建|设|定|来)?\s*(?:一个|个)?\s*(.+?)\s*倒计时$/) ??
+    countdownText.match(/^(?:请|帮我|请帮我)?\s*(?:创建|新建|设|定|来)?\s*(?:一个|个)?\s*(.+?)\s*的?\s*倒计时$/) ??
     countdownText.match(/^倒计时\s*(.+)$/) ??
     countdownText.match(/^(?:请|帮我|请帮我)?\s*(?:创建|新建|设|定|来)?\s*(?:一个|个)?\s*倒计时\s*(.+)$/);
   if (countdownMatch) {

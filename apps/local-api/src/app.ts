@@ -481,12 +481,16 @@ export const createApp = (deps: AppDeps) => {
     // The "stepfun" slot is the main planner slot: in DeepSeek mode it reports
     // the env-keyed fixed model so existing clients keep working unchanged.
     const status = mainCredentials.status();
+    // Legacy clients still read the "stepfun" main slot, but when the provider
+    // store selects DeepSeek the displayed provider must say DeepSeek.
+    const mainSlotName = mainProvider === "deepseek" ? "deepseek" : "stepfun";
+    const displayStatus = { ...status, name: mainSlotName };
     rememberGpt();
     if (activeProvider === "gpt") gpt.keepWarm();
     return c.json({
-      activeProvider, instance,
+      activeProvider, mainProvider, instance,
       ...(restoringGpt ? { restoring: "gpt" } : {}),
-      providers: online ? [status] : [status, gpt.status()],
+      providers: online ? [displayStatus] : [displayStatus, gpt.status()],
       platform: platform.status(),
       degradations: (activeProvider === "stepfun" ? status.connected : gpt.status().connected)
         ? []
@@ -777,28 +781,45 @@ export const createApp = (deps: AppDeps) => {
         tracePath: c.req.header("x-vivic-trace-path") === "task" ? "task" as const : "browser" as const,
         ...(installedDefinitions ? { installedDefinitions, extensionDefinitions: undefined } : {}),
         ...(online && c.req.header("x-vivic-intent-image-ref") ? { trustedImageRef: c.req.header("x-vivic-intent-image-ref") } : {}) };
-      // Paths that deliberately get no single route hint still need a safe line:
-      // multi-clause, attachments, follow-up answers and task receipts are the
-      // longest waits, and leaving them neutral for seconds reads as a stall.
-      // This frame carries no business data and no route claim.
-      const scene = !streamFeedback ? undefined
+      const clauseCount = splitClauses(intent.text).length;
+      // ChatPage sends a task id on every request, so `task` alone must not own
+      // the first sentence. A request that can publish a route hint waits for
+      // it; only the paths that deliberately have no single route use a scene
+      // line immediately. Priority: target frame > route hint > scene > neutral.
+      const routeHintEligible = requestRouter?.mode === "on" && clauseCount === 1
+        && !parsed.data.attachments?.length && !parsed.data.continuation
+        && !parsed.data.task?.receipt && !parsed.data.task?.cancel;
+      const fallbackScene = !streamFeedback ? undefined
         : parsed.data.attachments?.length ? "attachment" as const
           : parsed.data.continuation ? "continuation" as const
-            : parsed.data.task ? "task" as const
-              : splitClauses(intent.text).length > 1 ? "multi" as const : undefined;
-      if (scene) {
-        try { onStage({ stage: "decision", status: "started", scene }); } catch { /* progress is advisory */ }
-      }
+            : clauseCount > 1 ? "multi" as const
+              : parsed.data.task ? "task" as const : undefined;
+      let scenePublished = false;
+      const publishScene = () => {
+        if (scenePublished || !fallbackScene) return;
+        scenePublished = true;
+        // This frame carries no business data and no route claim.
+        try { onStage({ stage: "decision", status: "started", scene: fallbackScene }); } catch { /* progress is advisory */ }
+      };
+      // Multi-clause, attachment, continuation and receipt paths never publish a
+      // route hint, so their scene line is sent now. A route-eligible request
+      // must not send `scene:"task"` first: the client schedules a 600ms preset
+      // from it and then ignores the later route hint.
+      if (!routeHintEligible) publishScene();
       // The on-mode router hint already exists for every clause. Publish it on the
       // existing progress channel as optional fields instead of opening a second
       // message chain; older clients strip the unknown keys and see today's label.
       const publishRouteHint = (hint: Promise<PlannerRouteHint | null> | undefined) => {
-        if (!streamFeedback || !hint || requestRouter?.mode !== "on" || parsed.data.attachments?.length
-          || parsed.data.continuation || parsed.data.task) return;
+        if (!streamFeedback || requestRouter?.mode !== "on" || !routeHintEligible) return;
+        if (!hint) { publishScene(); return; }
         void hint.then(value => {
-          if (signal.aborted || !value?.result) return;
-          const { route, probability, none } = value.result;
-          if (!route || none || probability < 0.8 || splitClauses(intent.text).length !== 1) return;
+          if (signal.aborted) return;
+          if (!value) { publishScene(); return; }
+          const result = value.result;
+          // A slow or failed classifier falls back to the safe scene line, never
+          // to a committed route or action sentence.
+          if (!result?.route || result.none || result.probability < 0.8) { publishScene(); return; }
+          const { route } = result;
           // "decision" is an existing stage, so old clients keep their old label.
           const progress = { stage: "decision" as const, status: "started" as const,
             route: route.slice(0, 90), feedbackSource: "preset" as const };
@@ -814,13 +835,18 @@ export const createApp = (deps: AppDeps) => {
               try { onStage({ ...progress, targetState }); } catch { /* progress is advisory */ }
             }).catch(() => { /* a target frame never fails the request */ });
           }
-        }).catch(() => { /* a route hint never fails the request */ });
+        }).catch(() => { publishScene(); });
       };
       if (requestRouter?.mode !== "on" && !nativeV2 && !parsed.data.task) return runIntent(intent, pipeline, signal);
       return observeDecision(intent, pipeline, signal, routeHint => {
         publishRouteHint(routeHint);
         return decisionTasks.run(intent, {
-          safetyMode: requestRouter?.mode === "on", routeHint,
+          // Deletion safety is a host policy, not a benefit of having a decision
+          // router: a missing target clarifies, an ambiguous target asks which
+          // card, and a known target is frozen behind an explicit confirmation.
+          // Without a route hint the planner proposal still goes through the same
+          // freeze; no configured model must never mean "delete immediately".
+          safetyMode: true, routeHint,
           legacy: (request, taskSignal, plannerOnly) => runIntent({ ...request,
             offlineReferenceCompatibility: request.offlineReferenceCompatibility === true
               && (online || !configuredProvider && !deps.decision && !decision.status().enabled),

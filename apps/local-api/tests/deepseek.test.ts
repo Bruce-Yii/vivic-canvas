@@ -152,7 +152,7 @@ describe("DeepSeek app path", () => {
     try {
       const response = await app.request("/api/providers/status", { headers: authed });
       const body = await response.json();
-      expect(body.providers[0]).toMatchObject({ name: "stepfun", connected: true,
+      expect(body.providers[0]).toMatchObject({ name: "deepseek", connected: true,
         defaultModel: "deepseek-flash", models: ["deepseek-flash"] });
       expect(JSON.stringify(body)).not.toContain(KEY);
     } finally { app.dispose(); }
