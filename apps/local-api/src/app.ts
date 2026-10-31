@@ -100,6 +100,9 @@ type AppContext = Context<{ Variables: { requestId: string } }>;
 export const createApp = (deps: AppDeps) => {
   const { config } = deps;
   const online = deps.mode === "online";
+  // Deployment switch for the SSE-only first sentence. Absent keeps today's
+  // behavior (on); ordinary JSON requests never take the streaming branch.
+  const sseStreamFeedback = config.streamFeedback !== false;
   const connections = new ConnectionManager({ fetchImpl: deps.fetchImpl });
   let localTts = online ? undefined : deps.localTts;
   const localTtsRuntime = () => online ? undefined : localTts ??= new ManagedLocalTts(path.join(homedir(), ".vivic", "runtime", "local-tts"));
@@ -701,7 +704,7 @@ export const createApp = (deps: AppDeps) => {
             delivery = delivery.then(async () => {
               if (!signal.aborted && !stream.closed) await stream.writeSSE({ event: "progress", data: JSON.stringify({ requestId, ...event }) });
             }).catch(() => controller.abort());
-          }, true);
+          }, sseStreamFeedback);
           const wire = IntentResponseSchema.safeParse(result);
           await delivery;
           if (!signal.aborted && !stream.closed) await stream.writeSSE({ event: "result", data: JSON.stringify(wire.success

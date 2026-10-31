@@ -1,7 +1,110 @@
 import { describe, expect, it, vi } from "vitest";
 import { createApp } from "../src/app.js";
+import { streamFeedbackEnabled } from "../src/config.js";
+import { CredentialStore } from "../src/credentials.js";
+import type { IntentRouter } from "../src/decision/router.js";
+import { createOnlineSessionApp } from "../src/online/appFactory.js";
 import type { DiagnosticEvent } from "../src/diagnostics.js";
-import { authed, emptyContext, testConfig } from "./helpers.js";
+import { authed, emptyContext, modelsOk, testConfig, TEST_TOKEN } from "./helpers.js";
+
+const sseFrame = (text: string) => `data: ${JSON.stringify({ choices: [{ delta: { content: text } }] })}\n\n`;
+const answer = { slots: { text: "阅读草稿" }, say: "已整理。" };
+/** One upstream that answers streamed only when the request actually asks for it. */
+const upstream = (bodies: Record<string, unknown>[]) => vi.fn<typeof fetch>(async (_input, init) => {
+  const body = JSON.parse(String(init?.body)) as Record<string, unknown>;
+  bodies.push(body);
+  const content = JSON.stringify({ feedback: "我来整理这份便笺。", ...answer });
+  if (body.stream !== true) return Response.json({ choices: [{ message: { content } }] });
+  const cut = content.indexOf(",") + 1;
+  return new Response(new ReadableStream({
+    start(controller) {
+      controller.enqueue(new TextEncoder().encode(sseFrame(content.slice(0, cut))));
+      controller.enqueue(new TextEncoder().encode(sseFrame(content.slice(cut))
+        + `data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\ndata: [DONE]\n\n`));
+      controller.close();
+    },
+  }), { headers: { "content-type": "text/event-stream" } });
+});
+const noteRouter: IntentRouter = { mode: "on", directRoutes: new Set(["note"]),
+  routeUtterance: async () => ({ route: "note", probability: .99, probabilities: { note: .99 }, none: false, latencyMs: 0 }),
+  chooseTarget: async () => null };
+const credentialStore = () => {
+  const store = new CredentialStore();
+  store.set({ apiKey: "test-key-only", models: ["test-model"], defaultModel: "test-model", checkedAt: "test" });
+  return store;
+};
+const streamed = async (config: ReturnType<typeof testConfig>, bodies: Record<string, unknown>[]) => {
+  const app = createApp({ config, credentials: credentialStore(), fetchImpl: upstream(bodies), router: noteRouter });
+  try {
+    const response = await app.request("/api/intent", { method: "POST", headers: { ...authed, accept: "text/event-stream" },
+      body: JSON.stringify({ text: "整理一份阅读草稿", canvasContext: emptyContext() }) });
+    return await response.text();
+  } finally { app.dispose(); }
+};
+
+describe("VIVIC_STREAM_FEEDBACK deployment switch", () => {
+  it("keeps today's streamed first sentence when the switch is unset", async () => {
+    const bodies: Record<string, unknown>[] = [];
+    const text = await streamed(testConfig(), bodies);
+    expect(bodies[0]!.stream).toBe(true);
+    expect(text).toContain('"feedback":"我来整理这份便笺。"');
+    expect(text.match(/event: result/g)).toHaveLength(1);
+    const final = JSON.parse(text.split("event: result\ndata: ")[1]!.trim());
+    expect(final).toMatchObject({ kind: "envelope" });
+    expect(final.task?.status).toBe("awaiting_execution");
+    expect(final.envelope.actions).toContainEqual(expect.objectContaining({ type: "card.create" }));
+  });
+  it("off never requests stream:true and sends no feedback, while the task still completes", async () => {
+    const bodies: Record<string, unknown>[] = [];
+    const text = await streamed(testConfig({ streamFeedback: false }), bodies);
+    expect(bodies[0]!.stream).toBeUndefined();
+    expect(JSON.stringify(bodies[0])).not.toContain("feedback");
+    expect(text).not.toContain("feedback");
+    expect(text).toContain("event: accepted");
+    expect(text.match(/event: result/g)).toHaveLength(1);
+    const final = JSON.parse(text.split("event: result\ndata: ")[1]!.trim());
+    expect(final).toMatchObject({ kind: "envelope" });
+    expect(final.task?.status).toBe("awaiting_execution");
+    expect(final.envelope.actions).toContainEqual(expect.objectContaining({ type: "card.create" }));
+  });
+  it("never leaks into ordinary JSON clients even when the switch is on", async () => {
+    const bodies: Record<string, unknown>[] = [];
+    const app = createApp({ config: testConfig(), credentials: credentialStore(), fetchImpl: upstream(bodies), router: noteRouter });
+    try {
+      const response = await app.request("/api/intent", { method: "POST", headers: authed,
+        body: JSON.stringify({ text: "整理一份阅读草稿", canvasContext: emptyContext() }) });
+      expect(await response.json()).toMatchObject({ kind: "envelope" });
+      expect(bodies[0]!.stream).toBeUndefined();
+      expect(JSON.stringify(bodies[0])).not.toContain("feedback");
+    } finally { app.dispose(); }
+  });
+  it("reads the deployment environment in online sessions", async () => {
+    const bodies: Record<string, unknown>[] = [];
+    const fetchImpl = vi.fn<typeof fetch>(async (input, init) => {
+      if (String(input).endsWith("/models")) return modelsOk(["step-3.5-flash"]);
+      return upstream(bodies)(input, init);
+    });
+    vi.stubEnv("VIVIC_STREAM_FEEDBACK", "off");
+    const session = createOnlineSessionApp({ token: TEST_TOKEN, origin: "https://vivic.example" },
+      { fetchImpl, router: noteRouter });
+    try {
+      const validate = await session.fetch(new Request("https://vivic.example/api/credentials/stepfun/validate",
+        { method: "POST", headers: authed, body: JSON.stringify({ apiKey: "test-key-only" }) }));
+      expect(await validate.json()).toMatchObject({ connected: true });
+      const response = await session.fetch(new Request("https://vivic.example/api/intent", { method: "POST",
+        headers: { ...authed, origin: "https://vivic.example", accept: "text/event-stream" },
+        body: JSON.stringify({ text: "整理一份阅读草稿", canvasContext: emptyContext() }) }));
+      const text = await response.text();
+      expect(bodies[0]!.stream).toBeUndefined();
+      expect(text).not.toContain("feedback");
+      expect(JSON.parse(text.split("event: result\ndata: ")[1]!.trim())).toMatchObject({ kind: "envelope" });
+    } finally { session.dispose(); vi.unstubAllEnvs(); }
+  });
+  it.each([[undefined, true], ["on", true], ["off", false], [" OFF ", false], ["maybe", true], ["", true]])(
+    "parses %j as enabled=%s, falling back to the default on", (value, expected) => {
+      expect(streamFeedbackEnabled(value)).toBe(expected);
+    });
+});
 
 describe("intent progress and metadata diagnostics", () => {
   it("streams ordered progress and one schema-valid final result using the existing authenticated route", async () => {

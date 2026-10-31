@@ -1,6 +1,6 @@
 import { createApp, type AppDeps } from "../app.js";
 import {
-  STEPFUN_PLAN_BASE_URL, INFERENCE_TIMEOUT_MS, CONNECTION_TIMEOUT_MS, SPEECH_TIMEOUT_MS,
+  STEPFUN_PLAN_BASE_URL, INFERENCE_TIMEOUT_MS, CONNECTION_TIMEOUT_MS, SPEECH_TIMEOUT_MS, streamFeedbackEnabled,
 } from "../config.js";
 import type { LocalApiConfig } from "../config.js";
 import type { PipelineDeps } from "../intent/pipeline.js";
@@ -18,6 +18,8 @@ export function createOnlineSessionApp(
     requestTimeoutMs: INFERENCE_TIMEOUT_MS, connectionTimeoutMs: CONNECTION_TIMEOUT_MS,
     speechTimeoutMs: SPEECH_TIMEOUT_MS, asrTimeoutMs: 30_000,
     bodyLimitBytes: 64 * 1024, searchEnabled: true, publicDnsFallback: false,
+    // Deployment switch: unset keeps today's SSE first sentence; `off` rolls it back.
+    streamFeedback: streamFeedbackEnabled(process.env.VIVIC_STREAM_FEEDBACK),
     managedDecisionEnabled: false, decisionProviderEnabled: false,
     // Deployment-owned remote service only; no launcher/runtime or local config file.
     decisionV2Url: process.env.VIVIC_DECISION_V2_URL?.trim() || undefined,

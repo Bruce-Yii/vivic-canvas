@@ -98,6 +98,8 @@ location / {
 
 ASR/TTS/分类元数据在线、协议通过和真实质量通过分别报告。HTTP 取消不等于 Mac 推理已停止。断网保留草稿并提示连接，不宣称离线模型能力。
 
+SSE 同次首句反馈由 `VIVIC_STREAM_FEEDBACK` 控制，默认 `on`（与既有行为一致），只在认证 SSE 分支生效；普通 JSON 客户端不变。设 `off` 并重建容器即关闭，删除该键或设 `on` 即恢复。详见 [决策记录](decisions/2026-10-31-routing-feedback.md)。
+
 `pnpm package:online` 生成源码/网页部署包和 SHA256，不附带个人数据、DB、权重、Key、私钥、签名 keystore 或 node_modules。运行后目录不得直接分发；私人备份单独受控保存。
 
 本轮只交独立分支、补丁和隔离复测证据，不自动推送、建 PR、合并、公开部署或升级公共服务。生产域名、真实推理质量、实体手机/麦克风和 Linux 运行结果按实际执行状态单列。

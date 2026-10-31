@@ -16,6 +16,15 @@ export const boundedTimeout = (value: unknown, fallback: number): number => {
 };
 
 /**
+ * Same-turn first-sentence feedback on the authenticated SSE route is ON by
+ * default, matching today's behavior. Only an explicit `off` (case/whitespace
+ * insensitive) turns it off; unset, `on` and unrecognized values keep the
+ * default so a typo cannot silently change what production clients receive.
+ */
+export const streamFeedbackEnabled = (value: string | undefined): boolean =>
+  value?.trim().toLowerCase() !== "off";
+
+/**
  * Local session auth: a random bearer token lives ONLY in
  * apps/local-api/.env.local (gitignored, mode 0600). The Vite dev proxy reads
  * the same file and injects the header server-side, so the browser bundle
@@ -38,6 +47,8 @@ export interface LocalApiConfig {
   asrTimeoutMs?: number;
   searchEnabled?: boolean;
   publicDnsFallback?: boolean;
+  /** SSE-only same-turn first sentence; `VIVIC_STREAM_FEEDBACK=off` disables. Default on. */
+  streamFeedback?: boolean;
   /** Keyless search egress: `auto` (env > OS proxy), `direct`, or a proxy URL. Unset = direct. */
   searchProxy?: string;
   /** Optional independent DEC-01 provider; unset preserves Kev-only behavior. */
@@ -110,6 +121,7 @@ export const loadConfig = (
     speechTimeoutMs: boundedTimeout(env.VIVIC_SPEECH_TIMEOUT_MS, SPEECH_TIMEOUT_MS),
     asrTimeoutMs: boundedTimeout(env.VIVIC_ASR_TIMEOUT_MS, 30000),
     searchEnabled: env.VIVIC_SEARCH_ENABLED !== "false",
+    streamFeedback: streamFeedbackEnabled(env.VIVIC_STREAM_FEEDBACK),
     searchProxy: env.VIVIC_SEARCH_PROXY?.trim() || "auto",
     decisionProviderUrl: env.VIVIC_DECISION_PROVIDER_URL?.trim() || undefined,
     decisionProviderFallbackUrl: env.VIVIC_DECISION_PROVIDER_FALLBACK_URL?.trim() || undefined,
