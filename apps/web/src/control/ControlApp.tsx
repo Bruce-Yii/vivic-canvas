@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { fetchWeatherHere } from "@/ai/api";
-import { FEEDBACK_RANK, newFeedbackSlot, reduceFeedback, type FeedbackEvent, type FeedbackSlot } from "@/ai/intentStream";
-import { planPreset } from "@/ai/presetFeedback";
+import { FEEDBACK_RANK, newFeedbackSlot, reduceFeedback, type FeedbackEvent, type FeedbackScene, type FeedbackSlot, type FeedbackTargetState } from "@/ai/intentStream";
+import { planPreset, safeFeedbackSentence } from "@/ai/presetFeedback";
 import { runDecisionTask, cancelDecisionTask } from "@/ai/decisionTask";
 import { cancelWakeActivity, getWakeActivity, isWakeInputBusy, subscribeWakeActivity } from "@/ai/wakeActivity";
 import { fixForRequest, freshFix, looksLikeWeather, subscribeLocation } from "@/location/deviceLocation";
@@ -515,21 +515,32 @@ export const ControlApp = () => {
       // A route hint is telemetry first. Its scene copy waits out the quiet delay
       // so a fast completion never flashes it; a model sentence, a slow hint or a
       // result all win without waiting for the delay or a minimum display time.
-      const schedulePreset = (route: string) => {
+      const schedulePreset = (route?: string, scene?: FeedbackScene, targetState?: FeedbackTargetState) => {
         const current = pending.current;
         if (!current || current.requestId !== requestId) return;
         const plan = planPreset(route, { now: Date.now(), tier: current.slot.tier,
-          settled: current.slot.settled, scheduled: current.presetTimer !== undefined });
+          settled: current.slot.settled, scheduled: current.presetTimer !== undefined, scene, targetState });
         if (!plan) return;
         current.presetTimer = setTimeout(() => {
           current.presetTimer = undefined;
           if (!isCurrent()) return;
           if (current.slot.settled || current.slot.tier !== "neutral") return;
-          if (!applyFeedback({ type: "preset", text: plan.text, route: plan.route, at: Date.now(), requestId })) return;
+          if (!applyFeedback({ type: "preset", text: plan.text, route: plan.route, scene: plan.scene,
+            at: Date.now(), requestId })) return;
           // Scene copy owns the line now; drop the 300ms "我看看" short voice.
           clearTimeout(current.feedbackTimer);
           cancelShortFeedback(requestId);
         }, plan.delayMs);
+      };
+      // A target frame arrives after the route hint. It may upgrade a still-pending
+      // confirmation to the action sentence; once confirmation is visible the
+      // upgrade is skipped, so an action can never appear after the fact.
+      const updatePresetTarget = (route: string | undefined, targetState: FeedbackTargetState) => {
+        const current = pending.current;
+        if (!current || current.requestId !== requestId) return;
+        if (current.slot.settled || current.slot.tier !== "neutral") return;
+        if (current.presetTimer !== undefined) { clearTimeout(current.presetTimer); current.presetTimer = undefined; }
+        schedulePreset(route, undefined, targetState);
       };
       setBusy(true);
       setFeedback("正在理解你的指令…");
@@ -550,31 +561,37 @@ export const ControlApp = () => {
             onProgress: event => {
               if (!isCurrent() || event.status !== "started" || event.stage === "total") return;
               const current = pending.current!;
-              // Only a complete first sentence is painted: model feedback from the
-              // planner (or a route-preset frame). A later stage can never replace it.
-              const sentence = event.feedback && (event.stage === "planner" || event.feedbackSource === "preset")
+              // Only a complete, safe first sentence is painted: model feedback
+              // from the planner (or a route-preset frame). A sentence that claims
+              // a finished action is dropped here as well as on the server, so a
+              // stale server or a model regression cannot reach the visible slot.
+              const candidate = event.feedback && (event.stage === "planner" || event.feedbackSource === "preset")
                 ? event.feedback : undefined;
+              const sentence = safeFeedbackSentence(candidate);
               if (sentence) {
                 // A model sentence replaces the neutral line (or a visible preset)
                 // immediately; its pending scene copy must not fire afterwards.
                 if (current.presetTimer !== undefined) { clearTimeout(current.presetTimer); current.presetTimer = undefined; }
                 if (applyFeedback({ type: "progress", stage: event.stage, feedback: sentence,
-                  feedbackSource: event.feedbackSource, route: event.route, requestId })) {
+                  feedbackSource: event.feedbackSource, route: event.route, scene: event.scene, requestId })) {
                   clearTimeout(current.slowTimer);
                   clearTimeout(current.feedbackTimer);
                   cancelShortFeedback(requestId);
                 }
                 return;
               }
-              // Stage labels are telemetry only: record the stage and any route hint
-              // without writing the visible line, so they cannot overwrite neutral,
-              // the slow hint, a preset sentence or the model first sentence.
-              applyFeedback({ type: "progress", stage: event.stage, route: event.route, feedbackSource: event.feedbackSource, requestId });
+              // Stage labels are telemetry only: record the stage and any route/scene
+              // hint without writing the visible line, so they cannot overwrite
+              // neutral, the slow hint, a preset sentence or the model first sentence.
+              applyFeedback({ type: "progress", stage: event.stage, route: event.route, scene: event.scene,
+                targetState: event.targetState, feedbackSource: event.feedbackSource, requestId });
               // The route is decided; its scene copy may paint after the quiet delay
               // only if the line is still neutral at that point.
-              if (!event.feedback && event.route) schedulePreset(event.route);
+              if (event.targetState) updatePresetTarget(event.route, event.targetState);
+              else if (!event.feedback && (event.route || event.scene)) schedulePreset(event.route, event.scene);
               window.dispatchEvent(new CustomEvent("vivic:feedback-trace", { detail: { requestId, source: "stage",
-                stage: event.stage, ...(event.route ? { route: event.route } : {}), suppressed: true, at: Date.now() } }));
+                stage: event.stage, ...(event.route ? { route: event.route } : {}), ...(event.scene ? { scene: event.scene } : {}),
+                ...(event.targetState ? { targetState: event.targetState } : {}), suppressed: true, at: Date.now() } }));
             },
           });
           if (!isCurrent()) {

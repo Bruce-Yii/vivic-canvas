@@ -1,7 +1,9 @@
 import { z } from "zod";
 import { ActionEnvelopeSchema } from "@/contracts";
-import { HostOperationSchema, DecisionTaskStatusSchema } from "@vivic/contracts";
+import { FEEDBACK_SCENES, FEEDBACK_TARGET_STATES, HostOperationSchema, DecisionTaskStatusSchema, type FeedbackScene, type FeedbackTargetState } from "@vivic/contracts";
+export { FEEDBACK_SCENES, FEEDBACK_TARGET_STATES, type FeedbackScene, type FeedbackTargetState };
 
+/** Paths that intentionally have no single route, but still need a safe line. */
 export const IntentProgressSchema = z.object({
   requestId: z.string().min(1).max(128),
   stage: z.enum(["rules", "data", "search", "decision", "planner", "validation", "travel", "total"]),
@@ -11,6 +13,8 @@ export const IntentProgressSchema = z.object({
   // Optional additions for newer clients. `z.object` strips them for older
   // readers, so the wire format stays backward compatible.
   route: z.string().max(90).optional(),
+  scene: z.enum(FEEDBACK_SCENES).optional(),
+  targetState: z.enum(FEEDBACK_TARGET_STATES).optional(),
   feedbackSource: z.enum(["model", "preset"]).optional(),
 });
 export type IntentProgress = z.infer<typeof IntentProgressSchema>;
@@ -37,6 +41,10 @@ export interface FeedbackSlot {
   text: string | null;
   /** Advisory route from the decision layer; a route frame alone never renders. */
   route?: string;
+  /** Safe fallback for multi-clause/attachment/continuation/task paths. */
+  scene?: FeedbackScene;
+  /** Whether the target-sensitive route already resolved a unique card. */
+  targetState?: FeedbackTargetState;
   /** A result/error/cancel ended this request; later progress frames are discarded. */
   settled: boolean;
 }
@@ -45,8 +53,8 @@ export type FeedbackEvent =
   | { type: "neutral"; text: string; requestId?: string }
   | { type: "slow"; text: string; requestId?: string }
   /** Scene copy derived from an already-decided route; `at` is when it was allowed to paint. */
-  | { type: "preset"; text: string; route?: string; at?: number; requestId?: string }
-  | { type: "progress"; stage: IntentProgress["stage"]; feedback?: string; feedbackSource?: "model" | "preset"; route?: string; requestId?: string }
+  | { type: "preset"; text: string; route?: string; scene?: FeedbackScene; at?: number; requestId?: string }
+  | { type: "progress"; stage: IntentProgress["stage"]; feedback?: string; feedbackSource?: "model" | "preset"; route?: string; scene?: FeedbackScene; targetState?: FeedbackTargetState; requestId?: string }
   | { type: "settle"; text: string | null; elapsedMs?: number; quiet?: boolean; requestId?: string };
 
 export const newFeedbackSlot = (requestId: string, text: string): FeedbackSlot =>
@@ -83,9 +91,12 @@ export function reduceFeedback(slot: FeedbackSlot, event: FeedbackEvent): Feedba
     // an earlier preset or a settled request all keep the visible line, and an
     // equal-tier preset can never replace itself.
     if (slot.tier !== "neutral") return slot;
-    return { ...slot, tier: "preset", text: event.text, ...(event.route ? { route: event.route } : {}) };
+    return { ...slot, tier: "preset", text: event.text, ...(event.route ? { route: event.route } : {}),
+      ...(event.scene ? { scene: event.scene } : {}) };
   }
-  const next = event.route && event.route !== slot.route ? { ...slot, route: event.route } : slot;
+  const routed = event.route && event.route !== slot.route ? { ...slot, route: event.route } : slot;
+  const scened = event.scene && event.scene !== routed.scene ? { ...routed, scene: event.scene } : routed;
+  const next = event.targetState ? { ...scened, targetState: event.targetState } : scened;
   if (event.feedback) {
     const tier: FeedbackTier = event.feedbackSource === "preset" ? "preset" : "model";
     if (FEEDBACK_RANK[tier] <= FEEDBACK_RANK[slot.tier]) return next;

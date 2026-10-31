@@ -89,12 +89,16 @@ describe("single-slot feedback priority", () => {
     expect(late.text).toBe("已保存");
   });
 
-  it("records the advisory route from a stage frame without touching the visible line", () => {
+  it("records the advisory route or scene without touching the visible line", () => {
     const routed = reduceFeedback(neutral(), stage("decision", { route: "answer" }));
     expect(routed).toMatchObject({ tier: "neutral", text: "让我想想…", route: "answer" });
-    const sentence = reduceFeedback(routed, model("我先查一下资料。"));
+    const scene = reduceFeedback(routed, { type: "progress", stage: "decision", scene: "multi", requestId: "r1" });
+    expect(scene).toMatchObject({ tier: "neutral", text: "让我想想…", route: "answer", scene: "multi" });
+    const targeted = reduceFeedback(scene, { type: "progress", stage: "decision", route: "focus", targetState: "resolved", requestId: "r1" });
+    expect(targeted).toMatchObject({ tier: "neutral", text: "让我想想…", route: "focus", targetState: "resolved" });
+    const sentence = reduceFeedback(targeted, model("我先查一下资料。"));
     expect(reduceFeedback(sentence, stage("validation", { route: "search" }))).toMatchObject({
-      tier: "model", text: "我先查一下资料。", route: "search",
+      tier: "model", text: "我先查一下资料。", route: "search", scene: "multi", targetState: "resolved",
     });
   });
 });
@@ -113,6 +117,13 @@ describe("optional progress fields stay backward compatible", () => {
       route: "answer", feedbackSource: "preset" })).toMatchObject({ route: "answer", feedbackSource: "preset" });
     expect(IntentProgressSchema.parse({ requestId: "r1", stage: "planner", status: "started",
       feedback: "我会整理成待办。", feedbackSource: "model" })).toMatchObject({ feedbackSource: "model" });
+    // Scene fallbacks are a closed set; unknown values are dropped at the wire.
+    expect(IntentProgressSchema.parse({ requestId: "r1", stage: "decision", status: "started", scene: "multi" }))
+      .toMatchObject({ scene: "multi" });
+    expect(IntentProgressSchema.safeParse({ requestId: "r1", stage: "decision", status: "started", scene: "ext.weather" }).success).toBe(false);
+    expect(IntentProgressSchema.parse({ requestId: "r1", stage: "decision", status: "started", route: "focus", targetState: "resolved" }))
+      .toMatchObject({ targetState: "resolved" });
+    expect(IntentProgressSchema.safeParse({ requestId: "r1", stage: "decision", status: "started", targetState: "unique" }).success).toBe(false);
     // Bounded route ids and a closed source enum.
     expect(IntentProgressSchema.safeParse({ requestId: "r1", stage: "decision", status: "started", route: "x".repeat(91) }).success).toBe(false);
     expect(IntentProgressSchema.safeParse({ requestId: "r1", stage: "decision", status: "started", feedbackSource: "other" }).success).toBe(false);
@@ -121,12 +132,14 @@ describe("optional progress fields stay backward compatible", () => {
   it("delivers the route hint through the existing progress channel and drops invalid ones", async () => {
     const onProgress = vi.fn();
     const routeFrame = 'event: progress\ndata: {"requestId":"r1","stage":"decision","status":"started","route":"answer","feedbackSource":"preset"}\n\n';
+    const sceneFrame = 'event: progress\ndata: {"requestId":"r1","stage":"decision","status":"started","scene":"multi"}\n\n';
     const modelFrame = 'event: progress\ndata: {"requestId":"r1","stage":"planner","status":"started","feedback":"我先理一理这个问题。","feedbackSource":"model"}\n\n';
     const invalid = `event: progress\ndata: ${JSON.stringify({ requestId: "r1", stage: "decision", status: "started", route: "x".repeat(91) })}\n\n`;
-    expect(await readIntentStream(response([accepted, routeFrame, modelFrame, invalid, result]), onProgress))
+    expect(await readIntentStream(response([accepted, routeFrame, sceneFrame, modelFrame, invalid, result]), onProgress))
       .toEqual({ kind: "clarify", message: "需要日期" });
     expect(onProgress.mock.calls.map(([event]) => event)).toEqual([
       { requestId: "r1", stage: "decision", status: "started", route: "answer", feedbackSource: "preset" },
+      { requestId: "r1", stage: "decision", status: "started", scene: "multi" },
       { requestId: "r1", stage: "planner", status: "started", feedback: "我先理一理这个问题。", feedbackSource: "model" },
     ]);
   });
