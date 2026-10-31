@@ -106,6 +106,8 @@ async function hybridProposal(input: HybridInput): Promise<HybridOutcome> {
     // Only a confident, approved route owning a unique literal parse may propose.
     const contract = route && isBuiltinRoute(route) && deps.router.directRoutes?.has(route) && Object.hasOwn(CARD_CONTRACTS, route)
       ? CARD_CONTRACTS[route] : undefined;
+    // Threshold 0.8: only a clause whose approved route is at least this
+    // confident may be built by rules; everything else is planned.
     if (!row || !contract || row.failed || row.none || row.probability < .8) { remaining.push(index); continue; }
     let built: Action[];
     // Preserve the existing verified scheduled-reminder adapter as a parser.
@@ -136,6 +138,8 @@ async function hybridProposal(input: HybridInput): Promise<HybridOutcome> {
     plans.push({ clause: index, contract: contract.id, source: "rules",
       cardIds: placed.flatMap(action => action.type === "card.create" ? [action.card.id] : []) });
   }
+  // directClauses counts clauses the rules actually built, not rows that merely
+  // parsed: the per-clause path uses the same definition.
   if (!remaining.length) return { kind: "actions", actions: [...ruleByClause.values()].flat(), directClauses: ruleByClause.size, plans, builds: ruleBuilds() };
   // Nothing is literal: keep the existing single whole-sentence planner path.
   if (remaining.length === clauses.length) return { kind: "whole" };
@@ -271,6 +275,9 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
     check();
     const protectedText = /不要|不用|别|如果|要是|什么意思|解释|不想|不需要|如何|怎么|是否|能否|[？?]|(?:吗|么)[。！!]?\s*$/.test(req.text);
     if (!protectedText) {
+      // Threshold 0.8: an ambiguous target is surfaced as a question only from a
+      // confident row. A weaker target hint is left to the planner instead of
+      // interrupting the user with candidates the classifier was unsure about.
       const index = rows.findIndex(row => row.probability >= .8 && row.target && "ambiguous" in row.target);
       const target = rows[index]?.target;
       if (target && "ambiguous" in target) {
@@ -286,6 +293,10 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
     if (protectedText) return await fallback();
     // M1: one plans[] call for the whole sentence, even when every clause is literal.
     if (mode === "plans" && clauses.length > 1 && !req.taskContext) return await fallback();
+    // directRows threshold 0.8: the legacy per-clause path may use rules only
+    // when every clause is a confident (>= .8), approved, uniquely parsed row.
+    // One weaker row sends the whole sentence to the planner (hybrid instead
+    // keeps the confident clauses local).
     const directRows = rows.every(row => !row.failed && row.route && row.probability >= .8
       && !row.none && isBuiltinRoute(row.route) && deps.router.directRoutes?.has(row.route) && Object.hasOwn(CARD_CONTRACTS, row.route));
     let context: CardBuildContext = { ...req.canvasContext, cards: [...req.canvasContext.cards], focusHistory: [...req.canvasContext.focusHistory] };
@@ -320,13 +331,19 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
         const schedule = row.route === "countdown" ? scheduledReminderIntent(row.text, context) : null;
         if (schedule) {
           if (!schedule.actions) return { kind: "clarify", message: schedule.message, usedProvider: "decision" };
-          built = schedule.actions; directClauses++; builtByRules = true;
+          built = schedule.actions;
+          // Same definition as hybridProposal's ruleByClause.size: only a clause
+          // whose actions rules actually produced counts as a direct clause.
+          if (built.length) directClauses++;
+          builtByRules = built.length > 0;
         } else {
           const slots = row.route === "countdown" && looksLikeDateCountdown(row.text) ? null : contract.parse?.(row.text, context);
           if (slots !== null && slots !== undefined) {
             const value = await budget.run(async () => contract.build(slots, context, new Date()));
             if (!Array.isArray(value)) return { kind: "clarify", message: "本次包含需要单独处理的操作，请分开发送。", usedProvider: "decision" };
-            built = value; directClauses++; builtByRules = true;
+            built = value;
+            if (built.length) directClauses++;
+            builtByRules = built.length > 0;
           } else {
             const partHint: PlannerRouteHint = { result: { ...row, route: row.route as IntentRouteId }, target: Promise.resolve(row.target) };
             const partRequest: IntentRequest = rows.length === 1 ? req : { ...req, text: row.text, canvasContext: context,
