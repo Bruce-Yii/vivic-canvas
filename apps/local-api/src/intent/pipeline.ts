@@ -439,7 +439,7 @@ const runLegacyIntent = async (
       if ((deps.planner ? !deps.planner.isCurrent() : deps.credentials.getSecret() !== credential)
         || (deps.isSessionCurrent && !deps.isSessionCurrent())) return { kind: "error", message: "模型连接已变更，旧结果已丢弃。", usedProvider };
       return planned.usedProvider && ["stepfun", "gpt", "deepseek"].includes(planned.usedProvider)
-        ? { ...planned, usedProvider: deps.planner?.provider ?? "stepfun" } : planned;
+        ? { ...planned, usedProvider: deps.planner?.provider ?? (deps.stepfun.provider === "deepseek" ? "deepseek" : "stepfun") } : planned;
     }
     const system = (reminderMode ? buildReminderSystemPrompt() : buildSystemPrompt() + buildScenePrompt() + extensionScenePrompt(definitions, req.text) + HOST_OPERATION_PROMPT)
       + (req.taskContext ? "\n当前由宿主多阶段任务调度。user JSON 中 task_state 是可信宿主提供的子任务边界，original_goal 是完整目标；只生成本次子任务的内容/动作提案，已执行步骤不要重复。移动/固定/传送/撤销/暂停恢复由宿主后续执行，不因尚有这些步骤而拒绝已完整的内容生成。LLM输出不代表已执行。" : "") + (hasImages
