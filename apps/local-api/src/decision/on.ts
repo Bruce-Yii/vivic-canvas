@@ -23,6 +23,29 @@ export function multiCardMode(value: string | undefined = process.env.VIVIC_MULT
   return value === "plans" || value === "hybrid" ? value : "off";
 }
 
+/** The host task wrapper (`taskV2`) always sends `taskContext`, so its presence
+ * alone cannot mean "a follow-up". An initial task is the first fallback turn:
+ * nothing has completed or been observed, no target/continuation has been frozen,
+ * and the host did not scope an active-clause/subtask partition. Only the explicit
+ * hybrid mode consumes this; off/plans and the host's receipt/confirmation state
+ * are untouched. */
+export function isInitialTask(req: IntentRequest): boolean {
+  if (req.continuation || req.resolvedTargetId || req.resolvedTargets) return false;
+  const value = req.taskContext;
+  if (value === undefined || value === null) return true;
+  if (typeof value !== "object" || Array.isArray(value)) return false;
+  const state = value as Record<string, unknown>;
+  const empty = (item: unknown) => item === undefined || item === null || (Array.isArray(item) && item.length === 0);
+  if (!empty(state.completed_steps) || !empty(state.observations)) return false;
+  // `active_clause*`/`subtask` only exist after the host split or scoped this turn.
+  if (["active_clause", "active_clauses", "active_clause_indexes", "subtask"].some(key => Object.hasOwn(state, key))) return false;
+  // The initial fallback instruction is "只完成尚未执行的目标，不得重复已成功步骤。";
+  // anything about continuing, supplementing or handling one clause is a follow-up.
+  const instruction = state.instruction;
+  if (typeof instruction === "string" && /继续|补充|只处理|当前子句|子任务/.test(instruction)) return false;
+  return true;
+}
+
 interface OnDeps {
   router: IntentRouter;
   hint?: Promise<PlannerRouteHint | null>;
@@ -260,7 +283,12 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
     let rulePlans: ClausePlan[] = [];
     let builds: ClauseBuild[] = [];
     let usedProvider: IntentResult["usedProvider"] = ruleFallback ? "rules-offline" : rows.every(row => row.source === "rules") ? "rules" : "decision";
-    if (mode === "hybrid" && clauses.length > 1 && !req.taskContext) {
+    // M3 also covers the production initial turn: the task wrapper injects
+    // taskContext for every on-mode request, but an initial task has no prior
+    // step, so its clauses may still propose locally before the one planner call.
+    // Follow-ups (completed steps, observation, continuation or frozen target)
+    // stay on the existing path.
+    if (mode === "hybrid" && clauses.length > 1 && (!req.taskContext || isInitialTask(req))) {
       // M3: literal clauses propose first, the remaining subset costs one planner call.
       const outcome = await hybridProposal({ req, clauses, rows, deps, signal: budget.signal, check, run: budget.run, plan: (request, partHint) => fallback(request, partHint) });
       if (outcome.kind === "whole") return await fallback();
@@ -301,9 +329,9 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
             built = planned.envelope.actions;
           }
         }
-        // The host task wrapper forces the per-clause path even when hybrid is
-        // selected; a locally built clause is still a rule proposal and belongs
-        // in the trace next to the planner's plans.
+        // A follow-up keeps this per-clause path even when hybrid is selected; a
+        // locally built clause is still a rule proposal and belongs in the trace
+        // next to the planner's plans.
         if (builtByRules && mode === "hybrid") {
           rulePlans.push({ clause: index, contract: row.route!, source: "rules",
             cardIds: built.flatMap(action => action.type === "card.create" ? [action.card.id] : []) });
