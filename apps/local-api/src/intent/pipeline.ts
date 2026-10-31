@@ -43,8 +43,7 @@ import { planDeterministic } from "./plans.js";
 import { runDecisionOn, multiCardMode, type MultiCardMode } from "../decision/on.js";
 import { feedbackReader, FEEDBACK_PROMPT, withoutFeedback } from "./feedback.js";
 
-export interface IntentRequest { text: string; canvasContext: CanvasContext; attachments?: Attachment[]; continuation?: { utterance: string; question: string }; deviceLocation?: DevicePosition; extensionDefinitions?: unknown[]; task?: DecisionTaskRequest; taskContext?: unknown;
-  /** Internal task-manager opt-in, never accepted from the HTTP request schema. */
+export interface IntentRequest { text: string; canvasContext: CanvasContext; attachments?: Attachment[]; continuation?: { utterance: string; question: string }; deviceLocation?: DevicePosition; extensionDefinitions?: unknown[]; task?: DecisionTaskRequest; taskContext?: unknown;  /** Internal task-manager opt-in, never accepted from the HTTP request schema. */
   offlineReferenceCompatibility?: boolean;
   /** Authenticated host metadata; never accepted by the HTTP body schema. */
   tracePath?: "browser" | "task";
@@ -103,7 +102,11 @@ export interface PipelineDeps {
   streamFeedback?: boolean;
   search?: { webSearch: (query: string, signal?: AbortSignal) => Promise<SearchEvidence[]>;
     fetchContent?: (url: string, signal?: AbortSignal, article?: boolean) => Promise<FetchEvidence> };
-  planner?: { provider: "gpt"; connected: boolean; generate: (messages: ChatMessage[], signal?: AbortSignal, onTextDelta?: (delta: string) => void) => Promise<StepfunResult<unknown>>; isCurrent: () => boolean; };
+  planner?: { provider: "gpt" | "stepfun" | "deepseek"; connected: boolean;
+    /** Transport order is (messages, signal, maxTokens, onTextDelta): the token
+     *  cap and the streamed-delta sink are positional, so a sink passed as
+     *  maxTokens silently disables streaming and mis-types the cap. */
+    generate: (messages: ChatMessage[], signal?: AbortSignal, maxTokens?: number, onTextDelta?: (delta: string) => void) => Promise<StepfunResult<unknown>>; isCurrent: () => boolean; };
   isSessionCurrent?: () => boolean;
   data?: { handleDataIntent: (text: string, context: CanvasContext, signal?: AbortSignal, position?: DevicePosition) => Promise<IntentResult | null>;
     locale?: (position?: DevicePosition, signal?: AbortSignal) => Promise<{ kind: "locale"; name: string; admin1?: string; country?: string; country_code?: string; basis: "device" | "network" } | { kind: "clarify" | "error"; message: string }> };
@@ -124,6 +127,18 @@ const PlannerOutputSchema = z.union([
     clarify: z.string().trim().min(1).max(180).optional() }).refine(output => !Object.hasOwn(output, "hostOperation") && (output.actions !== undefined || output.cards !== undefined)),
 ]);
 const OFFLINE_MESSAGE = "未连接模型，当前只做本地规则：这条指令我还不会处理。连接 GPT 或 StepFun 后重试，或先用「倒计时/加待办/显示全部/恢复原视图」。";
+/** The host task wrapper injects a context for every turn. A context that only
+ * repeats the whole goal (no clause subset, no subtask, no completed step) is
+ * still the user's own sentence, so the rules may answer it. */
+const isScopedSubtask = (taskContext: unknown): boolean => {
+  if (!taskContext || typeof taskContext !== "object" || Array.isArray(taskContext)) return false;
+  const context = taskContext as { active_clause?: unknown; active_clauses?: unknown; active_clause_indexes?: unknown;
+    subtask?: unknown; completed_steps?: unknown; observations?: unknown };
+  return context.active_clause !== undefined || context.active_clauses !== undefined
+    || context.active_clause_indexes !== undefined || context.subtask !== undefined
+    || (Array.isArray(context.completed_steps) && context.completed_steps.length > 0)
+    || (Array.isArray(context.observations) && context.observations.length > 0);
+};
 /** Hybrid planning hands the planner a clause subset; this maps it back to the
  * original split so trace provenance keeps the user's clause numbering. */
 const partialClauseIndexes = (taskContext: unknown): number[] | undefined => {
@@ -166,7 +181,15 @@ export const runIntent = async (req: IntentRequest, deps: PipelineDeps, signal?:
   };
   const execute = (hint = deps.routeHint) => router?.mode === "on" ? runDecisionOn(req, {
     router, hint, telemetry: deps.decisionTelemetry!, isCurrent: deps.isSessionCurrent, multiCard: deps.multiCard,
-    plan: (request, routeHint, planSignal) => legacy(routeHint, { ...request, offlineReferenceCompatibility: false }, false, planSignal, true),
+    plan: (request, routeHint, planSignal) => {
+      // Main-only has no classifier: the only route evidence is the rules, so a
+      // plan call for the *whole* user sentence must still try them first. A
+      // subset call (the clauses a hybrid pass left over) keeps them skipped so
+      // a leftover clause is never answered by rules that own another clause.
+      const wholeSentence = request.text === req.text && !isScopedSubtask(request.taskContext);
+      const skipFastRules = !(mainOnly && wholeSentence);
+      return legacy(routeHint, { ...request, offlineReferenceCompatibility: false }, false, planSignal, skipFastRules);
+    },
   }, signal) : legacy(hint);
   return adapterOnly || plannerOnly ? legacy() : observeDecision(req, deps, signal, execute);
 };
@@ -207,7 +230,10 @@ const runLegacyIntent = async (
       try { deps.onStage?.({ stage: "planner", status: "started", feedback: text }); } catch { /* advisory */ }
     });
     const input = deps.streamFeedback ? messages.map(message => message.role === "system" ? { ...message, content: message.content + FEEDBACK_PROMPT } : message) : messages;
-    const result = await measured("planner", () => deps.planner ? deps.planner.generate(input, budget.signal, deps.streamFeedback ? onTextDelta : undefined)
+    // Both transports take (…, maxTokens, onTextDelta): passing the delta sink in
+    // the cap position meant the planner never streamed a first sentence.
+    const result = await measured("planner", () => deps.planner
+      ? deps.planner.generate(input, budget.signal, maxTokens, deps.streamFeedback ? onTextDelta : undefined)
       : chatJson(credential!, input, { ...deps.stepfun, signal: budget.signal }, { maxTokens, ...(deps.streamFeedback ? { onTextDelta } : {}) }));
     budget.signal.throwIfAborted();
     return result.ok ? { ...result, value: withoutFeedback(result.value) } : result;

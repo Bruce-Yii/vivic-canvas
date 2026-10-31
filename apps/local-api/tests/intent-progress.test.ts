@@ -57,6 +57,20 @@ describe("VIVIC_STREAM_FEEDBACK deployment switch", () => {
     expect(final.trace.firstFeedbackMs).toBeGreaterThanOrEqual(0);
     expect(final.envelope.actions).toContainEqual(expect.objectContaining({ type: "card.create" }));
   });
+  it("publishes the planner's first sentence in a progress frame before the result, with a numeric cap", async () => {
+    const bodies: Record<string, unknown>[] = [];
+    const text = await streamed(testConfig(), bodies);
+    // maxTokens must reach the transport as a number: the streamed-delta sink is
+    // positional right after it, and passing the sink in the cap slot both typed
+    // the cap wrong and turned streaming off entirely.
+    expect(typeof bodies[0]!.max_tokens).toBe("number");
+    expect(bodies[0]!.stream).toBe(true);
+    const frames = text.split("\n\n").filter(Boolean);
+    const feedbackAt = frames.findIndex(frame => frame.includes('"feedback":"我来整理这份便笺。"'));
+    const resultAt = frames.findIndex(frame => frame.startsWith("event: result"));
+    expect(feedbackAt).toBeGreaterThanOrEqual(0);
+    expect(feedbackAt).toBeLessThan(resultAt);
+  });
   it("off never requests stream:true and sends no feedback, while the task still completes", async () => {
     const bodies: Record<string, unknown>[] = [];
     const text = await streamed(testConfig({ streamFeedback: false }), bodies);
