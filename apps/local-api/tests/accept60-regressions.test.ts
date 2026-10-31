@@ -109,6 +109,62 @@ describe("accept60: a trailing bare append command joins the clause before it", 
   });
 });
 
+describe("accept60: main-only keeps the rules reachable without a classifier allow-list", () => {
+  it("sc-12 builds both reminders and records the countdown route", async () => {
+    const f = setup(["countdown"], [{ clarify: "模型不应被调用" }]);
+    const mainOnly: PipelineDeps = { ...f.deps, router: { ...f.router, policy: "main-only", directRoutes: new Set() } };
+    const result = await runIntent({ text: "五分钟后提醒我喝水和吃药", canvasContext: canvas() }, mainOnly);
+    expect(result.kind, JSON.stringify(result)).toBe("envelope");
+    expect(created(result).map(item => item.type)).toEqual(["CountdownCard", "CountdownCard"]);
+    expect(result.trace?.route).toBe("countdown");
+    expect(result.trace?.policy).toBe("main-only");
+    expect(f.generate).not.toHaveBeenCalled();
+  });
+
+  it("sc-16 stays deterministic in main-only", async () => {
+    const f = setup(["generate"], [{ clarify: "模型不应被调用" }]);
+    const mainOnly: PipelineDeps = { ...f.deps, router: { ...f.router, policy: "main-only", directRoutes: new Set() } };
+    const result = await runIntent({ text: "帮我做一个下周的健身计划", canvasContext: canvas() }, mainOnly);
+    expect(result.kind, JSON.stringify(result)).toBe("envelope");
+    expect(created(result).map(item => item.type)).toEqual(["WeeklyScheduleCard"]);
+    expect(f.generate).not.toHaveBeenCalled();
+  });
+
+  it("still plans a sentence the rules cannot answer", async () => {
+    const f = setup([], [{ clarify: "请补充更多信息" }]);
+    const mainOnly: PipelineDeps = { ...f.deps, router: { ...f.router, policy: "main-only", directRoutes: new Set() } };
+    const result = await runIntent({ text: "帮我想个产品名字", canvasContext: canvas() }, mainOnly);
+    expect(result.kind).toBe("clarify");
+    expect(f.generate).toHaveBeenCalled();
+  });
+});
+
+describe("accept60: a focus clause hands its card to the following edit clause", () => {
+  it("sc-51 edits 会议记录 without a planner call and asks nothing", async () => {
+    const f = setup(["focus", "edit"], [{ clarify: "模型不应被调用" }]);
+    const result = await runIntent({ text: "聚焦会议记录，把标题改成首页改版讨论", canvasContext: canvas() }, f.deps);
+    expect(result.kind, JSON.stringify(result)).toBe("envelope");
+    expect(actions(result)).toContainEqual({ type: "card.focus", targetId: "note_meeting" });
+    expect(actions(result)).toContainEqual({ type: "card.update", targetId: "note_meeting", displayProps: { text: "首页改版讨论" } });
+    expect(result.message ?? "").not.toMatch(/哪一张|哪张卡片/);
+    expect(f.generate).not.toHaveBeenCalled();
+  });
+
+  it("does not guess when the focused name matches two cards", async () => {
+    const context = canvas();
+    context.cards.push(card("note_meeting2", "会议记录", "NoteCard", 1200));
+    const f = setup(["focus", "edit"], [{ clarify: "模型不应被调用" }]);
+    const result = await runIntent({ text: "聚焦会议记录，把标题改成首页改版讨论", canvasContext: context }, f.deps);
+    expect(result.kind).not.toBe("envelope");
+  });
+
+  it("keeps a focus-only sentence a plain focus", async () => {
+    const f = setup(["focus"], [{ clarify: "模型不应被调用" }]);
+    const result = await runIntent({ text: "聚焦会议记录", canvasContext: canvas() }, f.deps);
+    expect(actions(result)).not.toContainEqual({ type: "card.update", targetId: "note_meeting", displayProps: { text: "" } });
+  });
+});
+
 describe("accept60: pausing a named timer is a closed-form host operation", () => {
   it("sc-34 pauses cd_water without a planner call", async () => {
     const f = setup(["edit"], [{ clarify: "模型不应被调用" }]);

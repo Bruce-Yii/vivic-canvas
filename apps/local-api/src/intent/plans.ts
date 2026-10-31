@@ -275,12 +275,54 @@ export async function planTodoAppend(text: string, ctx: CanvasContext, now = Dat
     groups: [{ clause: 0, contract: "todo", cardIds: createdIds(built), cards, route: "todo" }] };
 }
 
+/** "聚焦会议记录，把标题改成首页改版讨论": the second clause names no card. */
+const FOCUS_CLAUSE = /^(?:请|帮我|给我|麻烦)?\s*(?:聚焦|聚焦到|选中|定位到|定位)\s*(.+)$/u;
+const TITLE_EDIT_CLAUSE = /^(?:请|帮我)?\s*(?:把|将)?\s*(?:这张卡片的|这张卡的|这张|它的|该卡片的|卡片的)?\s*标题\s*(?:改成|改为|设为|设置成|设成|换成|变成)\s*(.+)$/u;
+
+const titleOf = (card: CanvasContext["cards"][number]): string => {
+  const title = card.displayProps.title;
+  return typeof title === "string" ? title : "";
+};
+
+/** Resolve the single card a focus clause names; ambiguity is never guessed. */
+export function resolveFocusCard(text: string, ctx: CanvasContext): CanvasContext["cards"][number] | null {
+  const input = text.trim().replace(/[。！!]+$/u, "");
+  const match = input.match(FOCUS_CLAUSE);
+  if (!match) return null;
+  const name = match[1]!.trim().replace(/^(?:一下|到)/u, "").trim();
+  if (!name || name.length > 40 || /[，,；;。！!？?]/u.test(name)) return null;
+  const cards = ctx.cards.filter(card => card.id === name || titleOf(card) === name
+    || card.aliases?.some(alias => alias === name || alias === `${name}卡` || alias === `${name}卡片`));
+  return cards.length === 1 ? cards[0]! : null;
+}
+
+/** The focus+edit-title pair where only the first clause names the card. */
+export function planFocusEdit(text: string, ctx: CanvasContext): DeterministicPlan | null {
+  const clauses = splitClauses(text);
+  if (clauses.length !== 2) return null;
+  const card = resolveFocusCard(clauses[0]!, ctx);
+  if (!card || !["NoteCard", "TodoCard"].includes(card.type)) return null;
+  const edit = clauses[1]!.trim().replace(/[。！!]+$/u, "").match(TITLE_EDIT_CLAUSE);
+  if (!edit) return null;
+  const title = edit[1]!.trim();
+  if (!title || title.length > 80) return null;
+  const update: Action = card.type === "TodoCard"
+    ? { type: "card.update", targetId: card.id, displayProps: { title } }
+    // A note's visible heading is its text; the card editor already maps 标题 to it.
+    : { type: "card.update", targetId: card.id, displayProps: { text: title } };
+  const actions: Action[] = [...(ctx.stage === "STANDBY" ? [{ type: "stage.awaken" } as const] : []),
+    { type: "card.focus", targetId: card.id }, update];
+  return { actions, routes: ["focus", "edit"], say: "已聚焦这张卡片并改好标题。",
+    groups: [{ clause: 0, contract: "focus", cardIds: [], cards: [], route: "focus" },
+      { clause: 1, contract: "edit", cardIds: [], cards: [], route: "edit" }] };
+}
+
 /** Entry point shared by the rules fast path and the on-mode proposal path. */
 export async function planDeterministic(text: string, ctx: CanvasContext, now = Date.now()): Promise<DeterministicPlan | null> {
   const clauses = splitClauses(text);
   if (clauses.length > 1) {
     if (isNumberedList(text)) return planNumbered(clauses, ctx, now);
-    return planTodoAppend(text, ctx, now);
+    return await planTodoAppend(text, ctx, now) ?? planFocusEdit(text, ctx);
   }
   const weekly = await planWeekly(text, ctx, now);
   if (weekly) return weekly;
