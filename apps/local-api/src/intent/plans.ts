@@ -252,7 +252,7 @@ export async function planDay(text: string, ctx: CanvasContext, now = Date.now()
   if (!built.ok) return null;
   const actions = placeSceneCards(built.actions, working), cardIds = createdIds(actions);
   return { actions, groups: [{ clause: 0, contract: "weekly_schedule", cardIds,
-    cards: actions.flatMap(action => action.type === "card.create" ? [action.card.type] : []), route: "generate" }], routes: ["generate"], say: `已生成${title}。` };
+    cards: actions.flatMap(action => action.type === "card.create" ? [action.card.type] : []), route: "generate" }], routes: ["generate"], say: `已为你准备好${title}，请确认。` };
 }
 
 /** Batches use one camera move; card.focus from a single-card builder is dropped. */

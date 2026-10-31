@@ -95,8 +95,9 @@ export function createHostedService(options: HostedServiceOptions) {
       // New accounts configure their own three keys. Operator defaults are never copied.
       const decisionStore = setup.providerStore(accountId), decision = decisionStore.findForRole("decision");
       const decisionKey = decision && decisionStore.getApiKey(decision.id);
+      // startlux-decision-4b p50 is ~2.7s on the platform: a 1500ms budget timed out on every turn.
       const accountRouter = options.router ?? (decisionKey ? createIntentRouter({ mode: "on", policy: "full", model: DEMO_DECISION_MODEL,
-        url: `${decision!.baseUrl.replace(/\/+$/, "")}/decisions`, apiKey: decisionKey, timeoutMs: 1500, fetchImpl: options.fetchImpl,
+        url: `${decision!.baseUrl.replace(/\/+$/, "")}/decisions`, apiKey: decisionKey, timeoutMs: 6000, fetchImpl: options.fetchImpl,
         directRoutes: ["countdown", "todo", "note", "overview", "restore"] }) : router);
       // Provider settings share the deployment's durable data root, so a saved
       // main/decision provider survives session turnover and process restarts.
