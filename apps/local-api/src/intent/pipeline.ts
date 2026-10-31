@@ -349,6 +349,8 @@ const runLegacyIntent = async (
     if (deps.slotPlanning) {
       const planned = await budget.run(() => runSlotPlanner(req, {
         hint: deps.routeHint, definitions, page, travel: deps.travel, signal: budget.signal, usedProvider,
+        // Cache identity: provider wins, otherwise the selected model id.
+        model: deps.planner ? "gpt" : credential?.defaultModel ?? deps.mainProvider ?? deps.stepfun.provider ?? "unknown",
         allowTargetCandidates: deps.executionRouter?.mode === "on",
         // A hybrid planner call maps its active clause subset back to the original split.
         ...(deps.multiCard !== "off" ? { report: (plans: Array<{ clause: number; contract: string; cardIds: string[] }>) => {

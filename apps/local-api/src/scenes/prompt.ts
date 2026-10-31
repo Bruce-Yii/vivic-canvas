@@ -1,4 +1,4 @@
-import { SCENES } from "@vivic/contracts";
+import { SCENES, type SceneId } from "@vivic/contracts";
 
 /** Planner instructions for scene cards. One table, the same registry the UI renders from. */
 const DATA: Record<(typeof SCENES)[number]["id"], string> = {
@@ -63,6 +63,53 @@ ${SCENES.map(scene => `${scene.id}：${INTENT[scene.id]}。${dataGuide(scene.id)
 数字、日期、年份、星期、链接、DOI、作者、出处、书名、图片只能来自本次用户原话、澄清、已有画布或 page。相对日期按 today/timeZone 推算，缺少必要信息先用上下文，否则 clarify。摘要与要点只能依据原文或 page；普通知识回答使用 answer 契约，不受新闻原文条件限制。
 选择规则：用户明确指定且数据兼容时服从；今天要完成什么用todo_list、几点做什么用weekly_schedule、整月事项用monthly_calendar、推进阶段用project_roadmap、目标完成比例用goal_progress、重复打卡用habit_tracking、过去事件用historical_timeline。保存网站或仓库用web_bookmark，明确学术论文才用academic_paper。纯计时与提醒用 countdown 契约，便笺原文用 note。写作整理可保存为 note，数值图表不能编造数据。
 一个独立对象对应一个计划项，最多6项。不能放进所选结构则 clarify，不能遗漏或随机选场景。`;
+
+/**
+ * Compact prompt: the scene rows worth showing this turn. It keeps the known
+ * confusable sets instead of one scene, because cutting them changes the choice
+ * (a three-day itinerary was built as a travel POI query in the A/B run). The
+ * stable selection rules stay in the compact fixed prefix, not in this list.
+ */
+const COMPACT_SCENE_RULES: ReadonlyArray<readonly [RegExp, readonly SceneId[]]> = [
+  // Itinerary wording is the confusable trio: POI query vs multi-day plan vs timetable.
+  [/行程|旅行|旅游|出游|攻略|酒店|航班|机票|景点|目的地/, ["travel_offers", "project_roadmap", "weekly_schedule"]],
+  [/对比|比较|选型|参数|哪个好|选哪个/, ["option_comparison", "data_visualization"]],
+  [/图表|柱状图|折线图|饼图|统计|趋势|数据/, ["data_visualization", "option_comparison"]],
+  [/论文|文献|学术|doi/i, ["academic_paper", "web_bookmark"]],
+  [/读书|看书|阅读|书单|读到|这本书/, ["book_record", "academic_paper"]],
+  [/收藏|书签|网站|仓库|网页|链接|资源/, ["web_bookmark", "academic_paper"]],
+  [/新闻|资讯|报道/, ["news_summary", "activity_feed"]],
+  [/照片|相册|图片|影像|拍照/, ["photo_gallery", "photo_story"]],
+  [/历史|过去|时间线|回顾/, ["historical_timeline", "activity_feed"]],
+  [/动态|最近发生|活动记录/, ["activity_feed", "historical_timeline"]],
+  [/通知|告警|提示|送达/, ["single_notification", "activity_feed"]],
+  [/打卡|习惯|坚持|每日/, ["habit_tracking", "goal_progress"]],
+  [/目标|完成.{0,4}(?:多少|比例|进度)|进度/, ["goal_progress", "project_roadmap"]],
+  [/倒计时|倒数|生日|考试|纪念日|还有.{0,4}天/, ["countdown", "goal_progress"]],
+  [/这个月|本月|整月|每月/, ["monthly_calendar", "weekly_schedule"]],
+  [/日程|这周|下周|本周|几点|安排|时间表|档期/, ["weekly_schedule", "monthly_calendar"]],
+  [/待办|清单|任务|to.?do|要做的事|代办/i, ["todo_list", "weekly_schedule"]],
+  [/阶段|里程碑|路线图|推进|规划|计划/, ["project_roadmap", "weekly_schedule"]],
+  [/故事|叙事|章节/, ["photo_story", "quote_note"]],
+  [/金句|名言|感悟|灵感|文案/, ["quote_note", "photo_story"]],
+  [/纪念|回忆/, ["photo_memory", "photo_story"]],
+];
+
+/**
+ * Deterministic proxy for the scene rows a turn could need: at most three, and
+ * always the confusable partner(s). No rows means "save the writing as note",
+ * which is the shipped rule for creative work without a matching structure.
+ */
+export const compactSceneIds = (text: string): SceneId[] => {
+  for (const [pattern, scenes] of COMPACT_SCENE_RULES) if (pattern.test(text)) return [...scenes];
+  return [];
+};
+
+/** Only the relevant scene rows; no optional-field lists, so the guide stays small. */
+export const buildCompactSceneSlotGuide = (scenes: readonly SceneId[]): string => scenes.length
+  ? `generate 的 slots 结构为 {"scene_id":"下表分类名","data":{}}。分类名不是实例编号。\n${scenes
+    .map(scene => `${scene}：${INTENT[scene]}。data结构=${DATA[scene].replace(/\?"\s*:/g, '":')}`).join("\n")}`
+  : "";
 
 export const buildScenePrompt = (): string => `
 场景卡片（重点）：用户想把内容整理、记录、展示成卡片时，优先输出 {"cards":[{"scene_id":"表内固定分类名","data":{…}}],"spokenText":"40字内说明"}，省略冗余card_type。scene_id是固定分类名，不是实例id；同类的多张卡也用相同scene_id，绝不加日期、时间戳或随机编号。若填写card_type，必须是表中箭头右侧的精确类型，不能填左侧场景名。程序负责实例id、布局、时间戳、校验和渲染；禁止输出 HTML、JSX、组件名、样式或卡片模板之外的字段。
