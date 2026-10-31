@@ -95,6 +95,50 @@ describe("reminder coverage requires every enumerated item", () => {
   });
 });
 
+describe("reminder coverage falls back to the whole phrase when splitting fails", () => {
+  it("rejects one reminder that folds a 然后 item", () => {
+    expect(reminderCoverageIssue("五分钟后提醒我喝水然后吃药", [{ afterSeconds: 300, text: "喝水然后吃药" }]))
+      .toBe("遗漏或更改了明确的提醒事项");
+  });
+
+  it("rejects folding a second 提醒 clause into the first reminder", () => {
+    expect(reminderCoverageIssue("五分钟后提醒我喝水、吃药，再提醒我休息",
+      [{ afterSeconds: 300, text: "喝水、吃药，再提醒我休息" }]))
+      .toBe("遗漏或更改了明确的提醒事项");
+  });
+
+  it("rejects a dropped item behind 再提醒我", () => {
+    expect(reminderCoverageIssue("五分钟后提醒我喝水、吃药，再提醒我休息", [
+      { afterSeconds: 300, text: "喝水" }, { afterSeconds: 300, text: "吃药" },
+    ])).toBe("遗漏或更改了明确的提醒事项");
+  });
+
+  it("accepts one reminder per item even though the split is not deterministic", () => {
+    expect(reminderCoverageIssue("五分钟后提醒我喝水然后吃药", [
+      { afterSeconds: 300, text: "喝水" }, { afterSeconds: 300, text: "吃药" },
+    ])).toBeNull();
+    expect(reminderCoverageIssue("五分钟后提醒我喝水、吃药，再提醒我休息", [
+      { afterSeconds: 300, text: "喝水" }, { afterSeconds: 300, text: "吃药" }, { afterSeconds: 300, text: "休息" },
+    ])).toBeNull();
+    // A duration may follow the trigger itself; it is not part of the item.
+    expect(reminderCoverageIssue("请提醒我五分钟后喝水然后吃药", [
+      { afterSeconds: 300, text: "喝水" }, { afterSeconds: 300, text: "吃药" },
+    ])).toBeNull();
+  });
+
+  it("does not mis-split a single item followed by the user's own next action", () => {
+    expect(reminderCoverageIssue("现在提醒我喝水然后睡觉", [{ afterSeconds: 60, text: "喝水" }])).toBeNull();
+    expect(reminderCoverageIssue("五分钟后提醒我和家人开会", [{ afterSeconds: 300, text: "和家人开会" }])).toBeNull();
+    expect(reminderCoverageIssue("五分钟后提醒我涉及预算的部分", [{ afterSeconds: 300, text: "涉及预算的部分" }])).toBeNull();
+  });
+
+  it("rejects two reminders when the user named one item", () => {
+    expect(reminderCoverageIssue("五分钟后提醒我和家人开会", [
+      { afterSeconds: 300, text: "家人" }, { afterSeconds: 300, text: "开会" },
+    ])).toBe("遗漏或更改了明确的提醒事项");
+  });
+});
+
 describe("reminder pipeline handles 和 without losing an item", () => {
   it("clarifies when the model folds 喝水和吃药 into one reminder", async () => {
     const f = setup(() => chatOk({ reminders: [{ afterSeconds: 300, text: "喝水和吃药" }] }));
@@ -131,5 +175,34 @@ describe("reminder pipeline handles 和 without losing an item", () => {
     expect(result.kind, JSON.stringify(result)).toBe("envelope");
     expect(reminderTexts(result)).toEqual(["和家人开会"]);
     expect(f.call).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("reminder pipeline keeps both items of a 然后 request", () => {
+  it("creates two cards when the model returns both items", async () => {
+    const f = setup(() => chatOk({ reminders: [
+      { afterSeconds: 300, text: "喝水" },
+      { afterSeconds: 300, text: "吃药" },
+    ] }));
+    const result = await runIntent({ text: "五分钟后提醒我喝水然后吃药", canvasContext: emptyContext() }, f.deps);
+    expect(result.kind, JSON.stringify(result)).toBe("envelope");
+    expect(reminderTexts(result)).toEqual(["喝水", "吃药"]);
+    expect(f.call).toHaveBeenCalledTimes(1);
+  });
+
+  it("clarifies when the model folds the 然后 item into one reminder", async () => {
+    const f = setup(() => chatOk({ reminders: [{ afterSeconds: 300, text: "喝水然后吃药" }] }));
+    const result = await runIntent({ text: "五分钟后提醒我喝水然后吃药", canvasContext: emptyContext() }, f.deps);
+    expect(result.kind).toBe("clarify");
+    expect(result.envelope).toBeUndefined();
+    expect(f.call).toHaveBeenCalledTimes(2);
+  });
+
+  it("clarifies when the model folds a second 提醒 clause into the first", async () => {
+    const f = setup(() => chatOk({ reminders: [{ afterSeconds: 300, text: "喝水、吃药，再提醒我休息" }] }));
+    const result = await runIntent({ text: "五分钟后提醒我喝水、吃药，再提醒我休息", canvasContext: emptyContext() }, f.deps);
+    expect(result.kind).toBe("clarify");
+    expect(result.envelope).toBeUndefined();
+    expect(f.call).toHaveBeenCalledTimes(2);
   });
 });

@@ -218,6 +218,61 @@ export const buildReminderActions = (reminders: Reminder[], ctx: CanvasContext):
 };
 
 const compactText = (text: string) => text.replace(/[\s，,。；;、：:！!？?]/g, "");
+const COVERAGE_ISSUE = "遗漏或更改了明确的提醒事项";
+
+/** An explicit timed reminder is the only grammar R2 may lean on: without it
+ * a trailing "然后..." can be the user's own next action ("现在提醒我喝水
+ * 然后睡觉"), which must stay one reminder. */
+const DURATION_TRIGGER = new RegExp(
+  `(?:${DURATION})\\s*(?:之后|以后|后)\\s*(?:再)?提醒我|(?:请)?提醒我\\s*(?:${DURATION})\\s*(?:之后|以后|后)`);
+
+/** The item phrase after the first "提醒我" trigger, used only by R2. */
+const coveragePhrase = (text: string): { phrase: string; anchored: boolean } | null => {
+  const start = text.search(/提醒我/);
+  if (start < 0) return null;
+  const phrase = text.slice(start + "提醒我".length).replace(/[。！!]+$/, "").trim();
+  return phrase ? { phrase, anchored: DURATION_TRIGGER.test(text) } : null;
+};
+
+/** Splits an item phrase for coverage only, never to build cards. Durations
+ * and repeated "提醒我" triggers are normalized away, 然后 is a sequence
+ * boundary; 和/及 keep the conservative guards so 和家人开会, 涉及, 和平 and
+ * 及时 stay one item. */
+const coverageItems = (raw: string): string[] | null => {
+  const normalized = raw
+    .replace(new RegExp(`(?:${DURATION})?\\s*(?:之后|以后|后)?\\s*(?:再)?提醒我`, "g"), "、")
+    .replace(new RegExp(`(?:${DURATION})\\s*(?:之后|以后|后)?`, "g"), "、")
+    .replace(/然后/g, "、")
+    .replace(/[、，,；;]+/g, "、")
+    .replace(/(^|、)再/g, "$1")
+    .replace(/^、+|、+$/g, "")
+    .trim();
+  return normalized ? splitEnumeratedItems(normalized) : [];
+};
+
+/** R2: when no deterministic split exists, coverage must still not lose or
+ * fold an item. Each CountdownCard holds one item, so a reminder text that
+ * still contains an item separator is a fold; missing items are rejected. */
+const nonDeterministicCoverageIssue = (text: string, reminders: Reminder[]): string | null => {
+  const found = coveragePhrase(text);
+  if (!found) return null;
+  const { phrase, anchored } = found;
+  const enumerated = /[、，,；;]|以及|还有|和|及/.test(phrase);
+  if (!enumerated && !(anchored && /然后/.test(phrase))) return null;
+  const items = coverageItems(phrase);
+  if (!items) return COVERAGE_ISSUE;
+  if (!items.length) return null;
+  for (const reminder of reminders) {
+    const folded = coverageItems(reminder.text);
+    if (!folded || folded.length > 1) return COVERAGE_ISSUE;
+  }
+  if (items.length <= 1 && reminders.length <= 1) return null;
+  if (items.length !== reminders.length) return COVERAGE_ISSUE;
+  if (items.some((item, index) => !compactText(item) ||
+    !compactText(reminders[index]!.text).includes(compactText(item)))) return COVERAGE_ISSUE;
+  return null;
+};
+
 /** Source anchors prevent invented task text and catch explicit missing items.
  * Ambiguous implicit references still require model clarification. */
 export const reminderCoverageIssue = (text: string, reminders: Reminder[]): string | null => {
@@ -227,7 +282,13 @@ export const reminderCoverageIssue = (text: string, reminders: Reminder[]): stri
   // distinct items into one reminder text or drop one of them.
   const exact = parseEnumeratedReminders(text) ?? parseExactReminders(text);
   if (exact && (exact.length !== reminders.length || exact.some((r, i) =>
-    r.afterSeconds !== reminders[i]?.afterSeconds || r.text !== reminders[i]?.text))) return "遗漏或更改了明确的提醒事项";
+    r.afterSeconds !== reminders[i]?.afterSeconds || r.text !== reminders[i]?.text))) return COVERAGE_ISSUE;
+  // R2: both parsers refused to split. Never fall through to the substring
+  // check, or one folded reminder silently swallows a second item.
+  if (!exact) {
+    const ambiguous = nonDeterministicCoverageIssue(text, reminders);
+    if (ambiguous) return ambiguous;
+  }
   const countMatch = text.match(new RegExp(`(${NUMBER})\\s*(?:件事|个提醒|项提醒|个倒计时)`));
   const count = countMatch ? chineseNumber(countMatch[1]!) : null;
   const durations = [...text.matchAll(new RegExp(DURATION, "g"))];
