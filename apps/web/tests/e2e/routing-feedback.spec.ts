@@ -13,6 +13,9 @@ type HeldIntent = {
 };
 type SseFixture = { url: string; requests: HeldIntent[] };
 const test = base.extend<{ sse: SseFixture }>({
+  // Playwright requires the first fixture argument to be an object destructuring
+  // pattern; this fixture needs no upstream fixtures.
+  // oxlint-disable-next-line no-empty-pattern
   sse: async ({}, use) => {
     const requests: HeldIntent[] = [];
     const server = http.createServer((request, response) => {
@@ -47,16 +50,61 @@ const test = base.extend<{ sse: SseFixture }>({
 const frame = (held: HeldIntent, event: string, data: unknown) => {
   held.response.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
 };
-const progress = (held: HeldIntent, stage: string, feedback?: string) => frame(held, "progress", {
-  requestId: held.id, stage, status: "started", ...(feedback ? { feedback } : {}),
+type ProgressFields = { feedback?: string; route?: string; feedbackSource?: "model" | "preset" };
+const emitProgress = (held: HeldIntent, stage: string, fields: ProgressFields = {}) => frame(held, "progress", {
+  requestId: held.id, stage, status: "started", ...fields,
 });
-const complete = (held: HeldIntent, cardId: string, message: string) => {
-  frame(held, "result", { kind: "envelope", usedProvider: "stepfun", envelope: {
+const progress = (held: HeldIntent, stage: string, feedback?: string) =>
+  emitProgress(held, stage, feedback ? { feedback } : {});
+const result = (held: HeldIntent, cardId: string, message: string) => frame(held, "result", {
+  kind: "envelope", usedProvider: "stepfun", envelope: {
     schemaVersion: "0.6", requestId: `result-${held.id}`, canvasId: held.body.canvasContext.canvasId,
     spokenText: message, actions: [{ type: "stage.awaken" }, { type: "card.create", card: todoCardRecord(cardId, ["保留用户原文"]) }],
-  } });
+  },
+});
+const complete = (held: HeldIntent, cardId: string, message: string) => {
+  result(held, cardId, message);
   held.response.end();
 };
+
+// The client copy the state machine already owns. Preset scene copy is not
+// asserted here because that copy table does not exist yet.
+const NEUTRAL_CONTROL = "正在理解你的指令…";
+const SLOW_HINT = "响应较慢，仍在处理…";
+const CANCELLED_TEXT = "已取消本次请求";
+const FAST_DONE_MS = 250;
+
+type FeedbackTraceEntry = {
+  requestId: string;
+  source: "neutral" | "slow" | "preset" | "model" | "final" | "stage";
+  rank?: number;
+  stage?: string;
+  suppressed?: boolean;
+  route?: string;
+  textLength?: number;
+};
+/** Record the reducer's decisions (including suppressed stage frames) in page order. */
+const watchFeedbackTrace = (page: Page) => page.evaluate(() => {
+  const entries: unknown[] = [];
+  window.addEventListener("vivic:feedback-trace", event => entries.push((event as CustomEvent).detail));
+  (window as unknown as { __feedbackTrace: unknown[] }).__feedbackTrace = entries;
+});
+const feedbackTrace = (page: Page): Promise<FeedbackTraceEntry[]> => page.evaluate(() =>
+  ((window as unknown as { __feedbackTrace?: FeedbackTraceEntry[] }).__feedbackTrace ?? []));
+/** Record every text value the one visible slot actually had, without polling timing. */
+const observeFeedbackLine = (page: Page) => page.evaluate(() => {
+  const seen: (string | null)[] = [];
+  const record = () => {
+    const text = document.querySelector("[data-vivic-command-feedback]")?.textContent ?? null;
+    if (seen[seen.length - 1] !== text) seen.push(text);
+  };
+  const observer = new MutationObserver(record);
+  observer.observe(document.body, { childList: true, characterData: true, subtree: true });
+  (window as unknown as { __feedbackTexts: (string | null)[] }).__feedbackTexts = seen;
+  record();
+});
+const visibleFeedbackTexts = (page: Page): Promise<(string | null)[]> => page.evaluate(() =>
+  ((window as unknown as { __feedbackTexts?: (string | null)[] }).__feedbackTexts ?? []));
 const sendCommand = async (page: Page, text: string) => {
   await showChat(page);
   // Exercise the existing template-draft entry then the real submit control.
@@ -164,4 +212,181 @@ test("a model failure replaces feedback and clears transient waiting state", asy
   await expect(page.locator("[data-vivic-command-feedback]")).toHaveText("模型服务返回 HTTP 429");
   await expect(page.locator("[data-vivic-command-cancel]")).toHaveCount(0);
   expect(await page.evaluate(() => (window.__vivic!.getState() as { activity: unknown }).activity)).toBeNull();
+});
+
+test("stage telemetry never overwrites the neutral line", async ({ page, sse }) => {
+  await ready(page, sse);
+  await watchFeedbackTrace(page);
+  await observeFeedbackLine(page);
+  await sendCommand(page, "请总结一下今天的工作");
+  await expect.poll(() => sse.requests.length).toBe(1);
+  const held = sse.requests[0]!;
+  await expect(page.locator("[data-vivic-command-feedback]")).toHaveText(NEUTRAL_CONTROL);
+  const stages = ["rules", "data", "search", "decision", "planner", "validation"] as const;
+  for (const stage of stages) emitProgress(held, stage,
+    stage === "decision" ? { route: "answer", feedbackSource: "preset" } : {});
+  // Each stage emits a suppressed trace entry but writes no visible text.
+  await expect.poll(async () => (await feedbackTrace(page)).length).toBe(stages.length);
+  await expect(page.locator("[data-vivic-command-feedback]")).toHaveText(NEUTRAL_CONTROL);
+  const trace = await feedbackTrace(page);
+  expect(trace.map(entry => entry.stage)).toEqual([...stages]);
+  expect(trace.every(entry => entry.source === "stage" && entry.suppressed === true)).toBe(true);
+  const routed = trace.filter(entry => entry.route === "answer");
+  expect(routed).toHaveLength(1);
+  expect(routed[0]).toMatchObject({ stage: "decision", suppressed: true });
+  expect(await visibleFeedbackTexts(page)).toEqual([null, NEUTRAL_CONTROL]);
+});
+
+test("the first model sentence is not replaced by later stages or the slow timer", async ({ page, sse }) => {
+  await ready(page, sse);
+  await watchFeedbackTrace(page);
+  await observeFeedbackLine(page);
+  await page.clock.install();
+  await sendCommand(page, "请把这段原文整理成待办");
+  await expect.poll(() => sse.requests.length).toBe(1);
+  const held = sse.requests[0]!;
+  const sentence = "我先理清原文，再整理成待办。";
+  emitProgress(held, "planner", { feedback: sentence, feedbackSource: "model" });
+  await expect(page.locator("[data-vivic-command-feedback]")).toHaveText(sentence);
+  const stages = ["rules", "data", "search", "decision", "validation"] as const;
+  for (const stage of stages) emitProgress(held, stage);
+  await expect.poll(async () => (await feedbackTrace(page)).length).toBe(stages.length + 1);
+  // The slow timer no longer has a neutral line to replace; advancing past 5s
+  // must not add a second slow hint either.
+  await page.clock.fastForward(6000);
+  await expect(page.locator("[data-vivic-command-feedback]")).toHaveText(sentence);
+  const trace = await feedbackTrace(page);
+  expect(trace.map(entry => entry.source)).toEqual(["model", ...stages.map(() => "stage")]);
+  expect(trace.filter(entry => entry.source === "slow")).toHaveLength(0);
+  expect(await visibleFeedbackTexts(page)).toEqual([null, NEUTRAL_CONTROL, sentence]);
+});
+
+test("the 5s slow hint survives later stage labels", async ({ page, sse }) => {
+  await ready(page, sse);
+  await watchFeedbackTrace(page);
+  await observeFeedbackLine(page);
+  await page.clock.install();
+  await sendCommand(page, "这条请求需要多等一会儿");
+  await expect.poll(() => sse.requests.length).toBe(1);
+  const held = sse.requests[0]!;
+  await expect(page.locator("[data-vivic-command-feedback]")).toHaveText(NEUTRAL_CONTROL);
+  await page.clock.fastForward(5100);
+  await expect(page.locator("[data-vivic-command-feedback]")).toHaveText(SLOW_HINT);
+  const stages = ["rules", "data", "decision", "validation"] as const;
+  for (const stage of stages) emitProgress(held, stage);
+  await expect.poll(async () => (await feedbackTrace(page)).length).toBe(stages.length + 1);
+  await expect(page.locator("[data-vivic-command-feedback]")).toHaveText(SLOW_HINT);
+  // A second 5s interval has no timer left to fire.
+  await page.clock.fastForward(6000);
+  await expect(page.locator("[data-vivic-command-feedback]")).toHaveText(SLOW_HINT);
+  const trace = await feedbackTrace(page);
+  expect(trace.map(entry => entry.source)).toEqual(["slow", ...stages.map(() => "stage")]);
+  expect(trace.filter(entry => entry.source === "slow")).toHaveLength(1);
+  expect(await visibleFeedbackTexts(page)).toEqual([null, NEUTRAL_CONTROL, SLOW_HINT]);
+});
+
+test("a result inside the 250ms window keeps the line empty and never paints a first sentence", async ({ page, sse }) => {
+  await ready(page, sse);
+  await watchFeedbackTrace(page);
+  await observeFeedbackLine(page);
+  // Fixing Date makes the browser-side elapsedMs exactly 0 without freezing
+  // timers, so the fast-result branch is deterministic and clicks still work.
+  await page.clock.setFixedTime(new Date("2026-10-31T08:00:00.000Z"));
+  const quietStartedAt = await page.evaluate(() => Date.now());
+  await sendCommand(page, "快速保存这条待办");
+  await expect.poll(() => sse.requests.length).toBe(1);
+  const quiet = sse.requests[0]!;
+  emitProgress(quiet, "decision", { route: "todo" });
+  result(quiet, "fast-quiet-card", "已保存");
+  // Frames written after the result belong to a settled request.
+  emitProgress(quiet, "planner", { feedback: "迟到首句不应上屏。", feedbackSource: "model" });
+  quiet.response.end();
+  await expect(page.locator("[data-vivic-command-feedback]")).toHaveCount(0);
+  await expect(page.locator("[data-vivic-command-cancel]")).toHaveCount(0);
+  const quietElapsed = await page.evaluate(() => Date.now()) - quietStartedAt;
+  expect(quietElapsed).toBeLessThan(FAST_DONE_MS);
+  const quietTexts = await visibleFeedbackTexts(page);
+  // A fast result may clear neutral before or after its first paint; the
+  // contract only forbids leaving a first sentence behind.
+  expect(quietTexts.every(text => text === null || text === NEUTRAL_CONTROL)).toBe(true);
+  expect(quietTexts[quietTexts.length - 1]).toBeNull();
+  expect(quietTexts).not.toContain("迟到首句不应上屏。");
+
+  const visibleStartedAt = await page.evaluate(() => Date.now());
+  await sendCommand(page, "快速把这条放到画布");
+  await expect.poll(() => sse.requests.length).toBe(2);
+  const visible = sse.requests[1]!;
+  emitProgress(visible, "decision", { route: "todo" });
+  complete(visible, "fast-visible-card", "已放到画布");
+  await expect(page.locator("[data-vivic-command-feedback]")).toHaveText("已放到画布");
+  await expect(page.locator("[data-vivic-command-cancel]")).toHaveCount(0);
+  const visibleElapsed = await page.evaluate(() => Date.now()) - visibleStartedAt;
+  expect(visibleElapsed).toBeLessThan(FAST_DONE_MS);
+  const texts = await visibleFeedbackTexts(page);
+  expect(texts[texts.length - 1]).toBe("已放到画布");
+  expect(texts).not.toContain("迟到首句不应上屏。");
+  const trace = await feedbackTrace(page);
+  expect(trace.filter(entry => entry.source === "stage")).toHaveLength(2);
+  expect(trace.filter(entry => entry.source === "model" || entry.source === "preset" || entry.source === "slow")).toHaveLength(0);
+});
+
+test("cancel clears the slot and late frames from the cancelled request cannot write", async ({ page, sse }) => {
+  await ready(page, sse);
+  await watchFeedbackTrace(page);
+  await observeFeedbackLine(page);
+  await sendCommand(page, "先整理这条，随后我会取消");
+  await expect.poll(() => sse.requests.length).toBe(1);
+  const held = sse.requests[0]!;
+  const sentence = "我会先整理这条请求。";
+  emitProgress(held, "planner", { feedback: sentence });
+  await expect(page.locator("[data-vivic-command-feedback]")).toHaveText(sentence);
+  await page.locator("[data-vivic-command-cancel]").click();
+  await expect(page.locator("[data-vivic-command-feedback]")).toHaveText(CANCELLED_TEXT);
+  await expect(page.locator("[data-vivic-command-cancel]")).toHaveCount(0);
+  emitProgress(held, "planner", { feedback: "取消之后才到的首句。" });
+  emitProgress(held, "validation", { route: "answer" });
+  complete(held, "cancelled-late-card", "旧请求不应完成");
+  await page.waitForTimeout(300);
+  await expect(page.locator("[data-vivic-command-feedback]")).toHaveText(CANCELLED_TEXT);
+  const state = await page.evaluate(() => window.__vivic!.getState()) as {
+    cards: { record: { id: string } }[]; activity: unknown;
+  };
+  expect(state.cards.map(card => card.record.id)).not.toContain("cancelled-late-card");
+  expect(state.activity).toBeNull();
+  expect((await feedbackTrace(page)).map(entry => entry.source)).toEqual(["model"]);
+  expect(await visibleFeedbackTexts(page)).toEqual([null, NEUTRAL_CONTROL, sentence, CANCELLED_TEXT]);
+});
+
+test("route and feedbackSource are accepted while legacy progress frames stay compatible", async ({ page, sse }) => {
+  await ready(page, sse);
+  await watchFeedbackTrace(page);
+  await observeFeedbackLine(page);
+  await sendCommand(page, "帮我查一下最新的资料");
+  await expect.poll(() => sse.requests.length).toBe(1);
+  const held = sse.requests[0]!;
+  const presetSentence = "这是测试注入的预设兜底句。";
+  const modelSentence = "我会先查一下最新资料。";
+  // A route-only frame is new telemetry: accepted, but it writes no visible line.
+  emitProgress(held, "decision", { route: "search", feedbackSource: "preset" });
+  await expect.poll(async () => (await feedbackTrace(page)).length).toBe(1);
+  await expect(page.locator("[data-vivic-command-feedback]")).toHaveText(NEUTRAL_CONTROL);
+  // feedbackSource=preset routes into the preset tier without a scene-copy table.
+  emitProgress(held, "decision", { feedback: presetSentence, feedbackSource: "preset", route: "search" });
+  await expect(page.locator("[data-vivic-command-feedback]")).toHaveText(presetSentence);
+  await expect.poll(async () => (await feedbackTrace(page)).length).toBe(2);
+  // A legacy frame (requestId/stage/status/feedback only) still upgrades to model.
+  progress(held, "planner", modelSentence);
+  await expect(page.locator("[data-vivic-command-feedback]")).toHaveText(modelSentence);
+  await expect.poll(async () => (await feedbackTrace(page)).length).toBe(3);
+  // A legacy stage-only frame is still parsed and still cannot write text.
+  progress(held, "validation");
+  await expect.poll(async () => (await feedbackTrace(page)).length).toBe(4);
+  await expect(page.locator("[data-vivic-command-feedback]")).toHaveText(modelSentence);
+  const trace = await feedbackTrace(page);
+  expect(trace.map(entry => entry.source)).toEqual(["stage", "preset", "model", "stage"]);
+  expect(trace[0]).toMatchObject({ stage: "decision", route: "search", suppressed: true });
+  expect(trace[1]).toMatchObject({ source: "preset", route: "search" });
+  expect(trace[2]).toMatchObject({ source: "model", route: "search" });
+  expect(trace[3]).toMatchObject({ source: "stage", suppressed: true });
+  expect(await visibleFeedbackTexts(page)).toEqual([null, NEUTRAL_CONTROL, presetSentence, modelSentence]);
 });
