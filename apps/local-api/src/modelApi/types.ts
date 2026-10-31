@@ -1,6 +1,6 @@
 export type ModelApiErrorCode =
   | "invalid-config" | "invalid-input" | "not-configured" | "unauthorized" | "forbidden"
-  | "busy" | "timeout" | "cancelled" | "unavailable" | "invalid-response" | "too-large";
+  | "busy" | "timeout" | "cancelled" | "unavailable" | "invalid-response" | "protocol-mismatch" | "too-large";
 
 /** Safe, fixed diagnostics only. No upstream body, token, URL, stack or abort reason. */
 export interface ModelApiFailure {
@@ -46,18 +46,22 @@ export interface ModelApiTranscription {
   /** Compressed browser recordings require the provider to enforce its 60s limit. */
   durationValidation: "local-wav" | "upstream-required";
 }
-export type ModelApiDecisionModel = "startlux-decision-2b" | "gliner2.5-multi-decide";
+export type ModelApiDecisionModel = "startlux-decision-2b" | "startlux-decision-4b" | "gliner2.5-multi-decide";
+/** 4B speaks the native state/questions protocol; 2B and GLiNER keep the legacy input/labels protocol. */
+export type ModelApiDecisionProtocol = "legacy" | "native";
 export interface ModelApiClassificationOptions extends ModelApiCallOptions {
   model: ModelApiDecisionModel;
   labels: Readonly<Record<string, string>>;
+  /** Optional explicit protocol; must match the model family or the call is rejected. */
+  protocol?: ModelApiDecisionProtocol;
 }
 export interface ModelApiClassification {
   model: ModelApiDecisionModel;
   choice: string | null;
   score: number;
   needs_review: boolean;
-  scoreKind: "startlux-choice-score" | "gliner-winning-label-score";
-  /** Classification is never a native-v2 state/questions/answers/None response. */
+  scoreKind: "startlux-choice-score" | "startlux-4b-choice-confidence" | "gliner-winning-label-score";
+  /** Legacy models never return native v2; 4B native answers are reduced to this one classification. */
   compatibilityGaps: readonly string[];
 }
 export interface ModelApiVoice { id: string; name: string; language?: string }
