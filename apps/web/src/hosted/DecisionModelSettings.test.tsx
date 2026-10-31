@@ -24,6 +24,32 @@ describe("decision model settings", () => {
     expect(html).toContain("卡片执行已关闭");
   });
 
+  it("offers the 4B native option with a local display name and explains the wire protocol", () => {
+    const html = render();
+    const option = /<option value="startlux-decision-4b">([^<]*)<\/option>/.exec(html);
+    expect(option?.[1]).toBe("StartLux Decision 4B（本地）");
+    expect(html).toContain("原生 state/questions 协议");
+    expect(html).toContain("旧 input/labels 协议");
+    expect(html).toContain("不会静默切换");
+  });
+
+  it("does not expose internal decision model ids as visible text", () => {
+    const host = document.createElement("div");
+    host.innerHTML = render({ selectedModel: "startlux-decision-4b" });
+    expect(host.textContent).not.toContain("startlux-decision-4b");
+    expect(host.textContent).not.toContain("gliner2.5-multi-decide");
+  });
+
+  it("shows the 4B connection from the reported native wire protocol", () => {
+    const html = render({
+      selectedModel: "startlux-decision-4b",
+      models: { configured: true, decision: { configured: true, model: "startlux-decision-4b", wireProtocol: "native", executionEnabled: false, protocol: "classification-only", quality: "not-tested" } },
+    });
+    expect(html).toContain("已连接 · StartLux Decision 4B（本地）");
+    expect(html).toContain("原生协议");
+    expect(html).toContain('data-wire-protocol="native"');
+  });
+
   it("shows the selected decision model as connected when its probe succeeded", () => {
     const html = render({ models: { configured: true, decision: { configured: true, model: "startlux-decision-2b", connectedAt: "2026-10-27T00:00:00.000Z", executionEnabled: false, protocol: "classification-only", quality: "not-tested" } } });
     expect(html).toContain("已连接 · Startlux Decision 2B");

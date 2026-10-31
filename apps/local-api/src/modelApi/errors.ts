@@ -11,6 +11,7 @@ const messages: Record<ModelApiErrorCode, string> = {
   cancelled: "模型 API 请求已取消。",
   unavailable: "模型 API 暂不可用。",
   "invalid-response": "模型 API 返回的数据格式不受支持。",
+  "protocol-mismatch": "决策模型与协议不匹配：StartLux 4B 只使用原生 state/questions，2B 与 GLiNER 只使用旧 input/labels；未自动切换。",
   "too-large": "模型 API 输入或响应超过大小限制。",
 };
 export class ModelApiError extends Error {

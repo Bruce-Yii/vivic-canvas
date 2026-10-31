@@ -28,6 +28,9 @@ export interface HostedServiceOptions {
 }
 const IDLE = 30 * 60_000, MAX_AGE = 8 * 60 * 60_000;
 const DECISION_TEST_INPUT = "请把所有卡片显示在一屏里";
+const DECISION_MODELS = ["startlux-decision-2b", "startlux-decision-4b", "gliner2.5-multi-decide"] as const;
+const DecisionModelSchema = z.enum(DECISION_MODELS);
+const wireProtocol = (model: ModelApiDecisionModel) => model === "startlux-decision-4b" ? "native" as const : "legacy" as const;
 const DECISION_LABELS = {
   fit: "在一屏显示全部卡片", restore: "恢复之前的画布视图", focus: "聚焦一张卡片", delete: "删除卡片",
   expand: "展开便笺并查看全文", collapse: "收起便笺只显示摘要", other: "不明确、否定、复合或其他要求",
@@ -136,20 +139,34 @@ export function createHostedService(options: HostedServiceOptions) {
     if (route === "/api/space/models/status" && request.method === "GET") return hostedJson({ configured: Boolean(model?.key),
       capabilities: ["speech", "transcribe", "classification"], inference: "not-tested", quality: "not-tested",
       decision: { configured: Boolean(model?.key && model.decision), model: model?.decision?.model ?? null,
+        wireProtocol: model?.decision ? wireProtocol(model.decision.model) : null,
         executionEnabled: false, protocol: "classification-only", quality: "not-tested", connectedAt: model?.decision?.connectedAt ?? null } });
     if (!model?.key) throw new SpaceError(503, "model-not-connected", "请在连接设置中填写语音与小模型API Key。");
     model.touched = now();
     const signal = AbortSignal.any([request.signal, model.controller.signal]);
     if (route === "/api/space/models/decision/connect" && request.method === "POST") {
-      const input = z.strictObject({ model: z.enum(["startlux-decision-2b", "gliner2.5-multi-decide"]) }).parse(await hostedBody(request));
+      const input = z.strictObject({ model: DecisionModelSchema }).parse(await hostedBody(request));
       const result = await model.client.classify(DECISION_TEST_INPUT, { model: input.model, labels: DECISION_LABELS, signal });
-      if (!result.ok) return hostedJson({ ok: false, code: result.error.code, message: result.error.message }, result.error.status ?? 503);
+      if (!result.ok) {
+        if (result.error.code === "protocol-mismatch") {
+          const native = input.model === "startlux-decision-4b";
+          return hostedJson({ ok: false, code: native ? "decision-native-protocol-unsupported" : "decision-protocol-mismatch",
+            message: native ? "平台返回了旧协议格式，未接受 4B 原生 state/questions；本次未连接，也不会静默改用旧协议。"
+              : "平台返回了 4B 原生格式，但所选模型使用旧 input/labels 协议；本次未连接，也不会静默改用 4B。" }, 502);
+        }
+        // A 4B-native body rejected by the platform means the gateway still speaks only the legacy protocol.
+        if (input.model === "startlux-decision-4b" && result.error.code === "invalid-input") {
+          return hostedJson({ ok: false, code: "decision-native-protocol-unsupported",
+            message: "平台拒绝了 4B 原生 state/questions 请求；请确认平台已支持 startlux-decision-4b。本次未连接，也不会静默改用旧协议。" }, 422);
+        }
+        return hostedJson({ ok: false, code: result.error.code, message: result.error.message }, result.error.status ?? 503);
+      }
       request.signal.throwIfAborted();
       space.store.assertDeviceActive(accountId, identity.device.id);
       if (models.get(accountId) !== model || !model.key) throw new SpaceError(409, "model-connection-changed", "模型连接已改变，请重新连接后再试。");
       model.decision = { model: input.model, connectedAt: new Date(now()).toISOString() };
       return hostedJson({ configured: true, model: input.model, connectedAt: model.decision.connectedAt,
-        executionEnabled: false, protocol: "classification-only", quality: "not-tested",
+        executionEnabled: false, protocol: "classification-only", wireProtocol: wireProtocol(input.model), quality: "not-tested",
         probe: { choice: result.value.choice, score: result.value.score, needsReview: result.value.needs_review } });
     }
     if (route === "/api/space/models/decision/disconnect" && request.method === "POST") {
@@ -169,7 +186,7 @@ export function createHostedService(options: HostedServiceOptions) {
           return model.client.transcribe(file, { filename: file.name, signal });
         })()
           : route === "/api/space/models/classify" && request.method === "POST" ? await (async () => {
-            const data = z.strictObject({ input: z.string().min(1).max(2000), model: z.enum(["startlux-decision-2b", "gliner2.5-multi-decide"]),
+            const data = z.strictObject({ input: z.string().min(1).max(2000), model: DecisionModelSchema,
               labels: z.record(z.string(), z.string()) }).parse(await hostedBody(request));
             if (!model.decision) throw new SpaceError(503, "decision-model-not-connected", "请先连接并测试决策模型。");
             if (data.model !== model.decision.model) throw new SpaceError(409, "decision-model-mismatch", "请求的决策模型与当前连接不一致。");
@@ -178,7 +195,15 @@ export function createHostedService(options: HostedServiceOptions) {
             : undefined;
     if (!result) throw new SpaceError(404, "not-found", "没有此模型接口。");
     space.store.assertDeviceActive(accountId, identity.device.id);
-    if (!result.ok) return hostedJson({ ok: false, code: result.error.code, message: result.error.message }, result.error.status ?? 503);
+    if (!result.ok) {
+      if (result.error.code === "protocol-mismatch") {
+        const native = model.decision?.model === "startlux-decision-4b";
+        return hostedJson({ ok: false, code: native ? "decision-native-protocol-unsupported" : "decision-protocol-mismatch",
+          message: native ? "平台返回了旧协议格式，未接受 4B 原生 state/questions；本次未执行分类，也不会静默改用旧协议。"
+            : "平台返回了 4B 原生格式，但当前模型使用旧 input/labels 协议；本次未执行分类，也不会静默改用 4B。" }, 502);
+      }
+      return hostedJson({ ok: false, code: result.error.code, message: result.error.message }, result.error.status ?? 503);
+    }
     if ("segments" in result.value) return hostedJson({ segments: result.value.segments.map(segment => ({ ...segment, audio: Buffer.from(segment.audio).toString("base64") })) });
     return hostedJson(result.value);
   }

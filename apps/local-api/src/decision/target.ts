@@ -168,7 +168,13 @@ export async function resolveTarget(text: string, context: CanvasContext, route:
   }
   // An unresolved classifier over the whole canvas has not found the card the
   // user explicitly named ("日程卡"). Listing every unrelated card as a candidate
-  // induces a wrong pick, so report the card as absent instead.
+  // induces a wrong pick, so report the card as absent instead. A "missing" below
+  // the 0.8 acceptance threshold is still the classifier saying the named card is
+  // not on the canvas (sc-58: missing @ 0.505); it must not fall through to the
+  // ambiguous whole-canvas list just because the probability is low.
+  if (result?.choice === "missing" && !names.length && (type || explicitCardReference(scope))) {
+    return { missing: true, source: "missing" };
+  }
   if ((!result || result.choice === "ambiguous") && !type && !names.length && pool.length === cards.length
     && explicitCardReference(scope)) return { missing: true, source: "missing" };
   return { ambiguous: labels(names.length ? names : pool), source: "ambiguous" };

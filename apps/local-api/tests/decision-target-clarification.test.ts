@@ -194,6 +194,37 @@ describe("a missing card gets zero unrelated candidates", () => {
     expect(f.model).not.toHaveBeenCalled();
   });
 
+  // accept20b sc-58: the real 4B answered missing at 0.505, below the 0.8 gate.
+  // The named card is still absent, so the whole canvas must not be offered.
+  it("reports an explicit absent card as missing when the classifier says missing below 0.8", async () => {
+    expect(await resolveTarget("聚焦一下日程卡", canvas(), "focus",
+      { chooseTarget: async () => ({ choice: "missing", probability: .505, latencyMs: 1 }) }))
+      .toEqual({ missing: true, source: "missing" });
+    const f = setup(text => /聚焦/.test(text) ? "focus" : "chat",
+      async () => ({ choice: "missing", probability: .505, latencyMs: 1 }));
+    const result = await f.post({ text: "聚焦一下日程卡", canvasContext: canvas() });
+    expect(result.kind).toBe("clarify");
+    expect(result.message).toBe("没有找到要操作的卡片，请说明卡名。");
+    expect(result.task?.clarification?.candidates ?? []).toHaveLength(0);
+    for (const title of titles) expect(result.message ?? "").not.toContain(title!);
+    expect(result.envelope).toBeUndefined();
+    expect(f.model).not.toHaveBeenCalled();
+  });
+
+  // The low-confidence fallback is only for a classifier-declared missing card.
+  // A genuine ambiguity among same-type cards must still ask, not claim absence.
+  it("still asks which same-type card when the classifier is genuinely ambiguous at low confidence", async () => {
+    const f = setup(text => /聚焦/.test(text) ? "focus" : "chat",
+      async () => ({ choice: "ambiguous", probability: .505, latencyMs: 1 }),
+      { contract: "focus", slots: {}, say: "请选择一张待办。", text: "请选择一张待办。" });
+    const result = await f.post({ text: "聚焦待办卡", canvasContext: canvas() });
+    expect(result.kind).toBe("clarify");
+    expect(result.message).toBe("你要操作哪一张？1. 本周待办 2. 购物清单");
+    expect(result.task?.clarification?.candidates?.map(candidate => candidate.id)).toEqual(["todo_week", "todo_shop"]);
+    expect(result.message ?? "").not.toContain("没有找到");
+    expect(result.envelope).toBeUndefined();
+  });
+
   it("keeps a confidently classified card even when its short name is not a title", async () => {
     const f = setup(text => /聚焦/.test(text) ? "focus" : "chat",
       async () => ({ choice: "note_meeting", probability: .97, latencyMs: 1 }));
@@ -211,6 +242,19 @@ describe("a missing card gets zero unrelated candidates", () => {
     expect(result.task?.clarification?.candidates ?? []).toHaveLength(0);
     for (const title of titles) expect(result.message ?? "").not.toContain(title!);
     expect(result.envelope).toBeUndefined();
+    expect(f.model).not.toHaveBeenCalled();
+  });
+});
+
+describe("a highlighted todo item is resolved by its text", () => {
+  it("highlights 买牛奶 inside 本周待办 instead of the whole card (sc-30)", async () => {
+    const f = setup(text => /高亮/.test(text) ? "highlight" : "chat",
+      async () => ({ choice: "todo_week", probability: .97, latencyMs: 1 }));
+    const result = await f.post({ text: "高亮一下买牛奶那条", canvasContext: canvas() });
+    expect(result.kind, JSON.stringify(result)).toBe("envelope");
+    expect(result.envelope?.actions).toContainEqual({
+      type: "card.highlight", targetId: "todo_week", itemId: "todo_week-item" });
+    expect(result.envelope?.actions.some(action => action.type === "card.highlight" && action.itemId === undefined)).toBe(false);
     expect(f.model).not.toHaveBeenCalled();
   });
 });
