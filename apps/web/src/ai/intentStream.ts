@@ -35,7 +35,7 @@ export interface FeedbackSlot {
   requestId: string;
   tier: FeedbackTier;
   text: string | null;
-  /** Advisory route from the decision layer; recorded as telemetry, never rendered by itself. */
+  /** Advisory route from the decision layer; a route frame alone never renders. */
   route?: string;
   /** A result/error/cancel ended this request; later progress frames are discarded. */
   settled: boolean;
@@ -44,6 +44,8 @@ export interface FeedbackSlot {
 export type FeedbackEvent =
   | { type: "neutral"; text: string; requestId?: string }
   | { type: "slow"; text: string; requestId?: string }
+  /** Scene copy derived from an already-decided route; `at` is when it was allowed to paint. */
+  | { type: "preset"; text: string; route?: string; at?: number; requestId?: string }
   | { type: "progress"; stage: IntentProgress["stage"]; feedback?: string; feedbackSource?: "model" | "preset"; route?: string; requestId?: string }
   | { type: "settle"; text: string | null; elapsedMs?: number; quiet?: boolean; requestId?: string };
 
@@ -75,6 +77,13 @@ export function reduceFeedback(slot: FeedbackSlot, event: FeedbackEvent): Feedba
     // (stage, preset, a second slow hint) may overwrite it.
     if (slot.tier !== "neutral") return slot;
     return { ...slot, tier: "slow", text: event.text };
+  }
+  if (event.type === "preset") {
+    // Scene copy only fills a still-neutral line. A slow hint, a model sentence,
+    // an earlier preset or a settled request all keep the visible line, and an
+    // equal-tier preset can never replace itself.
+    if (slot.tier !== "neutral") return slot;
+    return { ...slot, tier: "preset", text: event.text, ...(event.route ? { route: event.route } : {}) };
   }
   const next = event.route && event.route !== slot.route ? { ...slot, route: event.route } : slot;
   if (event.feedback) {

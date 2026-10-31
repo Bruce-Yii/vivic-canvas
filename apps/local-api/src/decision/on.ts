@@ -138,18 +138,58 @@ async function hybridProposal(input: HybridInput): Promise<HybridOutcome> {
     return { kind: "result", result: { kind: "clarify",
       message: "这句话还有一项没能形成完整方案，本次没有执行任何部分；请补充或分开提出要求。", usedProvider: "decision" } };
   }
-  // Clause 1:1 coverage for the model segment; a dropped clause must not commit.
+  // A verified lookup answers a different question than the literal segment, and
+  // a channel-only answer has no proposal at all: neither may ride along.
+  const uncovered = { kind: "result" as const, result: { kind: "clarify" as const,
+    message: "这句话有一项没有形成完整方案，请分开或补充说明。", usedProvider: "decision" as const } };
+  if (planned.usedProvider === "search") return uncovered;
+  // Clause 1:1 coverage for the model segment, including a single remaining
+  // clause. One plan per active clause; duplicates, extras, missing clauses or
+  // an out-of-subset index invalidate the whole batch.
+  const plannerPlans = (deps.telemetry.plans ?? []).slice(reported).filter(plan => plan.source === "planner");
   if (remaining.length > 1) {
-    const covered = new Set((deps.telemetry.plans ?? []).slice(reported)
-      .filter(plan => plan.source === "planner").map(plan => plan.clause));
-    if (!remaining.every(index => covered.has(index))) return { kind: "result", result: { kind: "clarify",
-      message: "这句话有一项没有形成完整方案，请分开或补充说明。", usedProvider: "decision" } };
+    const covered = new Set(plannerPlans.map(plan => plan.clause));
+    if (plannerPlans.length !== remaining.length || covered.size !== remaining.length
+      || !remaining.every(index => covered.has(index)) || plannerPlans.some(plan => !remaining.includes(plan.clause))) return uncovered;
+  } else if (plannerPlans.length !== 1 || plannerPlans[0]!.clause !== remaining[0]) return uncovered;
+  // Merge in user order. Rule clauses contribute their own proposal; model
+  // actions are attributed back to the clause plan that produced them, so
+  // [planner, rule, planner] keeps 0 → 1 → 2 instead of hoisting both planner
+  // segments to the first remaining clause. Batch-wide effects are separate.
+  const batchTypes = new Set<Action["type"]>(["stage.awaken", "canvas.fit", "canvas.restore",
+    "subtitle.show", "subtitle.hide", "ambient.setPreset"]);
+  const modelByClause = new Map<number, Action[]>();
+  const batchActions: Action[] = [];
+  if (remaining.length === 1) {
+    modelByClause.set(remaining[0]!, [...planned.envelope.actions]);
+  } else {
+    const ownerByCardId = new Map<string, number>();
+    for (const entry of plannerPlans) for (const cardId of entry.cardIds) ownerByCardId.set(cardId, entry.clause);
+    const contractOfAction: Partial<Record<Action["type"], string>> = {
+      "card.focus": "focus", "card.highlight": "highlight", "card.delete": "delete", "card.update": "edit" };
+    let current: number | undefined;
+    for (const action of planned.envelope.actions) {
+      if (batchTypes.has(action.type)) { batchActions.push(action); continue; }
+      let clause: number | undefined;
+      if (action.type === "card.create") clause = ownerByCardId.get(action.card.id);
+      else {
+        const contract = contractOfAction[action.type];
+        const matches = contract ? plannerPlans.filter(entry => entry.contract === contract) : [];
+        clause = matches.length === 1 ? matches[0]!.clause : current;
+      }
+      // A create outside every plan, or an effect with no owning clause, would
+      // silently reorder the batch; ask instead of guessing.
+      if (clause === undefined || !remaining.includes(clause)) return uncovered;
+      current = clause;
+      modelByClause.set(clause, [...(modelByClause.get(clause) ?? []), action]);
+    }
   }
-  const first = remaining[0]!;
   const actions: Action[] = [];
-  for (const [index, list] of ruleByClause) if (index < first) actions.push(...list);
-  actions.push(...planned.envelope.actions);
-  for (const [index, list] of ruleByClause) if (index > first) actions.push(...list);
+  for (let index = 0; index < clauses.length; index++) {
+    actions.push(...(ruleByClause.get(index) ?? []));
+    actions.push(...(modelByClause.get(index) ?? []));
+  }
+  actions.push(...batchActions);
   return { kind: "actions", actions, directClauses: ruleByClause.size, provider: planned.usedProvider,
     say: planned.envelope.spokenText, plans };
 }

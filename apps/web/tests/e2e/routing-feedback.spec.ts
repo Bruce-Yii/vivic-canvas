@@ -2,6 +2,7 @@ import { expect, test as base, type Page } from "@playwright/test";
 import http, { type ServerResponse } from "node:http";
 import { writeFile } from "node:fs/promises";
 import { activeCanvasId, showChat, todoCardRecord } from "./helpers1";
+import { PRESET_FEEDBACK } from "../../src/ai/presetFeedback";
 
 // This is a controlled transport test, not a real-model latency measurement.
 // The local HTTP server flushes SSE frames separately, so the browser has to render
@@ -42,6 +43,8 @@ const test = base.extend<{ sse: SseFixture }>({
     await new Promise<void>(resolve => server.listen(0, "127.0.0.1", resolve));
     const address = server.address();
     if (!address || typeof address === "string") throw new Error("SSE fixture did not bind a port");
+    // Playwright's fixture `use` callback, not a React hook.
+    // oxlint-disable-next-line react-hooks/rules-of-hooks
     try { await use({ requests, url: `http://127.0.0.1:${address.port}/intent` }); }
     finally { server.closeAllConnections(); await new Promise<void>(resolve => server.close(() => resolve())); }
   },
@@ -67,8 +70,8 @@ const complete = (held: HeldIntent, cardId: string, message: string) => {
   held.response.end();
 };
 
-// The client copy the state machine already owns. Preset scene copy is not
-// asserted here because that copy table does not exist yet.
+// The client copy the state machine already owns. Scene copy comes from the
+// real route table; the test only controls when the route hint arrives.
 const NEUTRAL_CONTROL = "正在理解你的指令…";
 const SLOW_HINT = "响应较慢，仍在处理…";
 const CANCELLED_TEXT = "已取消本次请求";
@@ -224,14 +227,15 @@ test("stage telemetry never overwrites the neutral line", async ({ page, sse }) 
   await expect(page.locator("[data-vivic-command-feedback]")).toHaveText(NEUTRAL_CONTROL);
   const stages = ["rules", "data", "search", "decision", "planner", "validation"] as const;
   for (const stage of stages) emitProgress(held, stage,
-    stage === "decision" ? { route: "answer", feedbackSource: "preset" } : {});
+    // A rule-direct route: recorded as telemetry, never scheduled as scene copy.
+    stage === "decision" ? { route: "todo", feedbackSource: "preset" } : {});
   // Each stage emits a suppressed trace entry but writes no visible text.
   await expect.poll(async () => (await feedbackTrace(page)).length).toBe(stages.length);
   await expect(page.locator("[data-vivic-command-feedback]")).toHaveText(NEUTRAL_CONTROL);
   const trace = await feedbackTrace(page);
   expect(trace.map(entry => entry.stage)).toEqual([...stages]);
   expect(trace.every(entry => entry.source === "stage" && entry.suppressed === true)).toBe(true);
-  const routed = trace.filter(entry => entry.route === "answer");
+  const routed = trace.filter(entry => entry.route === "todo");
   expect(routed).toHaveLength(1);
   expect(routed[0]).toMatchObject({ stage: "decision", suppressed: true });
   expect(await visibleFeedbackTexts(page)).toEqual([null, NEUTRAL_CONTROL]);
@@ -357,24 +361,26 @@ test("cancel clears the slot and late frames from the cancelled request cannot w
   expect(await visibleFeedbackTexts(page)).toEqual([null, NEUTRAL_CONTROL, sentence, CANCELLED_TEXT]);
 });
 
-test("route and feedbackSource are accepted while legacy progress frames stay compatible", async ({ page, sse }) => {
+test("a decided route paints its scene copy after the quiet delay and yields to the model sentence", async ({ page, sse }) => {
   await ready(page, sse);
   await watchFeedbackTrace(page);
   await observeFeedbackLine(page);
+  // The clock makes the 600ms quiet delay deterministic without a real wait.
+  await page.clock.install();
   await sendCommand(page, "帮我查一下最新的资料");
   await expect.poll(() => sse.requests.length).toBe(1);
   const held = sse.requests[0]!;
-  const presetSentence = "这是测试注入的预设兜底句。";
+  const presetSentence = PRESET_FEEDBACK.search!;
   const modelSentence = "我会先查一下最新资料。";
-  // A route-only frame is new telemetry: accepted, but it writes no visible line.
+  // A route-only frame is new telemetry: accepted immediately, but the scene copy
+  // waits out the 600ms quiet delay so a fast completion never flashes it.
   emitProgress(held, "decision", { route: "search", feedbackSource: "preset" });
   await expect.poll(async () => (await feedbackTrace(page)).length).toBe(1);
   await expect(page.locator("[data-vivic-command-feedback]")).toHaveText(NEUTRAL_CONTROL);
-  // feedbackSource=preset routes into the preset tier without a scene-copy table.
-  emitProgress(held, "decision", { feedback: presetSentence, feedbackSource: "preset", route: "search" });
+  await page.clock.fastForward(600);
   await expect(page.locator("[data-vivic-command-feedback]")).toHaveText(presetSentence);
   await expect.poll(async () => (await feedbackTrace(page)).length).toBe(2);
-  // A legacy frame (requestId/stage/status/feedback only) still upgrades to model.
+  // A model sentence replaces the scene copy without waiting for a minimum display.
   progress(held, "planner", modelSentence);
   await expect(page.locator("[data-vivic-command-feedback]")).toHaveText(modelSentence);
   await expect.poll(async () => (await feedbackTrace(page)).length).toBe(3);
@@ -385,8 +391,23 @@ test("route and feedbackSource are accepted while legacy progress frames stay co
   const trace = await feedbackTrace(page);
   expect(trace.map(entry => entry.source)).toEqual(["stage", "preset", "model", "stage"]);
   expect(trace[0]).toMatchObject({ stage: "decision", route: "search", suppressed: true });
-  expect(trace[1]).toMatchObject({ source: "preset", route: "search" });
+  expect(trace[1]).toMatchObject({ source: "preset", rank: 30, route: "search" });
   expect(trace[2]).toMatchObject({ source: "model", route: "search" });
   expect(trace[3]).toMatchObject({ source: "stage", suppressed: true });
   expect(await visibleFeedbackTexts(page)).toEqual([null, NEUTRAL_CONTROL, presetSentence, modelSentence]);
+});
+
+test("an explicit preset feedback frame still paints arbitrary fallback copy", async ({ page, sse }) => {
+  await ready(page, sse);
+  await watchFeedbackTrace(page);
+  await sendCommand(page, "帮我整理一下这页的内容");
+  await expect.poll(() => sse.requests.length).toBe(1);
+  const held = sse.requests[0]!;
+  const fallback = "这是测试注入的预设兜底句。";
+  // Older/raw preset frames carry their own text; the route table is not required.
+  emitProgress(held, "decision", { feedback: fallback, feedbackSource: "preset", route: "generate" });
+  await expect(page.locator("[data-vivic-command-feedback]")).toHaveText(fallback);
+  await expect.poll(async () => (await feedbackTrace(page)).length).toBe(1);
+  const trace = await feedbackTrace(page);
+  expect(trace[0]).toMatchObject({ source: "preset", rank: 30, route: "generate" });
 });
