@@ -133,6 +133,10 @@ describe("VIVIC_MULTI_CARD_MODE=hybrid proposes literal clauses and plans only t
     ]);
     const created = cards(r).map(card => card.id);
     expect(plans.flatMap(plan => plan.cardIds).sort()).toEqual([...created].sort());
+    // Clause-order coverage in the same trace: one card per clause, types only.
+    expect(r.trace?.decisions.map(row => row.built)).toEqual([
+      { cards: ["NoteCard"], n: 1 }, { cards: ["CountdownCard"], n: 1 }, { cards: ["CountdownCard"], n: 1 },
+    ]);
     // The trace augmentation must still be accepted by the strict wire schema.
     expect(IntentResponseSchema.safeParse(r).success).toBe(true);
     await new Promise<void>(resolve => setImmediate(resolve));

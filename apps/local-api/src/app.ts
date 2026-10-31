@@ -74,7 +74,9 @@ export interface AppDeps {
   router?: PipelineDeps["router"];
   getEnabledDefinitions?: () => Promise<CardDefinition[]>;
   onDecisionTrace?: PipelineDeps["onDecisionTrace"];
-  onDecisionReceipt?: (taskId: string, outcome: "succeeded" | "failed") => void;
+  /** `receiptMs` is the proposal→owner-receipt interval when the proposal was seen
+   * by this app; omitted for cancellations and for unknown task ids. */
+  onDecisionReceipt?: (taskId: string, outcome: "succeeded" | "failed", receiptMs?: number) => void;
   onDiagnostic?: DiagnosticSink;
   travel?: TravelProvider;
   /** Remembers the chosen connection across restarts; absent in tests. */
@@ -165,6 +167,9 @@ export const createApp = (deps: AppDeps) => {
   let connectionRevision = 0;
   let connectionAttempt: AbortController | undefined;
   let disposed = false;
+  // Proposal→owner-receipt latency is transport telemetry: the receipt request
+  // carries no trace, so the proposal time is remembered by task id here.
+  const receiptTimes = new Map<string, number>();
   // Lets the page tell "the backend restarted and dropped the in-memory key"
   // apart from a key that stopped working.
   const instance = randomUUID();
@@ -646,7 +651,8 @@ export const createApp = (deps: AppDeps) => {
       ...(activeProvider === "gpt" ? { planner: { provider: "gpt" as const, connected: gpt.status().connected,
         generate: (messages, signal, onTextDelta) => gpt.generate(messages, signal, onTextDelta), isCurrent: () => gpt.isCurrent(gptVersion) } } : {}),
       };
-      const intent = { ...parsed.data, tracePath: c.req.header("x-vivic-trace-path") === "task" ? "task" as const : "browser" as const,
+      const intent = { ...parsed.data, requestId,
+        tracePath: c.req.header("x-vivic-trace-path") === "task" ? "task" as const : "browser" as const,
         ...(installedDefinitions ? { installedDefinitions, extensionDefinitions: undefined } : {}),
         ...(online && c.req.header("x-vivic-intent-image-ref") ? { trustedImageRef: c.req.header("x-vivic-intent-image-ref") } : {}) };
       // The on-mode router hint already exists for every clause. Publish it on the
@@ -683,7 +689,23 @@ export const createApp = (deps: AppDeps) => {
           if (intent.task && (intent.task.receipt || intent.task.cancel)) {
             const outcome = result.task?.status === "completed" ? "succeeded"
               : result.task?.status === "failed" || result.task?.status === "cancelled" ? "failed" : undefined;
-            if (outcome) { try { deps.onDecisionReceipt?.(intent.task.id, outcome); } catch { /* telemetry is advisory */ } }
+            if (outcome) {
+              const proposedAt = receiptTimes.get(intent.task.id);
+              receiptTimes.delete(intent.task.id);
+              // A cancellation is not an owner receipt, so it has no receipt wait.
+              const receiptMs = intent.task.receipt && proposedAt !== undefined
+                ? Math.max(0, Math.round(performance.now() - proposedAt)) : undefined;
+              try { deps.onDecisionReceipt?.(intent.task.id, outcome, receiptMs); } catch { /* telemetry is advisory */ }
+            }
+          } else if (result.task?.status === "awaiting_execution") {
+            // A taskless proposal still returns its generated task id, which is what
+            // the later receipt carries; remember when this app handed it to the owner.
+            receiptTimes.set(result.task.id, performance.now());
+            while (receiptTimes.size > 256) {
+              const oldest = receiptTimes.keys().next().value;
+              if (oldest === undefined) break;
+              receiptTimes.delete(oldest);
+            }
           }
           return result;
         });
@@ -740,5 +762,6 @@ export const createApp = (deps: AppDeps) => {
     platformAttempt?.abort(); platformAttempt = undefined;
     connections.dispose();
     credentials.clear(); platform.clear(); gpt.dispose(); mobileBroker.dispose(); decision.stop(); decisionTasks.dispose(); localTts?.stop();
+    receiptTimes.clear();
   } });
 };

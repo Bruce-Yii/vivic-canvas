@@ -84,23 +84,26 @@ describe("target resolution", () => {
     card("todo-right", "购物清单", "TodoCard", 200), card("note1", "读书笔记", "NoteCard", 0)]);
   it("resolves title, focus, position and unique type without a model request", async () => {
     const model = { chooseTarget: vi.fn() };
-    expect(await resolveTarget("聚焦购物清单", context, "focus", model)).toEqual({ targetId: "todo-right" });
-    expect(await resolveTarget("高亮左边的待办", context, "highlight", model)).toEqual({ targetId: "todo-left" });
-    expect(await resolveTarget("打开便签", context, "focus", model)).toEqual({ targetId: "note1" });
-    expect(await resolveTarget("这张闪一下", { ...context, focusHistory: ["note1"] }, "highlight", model)).toEqual({ targetId: "note1" });
+    expect(await resolveTarget("聚焦购物清单", context, "focus", model)).toEqual({ targetId: "todo-right", source: "title" });
+    expect(await resolveTarget("高亮左边的待办", context, "highlight", model)).toEqual({ targetId: "todo-left", source: "spatial" });
+    expect(await resolveTarget("打开便签", context, "focus", model)).toEqual({ targetId: "note1", source: "type" });
+    expect(await resolveTarget("这张闪一下", { ...context, focusHistory: ["note1"] }, "highlight", model)).toEqual({ targetId: "note1", source: "focus" });
+    // A name only present in aliases is reported as alias, not as the title path.
+    const aliased = { ...card("alias-1", "本周工作"), aliases: ["便签本"] };
+    expect(await resolveTarget("打开便签本", emptyContext([aliased]), "focus", model)).toEqual({ targetId: "alias-1", source: "alias" });
     expect(model.chooseTarget).not.toHaveBeenCalled();
   });
   it("asks the model once when necessary, never guessing from low confidence", async () => {
     const model = { chooseTarget: vi.fn(async () => ({ choice: "todo-right", probability: .95, latencyMs: 20 })) };
-    expect(await resolveTarget("打开买东西那个", context, "focus", model)).toEqual({ targetId: "todo-right" });
+    expect(await resolveTarget("打开买东西那个", context, "focus", model)).toEqual({ targetId: "todo-right", source: "classifier" });
     expect(model.chooseTarget).toHaveBeenCalledTimes(1);
     model.chooseTarget.mockResolvedValueOnce({ choice: "todo-right", probability: .4, latencyMs: 20 });
-    expect(await resolveTarget("打开那个", context, "focus", model)).toHaveProperty("ambiguous");
+    expect(await resolveTarget("打开那个", context, "focus", model)).toMatchObject({ source: "ambiguous" });
   });
   it("reports spatial ties and missing targets; non-target routes do no work", async () => {
     const model = { chooseTarget: vi.fn() };
     expect(await resolveTarget("左边的待办", emptyContext([card("a", "甲任务"), card("b", "乙任务")]), "focus", model)).toHaveProperty("ambiguous");
-    expect(await resolveTarget("打开天气", context, "focus", model)).toEqual({ missing: true });
+    expect(await resolveTarget("打开天气", context, "focus", model)).toEqual({ missing: true, source: "missing" });
     expect(await resolveTarget("显示全部", context, "overview", model)).toBeUndefined();
     expect(model.chooseTarget).not.toHaveBeenCalled();
   });

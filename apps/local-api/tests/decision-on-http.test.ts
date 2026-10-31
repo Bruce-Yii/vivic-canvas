@@ -14,7 +14,7 @@ const context = (cards: CanvasContext["cards"] = []): CanvasContext => ({ canvas
   stage: "WORKSPACE", viewport: { x: 0, y: 0, zoom: 1 }, focusHistory: [], cards });
 const apps: ReturnType<typeof createApp>[] = [];
 afterEach(() => { for (const app of apps.splice(0)) app.dispose(); });
-function setup(withModel=false) {
+function setup(withModel=false, onDecisionReceipt?: (taskId: string, outcome: "succeeded" | "failed", receiptMs?: number) => void) {
   const router: IntentRouter = { mode: "on", directRoutes: new Set(["countdown", "todo", "note", "overview", "restore"]),
     routeUtterance: vi.fn(async text => {
       const route: RouteResult["route"] = /删除/.test(text) ? "delete" : /聚焦/.test(text) ? "focus" : /倒计时/.test(text) ? "countdown" : "chat";
@@ -27,7 +27,8 @@ function setup(withModel=false) {
     expect(user.host_targets?.["0"]).toBe("a");
     return Response.json({ choices:[{message:{content:JSON.stringify({slots:{},say:"已聚焦。",text:"已选中目标。"})}}] });
   });
-  const app = createApp({ config, mode:"online", credentials, router, fetchImpl:model as typeof fetch });apps.push(app);
+  const app = createApp({ config, mode:"online", credentials, router, fetchImpl:model as typeof fetch,
+    ...(onDecisionReceipt ? { onDecisionReceipt } : {}) });apps.push(app);
   async function post(body: unknown) {
     const r = await app.fetch(new Request(origin+"/api/intent",{method:"POST",headers:{authorization:`Bearer ${token}`,origin,"content-type":"application/json"},body:JSON.stringify(body)}));
     expect(r.status).toBe(200);return IntentResponseSchema.parse(await r.json());
@@ -38,6 +39,8 @@ describe("on-mode HTTP task and clarification integration", () => {
   it("wraps a taskless direct request and accepts its real execution receipt without reclassification", async () => {
     const f=setup();const r=await f.post({text:"倒计时50分钟",canvasContext:context()});
     expect(r.task?.status).toBe("awaiting_execution");expect(r.trace).toMatchObject({mode:"on",plannerCalls:0,directClauses:1});
+    expect(r.trace?.decisions[0]?.built).toEqual({cards:["CountdownCard"],n:1});
+    expect(r.trace?.requestId).toBeTruthy();
     const creates=r.envelope!.actions.flatMap(a=>a.type==="card.create"?[a.card]:[]);
     const ctx={...context(creates.map(c=>({id:c.id,type:c.type,displayProps:c.displayProps,sourceDataSummary:c.sourceData,layout:c.layout}))),version:2};
     const receipt=await f.post({text:"倒计时50分钟",canvasContext:ctx,task:{id:r.task!.id,receipt:{executionId:r.task!.executionId,status:"succeeded",createdCardIds:creates.map(c=>c.id)}}});
@@ -65,5 +68,37 @@ describe("on-mode HTTP task and clarification integration", () => {
     const f=setup();
     const r=await f.app.fetch(new Request(origin+"/api/intent",{method:"POST",headers:{authorization:`Bearer ${token}`,origin,"content-type":"application/json"},body:JSON.stringify({text:"倒计时50分钟",canvasContext:context(),resolvedTargetId:"foreign"})}));
     expect(r.status).toBe(400);expect(f.router.routeUtterance).not.toHaveBeenCalled();
+  });
+  it("joins the HTTP request id to the trace while keeping the decision id", async () => {
+    const f=setup();
+    const response=await f.app.fetch(new Request(origin+"/api/intent",{method:"POST",headers:{authorization:`Bearer ${token}`,origin,"content-type":"application/json"},body:JSON.stringify({text:"倒计时50分钟",canvasContext:context()})}));
+    const header=response.headers.get("x-request-id");
+    const body=IntentResponseSchema.parse(await response.json());
+    expect(header).toBeTruthy();
+    expect(body.trace?.requestId).toBe(header);
+    expect(body.trace?.id).toMatch(/^decision_/);
+    expect(body.trace?.id).not.toBe(header);
+  });
+  it("reports the proposal-to-owner-receipt wait without changing the response", async () => {
+    const receipts: Array<{ taskId: string; outcome: string; receiptMs?: number }> = [];
+    const f=setup(false,(taskId,outcome,receiptMs)=>{receipts.push({taskId,outcome,...(receiptMs===undefined?{}:{receiptMs})});});
+    const r=await f.post({text:"倒计时50分钟",canvasContext:context()});
+    const creates=r.envelope!.actions.flatMap(a=>a.type==="card.create"?[a.card]:[]);
+    const ctx={...context(creates.map(c=>({id:c.id,type:c.type,displayProps:c.displayProps,sourceDataSummary:c.sourceData,layout:c.layout}))),version:2};
+    const receipt=await f.post({text:"倒计时50分钟",canvasContext:ctx,task:{id:r.task!.id,receipt:{executionId:r.task!.executionId,status:"succeeded",createdCardIds:creates.map(c=>c.id)}}});
+    expect(receipt.task?.status).toBe("completed");expect(receipt.envelope).toBeUndefined();
+    expect(receipts).toHaveLength(1);
+    expect(receipts[0]!.taskId).toBe(r.task!.id);expect(receipts[0]!.outcome).toBe("succeeded");
+    expect(typeof receipts[0]!.receiptMs).toBe("number");
+    expect(receipts[0]!.receiptMs!).toBeGreaterThanOrEqual(0);
+  });
+  it("omits receiptMs when the turn is cancelled instead of receipted", async () => {
+    const receipts: Array<{ outcome: string; receiptMs?: number }> = [];
+    const f=setup(false,(_taskId,outcome,receiptMs)=>{receipts.push({outcome,...(receiptMs===undefined?{}:{receiptMs})});});
+    const r=await f.post({text:"倒计时50分钟",canvasContext:context()});
+    const cancelled=await f.post({text:"取消",canvasContext:context(),task:{id:r.task!.id,cancel:true}});
+    expect(cancelled.task?.status).toBe("cancelled");
+    expect(receipts[0]?.outcome).toBe("failed");
+    expect(receipts[0]).not.toHaveProperty("receiptMs");
   });
 });

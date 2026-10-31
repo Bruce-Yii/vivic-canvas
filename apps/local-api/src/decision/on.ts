@@ -13,7 +13,7 @@ import { looksLikeDateCountdown } from "../scenes/index.js";
 import { splitClauses } from "./split.js";
 import { resolveTarget } from "./target.js";
 import { isBuiltinRoute, type IntentRouter } from "./router.js";
-import type { ClausePlan, PlannerRouteHint, DecisionTrace } from "./trace.js";
+import type { ClauseBuild, ClausePlan, PlannerRouteHint, DecisionTrace } from "./trace.js";
 
 /** One sentence may carry several card intents. "off" keeps the pre-existing
  * rules / per-clause / whole-sentence paths; "plans" plans it once; "hybrid"
@@ -43,7 +43,7 @@ export function literalRoute(text: string, context: IntentRequest["canvasContext
 }
 
 type HybridOutcome =
-  | { kind: "actions"; actions: Action[]; directClauses: number; provider?: IntentResult["usedProvider"]; say?: string; plans: ClausePlan[] }
+  | { kind: "actions"; actions: Action[]; directClauses: number; provider?: IntentResult["usedProvider"]; say?: string; plans: ClausePlan[]; builds: ClauseBuild[] }
   | { kind: "whole" }
   | { kind: "result"; result: IntentResult };
 
@@ -69,6 +69,12 @@ async function hybridProposal(input: HybridInput): Promise<HybridOutcome> {
   const ruleByClause = new Map<number, Action[]>();
   const plans: ClausePlan[] = [];
   const remaining: number[] = [];
+  // Trace telemetry only: card types and counts per clause, never card text.
+  const clauseBuild = (index: number, actions: Action[]): ClauseBuild => {
+    const cards = actions.flatMap(action => action.type === "card.create" ? [action.card.type] : []);
+    return { clause: index, cards, n: cards.length };
+  };
+  const ruleBuilds = () => clauses.map((_, index) => clauseBuild(index, ruleByClause.get(index) ?? []));
   for (const [index, text] of clauses.entries()) {
     check();
     const row = rows[index];
@@ -106,7 +112,7 @@ async function hybridProposal(input: HybridInput): Promise<HybridOutcome> {
     plans.push({ clause: index, contract: contract.id, source: "rules",
       cardIds: placed.flatMap(action => action.type === "card.create" ? [action.card.id] : []) });
   }
-  if (!remaining.length) return { kind: "actions", actions: [...ruleByClause.values()].flat(), directClauses: ruleByClause.size, plans };
+  if (!remaining.length) return { kind: "actions", actions: [...ruleByClause.values()].flat(), directClauses: ruleByClause.size, plans, builds: ruleBuilds() };
   // Nothing is literal: keep the existing single whole-sentence planner path.
   if (remaining.length === clauses.length) return { kind: "whole" };
   const remainingText = remaining.map(index => clauses[index]!).join("，");
@@ -191,7 +197,8 @@ async function hybridProposal(input: HybridInput): Promise<HybridOutcome> {
   }
   actions.push(...batchActions);
   return { kind: "actions", actions, directClauses: ruleByClause.size, provider: planned.usedProvider,
-    say: planned.envelope.spokenText, plans };
+    say: planned.envelope.spokenText, plans,
+    builds: clauses.map((_, index) => clauseBuild(index, [...(ruleByClause.get(index) ?? []), ...(modelByClause.get(index) ?? [])])) };
 }
 
 /** Approved routes may build proposals; the real owner/task executor still commits them. */
@@ -207,7 +214,7 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
     if (req.continuation || req.resolvedTargetId || req.resolvedTargets) {
       const text = req.continuation ? `${req.continuation.utterance}\n用户补充：${req.text}` : req.text;
       const value = await budget.run(() => deps.router.routeUtterance(text, req.canvasContext, budget.signal));
-      const target = req.resolvedTargetId ? Promise.resolve({ targetId: req.resolvedTargetId })
+      const target = req.resolvedTargetId ? Promise.resolve({ targetId: req.resolvedTargetId, source: "frozen" as const })
         : value?.route && isBuiltinRoute(value.route) ? resolveTarget(text, req.canvasContext, value.route, deps.router, budget.signal) : Promise.resolve(undefined);
       return await fallback(req, Promise.resolve({ result: value, target }));
     }
@@ -251,17 +258,18 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
     let directClauses = 0;
     let say: string | undefined;
     let rulePlans: ClausePlan[] = [];
+    let builds: ClauseBuild[] = [];
     let usedProvider: IntentResult["usedProvider"] = ruleFallback ? "rules-offline" : rows.every(row => row.source === "rules") ? "rules" : "decision";
     if (mode === "hybrid" && clauses.length > 1 && !req.taskContext) {
       // M3: literal clauses propose first, the remaining subset costs one planner call.
       const outcome = await hybridProposal({ req, clauses, rows, deps, signal: budget.signal, check, run: budget.run, plan: (request, partHint) => fallback(request, partHint) });
       if (outcome.kind === "whole") return await fallback();
       if (outcome.kind === "result") return outcome.result;
-      actions = outcome.actions; directClauses = outcome.directClauses;
+      actions = outcome.actions; directClauses = outcome.directClauses; builds = outcome.builds;
       usedProvider = outcome.provider ?? usedProvider; say = outcome.say; rulePlans = outcome.plans;
     } else {
       if (!directRows) return await fallback();
-      for (const row of rows) {
+      for (const [index, row] of rows.entries()) {
         check();
         const contract = CARD_CONTRACTS[row.route!];
         let built: Action[];
@@ -296,6 +304,8 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
             displayProps: placed.card.displayProps, sourceDataSummary: placed.card.sourceData, layout: placed.card.layout });
           if (action.type === "card.focus") context.focusHistory = [...context.focusHistory, action.targetId].slice(-20);
         }
+        const builtCards = built.flatMap(action => action.type === "card.create" ? [action.card.type] : []);
+        builds.push({ clause: index, cards: builtCards, n: builtCards.length });
       }
     }
     check();
@@ -312,6 +322,8 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
     if (!envelope.success) return { kind: "clarify", message: "这句话包含的操作过多或参数不完整，请分开发送。", usedProvider: "decision" };
     if (!ruleFallback) deps.telemetry.directClauses += directClauses;
     if (rulePlans.length) deps.telemetry.plans = [...(deps.telemetry.plans ?? []), ...rulePlans];
+    // Only a validated, committed proposal may claim which cards each clause built.
+    if (builds.length) deps.telemetry.built = builds;
     return { kind: "envelope", envelope: envelope.data, usedProvider };
   } catch {
     return { kind: "error", message: budget.signal.reason?.name === "TimeoutError" ? "本次请求超时，未执行任何动作。" : "请求已取消或连接已变更，未执行任何动作。", usedProvider: "decision" };

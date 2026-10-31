@@ -161,7 +161,7 @@ describe("delete clarification text matches the frozen numbered payload", () => 
 
 describe("a missing card gets zero unrelated candidates", () => {
   it("reports an explicit absent card as missing even without a target classifier", async () => {
-    expect(await resolveTarget("聚焦一下日程卡", canvas(), "focus")).toEqual({ missing: true });
+    expect(await resolveTarget("聚焦一下日程卡", canvas(), "focus")).toEqual({ missing: true, source: "missing" });
   });
 
   it("treats 聚焦一下日程卡 as missing instead of offering the whole canvas", async () => {

@@ -205,7 +205,7 @@ describe("runIntent slot planning with the shared shadow route", () => {
     expect(result.envelope!.actions).toContainEqual({ type: "card.focus", targetId: "TEST-right" });
     expect(f.router.routeUtterance).toHaveBeenCalledTimes(1);
     expect(f.router.chooseTarget).toHaveBeenCalledTimes(1);
-    expect(result.trace?.target).toEqual({ targetId: "TEST-right" });
+    expect(result.trace?.target).toEqual({ targetId: "TEST-right", source: "classifier" });
   });
 
   it("builds a general knowledge answer as NewsCard without requiring an article", async () => {

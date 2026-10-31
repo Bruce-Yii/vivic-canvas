@@ -162,4 +162,14 @@ describe("private decision log", () => {
     expect(f.service.store.listDecisionLogs(f.a)[0]!.trace.taskId).toBe("browser-task");
     expect(f.service.store.listDecisionLogs(f.b)).toHaveLength(0);
   });
+  it("persists the HTTP request id beside the decision id for cross-source joins", async () => {
+    const f = await fixture();
+    const response = await f.request(f.first.token, "/api/intent", { text: "显示全部", canvasContext: { ...emptyContext(), canvasId: f.aSpace } });
+    const body = await response.json(), requestId = response.headers.get("x-request-id");
+    expect(requestId).toBeTruthy();
+    expect(body.trace.requestId).toBe(requestId);
+    await vi.waitFor(() => expect(f.service.store.listDecisionLogs(f.a)).toHaveLength(1));
+    expect(f.service.store.listDecisionLogs(f.a)[0]!.trace).toMatchObject({ requestId, id: body.trace.id });
+    expect(body.trace.id).not.toBe(requestId);
+  });
 });

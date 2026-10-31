@@ -112,8 +112,21 @@ describe("shadow observer", () => {
     });
     const model = router(query);
     const result = await observeDecision({ text: "聚焦左边的待办，高亮第二条", canvasContext: context }, deps(model), undefined, async () => output);
-    expect(result.trace?.decisions.map(x => x.target)).toEqual([{ targetId: "left" }, { targetId: "left" }]);
+    expect(result.trace?.decisions.map(x => x.target)).toEqual([
+      { targetId: "left", source: "spatial" }, { targetId: "left", source: "ordinal" },
+    ]);
     expect(context.focusHistory).toEqual([]);
     expect(model.chooseTarget).not.toHaveBeenCalled();
+  });
+  it("records a host-frozen candidate instead of implying the classifier chose it", async () => {
+    const cards: CanvasContext["cards"] = [
+      { id: "note-1", type: "NoteCard", aliases: [], displayProps: { text: "甲" }, sourceDataSummary: {}, layout: { x: 0, y: 0 } },
+      { id: "note-2", type: "NoteCard", aliases: [], displayProps: { text: "乙" }, sourceDataSummary: {}, layout: { x: 500, y: 0 } },
+    ];
+    const model = router(vi.fn(async () => ({ ...answer, route: "focus" as const, probabilities: { focus: .99 } })));
+    const frozen = await observeDecision({ text: "聚焦便签", canvasContext: emptyContext(cards), resolvedTargetId: "note-2" }, deps(model), undefined, async () => output);
+    expect(frozen.trace?.decisions[0]?.target).toEqual({ targetId: "note-2", source: "frozen" });
+    const picked = await observeDecision({ text: "聚焦便签", canvasContext: emptyContext(cards), resolvedTargets: { "0": "note-1" } }, deps(model), undefined, async () => output);
+    expect(picked.trace?.decisions[0]?.target).toEqual({ targetId: "note-1", source: "user_pick" });
   });
 });

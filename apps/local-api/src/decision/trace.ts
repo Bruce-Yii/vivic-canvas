@@ -17,21 +17,29 @@ export interface PlannerRouteHint {
 /** Clause → contract → card ids. It answers "which clause produced what" without
  * granting anything: a plan only proves provenance after the host commits it. */
 export interface ClausePlan { clause: number; contract: string; cardIds: string[]; source: "rules" | "planner" }
+/** Cards actually built per clause. Types and counts only: never titles or text. */
+export interface ClauseBuild { clause: number; cards: string[]; n: number }
 
 const route = z.union([z.enum(Object.keys(ROUTES) as [keyof typeof ROUTES, ...Array<keyof typeof ROUTES>]),
   z.string().max(90).regex(/^ext\.[a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*)*$/)]);
-const target = z.union([z.strictObject({ targetId: z.string().max(128) }),
-  z.strictObject({ missing: z.literal(true) }), z.strictObject({ ambiguous: z.array(z.strictObject({
+/** Why a target was chosen; optional for older traces and callers. */
+const targetSource = z.enum(["title", "alias", "focus", "ordinal", "type", "spatial", "classifier", "frozen", "user_pick", "missing", "ambiguous"]);
+const target = z.union([z.strictObject({ targetId: z.string().max(128), source: targetSource.optional() }),
+  z.strictObject({ missing: z.literal(true), source: targetSource.optional() }), z.strictObject({ ambiguous: z.array(z.strictObject({
     id: z.string().max(128), label: z.string().max(500),
-  })).max(40) })]);
+  })).max(40), source: targetSource.optional() })]);
+const built = z.strictObject({ cards: z.array(z.string().max(80)).max(12), n: z.int().min(0).max(12) });
 const decision = z.strictObject({ text: z.string().max(500), route: route.nullable(),
   probability: z.number().min(0).max(1), probabilities: z.record(z.string(), z.number().min(0).max(1)),
-  none: z.boolean(), latencyMs: z.number().nonnegative(), failed: z.boolean(), target: target.optional(), source: z.enum(["rules", "decision"]).optional() });
+  none: z.boolean(), latencyMs: z.number().nonnegative(), failed: z.boolean(), target: target.optional(),
+  built: built.optional(), source: z.enum(["rules", "decision"]).optional() });
 const plan = z.strictObject({ clause: z.int().min(0).max(2), contract: z.string().min(1).max(100),
   cardIds: z.array(z.string().max(128)).max(12), source: z.enum(["rules", "planner"]) });
 export const DecisionTraceSchema = z.strictObject({
   id: z.string().max(128), mode: z.enum(["shadow", "on"]), status: z.enum(["pending", "complete", "failed"]),
   taskId: z.string().max(128).optional(),
+  /** HTTP/task request id, so container logs and decision_log can be joined to trace.id. */
+  requestId: z.string().max(128).optional(),
   clauses: z.array(z.string().max(500)).max(3), decisions: z.array(decision).max(3),
   route: route.nullable(), probability: z.number().min(0).max(1), target: target.optional(),
   latencyMs: z.number().nonnegative(), routeLatencyMs: z.number().nonnegative(),
@@ -41,6 +49,8 @@ export const DecisionTraceSchema = z.strictObject({
   legacyCardTypes: z.array(z.string().max(80)).max(32),
   plannerCalls: z.int().min(0).max(100).optional(),
   directClauses: z.int().min(0).max(3).optional(),
+  /** First published feedback sentence, in ms from the planner stage start. Absent when none was sent. */
+  firstFeedbackMs: z.number().nonnegative().optional(),
   /** Backward-compatible: absent unless this turn committed an envelope. */
   plans: z.array(plan).max(12).optional(),
 });
@@ -65,7 +75,7 @@ export async function observeDecision(req: IntentRequest, deps: PipelineDeps, si
   const pending = (async () => {
     const output: DecisionTrace["decisions"] = [];
     let shadowContext = req.canvasContext;
-    for (const text of clauses) {
+    for (const [index, text] of clauses.entries()) {
       const clauseStarted = performance.now();
       try {
         if (router.mode === "on") controller.signal.throwIfAborted();
@@ -76,7 +86,12 @@ export async function observeDecision(req: IntentRequest, deps: PipelineDeps, si
         const targetPromise = value?.route && isBuiltinRoute(value.route) ? resolveTarget(text, shadowContext, value.route, router, controller.signal) : Promise.resolve(undefined);
         if (!output.length) publishHint({ result: value, target: targetPromise, all });
         const selected = await targetPromise;
-        output.push(value ? { text, ...value, source: exact ? "rules" : "decision", failed: false, ...(selected ? { target: selected } : {}) }
+        // The host may have frozen a candidate the user already picked; the trace
+        // should say so instead of implying the classifier chose it.
+        const frozen = req.resolvedTargets?.[String(index)];
+        const target = frozen ? { targetId: frozen, source: "user_pick" as const }
+          : clauses.length === 1 && req.resolvedTargetId ? { targetId: req.resolvedTargetId, source: "frozen" as const } : selected;
+        output.push(value ? { text, ...value, source: exact ? "rules" : "decision", failed: false, ...(target ? { target } : {}) }
           : { text, route: null, probability: 0, probabilities: {}, none: true, latencyMs: Math.round(performance.now() - clauseStarted), failed: true });
         if (value?.route === "focus" && value.probability >= .8 && selected && "targetId" in selected) {
           shadowContext = { ...shadowContext, focusHistory: [...shadowContext.focusHistory, selected.targetId].slice(-20) };
@@ -119,9 +134,16 @@ export async function observeDecision(req: IntentRequest, deps: PipelineDeps, si
     const plans = result.envelope ? deps.decisionTelemetry?.plans
       ?.filter(entry => entry.cardIds.every(cardId => created.has(cardId)))
       .sort((a, b) => a.clause - b.clause) : undefined;
+    // Built cards are only reported by on-mode after the batch passed validation.
+    const builds = new Map((deps.decisionTelemetry?.built ?? []).map(entry => [entry.clause, entry]));
+    const decisions = rows?.map((row, index) => {
+      const entry = builds.get(index);
+      return entry ? { ...row, built: { cards: entry.cards, n: entry.n } } : row;
+    }) ?? [];
     return { id, mode: router.mode === "on" ? "on" : "shadow", status: !rows ? "pending" : failures ? "failed" : "complete",
       ...(req.task?.id ? { taskId: req.task.id } : {}),
-      clauses, decisions: rows ?? [], route: first?.route ?? null, probability: first?.probability ?? 0,
+      ...(req.requestId ? { requestId: req.requestId } : {}),
+      clauses, decisions, route: first?.route ?? null, probability: first?.probability ?? 0,
       ...(first?.target ? { target: first.target } : {}),
       latencyMs: decisionElapsedMs ?? Math.round(performance.now() - start), routeLatencyMs: first?.latencyMs ?? 0,
       legacyElapsedMs, shadowWaitMs, failedCount: failures, legacyKind: result.kind,
@@ -129,6 +151,7 @@ export async function observeDecision(req: IntentRequest, deps: PipelineDeps, si
       legacyActionTypes: [...actions.map(action => action.type), ...(result.hostOperation ? [result.hostOperation.kind] : [])],
       legacyCardTypes: actions.flatMap(action => action.type === "card.create" ? [action.card.type] : []),
       ...(deps.decisionTelemetry ? { plannerCalls: deps.decisionTelemetry.plannerCalls, directClauses: deps.decisionTelemetry.directClauses } : {}),
+      ...(deps.decisionTelemetry?.firstFeedbackMs !== undefined ? { firstFeedbackMs: deps.decisionTelemetry.firstFeedbackMs } : {}),
       ...(plans?.length ? { plans } : {}),
     };
   };

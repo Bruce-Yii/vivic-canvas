@@ -35,7 +35,7 @@ import { incompleteCanvasIssue } from "./contextSafety.js";
 import type { DecisionManager } from "../decision/manager.js";
 import type { IntentRouter } from "../decision/router.js";
 import type { CardDefinition } from "@vivic/card-runtime";
-import { observeDecision, type ClausePlan, type DecisionTrace, type PlannerRouteHint } from "../decision/trace.js";
+import { observeDecision, type ClauseBuild, type ClausePlan, type DecisionTrace, type PlannerRouteHint } from "../decision/trace.js";
 import { runSlotPlanner } from "./slotPlanner.js";
 import { applyOutputChannels, normalizeOutputChannels } from "./channels.js";
 import { splitClauses } from "../decision/split.js";
@@ -47,6 +47,8 @@ export interface IntentRequest { text: string; canvasContext: CanvasContext; att
   offlineReferenceCompatibility?: boolean;
   /** Authenticated host metadata; never accepted by the HTTP body schema. */
   tracePath?: "browser" | "task";
+  /** HTTP/task request id from the authenticated host; joins logs to the decision trace. */
+  requestId?: string;
   /** Set only by the authenticated host, never HTTP JSON. */
   trustedImageRef?: string;
   /** A selection frozen and resolved by the session task manager, never HTTP JSON. */
@@ -78,7 +80,7 @@ export interface PipelineDeps {
   router?: IntentRouter;
   /** Preserve the same on-mode router through the task wrapper without observing twice. */
   executionRouter?: IntentRouter;
-  decisionTelemetry?: { plannerCalls: number; directClauses: number; plans?: ClausePlan[] };
+  decisionTelemetry?: { plannerCalls: number; directClauses: number; plans?: ClausePlan[]; built?: ClauseBuild[]; firstFeedbackMs?: number };
   /** Internal multi-card switch (default `VIVIC_MULTI_CARD_MODE`, itself "off"). */
   multiCard?: MultiCardMode;
   /** Keep verified data/search/schedule adapters, while on-mode fallback skips old broad fast rules. */
@@ -186,6 +188,10 @@ const runLegacyIntent = async (
       if (feedbackPublished || budget.signal.aborted || deps.isSessionCurrent?.() === false
         || (deps.planner ? !deps.planner.isCurrent() : deps.credentials.getSecret() !== credential)) return;
       feedbackPublished = true;
+      // Only the first sentence of the turn is measured; absent means none was sent.
+      if (deps.decisionTelemetry && deps.decisionTelemetry.firstFeedbackMs === undefined) {
+        deps.decisionTelemetry.firstFeedbackMs = Math.round(performance.now() - startedAt);
+      }
       try { deps.onStage?.({ stage: "planner", status: "started", feedback: text }); } catch { /* advisory */ }
     });
     const input = deps.streamFeedback ? messages.map(message => message.role === "system" ? { ...message, content: message.content + FEEDBACK_PROMPT } : message) : messages;
