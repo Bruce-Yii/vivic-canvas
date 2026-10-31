@@ -15,6 +15,8 @@ export interface SceneBuildContext {
   corpus: Corpus;
   /** User-supplied text beyond the bare command (pasted article, notes…). */
   sourceTextLength: number;
+  /** Weekdays the *user's own turn* named; canvas/page text is not user intent. */
+  ownWeekdays: ReadonlySet<number>;
   page?: ScenePage;
   timeZone: string;
   now: number;
@@ -59,7 +61,9 @@ function groundingIssue(scene: ParsedScene, context: SceneBuildContext): SceneIs
       // A plan the user asked for ("下周的健身计划") has no weekdays in the
       // request: which days to train is the plan's own content, so only clock
       // times stay grounded. If the user did name days/dates, they still bind.
-      const plannedWeek = context.corpus.weekdays.size === 0;
+      // Only the user's own turn counts here: a canvas card mentioning 周三 is
+      // not a request to schedule that day.
+      const plannedWeek = context.ownWeekdays.size === 0;
       return first(...scene.data.events.flatMap(event => [
         event.date ? plannedWeek ? null : day(event.date, "events.date") : event.day !== undefined && !plannedWeek && !groundedWeekday(context.corpus, event.day)
           ? { issue: "weekly_schedule.events.day 的星期不在用户的话里，不能推测" } : null,
