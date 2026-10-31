@@ -4,6 +4,7 @@ import type { ResolvedCard } from "@/commands/references";
 import type { Attachment } from "@/ai/attachments";
 import type { ControlHost } from "@/sync/controlHost";
 import { ChatComposer, type ClarifyState } from "./ChatComposer";
+import { ChatStatusLine } from "./ChatStatusLine";
 import { UserCardLayer, useUserPageDrop } from "./UserCardLayer";
 import { UserCanvasControls } from "./UserCanvasControls";
 import { ConnectedSources } from "@/connections/ConnectedSources";
@@ -82,8 +83,7 @@ export const ChatPage = ({ hidden, host, theme, feedback, notice, onOpenSettings
       <div className="vivic-chat-space" />
       <div className="vivic-chat-footer">
         {fileMessage && <p className="vivic-file-message vivic-upload-status" role="status">{fileMessage}</p>}
-        {displayFeedback && <p className="vivic-chat-status" role="status" aria-live="polite" aria-busy={composer.busy}
-          data-visible={(fresh || sticky) || undefined} data-vivic-command-feedback>{displayFeedback}</p>}
+        <ChatStatusLine text={displayFeedback} visible={fresh || sticky} busy={composer.busy} onCancel={composer.onCancel} />
         <ChatComposer {...composer} onOpenConnectionSettings={() => {
           if (window.location.hash !== "#settings-connections") window.location.hash = "settings-connections";
           onOpenSettings();

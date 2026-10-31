@@ -25,6 +25,17 @@ describe("same-call feedback metadata", () => {
   ])("does not publish unsafe, incomplete or late fields: %s", content => {
     const publish = vi.fn(); feedbackReader(publish)(content); expect(publish).not.toHaveBeenCalled();
   });
+  it.each([
+    "已为你创建卡片。", "已帮你生成内容。", "我帮你弄好了。", "做好了。", "搞定了。",
+    "卡片弄好了，请查看。", "我创建了卡片。", "已删除卡片。", "已设置提醒。",
+  ])("rejects a finished-state first sentence even without an adjacent 已: %s", text => {
+    const publish = vi.fn(); feedbackReader(publish)(JSON.stringify({ feedback: text })); expect(publish).not.toHaveBeenCalled();
+  });
+  it.each([
+    "正在创建卡片。", "正在为你创建卡片。", "正在整理这张卡。", "我会帮你创建。", "我先看看。", "我来整理一下。",
+  ])("keeps an honest in-progress first sentence: %s", text => {
+    const publish = vi.fn(); feedbackReader(publish)(JSON.stringify({ feedback: text })); expect(publish).toHaveBeenCalledWith(text);
+  });
   it("leaves the existing output contract intact", () => {
     expect(withoutFeedback({ feedback: "我来整理。", slots: { text: "原文" } })).toEqual({ slots: { text: "原文" } });
   });

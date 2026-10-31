@@ -1,3 +1,25 @@
+export const FEEDBACK_SCENES = ["multi", "attachment", "continuation", "task"] as const;
+export type FeedbackScene = (typeof FEEDBACK_SCENES)[number];
+
+/** A target-sensitive route may speak an action only after a unique card is known. */
+export const FEEDBACK_TARGET_STATES = ["unresolved", "resolved", "ambiguous", "missing"] as const;
+export type FeedbackTargetState = (typeof FEEDBACK_TARGET_STATES)[number];
+
+/**
+ * The provisional first sentence may only describe work in progress. It must
+ * never claim a finished action ("已为你创建卡片", "我帮你弄好了", "我创建了
+ * 卡片") and must never leak wire/implementation detail. The backend uses this
+ * as its hard gate; the web client re-runs it so a sentence that slips past an
+ * older server still cannot reach the visible slot.
+ */
+export const UNSAFE_FEEDBACK_PATTERN = /[{}\[\]`<>\r\n]|(?:tools?\.|card\.|canvas\.|stage\.|slots|contract|sourceData|displayProps|targetId|itemId|requestId|metadata|reasoning|[A-Z][a-z]+Card)|已|完成|成功|好了|搞定|完毕|(?:弄|做|搞|处理)(?:完|好)|(?:创建|生成|设置|保存|删除|执行|记下)(?:了|好|完|过)|(?:saved|created|completed|done)\b/i;
+
+/** `false` means: drop this first sentence and keep waiting for the result. */
+export function isSafeFeedbackText(text: string): boolean {
+  const value = text.trim();
+  return value.length > 0 && Array.from(value).length <= 80 && !UNSAFE_FEEDBACK_PATTERN.test(value);
+}
+
 /** An explicit new command must not be consumed as an answer to an old question. */
 export function startsNewInstruction(text: string, previousUtterance?: string): boolean {
   const value = text.trim();

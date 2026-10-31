@@ -685,6 +685,18 @@ export const createApp = (deps: AppDeps) => {
         tracePath: c.req.header("x-vivic-trace-path") === "task" ? "task" as const : "browser" as const,
         ...(installedDefinitions ? { installedDefinitions, extensionDefinitions: undefined } : {}),
         ...(online && c.req.header("x-vivic-intent-image-ref") ? { trustedImageRef: c.req.header("x-vivic-intent-image-ref") } : {}) };
+      // Paths that deliberately get no single route hint still need a safe line:
+      // multi-clause, attachments, follow-up answers and task receipts are the
+      // longest waits, and leaving them neutral for seconds reads as a stall.
+      // This frame carries no business data and no route claim.
+      const scene = !streamFeedback ? undefined
+        : parsed.data.attachments?.length ? "attachment" as const
+          : parsed.data.continuation ? "continuation" as const
+            : parsed.data.task ? "task" as const
+              : splitClauses(intent.text).length > 1 ? "multi" as const : undefined;
+      if (scene) {
+        try { onStage({ stage: "decision", status: "started", scene }); } catch { /* progress is advisory */ }
+      }
       // The on-mode router hint already exists for every clause. Publish it on the
       // existing progress channel as optional fields instead of opening a second
       // message chain; older clients strip the unknown keys and see today's label.
@@ -699,6 +711,17 @@ export const createApp = (deps: AppDeps) => {
           const progress = { stage: "decision" as const, status: "started" as const,
             route: route.slice(0, 90), feedbackSource: "preset" as const };
           try { onStage(progress); } catch { /* progress is advisory */ }
+          // The route is known before the target is; only a later frame unlocks
+          // an action sentence for focus/edit/highlight. Delete stays confirmation.
+          if (["focus", "edit", "delete", "highlight"].includes(route)) {
+            void value.target.then(target => {
+              if (signal.aborted) return;
+              const targetState = !target ? "unresolved" as const
+                : "targetId" in target ? "resolved" as const
+                  : "missing" in target ? "missing" as const : "ambiguous" as const;
+              try { onStage({ ...progress, targetState }); } catch { /* progress is advisory */ }
+            }).catch(() => { /* a target frame never fails the request */ });
+          }
         }).catch(() => { /* a route hint never fails the request */ });
       };
       if (requestRouter?.mode !== "on" && !nativeV2 && !parsed.data.task) return runIntent(intent, pipeline, signal);

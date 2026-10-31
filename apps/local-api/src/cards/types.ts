@@ -5,6 +5,8 @@ import type { CanvasContext } from "../schemas.js";
 export interface CardBuildContext extends CanvasContext {
   targetId?: string;
   itemId?: string;
+  /** Host-resolved reference card of a movement relation, never a model slot. */
+  relativeToId?: string;
   trustedImageRef?: string;
 }
 export type BuiltinCardContract = CardContract<unknown, CardBuildContext>;

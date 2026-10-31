@@ -3,7 +3,7 @@ import { z } from "zod";
 import { ROUTES } from "@vivic/contracts";
 import type { IntentRequest, IntentResult, PipelineDeps } from "../intent/pipeline.js";
 import { splitClauses } from "./split.js";
-import { resolveTarget } from "./target.js";
+import { hasExplicitCardReference, resolveTarget, targetedRoutes } from "./target.js";
 import type { TargetResult } from "./target.js";
 import { isBuiltinRoute, type RouteResult } from "./router.js";
 import { literalRoute } from "./on.js";
@@ -87,6 +87,8 @@ export async function observeDecision(req: IntentRequest, deps: PipelineDeps, si
   const pending = (async () => {
     const output: DecisionTrace["decisions"] = [];
     let shadowContext = req.canvasContext;
+    // A focus clause sets the working card for a follow-up that names none.
+    let inheritedTargetId: string | undefined;
     for (const [index, text] of clauses.entries()) {
       const clauseStarted = performance.now();
       try {
@@ -100,8 +102,11 @@ export async function observeDecision(req: IntentRequest, deps: PipelineDeps, si
           : await router.routeUtterance(text, shadowContext, controller.signal);
         // Main-only has no model target: the plan resolves it deterministically
         // from the user's words, and ambiguity still asks the user.
-        const targetPromise = mainOnly ? Promise.resolve(undefined)
-          : value?.route && isBuiltinRoute(value.route) ? resolveTarget(text, shadowContext, value.route, router, controller.signal) : Promise.resolve(undefined);
+        const inherited = inheritedTargetId && value?.route && isBuiltinRoute(value.route) && targetedRoutes.has(value.route) && value.route !== "focus"
+          && !hasExplicitCardReference(text, shadowContext)
+          ? Promise.resolve({ targetId: inheritedTargetId, source: "focus" as const }) : undefined;
+        const targetPromise = mainOnly ? Promise.resolve(undefined) : inherited
+          ?? (value?.route && isBuiltinRoute(value.route) ? resolveTarget(text, shadowContext, value.route, router, controller.signal) : Promise.resolve(undefined));
         if (!output.length) publishHint({ result: value, target: targetPromise, all });
         const selected = await targetPromise;
         // The host may have frozen a candidate the user already picked; the trace
@@ -114,8 +119,9 @@ export async function observeDecision(req: IntentRequest, deps: PipelineDeps, si
           ...(mainOnly ? { routeSource: exact ? "rules" as const : "skipped" as const } : {}) }
           : { text, route: null, probability: 0, probabilities: {}, none: true, latencyMs: Math.round(performance.now() - clauseStarted),
             failed: true, ...(mainOnly ? { routeSource: "skipped" as const } : {}) });
-        if (value?.route === "focus" && value.probability >= .8 && selected && "targetId" in selected) {
-          shadowContext = { ...shadowContext, focusHistory: [...shadowContext.focusHistory, selected.targetId].slice(-20) };
+        if (value?.route === "focus" && value.probability >= .8 && target && "targetId" in target) {
+          inheritedTargetId = target.targetId;
+          shadowContext = { ...shadowContext, focusHistory: [...shadowContext.focusHistory, target.targetId].slice(-20) };
         }
       } catch {
         if (!output.length) publishHint(null);

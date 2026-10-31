@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import {
   absoluteReminderTime, CardRecordSchema, SCENE_BY_ID, SCENE_CARD_SIZES, type CardRecord, type EvidenceRef, type SceneId,
 } from "@vivic/contracts";
-import { dayOfWeek, isoOf, mondayOf, monthOf, parseIso, daysBetween } from "./calendar.js";
+import { addDays, dayOfWeek, isoOf, mondayOf, monthOf, parseIso, daysBetween, type Ymd } from "./calendar.js";
 import {
   groundedDate, groundedDoi, groundedNumber, groundedPartialDate, groundedPhrase, groundedTime, groundedUrl, groundedWeekday, overlapRatio, type Corpus,
 } from "./grounding.js";
@@ -55,11 +55,17 @@ function groundingIssue(scene: ParsedScene, context: SceneBuildContext): SceneIs
         d.doi === undefined || groundedDoi(corpus, d.doi) ? null : { issue: "academic_paper.doi 必须来自用户提供的信息" }, url(d.url, "url"));
     }
     case "photo_gallery": return first(...(scene.data.images ?? []).map(image => url(image.url, "images.url")));
-    case "weekly_schedule": return first(...scene.data.events.flatMap(event => [
-      event.date ? day(event.date, "events.date") : event.day !== undefined && !groundedWeekday(corpus, event.day)
-        ? { issue: "weekly_schedule.events.day 的星期不在用户的话里，不能推测" } : null,
-      clock(event.start, "events.start"), clock(event.end, "events.end"),
-    ]));
+    case "weekly_schedule": {
+      // A plan the user asked for ("下周的健身计划") has no weekdays in the
+      // request: which days to train is the plan's own content, so only clock
+      // times stay grounded. If the user did name days/dates, they still bind.
+      const plannedWeek = context.corpus.weekdays.size === 0;
+      return first(...scene.data.events.flatMap(event => [
+        event.date ? plannedWeek ? null : day(event.date, "events.date") : event.day !== undefined && !plannedWeek && !groundedWeekday(context.corpus, event.day)
+          ? { issue: "weekly_schedule.events.day 的星期不在用户的话里，不能推测" } : null,
+        clock(event.start, "events.start"), clock(event.end, "events.end"),
+      ]));
+    }
     case "data_visualization": return first(...scene.data.points.flatMap((point, index) => [
       number(point.y, `points[${index}].y`), typeof point.x === "number" ? number(point.x, `points[${index}].x`) : null,
     ]));
@@ -110,6 +116,14 @@ function groundingIssue(scene: ParsedScene, context: SceneBuildContext): SceneIs
 
 // ----------------------------------------------------------------- builders
 
+/** The Monday a request's own week phrase names ("下周/本周"), if any. */
+function statedWeekStart(text: string, today: Ymd): Ymd | undefined {
+  const match = text.match(/(下下|下|这|本|上)(?:个)?(?:周|星期|礼拜)/u);
+  if (!match) return undefined;
+  const shift = match[1] === "下下" ? 2 : match[1] === "下" ? 1 : match[1] === "上" ? -1 : 0;
+  return addDays(mondayOf(today), shift * 7);
+}
+
 const sceneTitle = (scene: ParsedScene): string => {
   switch (scene.scene) {
     case "travel_offers": return `${scene.data.destination}旅游结果`;
@@ -150,7 +164,12 @@ function displayFor(scene: ParsedScene, context: SceneBuildContext): { type: Car
     case "weekly_schedule": {
       const d = scene.data;
       const dated = d.events.map(event => event.date ? parseIso(event.date) : null);
-      const anchor = d.weekStart ? parseIso(d.weekStart) : dated.find(Boolean) ?? today;
+      // "下周" in the request owns the week; a model weekStart that disagrees
+      // with an explicit "下周/这周" must not move the plan to another week.
+      const stated = statedWeekStart(context.corpus.text, today);
+      let anchor = d.weekStart ? parseIso(d.weekStart) : dated.find(Boolean) ?? undefined;
+      if (!dated.some(Boolean) && stated && (!anchor || daysBetween(stated, mondayOf(anchor)) !== 0)) anchor = stated;
+      anchor ??= today;
       if (!anchor) return { issue: "weekly_schedule.weekStart 不是有效日期" };
       const weekStart = mondayOf(anchor);
       const events = [];
