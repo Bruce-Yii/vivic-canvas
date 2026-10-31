@@ -24,7 +24,10 @@ export function parseWeatherInput(text: string): WeatherInput | null {
     .replace(/^(?:查询|查一下|查看|查查|显示|查)\s*/, "")
     .replace(/[。？?！!]$/, "").trim();
   // Card operations belong to reference resolution, not a new weather lookup.
-  if (/^(?:删除|删掉|删了|删|移除|去掉|聚焦|放大|展开|收起|折叠)/.test(raw)) return null;
+  // "把上海天气那张卡拖到左上角" must reach the arrange route, not become
+  // "weather where I am" merely because it contains the word 天气.
+  if (/^(?:删除|删掉|删了|删|移除|去掉|聚焦|放大|展开|收起|折叠)/.test(raw)
+    || /拖到|拖至|挪到|搬到|移到|移动到|移至|放到|放大|展开|收起|折叠|高亮|固定|取消固定|传送到/.test(raw)) return null;
   if ((raw.match(/天气|气温/g)?.length ?? 0) > 1 || isMixedInstruction(raw.replace(/天气|气温/g, ""))
     || /[；;\n]|然后|顺便|再(?:查|画|建|删)|并(?:查|画|建|删)|以及|同时|、/.test(raw)) {
     return { kind: "clarify", message: "请一次查询一个城市的当前天气，其他操作请另发指令；本次没有执行任何部分。" };

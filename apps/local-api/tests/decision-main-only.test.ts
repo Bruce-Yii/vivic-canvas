@@ -13,6 +13,11 @@ const context = (cards: CanvasContext["cards"] = []): CanvasContext =>
   ({ canvasId: "TEST-main-only", stage: "WORKSPACE", viewport: { x: 0, y: 0, zoom: 1 }, focusHistory: [], cards });
 const noteCard = (id: string, alias: string) => ({ id, type: "NoteCard" as const, aliases: [alias],
   displayProps: { text: `${alias}正文` }, sourceDataSummary: {}, layout: { x: 0, y: 0, width: 320, height: 120 } });
+/** The B-pilot todo: its id is internal and must never be shown to the user. */
+const todoCard = (id: string, x: number, y = 0, title?: string) => ({ id, type: "TodoCard" as const,
+  aliases: title ? [title] : [],
+  displayProps: { ...(title ? { title } : {}), items: [{ id: `${id}-item`, text: "买牛奶", done: false }] },
+  sourceDataSummary: {}, layout: { x, y, width: 360, height: 120 } });
 
 /** A router that would fail the test if either 4B call were ever attempted:
  * main-only must not call route or target classification at all. */
@@ -265,6 +270,59 @@ describe("main-only keeps provider labels and host safety intact", () => {
     expect(f.routeUtterance).not.toHaveBeenCalled();
     // The draft is the main planner's; the host still owns the freeze/confirm step.
     expect(f.generate).toHaveBeenCalledOnce();
+  });
+});
+
+describe("main-only answers a spatial reference from the layout", () => {
+  it("focuses the left todo of two separated cards without a second question or a 4B call", async () => {
+    const f = setup(() => ({ contract: "focus", slots: {}, say: "已聚焦。", text: "已聚焦左边的待办。" }));
+    const r = await runIntent({ text: "聚焦左边的待办",
+      canvasContext: context([todoCard("bpilot-left", 60), todoCard("bpilot-right", 720)]) }, f.deps);
+    expect(r.kind, JSON.stringify(r)).toBe("envelope");
+    expect(r.envelope!.actions).toContainEqual({ type: "card.focus", targetId: "bpilot-left" });
+    expect(r.message ?? "").not.toContain("哪一张");
+    expect(r.message ?? "").not.toContain("bpilot-");
+    expect(f.routeUtterance).not.toHaveBeenCalled();
+    expect(f.chooseTarget).not.toHaveBeenCalled();
+  });
+
+  it("selects the middle and the rightmost of three separated cards end to end", async () => {
+    const three = context([todoCard("bpilot-left", 60), todoCard("bpilot-mid", 440),
+      todoCard("bpilot-right", 820)]);
+    for (const [text, target] of [["聚焦中间的待办", "bpilot-mid"], ["聚焦最右边的待办", "bpilot-right"]]) {
+      const f = setup(() => ({ contract: "focus", slots: {}, say: "已聚焦。", text: "已聚焦。" }));
+      const r = await runIntent({ text, canvasContext: three }, f.deps);
+      expect(r.kind, JSON.stringify(r)).toBe("envelope");
+      expect(r.envelope!.actions).toContainEqual({ type: "card.focus", targetId: target });
+      expect(r.message ?? "").not.toContain("哪一张");
+      expect(f.chooseTarget).not.toHaveBeenCalled();
+    }
+  });
+
+  it("asks among two stacked cards with type and position, never the internal id", async () => {
+    const f = setup(() => ({ contract: "focus", slots: {}, say: "已聚焦。", text: "已聚焦。" }));
+    const r = await runIntent({ text: "聚焦左边的待办",
+      canvasContext: context([todoCard("bpilot-left", 60), todoCard("bpilot-right", 60)]) }, f.deps);
+    expect(r.kind).toBe("clarify");
+    expect(r.envelope).toBeUndefined();
+    expect(r.message).toContain("哪一张");
+    expect(r.message).toContain("待办");
+    expect(r.message).toContain("x=60");
+    expect(r.message).not.toContain("bpilot-");
+    expect(f.chooseTarget).not.toHaveBeenCalled();
+  });
+
+  it("stays safe when the direction names no card on the canvas", async () => {
+    const answer = () => ({ contract: "focus", slots: {}, say: "已聚焦。", text: "已聚焦。" });
+    for (const cards of [context([]), context([todoCard("bpilot-left", 60)])]) {
+      const f = setup(answer);
+      const r = await runIntent({ text: "聚焦左边的便签", canvasContext: cards }, f.deps);
+      expect(r.kind).toBe("clarify");
+      expect(r.envelope).toBeUndefined();
+      expect(r.message).toBe("没有找到要操作的卡片，请说明卡名。");
+      expect(f.routeUtterance).not.toHaveBeenCalled();
+      expect(f.chooseTarget).not.toHaveBeenCalled();
+    }
   });
 });
 

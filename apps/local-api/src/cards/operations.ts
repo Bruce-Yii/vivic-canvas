@@ -109,14 +109,15 @@ const editContract = defineCardContract({
 
 const arrangeContract = defineCardContract({
   id: "arrange", name: "布局与传送", cardType: "none",
-  description: "mode为move/pin/surface/arrange/organize。move只填方向，不填坐标或relativeTo；pin填pinned；surface填user/display。arrange整理全画布；organize填写sort、direction、group，只打开整理预览。目标编号只由宿主提供。",
+  description: "mode为move/pin/surface/arrange/organize。move只填方向，不填坐标或relativeTo；原句里的参照卡（如「挪到购物清单下面」的购物清单）由宿主识别，不要为此澄清。pin填pinned；surface填user/display。arrange整理全画布；organize填写sort、direction、group，只打开整理预览。目标编号只由宿主提供。",
   examples: ["把这张卡向左移动", "固定这张卡", "传送到用户页", "按截止日期排序"],
   slots: ArrangeSlotsSchema,
   build(slots, context) {
     if (slots.mode === "arrange") return host({ kind: "canvas.arrange" }, context);
     if (slots.mode === "organize") return host({ kind: "canvas.organize.preview", sort: slots.sort, direction: slots.direction, group: slots.group }, context);
     const card = target(context);
-    if (slots.mode === "move") return host({ kind: "card.move", targetId: card.id, direction: slots.direction }, context);
+    if (slots.mode === "move") return host({ kind: "card.move", targetId: card.id, direction: slots.direction,
+      ...(context.relativeToId && context.relativeToId !== card.id ? { relativeTo: context.relativeToId } : {}) }, context);
     if (slots.mode === "pin") return host({ kind: "card.pin", targetId: card.id, pinned: slots.pinned }, context);
     return host({ kind: "card.surface", targetId: card.id, surface: slots.surface }, context);
   },

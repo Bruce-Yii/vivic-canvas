@@ -140,15 +140,17 @@ describe("reminder coverage falls back to the whole phrase when splitting fails"
 });
 
 describe("reminder pipeline handles 和 without losing an item", () => {
-  it("clarifies when the model folds 喝水和吃药 into one reminder", async () => {
+  it("splits 喝水和吃药 deterministically instead of letting the model fold it", async () => {
+    // The deterministic grammar owns this shape now; even a folding model reply
+    // is never requested, so the item can neither be folded nor dropped.
     const f = setup(() => chatOk({ reminders: [{ afterSeconds: 300, text: "喝水和吃药" }] }));
     const result = await runIntent({ text: "五分钟后提醒我喝水和吃药", canvasContext: emptyContext() }, f.deps);
-    expect(result.kind).toBe("clarify");
-    expect(result.envelope).toBeUndefined();
-    expect(f.call).toHaveBeenCalledTimes(2);
+    expect(result.kind, JSON.stringify(result)).toBe("envelope");
+    expect(reminderTexts(result)).toEqual(["喝水", "吃药"]);
+    expect(f.call).not.toHaveBeenCalled();
   });
 
-  it("creates one card per item when the model returns both", async () => {
+  it("keeps one card per item and one batch camera move", async () => {
     const f = setup(() => chatOk({ reminders: [
       { afterSeconds: 300, text: "喝水" },
       { afterSeconds: 300, text: "吃药" },

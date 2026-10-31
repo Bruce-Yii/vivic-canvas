@@ -547,3 +547,42 @@ describe("hybrid keeps the existing confirmation, envelope and runtime contracts
     expect(ctx).toEqual(before);
   });
 });
+
+/** `directClauses` is one metric, not a per-mode one: the number of clauses
+ * whose actions an approved rule actually built. Hybrid derives it from
+ * ruleByClause.size, the per-clause (off/plans) path counts the same thing.
+ * A clause the planner had to fill must never be counted. */
+describe("directClauses counts the clauses the rules actually built", () => {
+  const table: Array<[string, string, number, number, number]> = [
+    // label, utterance, off plannerCalls, hybrid plannerCalls, direct clauses
+    ["only literal clauses", literal, 0, 0, 2],
+    ["one literal clause and two planned", mixed, 2, 1, 1],
+    ["literal, planned, literal", "帮我记个便签明天交周报，然后过五分钟叫我休息，再显示全部", 1, 1, 2],
+  ];
+
+  it.each(table)("%s reports the same count in both paths", async (_label, text, offCalls, hybridCalls, direct) => {
+    delete process.env.VIVIC_MULTI_CARD_MODE;
+    const off = await runIntent({ text, canvasContext: context() }, setup().deps);
+    process.env.VIVIC_MULTI_CARD_MODE = "hybrid";
+    const hybrid = await runIntent({ text, canvasContext: context() }, setup().deps);
+
+    expect(off.trace?.directClauses).toBe(direct);
+    expect(hybrid.trace?.directClauses).toBe(direct);
+    expect(off.trace?.plannerCalls).toBe(offCalls);
+    expect(hybrid.trace?.plannerCalls).toBe(hybridCalls);
+    // Every clause is attributed exactly once in hybrid: rules or planner.
+    expect(hybrid.trace?.plans?.length).toBe(hybrid.trace?.clauses.length);
+    expect(hybrid.trace?.plans?.filter(plan => plan.source === "rules")).toHaveLength(direct);
+  });
+
+  it("does not count a rule row whose contract still had to be planned", async () => {
+    process.env.VIVIC_MULTI_CARD_MODE = "hybrid";
+    // 过五分钟叫我休息 is classified as countdown with .99, but the literal
+    // countdown parser rejects it, so it is a planner clause, not a direct one.
+    const f = setup();
+    const r = await runIntent({ text: "过五分钟叫我休息，然后记个便签交周报", canvasContext: context() }, f.deps);
+    expect(r.kind, JSON.stringify(r)).toBe("envelope");
+    expect(r.trace?.directClauses).toBe(1);
+    expect(r.trace?.plans?.map(plan => [plan.clause, plan.source])).toEqual([[0, "planner"], [1, "rules"]]);
+  });
+});

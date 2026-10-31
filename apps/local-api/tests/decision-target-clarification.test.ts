@@ -6,6 +6,7 @@ import { IntentResponseSchema, type CanvasContext } from "../src/schemas.js";
 import type { IntentRouter, RouteResult } from "../src/decision/router.js";
 import { runIntent, type IntentResult, type PipelineDeps } from "../src/intent/pipeline.js";
 import { resolveTarget } from "../src/decision/target.js";
+import { DecisionTaskManager } from "../src/decision/taskV2.js";
 import type { ChatMessage } from "../src/stepfun.js";
 
 const origin = "https://unit.test", token = "TEST-target-clarify-token-12345678";
@@ -32,6 +33,22 @@ const canvas = (): CanvasContext => ({ canvasId: "TEST-target", version: 7, stag
 const route = (id: RouteResult["route"], probability = .99): RouteResult =>
   ({ route: id, probability, probabilities: { [id!]: probability }, none: false, latencyMs: 1 });
 const titles = canvas().cards.map(item => item.displayProps.title ?? item.displayProps.text);
+
+/** The B-pilot canvas: two todo cards whose ids are internal (`bpilot-*`), so the
+ * user must only ever see the card face and the position. */
+const pilot = (id: string, title: string, x: number, y = 0): CanvasCard => ({
+  id, type: "TodoCard", aliases: title ? [title] : [],
+  displayProps: { ...(title ? { title } : {}), items: [{ id: `${id}-item`, text: "买牛奶", done: false }] },
+  sourceDataSummary: {}, layout: { x, y, width: 360, height: 120, pinned: false },
+});
+const pilotCanvas = (cards: CanvasCard[]): CanvasContext => ({ canvasId: "TEST-bpilot", version: 3, stage: "WORKSPACE",
+  viewport: { x: 0, y: 0, zoom: 1 }, focusHistory: [], cards });
+const uuid = "3f2b8c1e-9a4d-4b7e-8f1a-2c5d6e7f8091";
+const noInternalId = (text: string) => {
+  expect(text).not.toContain("bpilot-");
+  expect(text).not.toMatch(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}/iu);
+  expect(text).not.toContain(uuid);
+};
 
 function setup(routeFor: (text: string) => RouteResult["route"], chooseTarget: IntentRouter["chooseTarget"] = async () => null,
   modelReply: unknown = { clarify: "模型不应被调用" }) {
@@ -236,5 +253,227 @@ describe("an ambiguous operation lists only same-type candidates", () => {
     for (const candidate of result.task?.clarification?.candidates ?? []) {
       expect(result.message).toContain(`${candidate.number}. ${candidate.label}`);
     }
+  });
+});
+
+describe("a spatial reference is answered from the layout, not by asking", () => {
+  it("focuses the left todo of two separated cards without a second question", async () => {
+    const f = setup(text => /聚焦/.test(text) ? "focus" : "chat", async () => null,
+      { contract: "focus", slots: {}, say: "已聚焦。", text: "已聚焦左边的待办。" });
+    const result = await f.post({ text: "聚焦左边的待办",
+      canvasContext: pilotCanvas([pilot("bpilot-left", "买牛奶", 60), pilot("bpilot-right", "交周报", 720)]) });
+    expect(result.kind, JSON.stringify(result)).toBe("envelope");
+    expect(result.envelope?.actions).toContainEqual({ type: "card.focus", targetId: "bpilot-left" });
+    expect(result.message ?? "").not.toContain("哪一张");
+    // The payload keeps the id; everything the user reads must not.
+    noInternalId(result.message ?? "");
+    expect(result.task?.clarification).toBeUndefined();
+  });
+
+  it("selects the middle and the rightmost card of three", async () => {
+    const three = pilotCanvas([pilot("bpilot-left", "甲组", 60), pilot("bpilot-mid", "乙组", 440), pilot("bpilot-right", "丙组", 820)]);
+    expect(await resolveTarget("聚焦中间的待办", three, "focus")).toEqual({ targetId: "bpilot-mid", source: "spatial" });
+    expect(await resolveTarget("聚焦最右边的待办", three, "focus")).toEqual({ targetId: "bpilot-right", source: "spatial" });
+    expect(await resolveTarget("聚焦最左边的待办", three, "focus")).toEqual({ targetId: "bpilot-left", source: "spatial" });
+    // 中间 reads the axis that actually separates the cards, so a column works too.
+    const column = pilotCanvas([pilot("bpilot-top", "甲组", 60, 60), pilot("bpilot-middle", "乙组", 60, 440),
+      pilot("bpilot-bottom", "丙组", 60, 820)]);
+    expect(await resolveTarget("聚焦中间的待办", column, "focus")).toEqual({ targetId: "bpilot-middle", source: "spatial" });
+    expect(await resolveTarget("聚焦最下面的待办", column, "focus")).toEqual({ targetId: "bpilot-bottom", source: "spatial" });
+    // An explicit pronoun keeps its existing precedence over a direction.
+    expect(await resolveTarget("把这张卡移到左边", { ...three, focusHistory: ["bpilot-right"] }, "arrange"))
+      .toEqual({ targetId: "bpilot-right", source: "focus" });
+  });
+
+  it("never reads a move destination as the target card", async () => {
+    const three = pilotCanvas([pilot("bpilot-left", "甲组", 60), pilot("bpilot-mid", "乙组", 440),
+      pilot("bpilot-right", "丙组", 820)]);
+    // "to the middle" says where a card should go; the todo to move is still unclear.
+    const middle = await resolveTarget("把待办移到中间", three, "arrange");
+    expect(middle).toMatchObject({ source: "ambiguous" });
+    expect(middle && "ambiguous" in middle ? middle.ambiguous.map(candidate => candidate.id) : [])
+      .toEqual(["bpilot-left", "bpilot-mid", "bpilot-right"]);
+    // A target mention before the destination still wins, whichever side it names.
+    expect(await resolveTarget("把左边的待办移到右边", three, "arrange"))
+      .toEqual({ targetId: "bpilot-left", source: "spatial" });
+    expect(await resolveTarget("把右边的待办移到左边", three, "arrange"))
+      .toEqual({ targetId: "bpilot-right", source: "spatial" });
+    // The object between the verb and the direction does not make it a target.
+    expect(await resolveTarget("把待办移到画布左边", three, "arrange")).toMatchObject({ source: "ambiguous" });
+    // A direction without a movement verb keeps naming a card.
+    expect(await resolveTarget("聚焦最右边的待办", three, "focus"))
+      .toEqual({ targetId: "bpilot-right", source: "spatial" });
+  });
+
+  it("clarifies a stack with card-face labels and no internal ids", async () => {
+    const stack = pilotCanvas([pilot("bpilot-left", "", 60), pilot(uuid, "", 60)]);
+    const result = await resolveTarget("聚焦左边的待办", stack, "focus");
+    expect(result).toMatchObject({ source: "ambiguous" });
+    const candidates = result && "ambiguous" in result ? result.ambiguous : [];
+    expect(candidates.map(candidate => candidate.id)).toEqual(["bpilot-left", uuid]);
+    expect(new Set(candidates.map(candidate => candidate.label)).size).toBe(candidates.length);
+    for (const candidate of candidates) {
+      noInternalId(candidate.label);
+      expect(candidate.label).toContain("待办");
+      expect(candidate.label).toContain("x=60");
+    }
+  });
+
+  it("adds a position hint when two cards share the same title", async () => {
+    const stack = pilotCanvas([pilot("bpilot-left", "买牛奶", 60), pilot("bpilot-right", "买牛奶", 60, 140)]);
+    const result = await resolveTarget("聚焦左边的待办", stack, "focus");
+    const candidates = result && "ambiguous" in result ? result.ambiguous : [];
+    expect(candidates).toHaveLength(2);
+    expect(new Set(candidates.map(candidate => candidate.label)).size).toBe(2);
+    for (const candidate of candidates) {
+      noInternalId(candidate.label);
+      expect(candidate.label).toContain("买牛奶");
+      expect(candidate.label).toContain("x=60");
+    }
+  });
+
+  it("asks among an overlapping stack through the turn instead of guessing", async () => {
+    const f = setup(text => /聚焦/.test(text) ? "focus" : "chat");
+    const result = await f.post({ text: "聚焦左边的待办",
+      canvasContext: pilotCanvas([pilot("bpilot-left", "", 60), pilot("bpilot-right", "", 76)]) });
+    expect(result.kind).toBe("clarify");
+    expect(result.envelope).toBeUndefined();
+    const candidates = result.task?.clarification?.candidates ?? [];
+    expect(candidates).toHaveLength(2);
+    for (const candidate of candidates) {
+      // The question text, the chip label and the payload are one list.
+      expect(result.message).toContain(`${candidate.number}. ${candidate.label}`);
+      noInternalId(candidate.label);
+      expect(candidate.label).toContain("待办");
+    }
+    noInternalId(result.message ?? "");
+    expect(f.model).not.toHaveBeenCalled();
+  });
+
+  it("stays safe on an empty canvas or a direction with no matching card", async () => {
+    expect(await resolveTarget("聚焦左边的待办", pilotCanvas([]), "focus")).toEqual({ missing: true, source: "missing" });
+    const f = setup(text => /聚焦/.test(text) ? "focus" : "chat", async () => null,
+      { contract: "focus", slots: {}, say: "已聚焦。", text: "已聚焦。" });
+    const result = await f.post({ text: "聚焦左边的便签", canvasContext: pilotCanvas([pilot("bpilot-left", "买牛奶", 60)]) });
+    expect(result.kind).toBe("clarify");
+    expect(result.message).toBe("没有找到要操作的卡片，请说明卡名。");
+    expect(result.task?.clarification?.candidates ?? []).toHaveLength(0);
+    expect(result.envelope).toBeUndefined();
+    expect(result.hostOperation).toBeUndefined();
+  });
+});
+
+/** `main-only` has no route hint and no target classifier: a target can only
+ * come from the user's words (title, direction, ordinal reply) or from a
+ * numbered clarification answer. The pilot canvas holds two todo cards whose
+ * ids are internal, so every user-visible string is checked against them. */
+describe("main-only resolves a target from words and asks only without a clue", () => {
+  const twoTodos = () => pilotCanvas([pilot("bpilot-left", "买牛奶", 60), pilot("bpilot-right", "交周报", 720)]);
+  // The cards are todos, so the edit contract must use a todo operation.
+  const editAnswer = { contract: "edit", slots: { mode: "todo", operation: "title", title: "已更新" },
+    say: "改好了。", text: "已修改。" };
+
+  function mainOnly(reply: unknown = editAnswer) {
+    const requests: string[] = [];
+    const generate = vi.fn(async (messages: ChatMessage[]) => {
+      const raw = String(messages[1]?.content ?? "{}").split("\n上次校验失败")[0]!;
+      const payload = JSON.parse(raw) as { utterance?: string };
+      requests.push(String(payload.utterance ?? ""));
+      return { ok: true as const, value: reply };
+    });
+    // Production main-only never calls the 4B: routeUtterance returns null and
+    // the target classifier is never invoked. A classifier call fails the test.
+    const routeUtterance = vi.fn(async () => null);
+    const chooseTarget = vi.fn(async () => { throw new Error("4B target must not be called"); });
+    const router: IntentRouter = { mode: "on", policy: "main-only",
+      directRoutes: new Set(["countdown", "todo", "note", "overview", "restore"]), routeUtterance, chooseTarget };
+    const deps: PipelineDeps = { router, credentials: new CredentialStore(), stepfun: { baseUrl: "https://unused.test" },
+      planner: { provider: "gpt", connected: true, isCurrent: () => true, generate } };
+    return { deps, generate, requests, routeUtterance, chooseTarget };
+  }
+  const targetOf = (result: IntentResult) =>
+    result.envelope?.actions.flatMap(action => "targetId" in action ? [action.targetId] : []) ?? [];
+
+  it("asks when the words carry no title, direction or ordinal at all", async () => {
+    const f = mainOnly();
+    const result = await runIntent({ text: "把那个改一下", canvasContext: twoTodos() }, f.deps);
+    expect(result.kind).toBe("clarify");
+    expect(result.envelope).toBeUndefined();
+    expect(result.message).toBe("你要操作哪一张？1. 买牛奶 2. 交周报");
+    expect(result.targetCandidates?.map(candidate => candidate.label)).toEqual(["买牛奶", "交周报"]);
+    for (const candidate of result.targetCandidates ?? []) noInternalId(candidate.label);
+    noInternalId(result.message ?? "");
+    expect(f.generate).toHaveBeenCalledTimes(1);
+    expect(f.routeUtterance).not.toHaveBeenCalled();
+    expect(f.chooseTarget).not.toHaveBeenCalled();
+  });
+
+  it("selects the left todo from a spatial word without asking and without a 4B", async () => {
+    const f = mainOnly();
+    const result = await runIntent({ text: "把左边那个改一下", canvasContext: twoTodos() }, f.deps);
+    expect(result.kind, JSON.stringify(result)).toBe("envelope");
+    expect(targetOf(result)).toEqual(["bpilot-left"]);
+    expect(result.message ?? "").not.toContain("哪一张");
+    noInternalId(result.message ?? "");
+    expect(f.generate).toHaveBeenCalledTimes(1);
+    expect(f.routeUtterance).not.toHaveBeenCalled();
+    expect(f.chooseTarget).not.toHaveBeenCalled();
+  });
+
+  it("selects the right todo from a title substring without asking", async () => {
+    const f = mainOnly();
+    const result = await runIntent({ text: "改一下交周报", canvasContext: twoTodos() }, f.deps);
+    expect(result.kind, JSON.stringify(result)).toBe("envelope");
+    expect(targetOf(result)).toEqual(["bpilot-right"]);
+    expect(result.message ?? "").not.toContain("哪一张");
+    expect(f.chooseTarget).not.toHaveBeenCalled();
+  });
+
+  it("still asks for 第二张 in the first utterance because card ordinals are not resolved", async () => {
+    // §known limitation: target.ts only treats 第…条/项/点/行 as an item
+    // ordinal for highlight/edit, never 第…张. The reply path below is the
+    // supported way to answer with an ordinal, so this records the safe
+    // behaviour instead of guessing a card.
+    const f = mainOnly();
+    const result = await runIntent({ text: "改一下第二张", canvasContext: twoTodos() }, f.deps);
+    expect(result.kind).toBe("clarify");
+    expect(result.message).toBe("你要操作哪一张？1. 买牛奶 2. 交周报");
+    expect(result.envelope).toBeUndefined();
+    expect(f.chooseTarget).not.toHaveBeenCalled();
+  });
+
+  it("resolves 第二张 as the numbered clarification reply and updates that card", async () => {
+    const f = mainOnly();
+    const tasks = new DecisionTaskManager();
+    const first = await tasks.run({ text: "把那个改一下", canvasContext: twoTodos() },
+      { legacy: (request, signal) => runIntent(request, f.deps, signal) });
+    expect(first.kind).toBe("clarify");
+    expect(first.task?.clarification?.candidates.map(candidate => [candidate.number, candidate.label]))
+      .toEqual([[1, "买牛奶"], [2, "交周报"]]);
+    const second = await tasks.run({ text: "第二张", canvasContext: twoTodos(), task: { id: first.task!.id } },
+      { legacy: (request, signal) => runIntent(request, f.deps, signal) });
+    expect(second.kind, JSON.stringify(second)).toBe("envelope");
+    expect(targetOf(second)).toEqual(["bpilot-right"]);
+    noInternalId(second.message ?? "");
+    // The frozen target path still calls routeUtterance, which in main-only is a
+    // local no-op that returns null. It must never reach the target classifier.
+    for (const pending of f.routeUtterance.mock.results) expect(await pending.value).toBeNull();
+    expect(f.chooseTarget).not.toHaveBeenCalled();
+  });
+
+  it("keeps full mode on the classifier path (no behaviour change)", async () => {
+    // The pilot only changes main-only. A `full` turn must still ask the target
+    // classifier before the planner sees the utterance.
+    const chooseTarget = vi.fn(async () => ({ choice: "bpilot-right", probability: .9, latencyMs: 1 }));
+    const router: IntentRouter = { mode: "on", directRoutes: new Set(["countdown", "todo", "note", "overview", "restore"]),
+      routeUtterance: vi.fn(async () => route("edit")), chooseTarget };
+    const generate = vi.fn(async () => ({ ok: true as const, value: editAnswer }));
+    const deps: PipelineDeps = { router, credentials: new CredentialStore(), stepfun: { baseUrl: "https://unused.test" },
+      planner: { provider: "gpt", connected: true, isCurrent: () => true, generate } };
+    const result = await runIntent({ text: "把那个改一下", canvasContext: twoTodos() }, deps);
+    expect(result.kind, JSON.stringify(result)).toBe("envelope");
+    expect(targetOf(result)).toEqual(["bpilot-right"]);
+    expect(chooseTarget).toHaveBeenCalledTimes(1);
+    expect(result.trace?.policy).toBeUndefined();
   });
 });
