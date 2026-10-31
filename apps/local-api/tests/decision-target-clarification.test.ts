@@ -5,6 +5,7 @@ import type { LocalApiConfig } from "../src/config.js";
 import { IntentResponseSchema, type CanvasContext } from "../src/schemas.js";
 import type { IntentRouter, RouteResult } from "../src/decision/router.js";
 import { runIntent, type IntentResult, type PipelineDeps } from "../src/intent/pipeline.js";
+import { resolveTarget } from "../src/decision/target.js";
 import type { ChatMessage } from "../src/stepfun.js";
 
 const origin = "https://unit.test", token = "TEST-target-clarify-token-12345678";
@@ -135,6 +136,19 @@ describe("delete clarification text matches the frozen numbered payload", () => 
     expect(result.envelope).toBeUndefined();
   });
 
+  it("caps eight same-type focus candidates to five numbered items", async () => {
+    const f = setup(text => /聚焦/.test(text) ? "focus" : "chat");
+    const eight = canvas();
+    eight.cards = Array.from({ length: 8 }, (_, index) => card(`todo_${index}`, `清单${index}`, "TodoCard", index * 400));
+    eight.focusHistory = [];
+    const result = await f.post({ text: "聚焦待办", canvasContext: eight });
+    const candidates = result.task?.clarification?.candidates ?? [];
+    expect(candidates).toHaveLength(5);
+    expect(candidates.map(candidate => candidate.number)).toEqual([1, 2, 3, 4, 5]);
+    for (const candidate of candidates) expect(result.message).toContain(`${candidate.number}. ${candidate.label}`);
+    expect(result.envelope).toBeUndefined();
+  });
+
   it("reports an empty canvas as missing without listing or creating cards", async () => {
     const f = setup(text => /删除/.test(text) ? "delete" : "chat");
     const result = await f.post({ text: "删除读书笔记", canvasContext: { ...canvas(), cards: [], focusHistory: [] } });
@@ -146,6 +160,10 @@ describe("delete clarification text matches the frozen numbered payload", () => 
 });
 
 describe("a missing card gets zero unrelated candidates", () => {
+  it("reports an explicit absent card as missing even without a target classifier", async () => {
+    expect(await resolveTarget("聚焦一下日程卡", canvas(), "focus")).toEqual({ missing: true });
+  });
+
   it("treats 聚焦一下日程卡 as missing instead of offering the whole canvas", async () => {
     const f = setup(text => /聚焦/.test(text) ? "focus" : "chat",
       async () => ({ choice: "ambiguous", probability: .99, latencyMs: 1 }));

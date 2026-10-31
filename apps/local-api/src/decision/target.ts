@@ -45,10 +45,11 @@ export async function resolveTarget(text: string, context: CanvasContext, route:
   const result = await router?.chooseTarget(text, context, criteria, signal);
   if (result?.choice === "missing" && result.probability >= .8) return { missing: true };
   if (result?.choice && result.probability >= .8 && pool.some(card => card.id === result.choice)) return { targetId: result.choice };
-  // The classifier answering "ambiguous" over the whole canvas has not found the
-  // card the user explicitly named ("日程卡"). Listing every unrelated card as a
-  // candidate induces a wrong pick, so report the card as absent instead.
-  if (result?.choice === "ambiguous" && !names.length && pool.length === cards.length && explicitCardReference(text)) return { missing: true };
+  // An unresolved classifier over the whole canvas has not found the card the
+  // user explicitly named ("日程卡"). Listing every unrelated card as a candidate
+  // induces a wrong pick, so report the card as absent instead.
+  if ((!result || result.choice === "ambiguous") && !type && !names.length && pool.length === cards.length
+    && explicitCardReference(text)) return { missing: true };
   return { ambiguous: labels(names.length ? names : pool) };
 }
 
