@@ -483,12 +483,14 @@ export const createApp = (deps: AppDeps) => {
     const status = mainCredentials.status();
     // Legacy clients still read the "stepfun" main slot, but when the provider
     // store selects DeepSeek the displayed provider must say DeepSeek.
-    const mainSlotName = mainProvider === "deepseek" ? "deepseek" : "stepfun";
+    const mainSlotName = savedMain
+      ? (/deepseek/i.test(savedMain.name) ? "deepseek" : "stepfun")
+      : (mainProvider === "deepseek" ? "deepseek" : "stepfun");
     const displayStatus = { ...status, name: mainSlotName };
     rememberGpt();
     if (activeProvider === "gpt") gpt.keepWarm();
     return c.json({
-      activeProvider, mainProvider, instance,
+      activeProvider: mainSlotName, mainProvider: mainSlotName, instance,
       ...(restoringGpt ? { restoring: "gpt" } : {}),
       providers: online ? [displayStatus] : [displayStatus, gpt.status()],
       platform: platform.status(),
