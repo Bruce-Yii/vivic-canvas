@@ -88,6 +88,12 @@ export function createHostedService(options: HostedServiceOptions) {
         ...(trustedImageRef ? { "x-vivic-intent-image-ref": trustedImageRef } : {}) },
       ...(body === undefined ? {} : { body: JSON.stringify(body) }) }));
   }
+  async function invokeMethod(accountId: string, route: string, method: string, body: unknown, signal?: AbortSignal): Promise<Response> {
+    const value = appFor(accountId, true);
+    return value.app.fetch(new Request(`${options.origin}${route}`, { method, signal,
+      headers: { authorization: `Bearer ${value.token}`, origin: options.origin, "content-type": "application/json" },
+      ...(body === undefined ? {} : { body: JSON.stringify(body) }) }));
+  }
   const tasks = createHostedTaskService({ store: space.store,
     invoke: (accountId, route, body, signal) => invoke(accountId, route, body, signal, "task"), now });
   const migration = createHostedMigrationService({ store: space.store, assetService: assets });
@@ -214,6 +220,20 @@ export function createHostedService(options: HostedServiceOptions) {
         const data = z.strictObject({ question: z.string().trim().min(1).max(1000) }).parse(await hostedBody(request));
         const response = await invoke(accountId, "/api/files/read", { name: asset.name, text: asset.text, partial: asset.parseStatus === "partial", question: data.question }, request.signal);
         space.store.assertDeviceActive(accountId, identity.device.id); return response;
+      }
+      // PR3 provider settings: the online owner panel is the same app as the
+      // local one, so CRUD/list/presets/preview/test must reach the session
+      // app instead of 404 at the hosted boundary. Settings are deployment
+      // level (shared by accounts), matching the persisted store.
+      const providerCrud = route === "/api/providers" || route === "/api/providers/presets"
+        || route.startsWith("/api/providers/preview/")
+        || /^\/api\/providers\/(?!status$|select$|model$)[^/]+(?:\/(?:test|models))?$/.test(route);
+      if (providerCrud) {
+        if (!["GET", "POST", "PATCH", "DELETE"].includes(request.method)) throw new SpaceError(405, "method-not-allowed", "此接口不支持该请求方法。");
+        const body = request.method === "GET" ? undefined : await hostedBody(request, 128 * 1024);
+        const response = await invokeMethod(accountId, route, request.method, body, request.signal);
+        space.store.assertDeviceActive(accountId, identity.device.id);
+        return response;
       }
       if (proxyGet.has(route) && request.method === "GET") return await invoke(accountId, route, undefined, request.signal);
       if (proxyPost.has(route) && request.method === "POST") {
