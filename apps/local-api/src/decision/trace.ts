@@ -131,8 +131,17 @@ export async function observeDecision(req: IntentRequest, deps: PipelineDeps, si
     // Provenance is only truthful for a committed proposal: drop plans whose
     // cards did not reach the returned envelope.
     const created = new Set(actions.flatMap(action => action.type === "card.create" ? [action.card.id] : []));
+    const seenPlans = new Set<string>();
     const plans = result.envelope ? deps.decisionTelemetry?.plans
       ?.filter(entry => entry.cardIds.every(cardId => created.has(cardId)))
+      // The host task wrapper may report the same segment twice across retries;
+      // one clause/source/contract/card set is one plan.
+      .filter(entry => {
+        const key = `${entry.source}\u0000${entry.clause}\u0000${entry.contract}\u0000${entry.cardIds.join(",")}`;
+        if (seenPlans.has(key)) return false;
+        seenPlans.add(key);
+        return true;
+      })
       .sort((a, b) => a.clause - b.clause) : undefined;
     // Built cards are only reported by on-mode after the batch passed validation.
     const builds = new Map((deps.decisionTelemetry?.built ?? []).map(entry => [entry.clause, entry]));

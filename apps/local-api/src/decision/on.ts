@@ -273,27 +273,40 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
         check();
         const contract = CARD_CONTRACTS[row.route!];
         let built: Action[];
+        let builtByRules = false;
         // Preserve the existing verified scheduled-reminder adapter as a parser.
         const schedule = row.route === "countdown" ? scheduledReminderIntent(row.text, context) : null;
         if (schedule) {
           if (!schedule.actions) return { kind: "clarify", message: schedule.message, usedProvider: "decision" };
-          built = schedule.actions; directClauses++;
+          built = schedule.actions; directClauses++; builtByRules = true;
         } else {
           const slots = row.route === "countdown" && looksLikeDateCountdown(row.text) ? null : contract.parse?.(row.text, context);
           if (slots !== null && slots !== undefined) {
             const value = await budget.run(async () => contract.build(slots, context, new Date()));
             if (!Array.isArray(value)) return { kind: "clarify", message: "本次包含需要单独处理的操作，请分开发送。", usedProvider: "decision" };
-            built = value; directClauses++;
+            built = value; directClauses++; builtByRules = true;
           } else {
             const partHint: PlannerRouteHint = { result: { ...row, route: row.route as IntentRouteId }, target: Promise.resolve(row.target) };
             const partRequest: IntentRequest = rows.length === 1 ? req : { ...req, text: row.text, canvasContext: context,
-              taskContext: { original_goal: req.text, active_clause: row.text, instruction: "只处理当前子句，其他子句由宿主合并，不得重复或遗漏。" } };
+              taskContext: { original_goal: req.text, active_clause: row.text,
+                // The host task wrapper scopes one clause; the planner reports
+                // clause 0 for it. Keep the original split index so provenance
+                // lands on the user's clause, not the one-clause subset.
+                ...(mode !== "off" ? { active_clause_indexes: [index] } : {}),
+                instruction: "只处理当前子句，其他子句由宿主合并，不得重复或遗漏。" } };
             const planned = await fallback(partRequest, Promise.resolve(partHint));
             check();
             if (!planned.envelope) return planned.hostOperation ? { kind: "clarify", message: "这些操作需要分别处理，本次没有执行任何部分。", usedProvider: "decision" } : planned;
             usedProvider = planned.usedProvider ?? usedProvider;
             built = planned.envelope.actions;
           }
+        }
+        // The host task wrapper forces the per-clause path even when hybrid is
+        // selected; a locally built clause is still a rule proposal and belongs
+        // in the trace next to the planner's plans.
+        if (builtByRules && mode === "hybrid") {
+          rulePlans.push({ clause: index, contract: row.route!, source: "rules",
+            cardIds: built.flatMap(action => action.type === "card.create" ? [action.card.id] : []) });
         }
         for (const action of built) {
           const placed = action.type === "card.create" ? { ...action, card: { ...action.card,
@@ -321,7 +334,19 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
       canvasId: req.canvasContext.canvasId, ...applyOutputChannels(merged, channels) });
     if (!envelope.success) return { kind: "clarify", message: "这句话包含的操作过多或参数不完整，请分开发送。", usedProvider: "decision" };
     if (!ruleFallback) deps.telemetry.directClauses += directClauses;
-    if (rulePlans.length) deps.telemetry.plans = [...(deps.telemetry.plans ?? []), ...rulePlans];
+    // Rule and planner segments share one provenance list: user clause order,
+    // no duplicates, and each plan only after the whole batch commits.
+    if (mode !== "off" && (rulePlans.length || deps.telemetry.plans?.length)) {
+      const seen = new Set<string>();
+      deps.telemetry.plans = [...(deps.telemetry.plans ?? []), ...rulePlans]
+        .filter(plan => {
+          const key = `${plan.source}\u0000${plan.clause}\u0000${plan.contract}\u0000${plan.cardIds.join(",")}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        })
+        .sort((a, b) => a.clause - b.clause);
+    }
     // Only a validated, committed proposal may claim which cards each clause built.
     if (builds.length) deps.telemetry.built = builds;
     return { kind: "envelope", envelope: envelope.data, usedProvider };
