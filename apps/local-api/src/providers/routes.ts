@@ -5,8 +5,8 @@ import { z } from "zod";
 import { ProviderClient } from "./client.js";
 import type { ProviderStore } from "./store.js";
 import {
-  CreateProviderSchema, PROVIDER_PRESETS, ProviderBaseUrlSchema, ProviderProtocolSchema,
-  UpdateProviderSchema, type ProviderErrorType,
+  CreateProviderSchema, PROVIDER_PRESETS, PROVIDER_ROLES, ProviderBaseUrlSchema, ProviderProtocolSchema,
+  ProviderRoleSchema, UpdateProviderSchema, type ProviderErrorType, type ProviderRole,
 } from "./types.js";
 
 /**
@@ -22,6 +22,8 @@ const TestBody = z.strictObject({
   baseUrl: ProviderBaseUrlSchema.optional(),
   protocol: ProviderProtocolSchema.optional(),
   apiKey: z.string().min(1).max(4096).optional(),
+  /** Unsaved edits may change the roles, and the probe route follows them. */
+  roles: z.array(ProviderRoleSchema).max(5).optional(),
 }).strict();
 
 const ModelsBody = z.strictObject({
@@ -40,7 +42,7 @@ const DraftSchema = z.strictObject({
   apiKey: z.string().min(1).max(4096).optional(),
   model: z.string().trim().min(1).max(200).optional(),
   headers: z.record(z.string().max(64), z.string().max(2048)).optional(),
-  /** Accepted for symmetry with the create payload; not needed to probe. */
+  /** Drives the probe route: a pure-ASR draft must be tested on transcriptions. */
   roles: z.array(z.string().max(16)).max(5).optional(),
 });
 
@@ -54,7 +56,8 @@ const draftToConfig = (draft: z.infer<typeof DraftSchema>) => ({
   ...(draft.apiKey ? { apiKey: draft.apiKey } : {}),
   ...(draft.model ? { model: draft.model } : {}),
   ...(draft.headers ? { headers: draft.headers } : {}),
-  roles: [] as never[],
+  // Keep only roles this build knows; the probe picks its route from them.
+  roles: (draft.roles ?? []).filter((role): role is ProviderRole => (PROVIDER_ROLES as readonly string[]).includes(role)),
   enabled: true,
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
@@ -185,6 +188,7 @@ export function createProviderRoutes({ store, client }: ProviderRoutesDeps): Hon
       ...(parsed.data.protocol ? { protocol: parsed.data.protocol } : {}),
       ...(parsed.data.apiKey ? { apiKey: parsed.data.apiKey } : {}),
       ...(parsed.data.model ? { model: parsed.data.model } : {}),
+      ...(parsed.data.roles ? { roles: parsed.data.roles } : {}),
     };
 
     const result = await providerClient.testConnection(config, { signal: c.req.raw.signal });

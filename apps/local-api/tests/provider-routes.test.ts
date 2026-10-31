@@ -145,6 +145,50 @@ describe("provider routes", () => {
     expect(result.errorType).toBe("auth");
   });
 
+  it("tests a stored ASR-only provider on the transcription route", async () => {
+    const calls: string[] = [];
+    const store = new ProviderStore({ dataDir: "/mem", secrets: codec, fs: memoryFs() });
+    const client = new ProviderClient({ fetchImpl: fetchStub({
+      "/audio/transcriptions": () => new Response(JSON.stringify({ text: "你好" }), {
+        status: 200, headers: { "content-type": "application/json" } }),
+    }, url => calls.push(url)) });
+    const app = createProviderRoutes({ store, client });
+    const { body } = await create(app, { roles: ["asr"], model: "stepaudio-2.5-asr",
+      baseUrl: "https://api.stepfun.com/v1" });
+    const id = (body.provider as { id: string }).id;
+
+    const tested = await app.request(`/${id}/test`, {
+      method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({}),
+    });
+    const result = await tested.json() as Record<string, unknown>;
+    expect(tested.status).toBe(200);
+    expect(result.ok).toBe(true);
+    expect(result.model).toBe("stepaudio-2.5-asr");
+    // Chat/completions would be a guaranteed 404 for a pure ASR provider; the
+    // probe is a real transcription (a successful probe may also list models).
+    expect(calls[0]).toBe("https://api.stepfun.com/v1/audio/transcriptions");
+    expect(calls.some(url => url.endsWith("/chat/completions"))).toBe(false);
+  });
+
+  it("follows unsaved roles overrides in the test body", async () => {
+    const calls: string[] = [];
+    const store = new ProviderStore({ dataDir: "/mem", secrets: codec, fs: memoryFs() });
+    const client = new ProviderClient({ fetchImpl: fetchStub({
+      "/audio/transcriptions": () => new Response(JSON.stringify({ text: "" }), { status: 200 }),
+    }, url => calls.push(url)) });
+    const app = createProviderRoutes({ store, client });
+    const { body } = await create(app);
+    const id = (body.provider as { id: string }).id;
+
+    const tested = await app.request(`/${id}/test`, {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ roles: ["asr"], model: "stepaudio-2.5-asr" }),
+    });
+    expect((await tested.json() as Record<string, unknown>).ok).toBe(true);
+    expect(calls[0]).toBe("https://api.example.test/v1/audio/transcriptions");
+    expect(calls.some(url => url.endsWith("/chat/completions"))).toBe(false);
+  });
+
   it("rejects a 4B model on the legacy protocol before calling upstream", async () => {
     let called = false;
     const { app } = makeApp();

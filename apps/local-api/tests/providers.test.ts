@@ -315,6 +315,83 @@ describe("ProviderClient.testConnection", () => {
     expect(result.error).toMatch(/Step Plan/);
   });
 
+  it("probes a pure-ASR provider on /audio/transcriptions, never chat/completions", async () => {
+    const calls: string[] = [];
+    let seen: RequestInit | undefined;
+    const client = new ProviderClient({
+      fetchImpl: fetchStub({
+        "/audio/transcriptions": init => {
+          seen = init;
+          return new Response(JSON.stringify({ text: "你好" }), { status: 200, headers: { "content-type": "application/json" } });
+        },
+      }, url => calls.push(url)),
+    });
+    const result = await client.testConnection(config({ roles: ["asr"], model: "stepaudio-2.5-asr" }));
+    expect(result.ok).toBe(true);
+    expect(result.model).toBe("stepaudio-2.5-asr");
+    // A chat probe would 404 for an ASR-only provider; only the transcription
+    // route is contacted, and it carries a real audio file + the model.
+    expect(calls).toEqual(["https://api.example.test/v1/audio/transcriptions"]);
+    const body = seen?.body;
+    expect(body).toBeInstanceOf(FormData);
+    const form = body as FormData;
+    expect(form.get("model")).toBe("stepaudio-2.5-asr");
+    const file = form.get("file");
+    expect(file).toBeInstanceOf(Blob);
+    expect((file as File).type).toBe("audio/wav");
+    const bytes = new Uint8Array(await (file as Blob).arrayBuffer());
+    expect(new TextDecoder().decode(bytes.subarray(0, 4))).toBe("RIFF");
+    expect(new TextDecoder().decode(bytes.subarray(8, 12))).toBe("WAVE");
+    // fetch must set the multipart boundary: no pinned content-type header.
+    const headers = seen?.headers as Record<string, string>;
+    expect(headers.authorization).toBe(`Bearer ${API_KEY}`);
+    expect(Object.keys(headers).some(key => /^content-type$/i.test(key))).toBe(false);
+  });
+
+  it("keeps the chat probe when the provider also serves a main model", async () => {
+    const calls: string[] = [];
+    const client = new ProviderClient({
+      fetchImpl: fetchStub({
+        "/chat/completions": () => new Response(JSON.stringify({ choices: [{ message: { content: "ok" } }] }), { status: 200 }),
+      }, url => calls.push(url)),
+    });
+    const result = await client.testConnection(config({ roles: ["main", "asr"] }));
+    expect(result.ok).toBe(true);
+    expect(calls).toEqual(["https://api.example.test/v1/chat/completions"]);
+  });
+
+  it("classifies a rejected or non-transcription ASR probe", async () => {
+    const denied = await new ProviderClient({
+      fetchImpl: fetchStub({ "/audio/transcriptions": () => new Response("unauthorized", { status: 401 }) }),
+    }).testConnection(config({ roles: ["asr"], model: "stepaudio-2.5-asr" }));
+    expect(denied.ok).toBe(false);
+    expect(denied.errorType).toBe("auth");
+
+    const wrongShape = await new ProviderClient({
+      fetchImpl: fetchStub({ "/audio/transcriptions": () => Response.json({ ok: true }) }),
+    }).testConnection(config({ roles: ["asr"], model: "stepaudio-2.5-asr" }));
+    expect(wrongShape.ok).toBe(false);
+    expect(wrongShape.errorType).toBe("invalid-response");
+    expect(wrongShape.error).toContain("text");
+  });
+
+  it("treats a reachable endpoint's 'no speech found' as connected, not as a failure", async () => {
+    const result = await new ProviderClient({
+      fetchImpl: fetchStub({ "/audio/transcriptions": () => new Response(
+        JSON.stringify({ error: { message: "no speech found", type: "request_params_invalid" } }), { status: 400 }) }),
+    }).testConnection(config({ roles: ["asr"], model: "stepaudio-2.5-asr" }));
+    expect(result.ok).toBe(true);
+    expect(result.httpStatus).toBe(400);
+
+    // A broken request shape is still a failure: only audio-domain errors pass.
+    const format = await new ProviderClient({
+      fetchImpl: fetchStub({ "/audio/transcriptions": () => new Response(
+        JSON.stringify({ error: { message: "audio format is required", type: "request_params_invalid" } }), { status: 400 }) }),
+    }).testConnection(config({ roles: ["asr"], model: "stepaudio-2.5-asr" }));
+    expect(format.ok).toBe(false);
+    expect(format.errorType).toBe("unknown");
+  });
+
   it("sends the native body for 4B and the legacy body for 2B", async () => {
     const seen: Array<{ url: string; body: Record<string, unknown> }> = [];
     const client = new ProviderClient({

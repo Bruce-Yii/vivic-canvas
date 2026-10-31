@@ -2,7 +2,7 @@ import type { z } from "zod";
 import {
   findPreset, pickDefaultModel, toModelInfo, validateProtocolModel,
   type ModelInfo, type ModelsResult, type ProviderConfig, type ProviderErrorType,
-  type ProviderProtocol, type TestConnectionResult,
+  type ProviderProtocol, type ProviderRole, type TestConnectionResult,
 } from "./types.js";
 
 /**
@@ -36,6 +36,34 @@ export const chatUrl = (config: Pick<ProviderConfig, "protocol" | "baseUrl">): s
 
 export const decisionsUrl = (config: Pick<ProviderConfig, "baseUrl">): string =>
   `${trimBase(config.baseUrl)}/decisions`;
+
+/** Speech-to-text endpoints are not chat completions: an ASR-only provider must
+ *  be probed on the transcription route, or "test connection" always 404s. */
+export const transcribeUrl = (config: Pick<ProviderConfig, "baseUrl">): string =>
+  `${trimBase(config.baseUrl)}/audio/transcriptions`;
+
+/** True when the provider serves speech-to-text only (no main/decision model). */
+export const asrOnlyProvider = (roles: readonly ProviderRole[] | undefined): boolean =>
+  Array.isArray(roles) && roles.includes("asr") && !roles.some(role => role === "main" || role === "decision");
+
+/** 0.2 s of 16 kHz mono 16-bit PCM silence, built in memory: a transport probe,
+ *  never user audio, and no binary asset to ship. */
+export const probeWav = (): ArrayBuffer => {
+  const dataBytes = 3_200 * 2;
+  const buffer = new ArrayBuffer(44 + dataBytes);
+  const bytes = new Uint8Array(buffer);
+  const view = new DataView(buffer);
+  const ascii = (offset: number, text: string) => {
+    for (let index = 0; index < text.length; index += 1) view.setUint8(offset + index, text.charCodeAt(index));
+  };
+  ascii(0, "RIFF"); view.setUint32(4, 36 + dataBytes, true); ascii(8, "WAVE");
+  ascii(12, "fmt "); view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true);
+  view.setUint32(24, 16_000, true); view.setUint32(28, 32_000, true); view.setUint16(32, 2, true); view.setUint16(34, 16, true);
+  ascii(36, "data"); view.setUint32(40, dataBytes, true);
+  // PCM payload is already all zero bytes: silence.
+  void bytes;
+  return buffer;
+};
 
 export const authHeaders = (
   config: Pick<ProviderConfig, "protocol" | "presetId" | "apiKey" | "headers">,
@@ -183,6 +211,13 @@ const chatBody = (model: string) => ({
   stream: false,
 });
 
+/** A reachable ASR endpoint rejects the built-in silence with an audio-domain
+ *  error ("no speech found"): URL, key and model were all accepted, which is
+ *  what a connection test proves. Anything about format/auth/route stays a
+ *  failure, so a broken request shape can never masquerade as "connected". */
+const noSpeechProbe = (body: string): boolean =>
+  /no speech|speech not found|no speech detected|empty audio|audio is empty|unable to transcribe|没有(?:检测到)?(?:语音|说话)|静音/u.test(body);
+
 export interface ProviderClientDeps {
   fetchImpl?: typeof fetch;
   testTimeoutMs?: number;
@@ -218,6 +253,10 @@ export class ProviderClient {
     const started = performance.now();
     const signal = withTimeout(this.#testTimeoutMs, options.signal);
     try {
+      // A pure-ASR provider has no chat model at all: chat/completions is a 404
+      // by definition, which used to make "test connection" always fail while
+      // /api/transcribe worked. Probe the route the roles actually serve.
+      if (asrOnlyProvider(config.roles)) return await this.#testTranscription(config, model, signal, started);
       const { url, body } = this.#probeRequest(config, model);
       const response = await this.#fetch(url, {
         method: "POST",
@@ -235,6 +274,50 @@ export class ProviderClient {
       const parsed = this.#parseProbeResponse(config.protocol, text);
       if (!parsed.ok) {
         return { ok: false, error: parsed.error, errorType: "invalid-response", httpStatus: response.status, latencyMs };
+      }
+      return { ok: true, latencyMs, model, httpStatus: response.status };
+    } catch (error) {
+      const { errorType, error: message } = classifyTransport(error);
+      return { ok: false, error: message, errorType, latencyMs: Math.round(performance.now() - started) };
+    }
+  }
+
+  /** Real speech-to-text probe for an ASR-only provider: multipart, built-in
+   *  silence sample, and a decoded `text` field as the only success criterion. */
+  async #testTranscription(
+    config: ProviderConfig,
+    model: string,
+    signal: AbortSignal,
+    started: number,
+  ): Promise<TestConnectionResult> {
+    const form = new FormData();
+    form.append("file", new Blob([probeWav()], { type: "audio/wav" }), "probe.wav");
+    form.append("model", model);
+    const headers = authHeaders(config);
+    // fetch must set the multipart boundary itself.
+    delete headers["content-type"];
+    try {
+      const response = await this.#fetch(transcribeUrl(config), {
+        method: "POST", headers, body: form, signal, redirect: "error",
+      });
+      const latencyMs = Math.round(performance.now() - started);
+      const text = await response.text();
+      if (!response.ok) {
+        // Silence is not speech: the endpoint answering "no speech found" still
+        // confirms the route, the key and the model; every other error does not.
+        if (noSpeechProbe(text)) return { ok: true, latencyMs, model, httpStatus: response.status };
+        const { errorType, error } = classifyHttp(response.status, text);
+        return { ok: false, error, errorType, httpStatus: response.status, latencyMs };
+      }
+      let body: unknown;
+      try { body = JSON.parse(text); } catch {
+        return { ok: false, latencyMs, httpStatus: response.status, errorType: "invalid-response",
+          error: "语音识别响应不是 JSON：端点可能不是 /audio/transcriptions。" };
+      }
+      const record = body && typeof body === "object" ? body as Record<string, unknown> : undefined;
+      if (!record || typeof record.text !== "string") {
+        return { ok: false, latencyMs, httpStatus: response.status, errorType: "invalid-response",
+          error: "语音识别响应缺少 text 字段：端点可能不是 /audio/transcriptions。" };
       }
       return { ok: true, latencyMs, model, httpStatus: response.status };
     } catch (error) {
