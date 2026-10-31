@@ -1,8 +1,22 @@
-export type DecisionModelId = "startlux-decision-2b" | "gliner2.5-multi-decide";
+export type DecisionModelId = "startlux-decision-2b" | "startlux-decision-4b" | "gliner2.5-multi-decide";
+export type DecisionWireProtocol = "legacy" | "native";
+
+/** User-facing names only: the internal provider ids never reach the UI as visible text. */
+export const decisionModelNames: Record<DecisionModelId, string> = {
+  "startlux-decision-2b": "Startlux Decision 2B",
+  "startlux-decision-4b": "StartLux Decision 4B（本地）",
+  "gliner2.5-multi-decide": "GLiNER 2.5 Multi Decide",
+};
+
+/** 4B speaks the native state/questions protocol; 2B and GLiNER keep legacy input/labels. */
+export const decisionModelProtocol = (model: DecisionModelId): DecisionWireProtocol =>
+  model === "startlux-decision-4b" ? "native" : "legacy";
 
 export interface DecisionConnectionStatus {
   configured: boolean;
   model: DecisionModelId | null;
+  /** Reported by the hosted service; "native" identifies the StartLux 4B wire protocol. */
+  wireProtocol?: DecisionWireProtocol | null;
   connectedAt?: string | null;
   executionEnabled: false;
   protocol: "classification-only";
@@ -40,5 +54,7 @@ export function decisionConnectionLabel(
   if (state === "platform-disconnected") return "请先连接平台 Key";
   if (state === "disconnected") return "未连接";
   if (state === "different-model") return "已连接其他模型";
-  return `已连接 · ${selectedModel === "startlux-decision-2b" ? "Startlux Decision 2B" : "GLiNER 2.5 Multi Decide"}`;
+  // Trust the reported wire protocol over the selected id when the service says native.
+  const connected = connection?.wireProtocol === "native" ? "startlux-decision-4b" : selectedModel;
+  return `已连接 · ${decisionModelNames[connected]}`;
 }

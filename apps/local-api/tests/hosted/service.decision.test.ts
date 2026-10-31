@@ -2,7 +2,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { createHostedService } from "./service.js";
+import { createHostedService } from "../../src/hosted/service.js";
 
 const origin = "https://vivic.test";
 const modelApiBaseUrl = "http://127.0.0.1:19441/v1";

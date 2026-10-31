@@ -124,6 +124,7 @@
 .hosted-model-status[data-state=connected]{color:#218653}
 .hosted-model-status[data-state=connected] i{background:#218653;opacity:1}
 .hosted-model-status[data-state=platform-disconnected] i{background:var(--color-error);opacity:1}
+.hosted-model-protocol{flex:none;padding:0 6px;border:1px solid currentColor;border-radius:999px;font-style:normal;font-size:11px;line-height:18px;opacity:.8}
 .hosted-decision-form{gap:10px}
 .hosted-decision-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
 .hosted-decision-test{align-self:flex-start}
