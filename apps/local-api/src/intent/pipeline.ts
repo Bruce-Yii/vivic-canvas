@@ -231,6 +231,14 @@ const runLegacyIntent = async (
     const deterministic = !hasImages && !continuation && !adapterOnly
       ? await planDeterministic(req.text, req.canvasContext) : null;
     if (deterministic) {
+      // A closed-form host operation resolved by the rules stays exclusive of an
+      // action envelope; the owner still applies it and reports a receipt.
+      if (deterministic.hostOperation) {
+        const problem = hostOperationIssue(deterministic.hostOperation, req.canvasContext, { allowUnloadedCountdownState: true });
+        if (problem) return { kind: "clarify", message: problem, usedProvider: "rules" };
+        report("rules", "completed", performance.now() - startedAt);
+        return { kind: "host-operation", hostOperation: deterministic.hostOperation, message: deterministic.say, usedProvider: "rules" };
+      }
       const envelope = assembleEnvelope(deterministic.actions, req.canvasContext.canvasId, deterministic.say);
       if (envelope) {
         report("rules", "completed", performance.now() - startedAt);

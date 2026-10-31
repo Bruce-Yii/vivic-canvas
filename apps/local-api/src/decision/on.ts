@@ -12,6 +12,7 @@ import { scheduledReminderIntent } from "../intent/scheduledReminders.js";
 import { looksLikeDateCountdown } from "../scenes/index.js";
 import { splitClauses } from "./split.js";
 import { planDeterministic } from "../intent/plans.js";
+import { hostOperationIssue } from "./hostOperations.js";
 import { resolveTarget } from "./target.js";
 import { numberedChoiceQuestion } from "./confirmation.js";
 import { isBuiltinRoute, type IntentRouter } from "./router.js";
@@ -325,6 +326,14 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
     const deterministic = await planDeterministic(req.text, req.canvasContext);
     if (deterministic) {
       check();
+      // A closed-form host operation (pause/resume one named timer) is exclusive
+      // of an action envelope: the rules resolved the target, the owner applies it.
+      if (deterministic.hostOperation) {
+        const issue = hostOperationIssue(deterministic.hostOperation, req.canvasContext, { allowUnloadedCountdownState: true });
+        if (issue) return { kind: "clarify", message: issue, usedProvider: "rules" };
+        deps.telemetry.directClauses += 1;
+        return { kind: "host-operation", hostOperation: deterministic.hostOperation, message: deterministic.say, usedProvider: "rules" };
+      }
       const prebuilt = new Set(deterministic.groups.flatMap(group => group.cardIds));
       const issue = actionExecutionIssue(deterministic.actions, req.canvasContext, prebuilt);
       if (issue) return { kind: "clarify", message: "本次提案未通过校验，请补充或分开提出要求。", usedProvider: "rules" };

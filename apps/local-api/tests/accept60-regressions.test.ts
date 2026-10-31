@@ -5,6 +5,7 @@ import { handleDataIntent } from "../src/data/index.js";
 import { parseWeatherInput } from "../src/data/weatherInput.js";
 import { lookupWeather } from "../src/data/weather.js";
 import type { IntentRouter, RouteResult } from "../src/decision/router.js";
+import { hostOperationIssue } from "../src/decision/hostOperations.js";
 import type { ChatMessage, StepfunResult } from "../src/stepfun.js";
 import type { CanvasContext } from "../src/schemas.js";
 import type { IntentRouteId } from "@vivic/contracts";
@@ -105,6 +106,38 @@ describe("accept60: a trailing bare append command joins the clause before it", 
     const f = setup(["arrange"], [{ clarify: "模型不应被调用" }]);
     const result = await runIntent({ text: "显示全部，加个待办", canvasContext: canvas() }, f.deps);
     expect(created(result).map(item => item.type)).not.toEqual(["TodoCard"]);
+  });
+});
+
+describe("accept60: pausing a named timer is a closed-form host operation", () => {
+  it("sc-34 pauses cd_water without a planner call", async () => {
+    const f = setup(["edit"], [{ clarify: "模型不应被调用" }]);
+    const result = await runIntent({ text: "暂停喝水倒计时", canvasContext: canvas() }, f.deps);
+    expect(result.kind, JSON.stringify(result)).toBe("host-operation");
+    expect(result.hostOperation).toEqual({ kind: "countdown.pause", targetId: "cd_water" });
+    expect(f.generate).not.toHaveBeenCalled();
+  });
+
+  it("treats 继续/恢复 on the same named timer as the matching resume", async () => {
+    const f = setup(["edit"], [{ clarify: "模型不应被调用" }]);
+    const result = await runIntent({ text: "继续喝水倒计时", canvasContext: canvas() }, f.deps);
+    expect(result.kind).toBe("host-operation");
+    // The projection carries no timer state; the owner applies against the real card.
+    expect(result.hostOperation).toEqual({ kind: "countdown.resume", targetId: "cd_water" });
+  });
+
+  it("never guesses between two timers that both match the name", async () => {
+    const context = canvas();
+    context.cards.push(card("cd_water2", "喝水提醒 2", "CountdownCard", 600));
+    const f = setup(["edit"], [{ clarify: "模型不应被调用" }]);
+    const result = await runIntent({ text: "暂停喝水倒计时", canvasContext: context }, f.deps);
+    expect(result.kind).not.toBe("host-operation");
+  });
+
+  it("keeps the loaded-state requirement for the model path", () => {
+    // The same operation proposed by a model must still see a loaded timer state.
+    expect(hostOperationIssue({ kind: "countdown.pause", targetId: "cd_water" }, canvas())).toBe("计时状态尚未完整加载。");
+    expect(hostOperationIssue({ kind: "countdown.pause", targetId: "cd_water" }, canvas(), { allowUnloadedCountdownState: true })).toBeNull();
   });
 });
 

@@ -2,7 +2,8 @@ import type { HostOperation } from "@vivic/contracts";
 import type { CanvasContext } from "../schemas.js";
 
 /** Context/precondition validation; coordinate/timestamp calculation stays in the real owner. */
-export function hostOperationIssue(operation: HostOperation, context: CanvasContext): string | null {
+export function hostOperationIssue(operation: HostOperation, context: CanvasContext,
+  options: { allowUnloadedCountdownState?: boolean } = {}): string | null {
   if (operation.kind === "history.undo" || operation.kind === "history.redo" || operation.kind === "canvas.arrange" || operation.kind === "ambient.control" || operation.kind === "canvas.organize.preview") return null;
   const target = context.cards.find(card => card.id === operation.targetId);
   if (!target) return "目标卡片已不存在或尚未加载，请重新选择。";
@@ -13,8 +14,14 @@ export function hostOperationIssue(operation: HostOperation, context: CanvasCont
   if (operation.kind === "countdown.pause" || operation.kind === "countdown.resume") {
     const source = target.sourceDataSummary;
     if (target.type !== "CountdownCard" || source.event || source.schedule || source.condition) return "只支持普通计时与一次性提醒的暂停和恢复。";
-    if (typeof source.targetAt !== "string" || !Number.isFinite(Date.parse(source.targetAt))) return "计时状态尚未完整加载。";
-    if (operation.kind === "countdown.resume" && !source.pausedAt) return "这个计时当前没有暂停。";
+    // A rule-resolved command already proved the target from the user's own
+    // words; a projection that omits timestamps is not a reason to refuse it,
+    // because the owner executes against the real card. The model path keeps
+    // requiring the loaded state so it can never invent a timer state.
+    if (typeof source.targetAt !== "string" || !Number.isFinite(Date.parse(source.targetAt))) {
+      if (!options.allowUnloadedCountdownState) return "计时状态尚未完整加载。";
+    }
+    if (operation.kind === "countdown.resume" && source.targetAt && !source.pausedAt) return "这个计时当前没有暂停。";
     if (operation.kind === "countdown.pause" && source.pausedAt) return "这个计时已经暂停。";
   }
   return null;

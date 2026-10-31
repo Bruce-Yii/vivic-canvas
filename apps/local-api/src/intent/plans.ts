@@ -1,4 +1,4 @@
-import type { Action, IntentRouteId } from "@vivic/contracts";
+import type { Action, HostOperation, IntentRouteId } from "@vivic/contracts";
 import type { CanvasContext } from "../schemas.js";
 import { CARD_CONTRACTS } from "../cards/index.js";
 import { newCardLayout } from "../cards/build.js";
@@ -22,6 +22,8 @@ export interface DeterministicPlan {
   /** One route per clause, in clause order. */
   routes: IntentRouteId[];
   say: string;
+  /** A closed-form host operation the rules resolved; exclusive of `actions`. */
+  hostOperation?: HostOperation;
 }
 
 const WEEKDAY: Record<string, number> = { 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 日: 7, 天: 7 };
@@ -187,6 +189,29 @@ export async function planNumbered(clauses: string[], ctx: CanvasContext, now = 
     say: `已创建 ${groups.reduce((sum, group) => sum + group.cardIds.length, 0)} 张卡片，请查看。` };
 }
 
+/** "暂停"/"继续" a named existing countdown: closed form, one card, no planner. */
+const COUNTDOWN_CONTROL = /^(?:请|帮我|给我|麻烦)?\s*(暂停|暂停一下|先暂停|停止|继续|恢复|继续计时|接着计时)\s*(?:一下)?\s*(.+?)\s*(?:的)?(?:倒计时|计时器|计时|定时器|提醒)$/u;
+const CONTROL_BLOCKER = /[，,；;？?]|然后|同时|顺便|并且|另外|要是|如果|不要|不用|别|吗|呢|删除|删掉|改成|改为|新建|创建|再来/u;
+
+/** The pause/resume host operation the user's own words and one card describe. */
+export function parseCountdownControl(text: string, ctx: CanvasContext): HostOperation | null {
+  const input = text.trim().replace(/[。！!]+$/u, "");
+  if (CONTROL_BLOCKER.test(input)) return null;
+  const match = input.match(COUNTDOWN_CONTROL);
+  if (!match) return null;
+  const verb = match[1]!;
+  const name = match[2]!.trim().replace(/^(?:这个|那个|这张|那张)/u, "").trim();
+  if (!name || name.length > 40) return null;
+  const timers = ctx.cards.filter(card => card.type === "CountdownCard" && (
+    card.id === name
+    || card.aliases?.some(alias => alias === name || alias.includes(name) || name.includes(alias))
+    || (typeof card.displayProps.title === "string" && (card.displayProps.title === name || card.displayProps.title.includes(name)))
+    || card.sourceDataSummary.reminderText === name));
+  // Ambiguity is not resolved by guessing: the planner/user picks the timer.
+  if (timers.length !== 1) return null;
+  return { kind: /暂停|停止/u.test(verb) ? "countdown.pause" : "countdown.resume", targetId: timers[0]!.id };
+}
+
 /** The single weekly-plan request the model used to answer with a question. */
 export async function planWeekly(text: string, ctx: CanvasContext, now = Date.now()): Promise<DeterministicPlan | null> {
   const request = parseWeeklyPlan(text, ctx, now);
@@ -257,5 +282,12 @@ export async function planDeterministic(text: string, ctx: CanvasContext, now = 
     if (isNumberedList(text)) return planNumbered(clauses, ctx, now);
     return planTodoAppend(text, ctx, now);
   }
-  return planWeekly(text, ctx, now);
+  const weekly = await planWeekly(text, ctx, now);
+  if (weekly) return weekly;
+  // "暂停喝水倒计时" is one existing card and one closed-form host operation:
+  // the rules own the target, the owner still applies and reports it.
+  const control = parseCountdownControl(text, ctx);
+  if (!control) return null;
+  return { actions: [], groups: [], routes: ["edit"], hostOperation: control,
+    say: control.kind === "countdown.pause" ? "已暂停这个计时。" : "已继续这个计时。" };
 }
