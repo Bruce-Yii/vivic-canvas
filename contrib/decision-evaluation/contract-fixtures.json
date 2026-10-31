@@ -1,0 +1,23 @@
+{
+  "schema_version": "vivic-decision-provider-1",
+  "request_id": "TEST-contract-v1",
+  "input": {
+    "utterance": "展开便笺",
+    "context": {},
+    "choices": [
+      {"id":"fit","decision":{"intent":"fit"}},
+      {"id":"restore","decision":{"intent":"restore"}},
+      {"id":"focus","decision":{"intent":"focus"}},
+      {"id":"delete","decision":{"intent":"delete"}},
+      {"id":"expand","decision":{"intent":"expand"}},
+      {"id":"collapse","decision":{"intent":"collapse"}},
+      {"id":"other","decision":{"intent":"other"}}
+    ]
+  },
+  "responses": [
+    {"label":"scores","value":{"choice_id":"expand","probabilities":{"fit":0.01,"restore":0.01,"focus":0.01,"delete":0.01,"expand":0.94,"collapse":0.01,"other":0.01}},"wire_valid":true,"runtime_state":"accepted"},
+    {"label":"choice_only","value":{"choice_id":"expand"},"wire_valid":true,"runtime_state":"deferred"},
+    {"label":"inconsistent","value":{"choice_id":"fit","probabilities":{"fit":0.01,"restore":0.01,"focus":0.01,"delete":0.01,"expand":0.94,"collapse":0.01,"other":0.01}},"wire_valid":false,"runtime_state":"error"},
+    {"label":"legacy_array","value":{"probabilities":[0.01,0.01,0.01,0.01,0.94,0.01,0.01]},"wire_valid":false,"runtime_state":"error"}
+  ]
+}

@@ -1,0 +1,35 @@
+# Review-only example. Replace host names and certificate paths before use.
+# The relay upstream remains loopback; do not expose port 8791 to the Internet.
+# Serve the browser console from a separately configured HTTPS static origin.
+server {
+    listen 443 ssl;
+    server_name relay.example.invalid;
+
+    ssl_certificate     /etc/ssl/vivic-mobile/fullchain.pem;
+    ssl_certificate_key /etc/ssl/vivic-mobile/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    # No request, query, pairing, credential, command, or canvas payload logs.
+    access_log off;
+    error_log /var/log/nginx/vivic-mobile-error.log crit;
+
+    location = /relay {
+        proxy_pass http://127.0.0.1:8791;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header Origin $http_origin;
+        # Trust only this nginx upstream IP in VIVIC_RELAY_TRUSTED_PROXY_IPS=127.0.0.1.
+        # Overwrite client input with the directly connected client IP; never append XFF.
+        # Do not add real_ip_header without a separately reviewed upstream trust boundary.
+        proxy_set_header X-Forwarded-For $remote_addr;
+        # Public relay mode requires this exact value from a configured trusted proxy.
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_read_timeout 45s;
+        proxy_send_timeout 45s;
+        proxy_buffering off;
+    }
+
+    location / { return 404; }
+}

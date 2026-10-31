@@ -1,0 +1,8 @@
+# CUDA wheel selection is explicit in README; do not install a system-wide Python.
+torch==2.9.1
+transformers==5.8.0
+peft==0.21.0
+numpy==2.5.4
+jinja2==3.1.6
+# Install startlux-decide 1.1.0 from its pinned upstream source, not an unpinned PyPI name.
+# https://github.com/StartLuxLabs/StartLux-Decision/tree/83fe6c7d61a687a6e17f118b4f7d8f429f5d3a01

@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2023", "lib": ["ES2023", "DOM"], "module": "ESNext", "moduleResolution": "bundler", "jsx": "react-jsx", "strict": true,
+    "noEmit": true, "skipLibCheck": true, "allowImportingTsExtensions": true, "allowArbitraryExtensions": true,
+    "types": ["node"], "typeRoots": ["../../apps/web/node_modules/@types"],
+    "paths": {
+      "@/*": ["../../apps/web/src/*"], "@vivic/contracts": ["../../packages/contracts/src/index.ts"],
+      "react": ["../../apps/web/node_modules/@types/react"], "react/*": ["../../apps/web/node_modules/@types/react/*"],
+      "react-dom/*": ["../../apps/web/node_modules/@types/react-dom/*"], "lucide-react": ["../../apps/web/node_modules/lucide-react"],
+      "zod": ["../../apps/web/node_modules/zod"], "vitest": ["../../apps/web/node_modules/vitest"]
+    }
+  },
+  "include": ["src"]
+}

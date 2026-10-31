@@ -1,0 +1,11 @@
+{
+  "source": "Actual current chat UI; create, undo and redo through the normal browser owner history.",
+  "checks": [
+    "note created and durably stored by the browser",
+    "undo removes the genuine new card and persists the result",
+    "redo restores the same card identity and content"
+  ],
+  "pageErrors": [],
+  "cleanup": true,
+  "complete": true
+}

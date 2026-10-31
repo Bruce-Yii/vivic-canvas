@@ -1,0 +1,19 @@
+{
+  "release": "display-background-sync-20261030-1",
+  "previous": "/opt/vivic-preview-20261025/releases/background-typography-20261030-1/web",
+  "indexSha256": "ed0ea9e8bfca9cd905e7bad9b792a434372276aeb6988a08d80da603a6e2e80f",
+  "stylesheet": "display-background-sync.css",
+  "stylesheetSha256": "e035b4fe62968f62fc13f9e7af3bfc6dfafab584e8876fffff75f6a155bf0705",
+  "unchangedEntrypoint": "/assets/card-packages-20261030-1/vivic-startup-confirmation-20261030.js",
+  "modifiedJavaScript": {
+    "DisplayApp-DkgZz97I.js": {
+      "beforeSha256": "5e176d7bc82d19841b6634ed445e92ae2fd1f331eb44e6ad01c7c8184e2658cc",
+      "afterSha256": "6ca3424ffa528e7be807d45abbefd0297eea8c95a82fbcad387c601a7e16e2cf"
+    }
+  },
+  "changes": [
+    "Reveal the existing shared background under the display stage and React Flow canvas",
+    "Keep the existing user-page snapshot synchronization",
+    "Remove the obsolete full-screen black loading layer"
+  ]
+}

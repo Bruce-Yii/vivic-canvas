@@ -1,0 +1,128 @@
+{
+  "at": "2026-10-30T03:53:26.426Z",
+  "mode": "on",
+  "scope": "Frozen synthetic API replay with the real connected main model; persistence and execution receipts. Transient browser visuals are verified separately.",
+  "datasetVersion": "vivic-route-v1-20261029",
+  "rows": [
+    {
+      "id": "search-07",
+      "text": "昨晚湖人赢了吗",
+      "expected": "search",
+      "expectedTarget": null,
+      "totalMs": 8539,
+      "kind": "envelope",
+      "message": "",
+      "plannerProgress": 1,
+      "trace": {
+        "id": "decision_b0ba0995-964b-48cc-8c72-cc0b419d5352",
+        "mode": "on",
+        "status": "complete",
+        "taskId": "g_eebeae40aa35_search-07",
+        "clauses": [
+          "昨晚湖人赢了吗"
+        ],
+        "decisions": [
+          {
+            "text": "昨晚湖人赢了吗",
+            "route": "search",
+            "probability": 0.9640742564966869,
+            "probabilities": {
+              "chat": 0.019855163481689943,
+              "answer": 0.0075289992210512075,
+              "search": 0.9640742564966869,
+              "countdown": 0.0004940000454254041,
+              "todo": 0.0003055321016695121,
+              "note": 0.00026967588684735194,
+              "generate": 0.0002581122474347683,
+              "focus": 0.0003034398463873292,
+              "overview": 0.0003025300180891007,
+              "restore": 0.0003622732005166373,
+              "highlight": 7.181042822414952e-05,
+              "edit": 0.0002114404305132662,
+              "arrange": 0.00012217765922574683,
+              "delete": 6.460941968506419e-05,
+              "undo": 8.442583599279373e-05,
+              "unsupported": 0.005691553680560765
+            },
+            "none": false,
+            "latencyMs": 1785,
+            "failed": false
+          }
+        ],
+        "route": "search",
+        "probability": 0.9640742564966869,
+        "latencyMs": 1785,
+        "routeLatencyMs": 1785,
+        "legacyElapsedMs": 8374,
+        "shadowWaitMs": 0,
+        "failedCount": 0,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "search",
+        "legacyActionTypes": [
+          "card.create",
+          "card.create",
+          "card.create",
+          "canvas.fit",
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [
+          "SearchResultCard",
+          "SearchResultCard",
+          "SearchResultCard"
+        ],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "createdTypes": [
+        "SearchResultCard",
+        "SearchResultCard",
+        "SearchResultCard"
+      ],
+      "clarification": null,
+      "routeCorrect": true,
+      "observedTarget": null,
+      "targetCorrect": null,
+      "execution": {
+        "committed": true,
+        "createdCardIds": [
+          "search_93ae490e-35c3-4ee5-b31c-bc1d65df9698",
+          "search_03d8cf5e-c621-4100-9313-e309c8961682",
+          "search_1511e1d8-0705-4fa4-aa2d-d337c5f0e81d"
+        ],
+        "requestId": "g_eebeae40aa35_apply_search-07_a7a178",
+        "storageReceipt": {
+          "requestId": "g_eebeae40aa35_apply_search-07_a7a178",
+          "status": "succeeded",
+          "version": 1148
+        },
+        "recoveredAfterWriteError": null
+      },
+      "receiptStatus": "completed"
+    }
+  ],
+  "complete": true,
+  "cleanup": true,
+  "modelConnected": true,
+  "datasetCaseCount": 161,
+  "residentWaitMs": 2200,
+  "summary": {
+    "cases": 1,
+    "routeCorrect": 1,
+    "routeAccuracy": 1,
+    "routeP50Ms": 1785,
+    "routeP95Ms": 1785,
+    "responseP50Ms": 8539,
+    "responseP95Ms": 8539,
+    "missingTraces": 0,
+    "pendingTraces": 0,
+    "serviceFailures": 0,
+    "directClauses": 0,
+    "plannerCalls": 1,
+    "persistedProposals": 1,
+    "rejectedCommits": 0,
+    "kindCounts": {
+      "envelope": 1
+    }
+  },
+  "datasetCasesSha256": "719aaf53f6468bec054cc5496c121a9a6898772443fbc462a0fa9695ab3666c0"
+}

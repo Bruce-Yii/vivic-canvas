@@ -1,0 +1,43 @@
+{
+  "release": "voice-v4-20261030-1",
+  "sourceAsset": "card-packages-20261030-1",
+  "targetAsset": "voice-v4-20261030-1",
+  "previous": "/opt/vivic-preview-20261025/releases/card-transfer-20261030-1/web",
+  "indexBeforeSha256": "ab2db1d6004765797aa1ea80347e066e74afa392d5085d1da40213a9dbb5c667",
+  "removedAccidentalHtmlPrefix": false,
+  "files": {
+    "index.html": {
+      "beforeSha256": "ab2db1d6004765797aa1ea80347e066e74afa392d5085d1da40213a9dbb5c667",
+      "afterSha256": "8dfbfbfc4fab6ac54b30f0bb1c6550583cc8d44ec6ffc43e7fd6049e9c0d5fd4"
+    },
+    "vivic-startup-v59.js": {
+      "beforeSha256": "66651b687897d3e8be8d222fc214ab99d07f6c1277f8cba5d392a06152a1ebea",
+      "afterSha256": "052f768f25902e5d99bafb83c313ec5e63805a6bfa248e47f888d4894f93ae08"
+    },
+    "app-runtime.js": {
+      "beforeSha256": "722b07eb6f40bb0cc9dd496e1c7fca8ad0822d3c414459a28cb3da90d6bc6338",
+      "afterSha256": "a3d2e054be66bb12ce97d25bcde562b7421c227332c6f1db07e70c769de204f3"
+    },
+    "app-runtime-v59.js": {
+      "beforeSha256": "429f87533fc319ff1e9cf62aac56409166d805bef6ae7d80c1b6fe3516d01cde",
+      "afterSha256": "e9aa08e24e07e4117c5cd328b98e39b130470492cd890c07d6a77dc578ef156f"
+    },
+    "ControlApp-ConfirmationGuard20261030.js": {
+      "beforeSha256": "1aa8c2abb33663eb2cce350e7a78210c72bb5d0482f2436f4e76dbd1b1d065de",
+      "afterSha256": "56ac72e5996d9d2db3cd34f6f9594677b35ab1494e2d52f8eaa7bb9f54dd6c66"
+    },
+    "voice-composer-v4.js": {
+      "beforeSha256": null,
+      "afterSha256": "c13ec025c343316f3b2136bc96b94759b5f67e0ad7544f71b9bec471bdad5545"
+    },
+    "voice-composer-v4.css": {
+      "beforeSha256": null,
+      "afterSha256": "73831e8f9c462918535171b8710738df24549acc397efc2cdcb753a66c9bffec"
+    }
+  },
+  "rulesReadBeforeModification": true,
+  "backendChanged": false,
+  "userDataChanged": false,
+  "canonicalRuntimeFrom": "app-runtime-v59.js",
+  "rulesSha256": "213a4e0559545879ba0a6f2265a385de9d7d979c81bfa927eb9e1cedd31475a1"
+}

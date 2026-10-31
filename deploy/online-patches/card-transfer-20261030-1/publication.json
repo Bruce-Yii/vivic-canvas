@@ -1,0 +1,25 @@
+{
+  "release": "card-transfer-20261030-1",
+  "previous": "/opt/vivic-preview-20261025/releases/direct-display-20261030-1/web",
+  "frontend": "/opt/vivic-preview-20261025/releases/card-transfer-20261030-1/web",
+  "changedWebFiles": [
+    "index.html",
+    "assets/card-packages-20261030-1/ControlApp-ConfirmationGuard20261030.js",
+    "assets/card-packages-20261030-1/DisplayApp-DkgZz97I.js",
+    "assets/card-packages-20261030-1/card-transfer-ui.js",
+    "assets/card-transfer-20261030-1/card-transfer-ui.css"
+  ],
+  "backendChanged": false,
+  "accountDataChanged": false,
+  "startupChanged": false,
+  "binaryStorageReused": true,
+  "candidateChecks": 90,
+  "freeBytesBefore": 8363945984,
+  "requiredBytesEstimate": 2641861,
+  "state": "published",
+  "publicStaticVerified": true,
+  "liveBrowserChecks": 90,
+  "liveStaticResources": 57,
+  "unchangedPublicResourcesVerified": 52,
+  "liveValidation": "passed; real public resources and isolated simulated account APIs"
+}

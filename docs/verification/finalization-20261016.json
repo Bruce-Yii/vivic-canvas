@@ -1,0 +1,910 @@
+{
+  "date": "2026-10-16",
+  "status": "automated-verification-complete-user-acceptance-pending",
+  "codeRevision": "b4ed31af7fe4049a1cac7bd22ff33d79a0e08543",
+  "branch": "agent/next-iteration",
+  "preFixRevision": "dfefebd",
+  "commits": {
+    "productionAndBrowserRegression": "cb020f6",
+    "generatedWireContracts": "b4ed31a"
+  },
+  "fixes": [
+    "Development-only Display debug panel; production paths verified",
+    "Shared Zod-generated JSON schemas, 21 drift/validity regressions",
+    "UTC-normalized historical wire examples; runtime validation unchanged",
+    "Real viewport-pan focus/restore assertions and current named-reminder assertion",
+    "Current delivery/implementation/onboarding-test documents separated from historical records"
+  ],
+  "unit": {
+    "command": "pnpm test",
+    "webPassed": 386,
+    "apiPassed": 881,
+    "passed": 1267,
+    "failed": 0,
+    "externalSkipped": 3,
+    "log": "evidence/finalization-20261016/logs/unit.txt"
+  },
+  "typecheck": {
+    "passed": true,
+    "log": "evidence/finalization-20261016/logs/typecheck.txt"
+  },
+  "build": {
+    "passed": true,
+    "mainKB": 3347.05,
+    "mainGzipKB": 1032.39,
+    "lazySearchKB": 44.67,
+    "lazySearchGzipKB": 27.99,
+    "log": "evidence/finalization-20261016/logs/build.txt",
+    "warnings": [
+      "existing Sherpaw WASM/Node branches",
+      "existing large main chunk",
+      "Vite native config loader notice"
+    ]
+  },
+  "contractsCheck": {
+    "passed": true,
+    "newCases": 21,
+    "command": "pnpm contracts:check",
+    "log": "evidence/finalization-20261016/logs/contracts.txt",
+    "semanticBoundary": "Runtime Zod and execution boundary still required for ownership/targets/provenance/IANA/normalization/subcard identity."
+  },
+  "lintChanged": {
+    "passed": true,
+    "warnings": 0,
+    "scope": "Changed Display component, focus/PTT browser tests and production config/tests",
+    "log": "evidence/finalization-20261016/logs/lint-changed.txt"
+  },
+  "browsers": {
+    "targeted": {
+      "passed": 10,
+      "failed": 0,
+      "log": "evidence/finalization-20261016/logs/browser-targeted.txt"
+    },
+    "production": {
+      "passed": 2,
+      "failed": 0,
+      "paths": [
+        "/display",
+        "/display?dev=1"
+      ],
+      "debugPanels": 0,
+      "developerGlobals": false,
+      "log": "evidence/finalization-20261016/logs/production-final.txt",
+      "supersededRun": "production.txt inherited the default preview proxy target and logged a failed health proxy connection; target fixed to test 8788 for final run."
+    },
+    "chromiumFull": {
+      "passed": 90,
+      "failed": 0,
+      "log": "evidence/finalization-20261016/logs/chromium-full.txt"
+    },
+    "compatibility": {
+      "passed": 30,
+      "failed": 0,
+      "eachEngine": 15,
+      "engines": [
+        "firefox",
+        "webkit"
+      ],
+      "files": [
+        "control.spec.ts",
+        "experience.spec.ts",
+        "experience-visual.spec.ts",
+        "overlap.spec.ts"
+      ],
+      "log": "evidence/finalization-20261016/logs/compat.txt"
+    }
+  },
+  "stability": {
+    "passed": true,
+    "mode": "full-stress-soak",
+    "durationRequestedMinutes": 30,
+    "soakStartedAt": "2026-10-16T07:22:15.630Z",
+    "soakFinishedAt": "2026-10-16T07:52:17.646Z",
+    "monotonicElapsedMs": 1802058,
+    "checksPassed": 24,
+    "checksTotal": 24,
+    "recordVideo": false,
+    "finalCardCount": 60,
+    "pageErrors": 0,
+    "runtimeDiagnostics": 0,
+    "checks": [
+      {
+        "name": "refresh-10",
+        "startedAt": "2026-10-16T07:20:35.372Z",
+        "required": true,
+        "ok": true,
+        "detail": {
+          "expected": 10,
+          "recoveryMs": 1688,
+          "screenshot": "/Users/cjr/Projects/vivic/evidence/finalization-20261016/snapshot/evidence/phase3-stability/2026-10-16T07-20-14-536Z-chromium/screenshots/display-10-after-refresh.png"
+        },
+        "elapsedMs": 3062
+      },
+      {
+        "name": "drag-10",
+        "startedAt": "2026-10-16T07:20:38.468Z",
+        "required": true,
+        "ok": true,
+        "detail": {
+          "id": "todo_mvan1juh_3d3dae53",
+          "before": {
+            "x": 0,
+            "y": 0,
+            "width": 288,
+            "height": 160,
+            "pinned": false
+          },
+          "after": {
+            "x": 70.4034582132565,
+            "y": 64.36887608069163,
+            "width": 288,
+            "height": 160,
+            "pinned": false
+          }
+        },
+        "elapsedMs": 23052
+      },
+      {
+        "name": "ui-create-10",
+        "ok": true,
+        "required": true,
+        "elapsedMs": 34005,
+        "cards": 10,
+        "source": "actual Control text input + send button; no test hooks/IDB writes"
+      },
+      {
+        "name": "refresh-30",
+        "startedAt": "2026-10-16T07:21:11.702Z",
+        "required": true,
+        "ok": true,
+        "detail": {
+          "expected": 30,
+          "recoveryMs": 1776,
+          "screenshot": "/Users/cjr/Projects/vivic/evidence/finalization-20261016/snapshot/evidence/phase3-stability/2026-10-16T07-20-14-536Z-chromium/screenshots/display-30-after-refresh.png"
+        },
+        "elapsedMs": 2898
+      },
+      {
+        "name": "drag-30",
+        "startedAt": "2026-10-16T07:21:14.617Z",
+        "required": true,
+        "ok": true,
+        "detail": {
+          "id": "todo_mvan1juh_3d3dae53",
+          "before": {
+            "x": 0,
+            "y": 0,
+            "width": 288,
+            "height": 160,
+            "pinned": false
+          },
+          "after": {
+            "x": 188.70605187319882,
+            "y": 175.03170028818442,
+            "width": 288,
+            "height": 160,
+            "pinned": false
+          }
+        },
+        "elapsedMs": 21407
+      },
+      {
+        "name": "ui-create-30",
+        "ok": true,
+        "required": true,
+        "elapsedMs": 34509,
+        "cards": 30,
+        "source": "actual Control text input + send button; no test hooks/IDB writes"
+      },
+      {
+        "name": "refresh-60",
+        "startedAt": "2026-10-16T07:21:48.479Z",
+        "required": true,
+        "ok": true,
+        "detail": {
+          "expected": 60,
+          "recoveryMs": 1813,
+          "screenshot": "/Users/cjr/Projects/vivic/evidence/finalization-20261016/snapshot/evidence/phase3-stability/2026-10-16T07-20-14-536Z-chromium/screenshots/display-60-after-refresh.png"
+        },
+        "elapsedMs": 3791
+      },
+      {
+        "name": "drag-60",
+        "startedAt": "2026-10-16T07:21:52.274Z",
+        "required": true,
+        "ok": true,
+        "detail": {
+          "id": "todo_mvan1juh_3d3dae53",
+          "before": {
+            "x": 0,
+            "y": 0,
+            "width": 288,
+            "height": 160,
+            "pinned": false
+          },
+          "after": {
+            "x": 373.55833333333334,
+            "y": 362.7305555555555,
+            "width": 288,
+            "height": 160,
+            "pinned": false
+          }
+        },
+        "elapsedMs": 23045
+      },
+      {
+        "name": "ui-create-60",
+        "ok": true,
+        "required": true,
+        "elapsedMs": 39277,
+        "cards": 60,
+        "source": "actual Control text input + send button; no test hooks/IDB writes"
+      },
+      {
+        "name": "backend-offline-visible",
+        "startedAt": "2026-10-16T07:22:15.327Z",
+        "required": true,
+        "ok": true,
+        "detail": {
+          "text": "离线本地模式"
+        },
+        "elapsedMs": 2
+      },
+      {
+        "name": "hidden-and-real-freeze-resume",
+        "startedAt": "2026-10-16T07:25:16.441Z",
+        "required": true,
+        "ok": true,
+        "detail": {
+          "actualFreeze": {
+            "hidden": false,
+            "events": [
+              {
+                "type": "pageshow",
+                "at": 338.2999999523163,
+                "persisted": false
+              }
+            ]
+          },
+          "hiddenInjection": {
+            "synthetic": true,
+            "elapsedRealMs": 2000,
+            "hidden": true,
+            "webglDrawsWhileHidden": 0
+          },
+          "recovered": true
+        },
+        "elapsedMs": 5434
+      },
+      {
+        "name": "reduced-motion-on",
+        "startedAt": "2026-10-16T07:27:16.348Z",
+        "required": true,
+        "ok": true,
+        "detail": {
+          "preference": true,
+          "webglDrawCallsOver1500ms": 0,
+          "note": "rAF sampler continues even when app animation is reduced"
+        },
+        "elapsedMs": 3470
+      },
+      {
+        "name": "reduced-motion-off",
+        "startedAt": "2026-10-16T07:28:16.006Z",
+        "required": true,
+        "ok": true,
+        "detail": {
+          "preference": false,
+          "webglDrawCallsOver1500ms": 14,
+          "note": "rAF sampler continues even when app animation is reduced"
+        },
+        "elapsedMs": 4304
+      },
+      {
+        "name": "display-refresh-recovery",
+        "startedAt": "2026-10-16T07:30:16.077Z",
+        "required": true,
+        "ok": true,
+        "detail": {
+          "expected": 60,
+          "recoveryMs": 2042,
+          "screenshot": "/Users/cjr/Projects/vivic/evidence/finalization-20261016/snapshot/evidence/phase3-stability/2026-10-16T07-20-14-536Z-chromium/screenshots/minute-8-refresh.png"
+        },
+        "elapsedMs": 3896
+      },
+      {
+        "name": "owner-close-reopen-recovery",
+        "startedAt": "2026-10-16T07:32:16.458Z",
+        "required": true,
+        "ok": true,
+        "detail": {
+          "cards": 60,
+          "recordCards": 60
+        },
+        "elapsedMs": 4918
+      },
+      {
+        "name": "native-webgl-context-loss",
+        "startedAt": "2026-10-16T07:34:16.489Z",
+        "required": true,
+        "ok": true,
+        "detail": {
+          "supported": true,
+          "nativeExtension": true,
+          "drawCallsAfterLoss": 0,
+          "screenshot": "/Users/cjr/Projects/vivic/evidence/finalization-20261016/snapshot/evidence/phase3-stability/2026-10-16T07-20-14-536Z-chromium/screenshots/native-webgl-context-loss-fallback.png"
+        },
+        "elapsedMs": 766
+      },
+      {
+        "name": "webgl-reload-recovery",
+        "startedAt": "2026-10-16T07:35:16.385Z",
+        "required": true,
+        "ok": true,
+        "detail": {
+          "expected": 60,
+          "recoveryMs": 903,
+          "screenshot": "/Users/cjr/Projects/vivic/evidence/finalization-20261016/snapshot/evidence/phase3-stability/2026-10-16T07-20-14-536Z-chromium/screenshots/minute-13-webgl-recovery.png"
+        },
+        "elapsedMs": 1694
+      },
+      {
+        "name": "small-viewport-60-cards",
+        "startedAt": "2026-10-16T07:37:16.297Z",
+        "required": true,
+        "ok": true,
+        "detail": {
+          "bounds": {
+            "count": 60,
+            "clipped": 0
+          },
+          "screenshot": "/Users/cjr/Projects/vivic/evidence/finalization-20261016/snapshot/evidence/phase3-stability/2026-10-16T07-20-14-536Z-chromium/screenshots/minute-15-800x600-60-cards.png"
+        },
+        "elapsedMs": 1267
+      },
+      {
+        "name": "normal-viewport-recovery",
+        "startedAt": "2026-10-16T07:40:16.546Z",
+        "required": true,
+        "ok": true,
+        "detail": {
+          "bounds": {
+            "count": 60,
+            "clipped": 0
+          },
+          "screenshot": "/Users/cjr/Projects/vivic/evidence/finalization-20261016/snapshot/evidence/phase3-stability/2026-10-16T07-20-14-536Z-chromium/screenshots/minute-18-1440x900.png"
+        },
+        "elapsedMs": 1754
+      },
+      {
+        "name": "dark-light-theme",
+        "startedAt": "2026-10-16T07:42:16.288Z",
+        "required": true,
+        "ok": true,
+        "detail": {
+          "screenshot": "/Users/cjr/Projects/vivic/evidence/finalization-20261016/snapshot/evidence/phase3-stability/2026-10-16T07-20-14-536Z-chromium/screenshots/minute-20-light.png"
+        },
+        "elapsedMs": 2429
+      },
+      {
+        "name": "late-drag-persistence",
+        "startedAt": "2026-10-16T07:44:15.858Z",
+        "required": true,
+        "ok": true,
+        "detail": {
+          "id": "todo_mvan1juh_3d3dae53",
+          "before": {
+            "x": 0,
+            "y": 0,
+            "width": 288,
+            "height": 160,
+            "pinned": false
+          },
+          "after": {
+            "x": 387.5533141210375,
+            "y": 381.93659942363115,
+            "width": 288,
+            "height": 160,
+            "pinned": false
+          }
+        },
+        "elapsedMs": 12942
+      },
+      {
+        "name": "system-reduced-motion-refresh",
+        "startedAt": "2026-10-16T07:47:15.919Z",
+        "required": true,
+        "ok": true,
+        "detail": {
+          "expected": 60,
+          "recoveryMs": 1918,
+          "screenshot": "/Users/cjr/Projects/vivic/evidence/finalization-20261016/snapshot/evidence/phase3-stability/2026-10-16T07-20-14-536Z-chromium/screenshots/minute-25-system-reduced.png"
+        },
+        "elapsedMs": 2530
+      },
+      {
+        "name": "system-motion-restore",
+        "startedAt": "2026-10-16T07:49:15.786Z",
+        "required": true,
+        "ok": true,
+        "detail": {
+          "expected": 60,
+          "recoveryMs": 1706,
+          "screenshot": "/Users/cjr/Projects/vivic/evidence/finalization-20261016/snapshot/evidence/phase3-stability/2026-10-16T07-20-14-536Z-chromium/screenshots/minute-27-normal-motion.png"
+        },
+        "elapsedMs": 3248
+      },
+      {
+        "name": "final-refresh-and-integrity",
+        "startedAt": "2026-10-16T07:51:16.466Z",
+        "required": true,
+        "ok": true,
+        "detail": {
+          "expected": 60,
+          "recoveryMs": 1899,
+          "screenshot": "/Users/cjr/Projects/vivic/evidence/finalization-20261016/snapshot/evidence/phase3-stability/2026-10-16T07-20-14-536Z-chromium/screenshots/minute-29-final-refresh.png"
+        },
+        "elapsedMs": 4668
+      }
+    ],
+    "snapshotMain": {
+      "path": "assets/index-CMl3X_JV.js",
+      "bytes": 3347054,
+      "sha256": "48f922197c0589a81c906663b84bacf74f7fe67425feddd6f64c62fd39790f92"
+    },
+    "record": "evidence/finalization-20261016/browser-evidence/phase3-stability/2026-10-16T07-20-14-536Z-chromium/report.json",
+    "analysis": "evidence/finalization-20261016/browser-evidence/phase3-stability/2026-10-16T07-20-14-536Z-chromium/analysis.json",
+    "cleanup": {
+      "startedAt": "2026-10-16T07:52:17.649Z",
+      "contextClosed": true,
+      "browserClosed": true,
+      "serverClosed": true,
+      "snapshotRemoved": true,
+      "finishedAt": "2026-10-16T07:52:17.705Z"
+    },
+    "memoryScope": "JavaScript heap per document, not RSS; refresh boundaries preserved",
+    "performanceMeaning": "Headless callback timing/instrumentation, not physical GPU FPS or proof of no leaks",
+    "perDocument": [
+      {
+        "role": "control",
+        "timeOrigin": 1792135226076.3,
+        "samples": 13,
+        "firstAt": "2026-10-16T07:20:33.100Z",
+        "lastAt": "2026-10-16T07:31:16.022Z",
+        "sampledSpanMinutes": 10.715366666666666,
+        "cards": [
+          0
+        ],
+        "jsHeapBytes": {
+          "min": 16647982,
+          "max": 22172181,
+          "first": 22172181,
+          "last": 16647982,
+          "endpointDeltaMiBPerMinute": -0.4916571563907059
+        },
+        "rAF": {
+          "frames": 38663,
+          "perWindowP95MsRange": [
+            16.70000000001164,
+            16.800000000000182
+          ],
+          "weightedMeanMs": 16.8095414220314
+        },
+        "longTasks": {
+          "count": 3,
+          "totalMs": 588,
+          "maxMs": 406
+        }
+      },
+      {
+        "role": "display",
+        "timeOrigin": 1792135226500,
+        "samples": 1,
+        "firstAt": "2026-10-16T07:20:33.100Z",
+        "lastAt": "2026-10-16T07:20:33.100Z",
+        "sampledSpanMinutes": 0,
+        "cards": [
+          10
+        ],
+        "jsHeapBytes": {
+          "min": 18982733,
+          "max": 18982733,
+          "first": 18982733,
+          "last": 18982733,
+          "endpointDeltaMiBPerMinute": null
+        },
+        "rAF": {
+          "frames": 37,
+          "perWindowP95MsRange": [
+            300,
+            300
+          ],
+          "weightedMeanMs": 177.91891891891893
+        },
+        "longTasks": {
+          "count": 31,
+          "totalMs": 6583,
+          "maxMs": 778
+        }
+      },
+      {
+        "role": "display",
+        "timeOrigin": 1792135256878.4,
+        "samples": 1,
+        "firstAt": "2026-10-16T07:21:09.277Z",
+        "lastAt": "2026-10-16T07:21:09.277Z",
+        "sampledSpanMinutes": 0,
+        "cards": [
+          30
+        ],
+        "jsHeapBytes": {
+          "min": 18500211,
+          "max": 18500211,
+          "first": 18500211,
+          "last": 18500211,
+          "endpointDeltaMiBPerMinute": null
+        },
+        "rAF": {
+          "frames": 53,
+          "perWindowP95MsRange": [
+            333.29999999999995,
+            333.29999999999995
+          ],
+          "weightedMeanMs": 228.6056603773585
+        },
+        "longTasks": {
+          "count": 46,
+          "totalMs": 11830,
+          "maxMs": 918
+        }
+      },
+      {
+        "role": "display",
+        "timeOrigin": 1792135292564.8,
+        "samples": 1,
+        "firstAt": "2026-10-16T07:21:46.307Z",
+        "lastAt": "2026-10-16T07:21:46.307Z",
+        "sampledSpanMinutes": 0,
+        "cards": [
+          60
+        ],
+        "jsHeapBytes": {
+          "min": 28674457,
+          "max": 28674457,
+          "first": 28674457,
+          "last": 28674457,
+          "endpointDeltaMiBPerMinute": null
+        },
+        "rAF": {
+          "frames": 60,
+          "perWindowP95MsRange": [
+            333.3000000000002,
+            333.3000000000002
+          ],
+          "weightedMeanMs": 226.10166666666666
+        },
+        "longTasks": {
+          "count": 54,
+          "totalMs": 13442,
+          "maxMs": 646
+        }
+      },
+      {
+        "role": "display",
+        "timeOrigin": 1792135331188.8,
+        "samples": 8,
+        "firstAt": "2026-10-16T07:22:15.633Z",
+        "lastAt": "2026-10-16T07:29:16.403Z",
+        "sampledSpanMinutes": 7.012833333333333,
+        "cards": [
+          60
+        ],
+        "jsHeapBytes": {
+          "min": 18059578,
+          "max": 29172126,
+          "first": 26853051,
+          "last": 21321949,
+          "endpointDeltaMiBPerMinute": -0.7521738601359282
+        },
+        "rAF": {
+          "frames": 5082,
+          "perWindowP95MsRange": [
+            16.79999999998836,
+            366.70000000001164
+          ],
+          "weightedMeanMs": 83.57918142463598
+        },
+        "longTasks": {
+          "count": 1428,
+          "totalMs": 363354,
+          "maxMs": 943
+        }
+      },
+      {
+        "role": "display",
+        "timeOrigin": 1792135816080.5,
+        "samples": 5,
+        "firstAt": "2026-10-16T07:30:20.236Z",
+        "lastAt": "2026-10-16T07:34:17.263Z",
+        "sampledSpanMinutes": 3.95045,
+        "cards": [
+          60
+        ],
+        "jsHeapBytes": {
+          "min": 15657249,
+          "max": 22047228,
+          "first": 21286617,
+          "last": 15657249,
+          "endpointDeltaMiBPerMinute": -1.3589802881188773
+        },
+        "rAF": {
+          "frames": 1695,
+          "perWindowP95MsRange": [
+            150,
+            300
+          ],
+          "weightedMeanMs": 142.15746312684365
+        },
+        "longTasks": {
+          "count": 1643,
+          "totalMs": 239091,
+          "maxMs": 1020
+        }
+      },
+      {
+        "role": "control",
+        "timeOrigin": 1792135940573.6,
+        "samples": 21,
+        "firstAt": "2026-10-16T07:32:21.521Z",
+        "lastAt": "2026-10-16T07:52:15.588Z",
+        "sampledSpanMinutes": 19.901116666666667,
+        "cards": [
+          0
+        ],
+        "jsHeapBytes": {
+          "min": 15155307,
+          "max": 18755305,
+          "first": 18755305,
+          "last": 15768815,
+          "endpointDeltaMiBPerMinute": -0.14311452251192444
+        },
+        "rAF": {
+          "frames": 71551,
+          "perWindowP95MsRange": [
+            16.70000000001164,
+            133.39999999999998
+          ],
+          "weightedMeanMs": 16.700705790275467
+        },
+        "longTasks": {
+          "count": 4,
+          "totalMs": 646,
+          "maxMs": 265
+        }
+      },
+      {
+        "role": "display",
+        "timeOrigin": 1792136116387.5,
+        "samples": 9,
+        "firstAt": "2026-10-16T07:35:18.185Z",
+        "lastAt": "2026-10-16T07:43:16.363Z",
+        "sampledSpanMinutes": 7.969633333333333,
+        "cards": [
+          60
+        ],
+        "jsHeapBytes": {
+          "min": 16073979,
+          "max": 22434227,
+          "first": 21469456,
+          "last": 18295009,
+          "endpointDeltaMiBPerMinute": -0.37986547762877476
+        },
+        "rAF": {
+          "frames": 6259,
+          "perWindowP95MsRange": [
+            50.10000000000582,
+            483.3
+          ],
+          "weightedMeanMs": 76.68649944080524
+        },
+        "longTasks": {
+          "count": 2936,
+          "totalMs": 325509,
+          "maxMs": 479
+        }
+      },
+      {
+        "role": "display",
+        "timeOrigin": 1792136665789,
+        "samples": 3,
+        "firstAt": "2026-10-16T07:44:28.926Z",
+        "lastAt": "2026-10-16T07:46:16.343Z",
+        "sampledSpanMinutes": 1.7902833333333332,
+        "cards": [
+          60
+        ],
+        "jsHeapBytes": {
+          "min": 15663890,
+          "max": 31764454,
+          "first": 31764454,
+          "last": 16258725,
+          "endpointDeltaMiBPerMinute": -8.259818560072745
+        },
+        "rAF": {
+          "frames": 649,
+          "perWindowP95MsRange": [
+            200.10000000000036,
+            283.3999999999942
+          ],
+          "weightedMeanMs": 170.15238828967642
+        },
+        "longTasks": {
+          "count": 642,
+          "totalMs": 109874,
+          "maxMs": 544
+        }
+      },
+      {
+        "role": "display",
+        "timeOrigin": 1792136836094,
+        "samples": 2,
+        "firstAt": "2026-10-16T07:47:18.485Z",
+        "lastAt": "2026-10-16T07:48:15.647Z",
+        "sampledSpanMinutes": 0.9527,
+        "cards": [
+          60
+        ],
+        "jsHeapBytes": {
+          "min": 16256284,
+          "max": 16475151,
+          "first": 16256284,
+          "last": 16475151,
+          "endpointDeltaMiBPerMinute": 0.21909083301027263
+        },
+        "rAF": {
+          "frames": 3469,
+          "perWindowP95MsRange": [
+            16.700000000004366,
+            266.6999999999998
+          ],
+          "weightedMeanMs": 17.088757567022196
+        },
+        "longTasks": {
+          "count": 3,
+          "totalMs": 1450,
+          "maxMs": 955
+        }
+      },
+      {
+        "role": "display",
+        "timeOrigin": 1792136955798.4,
+        "samples": 2,
+        "firstAt": "2026-10-16T07:49:19.228Z",
+        "lastAt": "2026-10-16T07:50:16.011Z",
+        "sampledSpanMinutes": 0.9463833333333334,
+        "cards": [
+          60
+        ],
+        "jsHeapBytes": {
+          "min": 15988261,
+          "max": 16489628,
+          "first": 15988261,
+          "last": 16489628,
+          "endpointDeltaMiBPerMinute": 0.5052295556701678
+        },
+        "rAF": {
+          "frames": 284,
+          "perWindowP95MsRange": [
+            266.6999999999971,
+            300
+          ],
+          "weightedMeanMs": 211.9042253521127
+        },
+        "longTasks": {
+          "count": 276,
+          "totalMs": 59972,
+          "maxMs": 807
+        }
+      },
+      {
+        "role": "display",
+        "timeOrigin": 1792137076469.5,
+        "samples": 2,
+        "firstAt": "2026-10-16T07:51:21.310Z",
+        "lastAt": "2026-10-16T07:52:15.588Z",
+        "sampledSpanMinutes": 0.9046333333333333,
+        "cards": [
+          60
+        ],
+        "jsHeapBytes": {
+          "min": 15747666,
+          "max": 18371744,
+          "first": 18371744,
+          "last": 15747666,
+          "endpointDeltaMiBPerMinute": -2.766331618165754
+        },
+        "rAF": {
+          "frames": 246,
+          "perWindowP95MsRange": [
+            333.29999999999563,
+            366.5999999999999
+          ],
+          "weightedMeanMs": 238.60813008130083
+        },
+        "longTasks": {
+          "count": 239,
+          "totalMs": 58655,
+          "maxMs": 945
+        }
+      }
+    ]
+  },
+  "checklist": {
+    "file": "docs/FINAL_ACCEPTANCE_CHECKLIST.md",
+    "humanCases": 128,
+    "technicalCases": 9,
+    "humanStatus": "pending",
+    "start": "Group 0: S01-S08; test one group, fix feedback, then continue"
+  },
+  "phase2": {
+    "status": "candidate-not-started",
+    "file": "docs/PHASE2_CANDIDATES.md",
+    "userPreference": "Own Pi/OAuth per user, invitation code/email waitlist, mobile web Control for voice/settings/images are later candidates. One complete flow at a time after current acceptance."
+  },
+  "isolation": {
+    "ports": [
+      5174,
+      8788
+    ],
+    "contextsIndependent": true,
+    "browserCommandsSerial": true,
+    "realUserCanvasTouched": false,
+    "physicalMicrophoneUsed": false,
+    "audibleOutput": false,
+    "voiceTestsUseSyntheticOrSilentMocks": true,
+    "realLLMQuotaUsed": false,
+    "newOAuthStarted": false,
+    "modelsDownloaded": false,
+    "sourceFilesCompared": 299,
+    "sourceManifest": "evidence/finalization-20261016/verified-source-manifest.json",
+    "temporaryTestServersClosed": true
+  },
+  "localService": {
+    "web": "http://localhost:5175/control",
+    "apiHealth": "http://127.0.0.1:8787/healthz",
+    "existingFrontendRestarted": false,
+    "apiStartedBecauseNotRunning": true,
+    "healthResult": {
+      "ok": true,
+      "service": "vivic-local-api"
+    },
+    "accountRestored": false,
+    "keptRunningForManualAcceptance": true,
+    "log": "/tmp/vivic-local-api-finalization-20261016.log",
+    "entryCorrection": {
+      "previouslyReportedWeb": "http://localhost:5173/control",
+      "previousWebIdentityVerified": false,
+      "problem": "HTTP 200 was checked without app identity; 5173 actually belonged to another project.",
+      "correctedWeb": "http://localhost:5175/control",
+      "verification": "docs/verification/entry-port-20261016.json",
+      "oldOtherProjectStopped": false,
+      "userCanvasReadOrMigrated": false
+    }
+  },
+  "remainingAcceptance": [
+    "User microphone/default wake phrase/environment noise/voice sound/device/Plan word timestamp permissions",
+    "Physical Safari/system Chinese IME/external monitor/physical GPU/visual acceptance",
+    "User execution/results of the complete current-function checklist"
+  ],
+  "deferred": [
+    "Kev remains experimental/default off; new decision model evaluation separate",
+    "Voice cloning remains deferred",
+    "All-browsers-closed reminders explicitly not required",
+    "Phase 2 new cards/panel/onboarding/server/users/invitation/mobile not implemented"
+  ],
+  "evidence": "evidence/finalization-20261016/",
+  "report": "docs/finalization-20261016.md",
+  "pushed": false,
+  "merged": false,
+  "published": false
+}

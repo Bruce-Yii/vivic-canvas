@@ -1,0 +1,31 @@
+{
+  "stage": false,
+  "checks": [
+    "v0.2 preview displays explicit DEMO facts",
+    "preview did not install or create a card",
+    "installed exact v0.2 hash",
+    "package survives page reload",
+    "real facts visible without DEMO values",
+    "disable refreshes an already open display through BroadcastChannel",
+    "re-enable restores original card without data changes",
+    "in-use version uninstall returns 409 and keeps the card",
+    "download and reimport deduplicate exact package",
+    "390px page has no horizontal overflow",
+    "no browser page errors"
+  ],
+  "pageErrors": [],
+  "screenshots": [
+    "f5-live-empty.png",
+    "f5-live-preview.png",
+    "f5-live-installed.png",
+    "f5-live-display.png",
+    "f5-live-disabled.png",
+    "f5-live-reference-protection.png",
+    "f5-live-mobile-manager.png"
+  ],
+  "cleanup": {
+    "emptySpace": true,
+    "emptyCatalog": true
+  },
+  "renderProvenance": "Reused unchanged 2026-10-30/back/40 facts from the prior genuine F model acceptance; this checks the new frontend, not a new model call."
+}

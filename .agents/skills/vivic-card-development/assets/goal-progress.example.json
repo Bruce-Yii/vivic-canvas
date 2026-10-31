@@ -1,0 +1,20 @@
+{
+  "description": "TEST 示例；现有目标进度卡，不是飞猪数据或真实服务响应。",
+  "input": "今年阅读目标 50 本，已经读了 18 本，创建阅读目标进度卡。",
+  "now": "2026-10-20T00:00:00.000Z",
+  "timeZone": "Asia/Shanghai",
+  "modelOutput": {
+    "cards": [
+      {
+        "scene_id": "goal_progress",
+        "data": { "title": "TEST · 阅读目标", "current": 18, "target": 50, "unit": "本" }
+      }
+    ],
+    "spokenText": "已整理阅读进度。"
+  },
+  "expectedType": "ProgressRingCard",
+  "expectedDisplayProps": { "title": "TEST · 阅读目标", "current": 18, "target": 50, "unit": "本" },
+  "validPatch": { "current": 19 },
+  "invalidData": { "title": "TEST · 阅读目标", "current": 18, "target": 0, "unit": "本" },
+  "ungroundedData": { "title": "TEST · 阅读目标", "current": 29, "target": 50, "unit": "本" }
+}

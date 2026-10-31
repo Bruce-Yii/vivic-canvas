@@ -1,0 +1,1 @@
+{"type":"object","additionalProperties":false,"properties":{"title":{"type":"string","title":"目标名称","minLength":1,"maxLength":80},"unit":{"type":"string","title":"单位","maxLength":20}},"required":["title","unit"]}

@@ -1,0 +1,422 @@
+{
+  "mode": "candidate",
+  "accountApis": "isolated simulated account/canvas APIs; no production account or user data",
+  "staticResources": "actual public resources with local candidate patches",
+  "checks": [
+    {
+      "name": "display-to-user-paper-plane-only",
+      "passed": true
+    },
+    {
+      "name": "display-to-user-button-at-card-right",
+      "passed": true,
+      "rightGap": 34,
+      "color": "rgb(70, 111, 152)"
+    },
+    {
+      "name": "display-to-user-sender-started",
+      "passed": true
+    },
+    {
+      "name": "display-to-user-receiver-started",
+      "passed": true
+    },
+    {
+      "name": "display-to-user-destination-visible",
+      "passed": true
+    },
+    {
+      "name": "display-to-user-source-card-removed",
+      "passed": true
+    },
+    {
+      "name": "display-to-user-saved-surface",
+      "passed": true
+    },
+    {
+      "name": "display-to-user-two-screen-motion-single-persistent-background",
+      "passed": true,
+      "frameCounts": [
+        104,
+        104
+      ]
+    },
+    {
+      "name": "display-to-user-real-card-ghost",
+      "passed": true
+    },
+    {
+      "name": "display-to-user-no-hidden-card-left",
+      "passed": true
+    },
+    {
+      "name": "user-to-display-paper-plane-only",
+      "passed": true
+    },
+    {
+      "name": "user-to-display-button-at-card-right",
+      "passed": true,
+      "rightGap": 34,
+      "color": "rgb(70, 111, 152)"
+    },
+    {
+      "name": "user-to-display-sender-started",
+      "passed": true
+    },
+    {
+      "name": "user-to-display-receiver-started",
+      "passed": true
+    },
+    {
+      "name": "user-to-display-destination-visible",
+      "passed": true
+    },
+    {
+      "name": "user-to-display-source-card-removed",
+      "passed": true
+    },
+    {
+      "name": "user-to-display-saved-surface",
+      "passed": true
+    },
+    {
+      "name": "user-to-display-two-screen-motion-single-persistent-background",
+      "passed": true,
+      "frameCounts": [
+        395,
+        395
+      ]
+    },
+    {
+      "name": "user-to-display-real-card-ghost",
+      "passed": true
+    },
+    {
+      "name": "user-to-display-no-hidden-card-left",
+      "passed": true
+    },
+    {
+      "name": "refresh-keeps-card-on-saved-surface",
+      "passed": true
+    },
+    {
+      "name": "delayed-confirmation-paper-plane-only",
+      "passed": true
+    },
+    {
+      "name": "delayed-confirmation-button-at-card-right",
+      "passed": true,
+      "rightGap": 33.994140625,
+      "color": "rgb(70, 111, 152)"
+    },
+    {
+      "name": "delayed-confirmation-sender-started",
+      "passed": true
+    },
+    {
+      "name": "delayed-confirmation-receiver-started",
+      "passed": true
+    },
+    {
+      "name": "delayed-confirmation-destination-visible",
+      "passed": true
+    },
+    {
+      "name": "delayed-confirmation-source-card-removed",
+      "passed": true
+    },
+    {
+      "name": "delayed-confirmation-saved-surface",
+      "passed": true
+    },
+    {
+      "name": "delayed-confirmation-two-screen-motion-single-persistent-background",
+      "passed": true,
+      "frameCounts": [
+        164,
+        162
+      ]
+    },
+    {
+      "name": "delayed-confirmation-real-card-ghost",
+      "passed": true
+    },
+    {
+      "name": "delayed-confirmation-no-hidden-card-left",
+      "passed": true
+    },
+    {
+      "name": "reduced-motion-paper-plane-only",
+      "passed": true
+    },
+    {
+      "name": "reduced-motion-button-at-card-right",
+      "passed": true,
+      "rightGap": 34,
+      "color": "rgb(70, 111, 152)"
+    },
+    {
+      "name": "reduced-motion-sender-started",
+      "passed": true
+    },
+    {
+      "name": "reduced-motion-receiver-started",
+      "passed": true
+    },
+    {
+      "name": "reduced-motion-destination-visible",
+      "passed": true
+    },
+    {
+      "name": "reduced-motion-source-card-removed",
+      "passed": true
+    },
+    {
+      "name": "reduced-motion-saved-surface",
+      "passed": true
+    },
+    {
+      "name": "reduced-motion-two-screen-motion-single-persistent-background",
+      "passed": true,
+      "frameCounts": [
+        397,
+        396
+      ]
+    },
+    {
+      "name": "reduced-motion-real-card-ghost",
+      "passed": true
+    },
+    {
+      "name": "reduced-motion-no-hidden-card-left",
+      "passed": true
+    },
+    {
+      "name": "mobile-user-receiving-paper-plane-only",
+      "passed": true
+    },
+    {
+      "name": "mobile-user-receiving-button-at-card-right",
+      "passed": true,
+      "rightGap": 33.22222900390625,
+      "color": "rgb(70, 111, 152)"
+    },
+    {
+      "name": "mobile-user-receiving-sender-started",
+      "passed": true
+    },
+    {
+      "name": "mobile-user-receiving-receiver-started",
+      "passed": true
+    },
+    {
+      "name": "mobile-user-receiving-destination-visible",
+      "passed": true
+    },
+    {
+      "name": "mobile-user-receiving-source-card-removed",
+      "passed": true
+    },
+    {
+      "name": "mobile-user-receiving-saved-surface",
+      "passed": true
+    },
+    {
+      "name": "mobile-user-receiving-two-screen-motion-single-persistent-background",
+      "passed": true,
+      "frameCounts": [
+        109,
+        109
+      ]
+    },
+    {
+      "name": "mobile-user-receiving-real-card-ghost",
+      "passed": true
+    },
+    {
+      "name": "mobile-user-receiving-no-hidden-card-left",
+      "passed": true
+    },
+    {
+      "name": "return-before-reopen-paper-plane-only",
+      "passed": true
+    },
+    {
+      "name": "return-before-reopen-button-at-card-right",
+      "passed": true,
+      "rightGap": 34,
+      "color": "rgb(70, 111, 152)"
+    },
+    {
+      "name": "return-before-reopen-sender-started",
+      "passed": true
+    },
+    {
+      "name": "return-before-reopen-receiver-started",
+      "passed": true
+    },
+    {
+      "name": "return-before-reopen-destination-visible",
+      "passed": true
+    },
+    {
+      "name": "return-before-reopen-source-card-removed",
+      "passed": true
+    },
+    {
+      "name": "return-before-reopen-saved-surface",
+      "passed": true
+    },
+    {
+      "name": "return-before-reopen-two-screen-motion-single-persistent-background",
+      "passed": true,
+      "frameCounts": [
+        398,
+        397
+      ]
+    },
+    {
+      "name": "return-before-reopen-real-card-ghost",
+      "passed": true
+    },
+    {
+      "name": "return-before-reopen-no-hidden-card-left",
+      "passed": true
+    },
+    {
+      "name": "dark-theme-to-user-paper-plane-only",
+      "passed": true
+    },
+    {
+      "name": "dark-theme-to-user-button-at-card-right",
+      "passed": true,
+      "rightGap": 34,
+      "color": "rgb(170, 201, 232)"
+    },
+    {
+      "name": "dark-theme-to-user-sender-started",
+      "passed": true
+    },
+    {
+      "name": "dark-theme-to-user-receiver-started",
+      "passed": true
+    },
+    {
+      "name": "dark-theme-to-user-destination-visible",
+      "passed": true
+    },
+    {
+      "name": "dark-theme-to-user-source-card-removed",
+      "passed": true
+    },
+    {
+      "name": "dark-theme-to-user-saved-surface",
+      "passed": true
+    },
+    {
+      "name": "dark-theme-to-user-two-screen-motion-single-persistent-background",
+      "passed": true,
+      "frameCounts": [
+        109,
+        109
+      ]
+    },
+    {
+      "name": "dark-theme-to-user-real-card-ghost",
+      "passed": true
+    },
+    {
+      "name": "dark-theme-to-user-no-hidden-card-left",
+      "passed": true
+    },
+    {
+      "name": "dark-theme-to-space-paper-plane-only",
+      "passed": true
+    },
+    {
+      "name": "dark-theme-to-space-button-at-card-right",
+      "passed": true,
+      "rightGap": 34,
+      "color": "rgb(170, 201, 232)"
+    },
+    {
+      "name": "dark-theme-to-space-sender-started",
+      "passed": true
+    },
+    {
+      "name": "dark-theme-to-space-receiver-started",
+      "passed": true
+    },
+    {
+      "name": "dark-theme-to-space-destination-visible",
+      "passed": true
+    },
+    {
+      "name": "dark-theme-to-space-source-card-removed",
+      "passed": true
+    },
+    {
+      "name": "dark-theme-to-space-saved-surface",
+      "passed": true
+    },
+    {
+      "name": "dark-theme-to-space-two-screen-motion-single-persistent-background",
+      "passed": true,
+      "frameCounts": [
+        397,
+        396
+      ]
+    },
+    {
+      "name": "dark-theme-to-space-real-card-ghost",
+      "passed": true
+    },
+    {
+      "name": "dark-theme-to-space-no-hidden-card-left",
+      "passed": true
+    },
+    {
+      "name": "saved-theme-and-background-unchanged-by-transfer",
+      "passed": true
+    },
+    {
+      "name": "reopen-with-existing-login-and-saved-card",
+      "passed": true
+    },
+    {
+      "name": "direct-display-opening-without-orb-preserved",
+      "passed": true
+    },
+    {
+      "name": "missing-card-does-not-start-or-mutate",
+      "passed": true
+    },
+    {
+      "name": "rejected-request-returns-card",
+      "passed": true
+    },
+    {
+      "name": "rejected-request-does-not-create-destination-card",
+      "passed": true
+    },
+    {
+      "name": "rejected-request-cleans-held-state",
+      "passed": true
+    },
+    {
+      "name": "card-content-unchanged",
+      "passed": true
+    },
+    {
+      "name": "no-page-or-static-resource-errors",
+      "passed": true,
+      "errors": []
+    }
+  ],
+  "errors": [],
+  "requests": [],
+  "videos": [
+    "D:\\\u5546\u8d5b\\VIVIC\u82cf\u5ba2\u677e\\card-transfer\\candidate\\videos\\page@22e0fe92dd5409f6e756daa63c03b3c6.webm",
+    "D:\\\u5546\u8d5b\\VIVIC\u82cf\u5ba2\u677e\\card-transfer\\candidate\\videos\\page@5e84accfb8dd4c5d2aee351d18fa7667.webm"
+  ]
+}

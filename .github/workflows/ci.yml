@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Checks (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Install Node, pnpm and locked dependencies
+        uses: pnpm/setup@v3
+        with:
+          runtime: node@24.21.0
+          require-lockfile: true
+          cache: true
+      - name: Check generated contracts
+        run: pnpm contracts:check
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Lint
+        run: pnpm lint
+      - name: Unit tests
+        run: pnpm test
+      - name: Build
+        run: pnpm build
+
+  browser-smoke:
+    name: Browser smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Install Node, pnpm and locked dependencies
+        uses: pnpm/setup@v3
+        with:
+          runtime: node@24.21.0
+          require-lockfile: true
+          cache: true
+      - name: Install Chromium
+        run: pnpm --filter @vivic/web exec playwright install --with-deps chromium
+      - name: Landing and persisted dual-window smoke
+        run: pnpm test:e2e:smoke
+      - name: Upload browser failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-smoke-failure
+          path: |
+            apps/web/test-results/
+            evidence/
+          if-no-files-found: ignore

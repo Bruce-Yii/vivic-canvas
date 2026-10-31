@@ -1,0 +1,5 @@
+/* Restore the existing Hark solid surface for NewsCard on the display canvas. */
+.vivic-display-root .vivic-card[data-scene-type="NewsCard"] {
+  --surface-fill: var(--hark-solid, rgba(255, 255, 255, .96));
+  background: var(--hark-solid, rgba(255, 255, 255, .96)) !important;
+}

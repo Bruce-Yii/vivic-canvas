@@ -1,0 +1,11 @@
+{
+  "name": "@vivic/card-runtime",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "files": ["src"],
+  "scripts": { "typecheck": "tsc --noEmit" },
+  "exports": { ".": "./src/index.ts" },
+  "dependencies": { "fflate": "^0.8.2" },
+  "devDependencies": { "@types/node": "^24.13.3", "typescript": "~6.0.2" }
+}

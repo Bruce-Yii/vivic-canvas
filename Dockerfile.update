@@ -1,0 +1,4 @@
+FROM vivic-preview-20261025:preview-shell-20261027-003119
+LABEL org.vivic.ui="owner-cursor" org.vivic.release="owner-deploy-20261027-1050"
+COPY --chown=node:node apps/local-api/src/ /app/apps/local-api/src/
+COPY --chown=node:node apps/web/dist-owner/ /app/apps/web/dist-online/

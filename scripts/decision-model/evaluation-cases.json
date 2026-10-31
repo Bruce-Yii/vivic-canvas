@@ -1,0 +1,722 @@
+[
+  {
+    "text": "把整个画布呈现出来",
+    "expected": "fit"
+  },
+  {
+    "text": "请让每张卡片都进入视野",
+    "expected": "fit"
+  },
+  {
+    "text": "我要同时看到所有卡片",
+    "expected": "fit"
+  },
+  {
+    "text": "把镜头拉远直到能看到全部内容",
+    "expected": "fit"
+  },
+  {
+    "text": "展示整个工作区",
+    "expected": "fit"
+  },
+  {
+    "text": "给我一个完整的画布总览",
+    "expected": "fit"
+  },
+  {
+    "text": "全局查看当前画布",
+    "expected": "fit"
+  },
+  {
+    "text": "把这些卡片全部放进画面",
+    "expected": "fit"
+  },
+  {
+    "text": "把视角缩放到全局",
+    "expected": "fit"
+  },
+  {
+    "text": "显示整个看板",
+    "expected": "fit"
+  },
+  {
+    "text": "麻烦你，把整个画布呈现出来",
+    "expected": "fit"
+  },
+  {
+    "text": "麻烦你，请让每张卡片都进入视野",
+    "expected": "fit"
+  },
+  {
+    "text": "麻烦你，我要同时看到所有卡片",
+    "expected": "fit"
+  },
+  {
+    "text": "麻烦你，把镜头拉远直到能看到全部内容",
+    "expected": "fit"
+  },
+  {
+    "text": "麻烦你，展示整个工作区",
+    "expected": "fit"
+  },
+  {
+    "text": "麻烦你，给我一个完整的画布总览",
+    "expected": "fit"
+  },
+  {
+    "text": "麻烦你，全局查看当前画布",
+    "expected": "fit"
+  },
+  {
+    "text": "麻烦你，把这些卡片全部放进画面",
+    "expected": "fit"
+  },
+  {
+    "text": "麻烦你，把视角缩放到全局",
+    "expected": "fit"
+  },
+  {
+    "text": "麻烦你，显示整个看板",
+    "expected": "fit"
+  },
+  {
+    "text": "退出单卡模式回到先前布局",
+    "expected": "restore"
+  },
+  {
+    "text": "还原聚焦前的镜头",
+    "expected": "restore"
+  },
+  {
+    "text": "回到我之前看的画面",
+    "expected": "restore"
+  },
+  {
+    "text": "结束聚焦状态",
+    "expected": "restore"
+  },
+  {
+    "text": "退回刚才的总览",
+    "expected": "restore"
+  },
+  {
+    "text": "镜头回到放大前",
+    "expected": "restore"
+  },
+  {
+    "text": "取消当前的单卡放大",
+    "expected": "restore"
+  },
+  {
+    "text": "恢复之前的视角",
+    "expected": "restore"
+  },
+  {
+    "text": "别保持聚焦了，回到全景",
+    "expected": "restore"
+  },
+  {
+    "text": "返回先前的画布视图",
+    "expected": "restore"
+  },
+  {
+    "text": "麻烦你，退出单卡模式回到先前布局",
+    "expected": "restore"
+  },
+  {
+    "text": "麻烦你，还原聚焦前的镜头",
+    "expected": "restore"
+  },
+  {
+    "text": "麻烦你，回到我之前看的画面",
+    "expected": "restore"
+  },
+  {
+    "text": "麻烦你，结束聚焦状态",
+    "expected": "restore"
+  },
+  {
+    "text": "麻烦你，退回刚才的总览",
+    "expected": "restore"
+  },
+  {
+    "text": "麻烦你，镜头回到放大前",
+    "expected": "restore"
+  },
+  {
+    "text": "麻烦你，取消当前的单卡放大",
+    "expected": "restore"
+  },
+  {
+    "text": "麻烦你，恢复之前的视角",
+    "expected": "restore"
+  },
+  {
+    "text": "麻烦你，别保持聚焦了，回到全景",
+    "expected": "restore"
+  },
+  {
+    "text": "麻烦你，返回先前的画布视图",
+    "expected": "restore"
+  },
+  {
+    "text": "请将镜头对准左侧待办",
+    "expected": "focus"
+  },
+  {
+    "text": "把右侧便笺拉近",
+    "expected": "focus"
+  },
+  {
+    "text": "我要仔细看左边这张卡片",
+    "expected": "focus"
+  },
+  {
+    "text": "镜头移近这张便笺",
+    "expected": "focus"
+  },
+  {
+    "text": "单独放大右边的任务卡",
+    "expected": "focus"
+  },
+  {
+    "text": "把中间那个置于画面中心",
+    "expected": "focus"
+  },
+  {
+    "text": "左侧那张显示大一些",
+    "expected": "focus"
+  },
+  {
+    "text": "将右边的便笺作为当前焦点",
+    "expected": "focus"
+  },
+  {
+    "text": "突出查看中间的卡片",
+    "expected": "focus"
+  },
+  {
+    "text": "调整镜头专注这张卡片",
+    "expected": "focus"
+  },
+  {
+    "text": "麻烦你，请将镜头对准左侧待办",
+    "expected": "focus"
+  },
+  {
+    "text": "麻烦你，把右侧便笺拉近",
+    "expected": "focus"
+  },
+  {
+    "text": "麻烦你，我要仔细看左边这张卡片",
+    "expected": "focus"
+  },
+  {
+    "text": "麻烦你，镜头移近这张便笺",
+    "expected": "focus"
+  },
+  {
+    "text": "麻烦你，单独放大右边的任务卡",
+    "expected": "focus"
+  },
+  {
+    "text": "麻烦你，把中间那个置于画面中心",
+    "expected": "focus"
+  },
+  {
+    "text": "麻烦你，左侧那张显示大一些",
+    "expected": "focus"
+  },
+  {
+    "text": "麻烦你，将右边的便笺作为当前焦点",
+    "expected": "focus"
+  },
+  {
+    "text": "麻烦你，突出查看中间的卡片",
+    "expected": "focus"
+  },
+  {
+    "text": "麻烦你，调整镜头专注这张卡片",
+    "expected": "focus"
+  },
+  {
+    "text": "把便笺内容完整展开",
+    "expected": "expand"
+  },
+  {
+    "text": "这张笔记请切换到详细视图",
+    "expected": "expand"
+  },
+  {
+    "text": "便笺里面的文字都展开给我看",
+    "expected": "expand"
+  },
+  {
+    "text": "让笔记显示完整原文",
+    "expected": "expand"
+  },
+  {
+    "text": "展开左边那张便笺的全部内容",
+    "expected": "expand"
+  },
+  {
+    "text": "将这张笔记展开到完整模式",
+    "expected": "expand"
+  },
+  {
+    "text": "便笺切换为展开状态",
+    "expected": "expand"
+  },
+  {
+    "text": "请把笔记显示得详细一些",
+    "expected": "expand"
+  },
+  {
+    "text": "把右边便笺展开",
+    "expected": "expand"
+  },
+  {
+    "text": "显示这张笔记的完整正文",
+    "expected": "expand"
+  },
+  {
+    "text": "麻烦你，把便笺内容完整展开",
+    "expected": "expand"
+  },
+  {
+    "text": "麻烦你，这张笔记请切换到详细视图",
+    "expected": "expand"
+  },
+  {
+    "text": "麻烦你，便笺里面的文字都展开给我看",
+    "expected": "expand"
+  },
+  {
+    "text": "麻烦你，让笔记显示完整原文",
+    "expected": "expand"
+  },
+  {
+    "text": "麻烦你，展开左边那张便笺的全部内容",
+    "expected": "expand"
+  },
+  {
+    "text": "麻烦你，将这张笔记展开到完整模式",
+    "expected": "expand"
+  },
+  {
+    "text": "麻烦你，便笺切换为展开状态",
+    "expected": "expand"
+  },
+  {
+    "text": "麻烦你，请把笔记显示得详细一些",
+    "expected": "expand"
+  },
+  {
+    "text": "麻烦你，把右边便笺展开",
+    "expected": "expand"
+  },
+  {
+    "text": "麻烦你，显示这张笔记的完整正文",
+    "expected": "expand"
+  },
+  {
+    "text": "把便笺文字折叠一下",
+    "expected": "collapse"
+  },
+  {
+    "text": "这张笔记切换成精简视图",
+    "expected": "collapse"
+  },
+  {
+    "text": "让便笺回到简短显示",
+    "expected": "collapse"
+  },
+  {
+    "text": "将笔记的展开内容收起来",
+    "expected": "collapse"
+  },
+  {
+    "text": "把右边便笺折叠",
+    "expected": "collapse"
+  },
+  {
+    "text": "笔记请恢复简洁模式",
+    "expected": "collapse"
+  },
+  {
+    "text": "把左边的笔记收拢",
+    "expected": "collapse"
+  },
+  {
+    "text": "切回便笺的最简显示",
+    "expected": "collapse"
+  },
+  {
+    "text": "折叠这张便笺的正文",
+    "expected": "collapse"
+  },
+  {
+    "text": "请将笔记缩回精简状态",
+    "expected": "collapse"
+  },
+  {
+    "text": "麻烦你，把便笺文字折叠一下",
+    "expected": "collapse"
+  },
+  {
+    "text": "麻烦你，这张笔记切换成精简视图",
+    "expected": "collapse"
+  },
+  {
+    "text": "麻烦你，让便笺回到简短显示",
+    "expected": "collapse"
+  },
+  {
+    "text": "麻烦你，将笔记的展开内容收起来",
+    "expected": "collapse"
+  },
+  {
+    "text": "麻烦你，把右边便笺折叠",
+    "expected": "collapse"
+  },
+  {
+    "text": "麻烦你，笔记请恢复简洁模式",
+    "expected": "collapse"
+  },
+  {
+    "text": "麻烦你，把左边的笔记收拢",
+    "expected": "collapse"
+  },
+  {
+    "text": "麻烦你，切回便笺的最简显示",
+    "expected": "collapse"
+  },
+  {
+    "text": "麻烦你，折叠这张便笺的正文",
+    "expected": "collapse"
+  },
+  {
+    "text": "麻烦你，请将笔记缩回精简状态",
+    "expected": "collapse"
+  },
+  {
+    "text": "明天的天气怎样",
+    "expected": "other"
+  },
+  {
+    "text": "帮我记录一个新的任务",
+    "expected": "other"
+  },
+  {
+    "text": "列一个今天的待办清单",
+    "expected": "other"
+  },
+  {
+    "text": "搜索官方文档",
+    "expected": "other"
+  },
+  {
+    "text": "给我生成一张表格",
+    "expected": "other"
+  },
+  {
+    "text": "十分钟以后提醒喝水",
+    "expected": "other"
+  },
+  {
+    "text": "把这组数据换成柱状图",
+    "expected": "other"
+  },
+  {
+    "text": "计算一下这个算式",
+    "expected": "other"
+  },
+  {
+    "text": "现在几点",
+    "expected": "other"
+  },
+  {
+    "text": "你好呀",
+    "expected": "other"
+  },
+  {
+    "text": "请你明天的天气怎样",
+    "expected": "other"
+  },
+  {
+    "text": "请你帮我记录一个新的任务",
+    "expected": "other"
+  },
+  {
+    "text": "请你列一个今天的待办清单",
+    "expected": "other"
+  },
+  {
+    "text": "请你搜索官方文档",
+    "expected": "other"
+  },
+  {
+    "text": "请你给我生成一张表格",
+    "expected": "other"
+  },
+  {
+    "text": "请你十分钟以后提醒喝水",
+    "expected": "other"
+  },
+  {
+    "text": "请你把这组数据换成柱状图",
+    "expected": "other"
+  },
+  {
+    "text": "请你计算一下这个算式",
+    "expected": "other"
+  },
+  {
+    "text": "请你现在几点",
+    "expected": "other"
+  },
+  {
+    "text": "请你你好呀",
+    "expected": "other"
+  },
+  {
+    "text": "不要删除待办",
+    "expected": "other"
+  },
+  {
+    "text": "不要把便笺展开",
+    "expected": "other"
+  },
+  {
+    "text": "不要聚焦左侧卡片",
+    "expected": "other"
+  },
+  {
+    "text": "不要折叠笔记",
+    "expected": "other"
+  },
+  {
+    "text": "不要恢复旧画面",
+    "expected": "other"
+  },
+  {
+    "text": "不要显示整个画布",
+    "expected": "other"
+  },
+  {
+    "text": "不用删除待办",
+    "expected": "other"
+  },
+  {
+    "text": "不用把便笺展开",
+    "expected": "other"
+  },
+  {
+    "text": "不用聚焦左侧卡片",
+    "expected": "other"
+  },
+  {
+    "text": "不用折叠笔记",
+    "expected": "other"
+  },
+  {
+    "text": "不用恢复旧画面",
+    "expected": "other"
+  },
+  {
+    "text": "不用显示整个画布",
+    "expected": "other"
+  },
+  {
+    "text": "不必删除待办",
+    "expected": "other"
+  },
+  {
+    "text": "不必把便笺展开",
+    "expected": "other"
+  },
+  {
+    "text": "不必聚焦左侧卡片",
+    "expected": "other"
+  },
+  {
+    "text": "不必折叠笔记",
+    "expected": "other"
+  },
+  {
+    "text": "不必恢复旧画面",
+    "expected": "other"
+  },
+  {
+    "text": "不必显示整个画布",
+    "expected": "other"
+  },
+  {
+    "text": "别删除待办",
+    "expected": "other"
+  },
+  {
+    "text": "别把便笺展开",
+    "expected": "other"
+  },
+  {
+    "text": "别聚焦左侧卡片",
+    "expected": "other"
+  },
+  {
+    "text": "别折叠笔记",
+    "expected": "other"
+  },
+  {
+    "text": "别恢复旧画面",
+    "expected": "other"
+  },
+  {
+    "text": "别显示整个画布",
+    "expected": "other"
+  },
+  {
+    "text": "我不想删除待办",
+    "expected": "other"
+  },
+  {
+    "text": "我不想把便笺展开",
+    "expected": "other"
+  },
+  {
+    "text": "我不想聚焦左侧卡片",
+    "expected": "other"
+  },
+  {
+    "text": "我不想折叠笔记",
+    "expected": "other"
+  },
+  {
+    "text": "我不想恢复旧画面",
+    "expected": "other"
+  },
+  {
+    "text": "我不想显示整个画布",
+    "expected": "other"
+  },
+  {
+    "text": "请将镜头对准左侧待办然后删除待办",
+    "expected": "other"
+  },
+  {
+    "text": "请将镜头对准左侧待办并且创建一个提醒",
+    "expected": "other"
+  },
+  {
+    "text": "请将镜头对准左侧待办同时修改便笺内容",
+    "expected": "other"
+  },
+  {
+    "text": "请将镜头对准左侧待办顺便查询天气",
+    "expected": "other"
+  },
+  {
+    "text": "请将镜头对准左侧待办再添加一张图表",
+    "expected": "other"
+  },
+  {
+    "text": "把右侧便笺拉近然后删除待办",
+    "expected": "other"
+  },
+  {
+    "text": "把右侧便笺拉近并且创建一个提醒",
+    "expected": "other"
+  },
+  {
+    "text": "把右侧便笺拉近同时修改便笺内容",
+    "expected": "other"
+  },
+  {
+    "text": "把右侧便笺拉近顺便查询天气",
+    "expected": "other"
+  },
+  {
+    "text": "把右侧便笺拉近再添加一张图表",
+    "expected": "other"
+  },
+  {
+    "text": "我要仔细看左边这张卡片然后删除待办",
+    "expected": "other"
+  },
+  {
+    "text": "我要仔细看左边这张卡片并且创建一个提醒",
+    "expected": "other"
+  },
+  {
+    "text": "我要仔细看左边这张卡片同时修改便笺内容",
+    "expected": "other"
+  },
+  {
+    "text": "我要仔细看左边这张卡片顺便查询天气",
+    "expected": "other"
+  },
+  {
+    "text": "我要仔细看左边这张卡片再添加一张图表",
+    "expected": "other"
+  },
+  {
+    "text": "镜头移近这张便笺然后删除待办",
+    "expected": "other"
+  },
+  {
+    "text": "镜头移近这张便笺并且创建一个提醒",
+    "expected": "other"
+  },
+  {
+    "text": "镜头移近这张便笺同时修改便笺内容",
+    "expected": "other"
+  },
+  {
+    "text": "镜头移近这张便笺顺便查询天气",
+    "expected": "other"
+  },
+  {
+    "text": "镜头移近这张便笺再添加一张图表",
+    "expected": "other"
+  },
+  {
+    "text": "单独放大右边的任务卡然后删除待办",
+    "expected": "other"
+  },
+  {
+    "text": "单独放大右边的任务卡并且创建一个提醒",
+    "expected": "other"
+  },
+  {
+    "text": "单独放大右边的任务卡同时修改便笺内容",
+    "expected": "other"
+  },
+  {
+    "text": "单独放大右边的任务卡顺便查询天气",
+    "expected": "other"
+  },
+  {
+    "text": "单独放大右边的任务卡再添加一张图表",
+    "expected": "other"
+  },
+  {
+    "text": "文档里写着“把便笺内容完整展开”，请解释含义",
+    "expected": "other"
+  },
+  {
+    "text": "文档里写着“这张笔记请切换到详细视图”，请解释含义",
+    "expected": "other"
+  },
+  {
+    "text": "文档里写着“便笺里面的文字都展开给我看”，请解释含义",
+    "expected": "other"
+  },
+  {
+    "text": "文档里写着“让笔记显示完整原文”，请解释含义",
+    "expected": "other"
+  },
+  {
+    "text": "文档里写着“展开左边那张便笺的全部内容”，请解释含义",
+    "expected": "other"
+  }
+]

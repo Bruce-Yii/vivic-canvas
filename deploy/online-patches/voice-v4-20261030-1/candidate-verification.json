@@ -1,0 +1,30 @@
+{
+  "mode": "candidate",
+  "checks": [
+    "Default real Siri orb and wake-word prompt",
+    "Ordinary speech without Hi Vivic ignored",
+    "Hi Vivic alone arms next utterance and enlarges orb 1.6x",
+    "Command submitted without placing recognized speech into draft",
+    "Existing single-line composer and add-content menu",
+    "Combined wake + command executes while preserving text draft",
+    "Reload returns to default voice",
+    "Single canonical runtime, no duplicate version runtime",
+    "Mobile original input geometry"
+  ],
+  "errors": [],
+  "transcriptions": [
+    "\u4eca\u5929\u7684\u5348\u996d\u5f88\u597d\u5403",
+    "Hi \uff0cvivic",
+    "\u65b0\u5efa\u4fbf\u7b3a\uff1a\u8bed\u97f3\u9a8c\u6536",
+    "Hi Vivic\uff0c\u6dfb\u52a0\u4fbf\u7b3a\uff1a\u4fdd\u7559\u8349\u7a3f\u9a8c\u6536"
+  ],
+  "commands": [
+    "\u65b0\u5efa\u4fbf\u7b3a\uff1a\u8bed\u97f3\u9a8c\u6536",
+    "\u6dfb\u52a0\u4fbf\u7b3a:\u4fdd\u7559\u8349\u7a3f\u9a8c\u6536"
+  ],
+  "resources": [
+    "https://vivic.edsionc.top/assets/voice-v4-20261030-1/app-runtime.js"
+  ],
+  "fixture": "Public assets; isolated in-memory account API, PCM microphone, transcription and validated intent fixtures; no real account data",
+  "serverApiModified": false
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Vivic 卡片开发"
+  short_description: "按现有契约开发卡片，覆盖数据解析、来源校验、渲染、编辑和保存"
+  default_prompt: "使用 $vivic-card-development 按任务单开发 Vivic 卡片，并交付真实验证结果。"

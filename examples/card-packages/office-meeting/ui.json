@@ -1,0 +1,50 @@
+{
+  "components": [
+    {
+      "component": "Header",
+      "bind": "/config/title"
+    },
+    {
+      "component": "Badge",
+      "label": "来源 user=用户输入 / demo=演示",
+      "bind": "/data/origin"
+    },
+    {
+      "component": "KeyValue",
+      "label": "会议结论",
+      "bind": "/config/context"
+    },
+    {
+      "component": "Table",
+      "bind": "/state/items",
+      "columns": [
+        {
+          "label": "行动",
+          "field": "title"
+        },
+        {
+          "label": "负责人",
+          "field": "owner"
+        },
+        {
+          "label": "截止说明",
+          "field": "due"
+        },
+        {
+          "label": "状态",
+          "field": "status"
+        }
+      ]
+    },
+    {
+      "component": "KeyValue",
+      "label": "备注",
+      "bind": "/state/note"
+    },
+    {
+      "component": "KeyValue",
+      "label": "范围",
+      "text": "本地整理，未同步外部日历"
+    }
+  ]
+}

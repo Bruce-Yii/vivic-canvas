@@ -1,0 +1,289 @@
+/* ---------------------------------------------------------------------------
+ * Scene cards — one shell, one set of tokens. Built on the shadcn/aui tokens
+ * in index.css; the two accents follow the approved card-library reference.
+ * Components use these variables, never their own hard-coded palettes.
+ * Derived tokens are re-declared on .dark: custom properties resolve where
+ * they are declared, and the Display puts .dark on a nested element.
+ * ------------------------------------------------------------------------ */
+:root, .dark {
+  --vivic-accent: oklch(0.52 0.15 276);
+  --vivic-accent-2: oklch(0.6 0.1 188);
+  --vivic-accent-soft: color-mix(in oklab, var(--vivic-accent) 12%, transparent);
+  --vivic-accent-2-soft: color-mix(in oklab, var(--vivic-accent-2) 14%, transparent);
+  --vivic-positive: var(--aui-success);
+  --vivic-caution: var(--aui-warning);
+  --vivic-danger: var(--destructive);
+  --vivic-track: color-mix(in oklab, var(--foreground) 9%, transparent);
+  --vivic-subtle: color-mix(in oklab, var(--foreground) 4%, transparent);
+  --vivic-line: color-mix(in oklab, var(--border) 80%, transparent);
+  --vivic-muted-ink: color-mix(in oklab, var(--foreground) 62%, var(--background));
+  --vivic-paper: oklch(0.972 0.028 92);
+  --vivic-paper-ink: oklch(0.33 0.035 70);
+  --vivic-heat-0: color-mix(in oklab, var(--foreground) 7%, transparent);
+  --vivic-heat-1: color-mix(in oklab, var(--vivic-accent-2) 55%, transparent);
+  --vivic-heat-2: var(--vivic-accent-2);
+  --vivic-scene-radius: calc(var(--radius) * 1.1);
+}
+.dark {
+  --vivic-accent: oklch(0.78 0.12 278);
+  --vivic-accent-2: oklch(0.8 0.1 186);
+  --vivic-muted-ink: color-mix(in oklab, var(--foreground) 66%, var(--background));
+  --vivic-paper: oklch(0.32 0.03 85);
+  --vivic-paper-ink: oklch(0.94 0.03 92);
+}
+
+.vivic-scene {
+  container: vivic-card-content / inline-size;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 10px;
+  color: var(--card-foreground);
+  font-size: 14px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+.vivic-scene > :is(.vivic-scene-head, .vivic-scene-title, .vivic-scene-meta, .vivic-scene-foot) { flex-shrink: 0; }
+.vivic-scene[data-mode="control"] > .vivic-scene-title { display: block; }
+.vivic-scene[data-fixed] { overflow: hidden; }
+.vivic-scene[data-bleed] {
+  margin: calc(-1 * var(--vivic-card-padding-y)) calc(-1 * var(--vivic-card-padding-x));
+  border-radius: calc(var(--radius-xl) - 1px);
+  overflow: hidden;
+  gap: 0;
+}
+.vivic-scene-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  /* Leave room for the card-level subcard trigger in the top-right corner. */
+  padding-right: 26px;
+}
+.vivic-scene[data-mode="control"] .vivic-scene-head { padding-right: 0; }
+.vivic-scene-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--vivic-muted-ink);
+  white-space: nowrap;
+}
+.vivic-scene-kicker svg { flex-shrink: 0; color: var(--vivic-accent); }
+.vivic-scene-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  max-width: 55%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 550;
+  background: var(--vivic-accent-soft);
+  color: color-mix(in oklab, var(--vivic-accent) 80%, var(--foreground));
+}
+.vivic-scene-badge[data-tone="positive"] { background: color-mix(in oklab, var(--vivic-positive) 16%, transparent); color: color-mix(in oklab, var(--vivic-positive) 70%, var(--foreground)); }
+.vivic-scene-badge[data-tone="caution"] { background: color-mix(in oklab, var(--vivic-caution) 18%, transparent); color: color-mix(in oklab, var(--vivic-caution) 65%, var(--foreground)); }
+.vivic-scene-badge[data-tone="danger"] { background: color-mix(in oklab, var(--vivic-danger) 15%, transparent); color: color-mix(in oklab, var(--vivic-danger) 70%, var(--foreground)); }
+.vivic-scene-badge[data-tone="neutral"] { background: var(--vivic-subtle); color: var(--vivic-muted-ink); }
+.vivic-scene-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 650;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.vivic-scene-meta {
+  margin: -4px 0 0;
+  font-size: 12.5px;
+  color: var(--vivic-muted-ink);
+  overflow-wrap: anywhere;
+}
+.vivic-scene-body { position: relative; display: flex; flex-direction: column; gap: 8px; min-width: 0; min-height: 0; }
+.vivic-scene[data-fixed] .vivic-scene-body { flex: 1 1 auto; overflow: hidden; }
+.vivic-scene-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--vivic-muted-ink);
+}
+.vivic-scene-foot > span { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+.vivic-progress-summary [data-progress-values] { overflow-wrap: anywhere; }
+.vivic-scene-scroll { min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.vivic-scene[data-mode="control"] .vivic-scene-scroll { max-height: 440px; }
+.vivic-scene-clamp-2, .vivic-scene-clamp-3, .vivic-scene-clamp-4 { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.vivic-scene-clamp-2 { -webkit-line-clamp: 2; }
+.vivic-scene-clamp-3 { -webkit-line-clamp: 3; }
+.vivic-scene-clamp-4 { -webkit-line-clamp: 4; }
+.vivic-scene-number { font-variant-numeric: tabular-nums; letter-spacing: -0.03em; font-weight: 650; line-height: 1; }
+.vivic-scene-muted { color: var(--vivic-muted-ink); }
+.vivic-scene-empty {
+  display: grid;
+  place-items: center;
+  gap: 6px;
+  min-height: 72px;
+  padding: 12px;
+  border: 1px dashed var(--vivic-line);
+  border-radius: var(--radius-md);
+  color: var(--vivic-muted-ink);
+  font-size: 12.5px;
+  text-align: center;
+}
+.vivic-scene-bar { height: 6px; border-radius: 999px; background: var(--vivic-track); overflow: hidden; }
+.vivic-scene-bar > i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--vivic-accent), var(--vivic-accent-2)); transition: width 0.4s cubic-bezier(0.25, 0.7, 0.25, 1); }
+.vivic-scene-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--vivic-line);
+  font-size: 11.5px;
+  color: var(--vivic-muted-ink);
+  white-space: nowrap;
+}
+.vivic-scene-link { display: inline-flex; align-items: center; gap: 4px; color: color-mix(in oklab, var(--vivic-accent) 85%, var(--foreground)); font-size: 12.5px; font-weight: 550; text-underline-offset: 3px; }
+.vivic-scene-link:hover, .vivic-scene-link:focus-visible { text-decoration: underline; }
+.vivic-scene-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--vivic-line);
+  background: var(--card);
+  color: var(--card-foreground);
+  font-size: 12.5px;
+  font-weight: 550;
+  cursor: pointer;
+  transition: background 140ms, border-color 140ms;
+}
+.vivic-scene-action:hover { background: var(--vivic-subtle); border-color: color-mix(in oklab, var(--vivic-accent) 45%, var(--border)); }
+.vivic-scene-action:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.vivic-scene-action:disabled { opacity: 0.5; cursor: default; }
+.vivic-scene-action[data-variant="primary"] { background: var(--primary); color: var(--primary-foreground); border-color: transparent; }
+.vivic-scene-icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-md);
+  color: var(--vivic-muted-ink);
+  cursor: pointer;
+  transition: background 140ms, color 140ms;
+}
+.vivic-scene-icon-button:hover { background: var(--vivic-subtle); color: var(--foreground); }
+.vivic-scene-icon-button:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+.vivic-scene-icon-button:disabled { opacity: 0.4; cursor: default; }
+.vivic-scene-input {
+  min-width: 0;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--input);
+  background: var(--background);
+  color: var(--foreground);
+  font-size: 13px;
+}
+.vivic-scene-input:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+.vivic-scene-placeholder {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(120% 90% at 0% 0%, var(--vivic-accent-soft), transparent 60%),
+    radial-gradient(120% 90% at 100% 100%, var(--vivic-accent-2-soft), transparent 60%),
+    var(--vivic-subtle);
+  color: var(--vivic-muted-ink);
+  font-size: 12px;
+  text-align: center;
+}
+.vivic-scene-img { display: block; width: 100%; height: 100%; object-fit: cover; background: var(--vivic-subtle); }
+.vivic-scene-fallback {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px dashed var(--vivic-line);
+  border-radius: var(--radius-md);
+  color: var(--vivic-muted-ink);
+  font-size: 12.5px;
+}
+
+/* Display → user page handle and drop targets. */
+.vivic-move-handle {
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  z-index: 5;
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 15px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  color: var(--vivic-muted-ink);
+  background: color-mix(in oklab, var(--card) 70%, transparent);
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 160ms, color 140ms, background 140ms;
+}
+.vivic-card:hover .vivic-move-handle, .vivic-move-handle:focus-visible, .vivic-user-card:hover .vivic-move-handle { opacity: 1; }
+.vivic-move-handle:hover { color: var(--foreground); }
+.vivic-move-handle:active { cursor: grabbing; }
+.vivic-drop-overlay {
+  position: absolute;
+  inset: 12px;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  border: 2px dashed color-mix(in oklab, var(--vivic-accent) 70%, transparent);
+  border-radius: var(--radius-2xl);
+  background: color-mix(in oklab, var(--vivic-accent) 10%, transparent);
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  text-shadow: 0 1px 10px rgb(0 0 0 / 0.45);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vivic-scene-bar > i, .vivic-scene * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+
+/* On the user page there is no fixed height below an edge-to-edge card; keep its foot inside. */
+.vivic-scene[data-bleed][data-mode="control"] {
+  margin-bottom: 0;
+  border-radius: calc(var(--radius-xl) - 1px) calc(var(--radius-xl) - 1px) var(--radius-md) var(--radius-md);
+}
+
+/* Empty heatmap cells need a little more presence on dark cards. */
+.dark { --vivic-heat-0: color-mix(in oklab, var(--foreground) 13%, transparent); }
+
+/* D adaptation: narrow content keeps badges and actions reachable at large text sizes. */
+@container vivic-card-content (max-width: 300px) {
+  .vivic-scene-head { flex-wrap: wrap; align-items: flex-start; }
+  .vivic-scene-badge { max-width: 100%; }
+  .vivic-scene-foot { align-items: flex-start; }
+  [data-progress-editor] .vivic-scene-action { margin-left: 0; }
+}

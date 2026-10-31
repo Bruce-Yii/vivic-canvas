@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "0.6",
+  "requestId": "r-search-001",
+  "canvasId": "canvas-research",
+  "spokenText": "找到了几个项目，第二个可以重点看看。",
+  "actions": [
+    {
+      "type": "card.create",
+      "card": {
+        "id": "search-001",
+        "type": "SearchResultCard",
+        "variant": "minimal",
+        "displayProps": {
+          "title": "React Flow",
+          "summary": "用于 React 节点画布的成熟基础库。",
+          "sourceLabel": "官方站点"
+        },
+        "sourceData": {
+          "query": "React 画布开源库",
+          "details": "用于演示来源持久化结构，不代表刚刚进行了网络搜索。"
+        },
+        "sources": [
+          {
+            "title": "React Flow official website",
+            "url": "https://reactflow.dev/",
+            "fetchedAt": "2026-10-14T12:00:00Z",
+            "provider": "STATIC_DOC_EXAMPLE",
+            "readFullPage": false
+          }
+        ],
+        "layout": {
+          "x": 480,
+          "y": 160,
+          "width": 360,
+          "height": 240,
+          "pinned": false
+        },
+        "metadata": {
+          "createdAt": "2026-10-14T13:00:00Z",
+          "updatedAt": "2026-10-14T13:00:00Z"
+        }
+      }
+    },
+    {
+      "type": "card.highlight",
+      "targetId": "search-001",
+      "durationMs": 1800
+    }
+  ]
+}

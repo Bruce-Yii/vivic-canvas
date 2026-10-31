@@ -1,0 +1,106 @@
+{
+  "at": "2026-10-29T18:59:02.992Z",
+  "mode": "on",
+  "direct": [
+    {
+      "id": "countdown",
+      "text": "倒计时50分钟",
+      "elapsedMs": 2049,
+      "plannerCalls": 0,
+      "directClauses": 1,
+      "cardTypes": [
+        "CountdownCard"
+      ],
+      "committed": true
+    },
+    {
+      "id": "todo",
+      "text": "添加待办：喝水、交周报",
+      "elapsedMs": 1968,
+      "plannerCalls": 0,
+      "directClauses": 1,
+      "cardTypes": [
+        "TodoCard"
+      ],
+      "committed": true
+    },
+    {
+      "id": "note",
+      "text": "帮我记个便签明天交周报",
+      "elapsedMs": 1981,
+      "plannerCalls": 0,
+      "directClauses": 1,
+      "cardTypes": [
+        "NoteCard"
+      ],
+      "committed": true
+    },
+    {
+      "id": "overview",
+      "text": "显示全部",
+      "elapsedMs": 2012,
+      "plannerCalls": 0,
+      "directClauses": 1,
+      "cardTypes": [],
+      "committed": true
+    },
+    {
+      "id": "restore",
+      "text": "恢复原视图",
+      "elapsedMs": 1958,
+      "plannerCalls": 0,
+      "directClauses": 1,
+      "cardTypes": [],
+      "committed": true
+    },
+    {
+      "id": "multi",
+      "text": "帮我记个便签明天交周报，再设个50分钟倒计时",
+      "elapsedMs": 3918,
+      "plannerCalls": 0,
+      "directClauses": 2,
+      "cardTypes": [
+        "NoteCard",
+        "CountdownCard"
+      ],
+      "committed": true
+    }
+  ],
+  "complete": true,
+  "cleanup": true,
+  "mainModelConnected": false,
+  "timerElapsedMs": 2049,
+  "timerWithin3s": true,
+  "deletion": {
+    "askedBeforeMutation": true,
+    "cancelKeptData": true,
+    "confirmedDeletedOnly": "note_book"
+  },
+  "ambiguity": {
+    "frozenCandidates": [
+      {
+        "number": 1,
+        "id": "note_meeting",
+        "label": "会议记录"
+      },
+      {
+        "number": 2,
+        "id": "note_book",
+        "label": "读书笔记"
+      }
+    ],
+    "chosenId": "note_meeting",
+    "confirmationRequiredAfterSelection": true
+  },
+  "changedTargetContextCancelled": true,
+  "conflict": {
+    "succeeded": true,
+    "createdOnce": true,
+    "concurrentWritePreserved": true,
+    "traceOutcomes": [
+      "succeeded",
+      "conflict"
+    ]
+  },
+  "functionalComplete": true
+}

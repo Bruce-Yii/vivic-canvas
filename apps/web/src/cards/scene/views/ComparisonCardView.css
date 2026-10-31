@@ -1,0 +1,99 @@
+/* Comparison card: option columns × criteria rows; narrow containers stack one option per block. */
+.vivic-compare { container: vivic-compare / inline-size; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.vivic-scene[data-fixed] .vivic-compare { container-type: size; flex: 1 1 0; min-height: 0; overflow: hidden; }
+.vivic-compare-scroll { min-width: 0; }
+.vivic-scene[data-fixed] .vivic-compare-scroll { flex: 0 1 auto; }
+
+.vivic-compare-table { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 0; font-size: 13px; line-height: 1.45; }
+.vivic-compare-table col.vivic-compare-col-name { width: 24%; }
+.vivic-compare-table th, .vivic-compare-table td { padding: 7px 8px; text-align: left; vertical-align: middle; border-bottom: 1px solid var(--vivic-line); overflow-wrap: anywhere; }
+.vivic-scene[data-fixed] .vivic-compare-table th, .vivic-scene[data-fixed] .vivic-compare-table td { padding-block: 5px; }
+.vivic-compare-table tbody tr:last-child > * { border-bottom: 0; }
+.vivic-compare-table thead th { vertical-align: bottom; font-weight: 600; border-bottom-color: color-mix(in oklab, var(--foreground) 16%, transparent); }
+/* Only a region that really scrolls gets the sticky, opaque header; otherwise it stays the card surface. */
+.vivic-compare-scroll[data-overflowing] .vivic-compare-table thead th { position: sticky; top: 0; z-index: 1; background-color: var(--card); }
+.vivic-compare-table tbody th { font-weight: 550; color: var(--vivic-muted-ink); font-size: 12.5px; }
+
+/* Chosen option: soft fill + accent outline drawn per cell so it survives sticky headers. */
+.vivic-compare-table [data-chosen] {
+  background: var(--vivic-accent-soft);
+  box-shadow: inset 1.5px 0 0 var(--vivic-accent), inset -1.5px 0 0 var(--vivic-accent);
+}
+.vivic-compare-table thead th[data-chosen] {
+  border-radius: 10px 10px 0 0;
+  box-shadow: inset 1.5px 0 0 var(--vivic-accent), inset -1.5px 0 0 var(--vivic-accent), inset 0 1.5px 0 var(--vivic-accent);
+}
+.vivic-compare-scroll[data-overflowing] .vivic-compare-table thead th[data-chosen] { background-image: linear-gradient(var(--vivic-accent-soft), var(--vivic-accent-soft)); }
+.vivic-compare-table td[data-chosen][data-last-row] {
+  border-radius: 0 0 10px 10px;
+  box-shadow: inset 1.5px 0 0 var(--vivic-accent), inset -1.5px 0 0 var(--vivic-accent), inset 0 -1.5px 0 var(--vivic-accent);
+}
+
+.vivic-compare-option { display: grid; gap: 2px; min-width: 0; }
+.vivic-compare-option-name { display: flex; align-items: flex-start; gap: 4px; min-width: 0; }
+.vivic-compare-option-name > span:first-child { min-width: 0; flex: 1 1 auto; overflow-wrap: anywhere; }
+.vivic-scene[data-fixed] .vivic-compare-option-name > span:first-child { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.vivic-compare-option-note { font-size: 11.5px; line-height: 1.4; font-weight: 450; color: var(--vivic-muted-ink); overflow-wrap: anywhere; }
+.vivic-scene[data-fixed] .vivic-compare-option-note { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vivic-compare-chip {
+  flex: none;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  line-height: 17px;
+  font-weight: 650;
+  background: var(--vivic-accent);
+  color: var(--card);
+}
+.vivic-compare-pick {
+  display: block;
+  width: calc(100% + 12px);
+  margin: -4px -6px;
+  padding: 4px 6px;
+  border-radius: var(--radius-md);
+  text-align: left;
+  cursor: pointer;
+  transition: background 140ms;
+}
+.vivic-compare-pick:hover { background: var(--vivic-subtle); }
+.vivic-compare-pick:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+
+.vivic-compare-name { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.vivic-compare-name > span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.vivic-scene[data-fixed] .vivic-compare-name > span:first-child { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.vivic-compare-better { display: inline-flex; flex: none; color: var(--vivic-muted-ink); opacity: 0.8; }
+.vivic-compare-value { display: inline-flex; align-items: center; gap: 4px; min-width: 0; max-width: 100%; font-variant-numeric: tabular-nums; }
+.vivic-compare-value > span { min-width: 0; overflow-wrap: anywhere; }
+.vivic-scene[data-fixed] .vivic-compare-value > span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.vivic-compare-value[data-best] { color: color-mix(in oklab, var(--vivic-positive) 78%, var(--foreground)); font-weight: 650; }
+.vivic-compare-value[data-best] svg { flex: none; }
+.vivic-compare-value[data-empty] { color: var(--vivic-muted-ink); }
+
+/* Stacked layout. */
+.vivic-compare-stack { display: none; gap: 8px; }
+.vivic-compare-card { display: grid; gap: 6px; padding: 8px 10px; border: 1px solid var(--vivic-line); border-radius: var(--radius-md); min-width: 0; }
+.vivic-compare-card[data-chosen] { background: var(--vivic-accent-soft); border-color: transparent; box-shadow: inset 0 0 0 1.5px var(--vivic-accent); }
+.vivic-compare-card dl { display: grid; gap: 2px; margin: 0; }
+.vivic-compare-card dl > div { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; min-width: 0; font-size: 12.5px; }
+.vivic-compare-card dt { flex: 1 1 auto; min-width: 5em; color: var(--vivic-muted-ink); overflow-wrap: anywhere; }
+.vivic-compare-card dd { flex: 0 1 auto; max-width: 62%; margin: 0; min-width: 0; text-align: right; }
+/* Numbers stay on one line; the criterion name wraps instead. */
+.vivic-compare-card dd[data-numeric] { flex-shrink: 0; max-width: none; white-space: nowrap; }
+
+@container vivic-compare (max-width: 420px) {
+  .vivic-compare-table { display: none; }
+  .vivic-compare-stack { display: grid; }
+}
+@container vivic-compare (max-width: 500px) {
+  .vivic-compare[data-options="5"] .vivic-compare-table { display: none; }
+  .vivic-compare[data-options="5"] .vivic-compare-stack { display: grid; }
+}
+@container vivic-compare (min-width: 300px) and (max-width: 420px) {
+  .vivic-compare[data-options="2"] .vivic-compare-table { display: table; }
+  .vivic-compare[data-options="2"] .vivic-compare-stack { display: none; }
+}
+
+.vivic-compare-rec { display: flex; align-items: flex-start; gap: 6px; flex: none; padding: 6px 10px; border-radius: var(--radius-md); background: var(--vivic-subtle); font-size: 12.5px; line-height: 19px; }
+.vivic-compare-rec svg { flex: none; margin-top: 2px; color: var(--vivic-accent); }
+.vivic-compare-rec p { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.vivic-scene[data-fixed] .vivic-compare-rec p { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }

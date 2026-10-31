@@ -1,0 +1,6 @@
+{
+  "name": "DEMO：虚构的腿部训练25分钟",
+  "config": { "title": "训练记录" },
+  "data": { "trainingDate": "2026-01-15", "bodyPart": "腿", "minutes": 25 },
+  "state": { "note": "DEMO：日期、部位和分钟数均为虚构示例" }
+}

@@ -1,0 +1,24 @@
+.vivic-display-root .vivic-transfer-button,.vivic-control-root .vivic-transfer-button{display:inline-flex;align-items:center;justify-content:center;flex:none;width:32px;height:28px;padding:5px!important;border:0!important;border-radius:9px;background:color-mix(in srgb,var(--hark-accent,#5a8cc8) 11%,var(--hark-solid,#fff))!important;color:var(--transfer-icon,#466f98);cursor:pointer;line-height:1}
+.vivic-transfer-button svg{width:16px;height:16px;flex:none}
+.vivic-display-root .vivic-display-card-actions{display:flex!important;justify-content:flex-end;padding:0 12px 10px;pointer-events:auto!important}
+.vivic-display-root .vivic-display-card-actions>button:not([data-vivic-transfer]){display:none!important}
+.vivic-transfer-button:disabled{cursor:default;opacity:.45}
+.vivic-transfer-button:hover:not(:disabled){background:color-mix(in srgb,var(--hark-accent,#5a8cc8) 20%,var(--hark-solid,#fff))!important}
+.vivic-user-transfer-action{position:relative;display:flex;justify-content:flex-end;padding:0 12px 10px;pointer-events:auto}
+.vivic-transfer-held{opacity:0!important;pointer-events:none!important}
+.vivic-transfer-overlay{position:fixed;inset:0;z-index:85;pointer-events:none;overflow:hidden;isolation:isolate}
+.vivic-transfer-scene,.vivic-transfer-flow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.vivic-transfer-card-ghost{position:absolute;transform-origin:center;pointer-events:none;will-change:transform,opacity;perspective:900px}
+.vivic-transfer-card-copy{position:absolute!important;left:0!important;top:0!important;margin:0!important;opacity:1!important;transform-origin:top left!important;pointer-events:none!important;animation:none!important;transition:none!important}
+.vivic-transfer-card-copy *{pointer-events:none!important;animation:none!important;transition:none!important}
+.vivic-transfer-plane{position:absolute;width:36px;height:25px;opacity:0;filter:drop-shadow(0 0 9px var(--transfer-accent,#91c3f2));pointer-events:none}
+.vivic-transfer-plane:before,.vivic-transfer-plane:after{content:"";position:absolute;inset:0;border-radius:3px;background:linear-gradient(125deg,#fff 15%,#e4f3ff 75%);clip-path:polygon(0 20%,100% 0,65% 100%,47% 53%)}
+.vivic-transfer-plane:after{background:var(--transfer-accent,#8ab4db);clip-path:polygon(0 20%,47% 53%,100% 0,49% 68%)}
+.vivic-transfer-landing{position:absolute;border:1px dashed var(--transfer-accent,#b3cadd);border-radius:18px;transform:translate(-50%,-50%);pointer-events:none}
+.vivic-transfer-ring{position:absolute;width:150px;height:150px;border:1px solid var(--transfer-accent,#6a9dce);border-radius:50%;opacity:0;pointer-events:none}
+.vivic-transfer-status{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:86;max-width:calc(100vw - 32px);padding:8px 14px;border-radius:14px;background:var(--hark-solid,#fff);color:var(--hark-ink,#466f98);font:400 13px/1.5 var(--hark-font,system-ui);box-shadow:0 8px 28px #526e8e16;opacity:0;pointer-events:none;transition:opacity .2s;text-align:center}
+.vivic-control-root>.vivic-transfer-status{bottom:132px}
+.vivic-transfer-status[data-visible=true]{opacity:1}
+[data-appearance=dark] .vivic-transfer-button{--transfer-icon:#aac9e8}
+[data-appearance=dark]>.vivic-transfer-status{color:#b5c8db}
+@media(prefers-reduced-motion:reduce){.vivic-transfer-card-ghost{will-change:auto}.vivic-transfer-status{transition:none}}

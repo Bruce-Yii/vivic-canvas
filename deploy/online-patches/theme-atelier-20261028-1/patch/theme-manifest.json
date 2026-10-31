@@ -1,0 +1,63 @@
+{
+  "sourceVersion": "settings-20261028-1",
+  "changes": {
+    "palettes-y4eFPjSE.js": {
+      "beforeSha256": "a704b57aeb0edac15d1e632e03efaa9940be1d662fc0086e16df0a33d05d3d57",
+      "normalizedBeforeSha256": "a704b57aeb0edac15d1e632e03efaa9940be1d662fc0086e16df0a33d05d3d57",
+      "afterSha256": "64d721ba4184f8ca9cddef5162e625ddd4ba34d74660489c1feb7a8968e8bd61"
+    },
+    "canvasStore-Kqevnh2f.js": {
+      "beforeSha256": "02d916cae705322f91869607dadc11867934b9dbdc92cec8d1ca61f1f597c81e",
+      "normalizedBeforeSha256": "02d916cae705322f91869607dadc11867934b9dbdc92cec8d1ca61f1f597c81e",
+      "afterSha256": "f192aa624ef16a194a37cb1629bf7035572397838e1dd1d695a1a41993a12857"
+    },
+    "browserRuntime-CMMGoec6.js": {
+      "beforeSha256": "e8359692c4cf4324eeb0d2795dce1168e284c279cbee5a98de2de49bb8b7ac0b",
+      "normalizedBeforeSha256": "e8359692c4cf4324eeb0d2795dce1168e284c279cbee5a98de2de49bb8b7ac0b",
+      "afterSha256": "b775b79248ca37ffdeed5904bcf2a5dd5ec05e812fbcffe0495c9a552695e621"
+    },
+    "ControlApp-PlatformKeyLock20261027.js": {
+      "beforeSha256": "c45e2b1dcc1b45b74d3c0b7f26bbb01e1c7b88d94c1900fa4c2a7f29865e674e",
+      "normalizedBeforeSha256": "6716a92b16388e5ed89c92a6959925363917aea932c1707049231911b2378862",
+      "afterSha256": "1ccf850d827eaed62a87d30406e12b0976509a5cbe1c080e8e7525ed336b2a6d"
+    },
+    "DisplayApp-DkgZz97I.js": {
+      "beforeSha256": "3002579724bef86f4c3dd5646c58265d011246ec860369dce8375f0dc12f26bb",
+      "normalizedBeforeSha256": "f044ee054608664cd9e220fbbef075ec5ad006c460427e421f875fa5c13903ff",
+      "afterSha256": "68f7f2dd35cf08bcdfee30741fe279f1fa8bca1be08126d4f7408e101d946e54"
+    },
+    "siri-orb-DLFUd4qh.js": {
+      "beforeSha256": "faad59566654ce91e1efa2f0860828ac3dcba8d4e243a47c10b904cb475d7937",
+      "normalizedBeforeSha256": "faad59566654ce91e1efa2f0860828ac3dcba8d4e243a47c10b904cb475d7937",
+      "afterSha256": "a870238d3c04b3c94dd1861b825cc626b2d460976e7d767871d477aca5439e28"
+    }
+  },
+  "newFiles": [
+    "atelier-background.js",
+    "atelier-background.css"
+  ],
+  "darkPresets": [
+    "midnight",
+    "graphite",
+    "forest",
+    "velvet",
+    "ember",
+    "ocean",
+    "nightsky"
+  ],
+  "lightPresets": [
+    "mint",
+    "lilac",
+    "peach",
+    "milk",
+    "berry",
+    "dawn"
+  ],
+  "preferences": [
+    "backgroundEffect",
+    "ambientSpeed",
+    "ambientIntensity",
+    "customDarkColors",
+    "customLightColors"
+  ]
+}

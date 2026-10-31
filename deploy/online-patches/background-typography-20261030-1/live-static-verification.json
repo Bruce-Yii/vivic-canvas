@@ -1,0 +1,17 @@
+{
+  "staticResources": "actual public HTTP responses; no interception",
+  "mainStatus": 200,
+  "cssStatus": 200,
+  "release": "background-typography-20261030-1",
+  "cacheControl": "no-store",
+  "securityHeadersPresent": true,
+  "indexSha256": "ed0ea9e8bfca9cd905e7bad9b792a434372276aeb6988a08d80da603a6e2e80f",
+  "indexMatchesPublishedCandidate": true,
+  "cssSha256": "ec423ee797ff2986f2ed48f6e28a9284bdd5a79c82217883b5a3ad4494bc2bff",
+  "cssMatchesPublishedCandidate": true,
+  "realSessionApi": {
+    "status": 200,
+    "authenticated": false
+  },
+  "timestamp": "2026-10-30T04:36:25.196Z"
+}

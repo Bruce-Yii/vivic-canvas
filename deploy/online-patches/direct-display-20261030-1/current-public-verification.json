@@ -1,0 +1,11 @@
+{
+  "currentRelease": "direct-display-20261030-1",
+  "startupPath": "/assets/card-packages-20261030-1/vivic-startup-v58.js",
+  "runtimePath": "/assets/card-packages-20261030-1/app-runtime-v58.js",
+  "currentHtmlSha256": "84c30f0e761105c155553caa6b1ff5c4c5b21562aa76288f7fd65b35850b072c",
+  "displaySha256": "12d355e023ac3fa8ad30e0c298b05d89da737f14623fb80cba56df8319c99f9b",
+  "displayFixMatchesPublishedPatch": true,
+  "backgroundSyncPreserved": true,
+  "typographyFixPreserved": true,
+  "timestamp": "2026-10-30T05:37:53.755Z"
+}

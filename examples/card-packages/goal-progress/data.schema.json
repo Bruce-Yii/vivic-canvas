@@ -1,0 +1,1 @@
+{"type":"object","additionalProperties":false,"properties":{"target":{"type":"number","minimum":1,"maximum":1000000,"title":"目标量"}},"required":["target"]}

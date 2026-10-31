@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "0.6",
+  "requestId": "r-create-countdown-001",
+  "canvasId": "canvas-life",
+  "spokenText": "已经开始倒计时。",
+  "actions": [
+    {
+      "type": "card.create",
+      "card": {
+        "id": "countdown-001",
+        "type": "CountdownCard",
+        "variant": "minimal",
+        "displayProps": {},
+        "sourceData": {
+          "targetAt": "2026-10-14T14:15:00Z"
+        },
+        "sources": [],
+        "layout": {
+          "x": 140,
+          "y": 90,
+          "width": 320,
+          "height": 200,
+          "pinned": false
+        },
+        "metadata": {
+          "createdAt": "2026-10-14T14:05:00Z",
+          "updatedAt": "2026-10-14T14:05:00Z"
+        }
+      }
+    },
+    {
+      "type": "card.focus",
+      "targetId": "countdown-001"
+    }
+  ]
+}

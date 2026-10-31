@@ -1,0 +1,253 @@
+{
+  "date": "2026-10-16",
+  "sourceRevision": "b6208962ff83d866ddf1a42d227fac038817f32c",
+  "businessCodeRevision": "a8b813c34076a5be73917e2241aeed8c65dcd08f",
+  "branch": "agent/next-iteration",
+  "objective": "Audit current three-feature brief and complete original MVP acceptance; no business implementation changes.",
+  "overall": "MVP and three UI improvements implemented; delivery and external acceptance remain incomplete.",
+  "unit": {
+    "passed": 1246,
+    "webPassed": 386,
+    "apiPassed": 860,
+    "externalSkipped": 3,
+    "exitCode": 0,
+    "log": "evidence/project-audit-20261016/logs/unit.txt"
+  },
+  "typecheck": {
+    "passed": true,
+    "log": "evidence/project-audit-20261016/logs/typecheck.txt"
+  },
+  "build": {
+    "passed": true,
+    "log": "evidence/project-audit-20261016/logs/build.txt",
+    "mainJS": "index-CHTpO3-5.js",
+    "mainSHA256": "e0735ac62625dae1992bef086ee1472472868f365ac42731fe47c79a4402c9fa",
+    "mainKB": 3350.24,
+    "mainGzipKB": 1033.75,
+    "warnings": [
+      "Sherpaw WASM/Node externalization",
+      "large main chunk"
+    ]
+  },
+  "lint": {
+    "exitCode": 0,
+    "warnings": 21,
+    "log": "evidence/project-audit-20261016/logs/lint.txt"
+  },
+  "browsers": {
+    "chromiumFull": {
+      "passed": 88,
+      "failed": 2,
+      "total": 90,
+      "log": "evidence/project-audit-20261016/logs/chromium-full.txt",
+      "failures": [
+        {
+          "file": "apps/web/tests/e2e/control.spec.ts",
+          "line": 18,
+          "cause": "Already centered single countdown at zoom 1 remains at identical transform after focus; test requires a changed transform."
+        },
+        {
+          "file": "apps/web/tests/e2e/voice-input.spec.ts",
+          "line": 57,
+          "cause": "Obsolete digits-only assertion rejects the correctly labeled named reminder."
+        }
+      ]
+    },
+    "firefoxAndWebkit": {
+      "passed": 46,
+      "failed": 0,
+      "eachEngine": 23,
+      "log": "evidence/project-audit-20261016/logs/compat.txt",
+      "files": [
+        "experience.spec.ts",
+        "experience-visual.spec.ts",
+        "interaction-details.spec.ts",
+        "manual-feedback.spec.ts",
+        "data-input.spec.ts",
+        "overlap.spec.ts"
+      ]
+    }
+  },
+  "livePublicTests": {
+    "passed": 3,
+    "failed": 0,
+    "requiresAccount": false,
+    "log": "evidence/project-audit-20261016/logs/public-data-live.txt",
+    "note": "Search diagnostic accepts explicit blocked results; actual product client success is recorded separately."
+  },
+  "liveWeather": {
+    "success": true,
+    "provider": "open-meteo",
+    "evidence": "evidence/project-audit-20261016/browser-evidence/data-providers/open-meteo-live.json"
+  },
+  "livePublicProbe": {
+    "at": "2026-10-16T06:26:30.596Z",
+    "credentialUsed": false,
+    "keyless-search": {
+      "ok": true,
+      "elapsedMs": 1697,
+      "count": 5,
+      "sources": [
+        {
+          "title": "winlp4ever/canvas-harness",
+          "url": "https://github.com/winlp4ever/canvas-harness",
+          "provider": "pi-web-access/exa-mcp-keyless"
+        },
+        {
+          "title": "IrakliDevelop/fieldnotes",
+          "url": "https://github.com/IrakliDevelop/fieldnotes",
+          "provider": "pi-web-access/exa-mcp-keyless"
+        },
+        {
+          "title": "ahmazin/nodus",
+          "url": "https://github.com/ahmazin/nodus",
+          "provider": "pi-web-access/exa-mcp-keyless"
+        },
+        {
+          "title": "Flowscape-UI/canvas-react",
+          "url": "https://github.com/Flowscape-UI/canvas-react/",
+          "provider": "pi-web-access/exa-mcp-keyless"
+        },
+        {
+          "title": "oh-just-another/diagram",
+          "url": "https://github.com/oh-just-another/diagram",
+          "provider": "pi-web-access/exa-mcp-keyless"
+        }
+      ]
+    },
+    "public-article": {
+      "ok": true,
+      "elapsedMs": 550,
+      "url": "https://example.com/",
+      "textChars": 156,
+      "format": "extracted-text",
+      "truncated": false
+    }
+  },
+  "contractDrift": [
+    {
+      "name": "batch-delete",
+      "runtimeAccepted": true,
+      "jsonSchemaAccepted": false,
+      "relevantErrors": [],
+      "missingActionType": "cards.delete"
+    },
+    {
+      "name": "recurring-reminder",
+      "runtimeAccepted": true,
+      "jsonSchemaAccepted": false,
+      "relevantErrors": [
+        {
+          "instancePath": "/actions/0/card/sourceData",
+          "additionalProperty": "schedule"
+        },
+        {
+          "instancePath": "/actions/0/card/sourceData",
+          "additionalProperty": "timeZone"
+        }
+      ]
+    },
+    {
+      "name": "conditional-reminder",
+      "runtimeAccepted": true,
+      "jsonSchemaAccepted": false,
+      "relevantErrors": [
+        {
+          "instancePath": "/actions/0/card/sourceData",
+          "additionalProperty": "condition"
+        }
+      ]
+    }
+  ],
+  "productionDisplayProbe": {
+    "at": "2026-10-16T06:36:16.345Z",
+    "mode": "production build",
+    "baseURL": "http://localhost:5174",
+    "plainPanelCount": 0,
+    "queryPanelCount": 1,
+    "queryButtons": [
+      "awaken a",
+      "3 demo cards c",
+      "focus todo f",
+      "restore r",
+      "delete countdown d",
+      "undo u",
+      "orb + subtitle s",
+      "auto -",
+      "light -",
+      "dark -"
+    ],
+    "devGlobalPresent": false,
+    "microphoneUsed": false,
+    "audioPlayed": false,
+    "accountUsed": false
+  },
+  "productionDisplayEvidence": {
+    "record": "evidence/project-audit-20261016/production-display-probe.json",
+    "screenshot": "evidence/project-audit-20261016/production-display-debug.png"
+  },
+  "acceptanceRemaining": [
+    "Production Display debug panel reachable with ?dev=1",
+    "JSON Schema missing batch delete and scheduled/conditional reminder fields",
+    "Two Chromium full-suite failures require semantic/assertion resolution",
+    "Dedicated local decision model remains experimental and below user Chinese expectations",
+    "Real microphone/wake/noise/voice/device/Plan timestamp acceptance",
+    "Physical Safari/system IME/external monitor/physical GPU acceptance",
+    "Current UI revision has no new 30-minute soak; older 4db5446 evidence retained",
+    "Several historical status documents remain contradictory"
+  ],
+  "excludedOrDeferred": [
+    "All browsers closed reminders explicitly not required",
+    "Voice cloning explicitly deferred",
+    "Other local model evaluation separate future task",
+    "Monthly/yearly/holiday/external-weather reminder conditions not in current three-feature brief",
+    "Desktop/cross-device/third provider/commerce/music not current MVP scope"
+  ],
+  "testIsolation": {
+    "ports": [
+      5174,
+      8788
+    ],
+    "isolatedContexts": true,
+    "commandsSerial": true,
+    "realUserCanvasTouched": false,
+    "physicalMicrophoneUsed": false,
+    "audibleOutput": false,
+    "ttsStateChecksUseSilentMocks": true,
+    "realLLMQuotaUsed": false,
+    "oauthChanged": false,
+    "snapshot": "git archive of sourceRevision, installed dependency links; snapshot-only Vite serving allowance and pnpm verifyDepsBeforeRun=false",
+    "supersededSetup": "First font-serving-isolation run interrupted; evidence/log retained as setup-invalid; not counted as pass or product regression.",
+    "temporaryServersClosed": true
+  },
+  "shortPerformance": {
+    "env": {
+      "dpr": 2,
+      "innerWidth": 1440,
+      "innerHeight": 900,
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+      "at": "2026-10-16T06:27:13.701Z"
+    },
+    "standby": {
+      "frames": 601,
+      "seconds": 10,
+      "avgFps": 60,
+      "p5Fps": 59.5,
+      "droppedOver50ms": 0
+    },
+    "workspace3": {
+      "frames": 601,
+      "seconds": 10,
+      "avgFps": 60,
+      "p5Fps": 59.5,
+      "droppedOver50ms": 0
+    }
+  },
+  "performanceCaveat": "10-second headless samples are not physical GPU acceptance or a current-revision 30-minute soak.",
+  "report": "docs/project-audit-20261016.md",
+  "rawEvidence": "evidence/project-audit-20261016/",
+  "businessCodeModified": false,
+  "pushed": false,
+  "merged": false,
+  "published": false
+}

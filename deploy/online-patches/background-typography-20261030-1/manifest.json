@@ -1,0 +1,9 @@
+{
+  "release": "background-typography-20261030-1",
+  "previous": "/opt/vivic-preview-20261025/releases/clarification-guard-20261030-1/web",
+  "indexSha256": "23e11d0dac170ae72f41935e083c36e501558bddd24961b14a1a502ef127b890",
+  "stylesheet": "background-typography.css",
+  "stylesheetSha256": "ec423ee797ff2986f2ed48f6e28a9284bdd5a79c82217883b5a3ad4494bc2bff",
+  "unchangedEntrypoint": "/assets/card-packages-20261030-1/vivic-startup-confirmation-20261030.js",
+  "unchangedRuntime": "/assets/card-packages-20261030-1/app-runtime-confirmation-20261030.js"
+}

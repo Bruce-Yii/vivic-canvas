@@ -1,0 +1,42 @@
+{
+  "name": "DEMO · 可交互样例",
+  "config": {
+    "title": "DEMO · 发布准备",
+    "context": "先完成评审，再确认交付；以下为虚构演示数据。"
+  },
+  "data": {
+    "origin": "demo"
+  },
+  "state": {
+    "items": [
+      {
+        "id": "demo-review",
+        "title": "整理评审材料",
+        "owner": "我",
+        "due": "周四下午",
+        "priority": "重点",
+        "status": "进行中",
+        "note": ""
+      },
+      {
+        "id": "demo-feedback",
+        "title": "确认反馈清单",
+        "owner": "",
+        "due": "",
+        "priority": "常规",
+        "status": "待办",
+        "note": "等待评审后补充"
+      },
+      {
+        "id": "demo-release",
+        "title": "检查发布说明",
+        "owner": "我",
+        "due": "周五",
+        "priority": "常规",
+        "status": "完成",
+        "note": ""
+      }
+    ],
+    "note": ""
+  }
+}

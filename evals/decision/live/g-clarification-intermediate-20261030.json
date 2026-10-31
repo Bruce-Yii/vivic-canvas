@@ -1,0 +1,16 @@
+{
+  "pageErrors": [],
+  "results": [],
+  "checks": [
+    "ambiguous deletion asks before mutation",
+    "selection asks separate deletion confirmation",
+    "cancel keeps both cards",
+    "selection asks separate deletion confirmation"
+  ],
+  "complete": false,
+  "cleanup": true,
+  "candidateButtons": 2,
+  "usedCandidateClick": true,
+  "error": "Expected values to be strictly equal:\n\n2 !== 1\n",
+  "failureText": "Space\nSpace 存档\n路由评测专用（非用户空间）\n\n画布或删除目标已变更，请重新发起并确认；本次未执行任何操作。\n\n添加图片\n上传文件\nPDF / MD · 最多 5 个 · 合计 10 MB\n选择已连接\n语音自动发送"
+}

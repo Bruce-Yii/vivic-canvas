@@ -1,0 +1,17 @@
+{
+  "windowHours": 24,
+  "mode": "on",
+  "evaluationExcluded": true,
+  "summary": {
+    "available": true,
+    "total": 0,
+    "pending": 0,
+    "failures": 0,
+    "undone": 0,
+    "byRoute": {},
+    "succeeded": 0,
+    "succeededUndone": 0,
+    "undoRatio": null,
+    "note": "Agreement is an output-contract proxy, not labeled model accuracy. Browser proposals are not execution receipts. Undo ratios use only confirmed outcome=succeeded records; total counts and undone counts include all records. Undo is a behavior proxy, not accuracy or a causal judgment of model quality."
+  }
+}

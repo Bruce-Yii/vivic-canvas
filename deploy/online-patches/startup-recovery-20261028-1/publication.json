@@ -1,0 +1,7 @@
+{
+  "release": "startup-recovery-20261028-1",
+  "previous": "/opt/vivic-preview-20261025/releases/ui-reconciled-20261028-1/web",
+  "sourceEntry": "main-AccessRecovery20261028-8.js",
+  "runtimeSha256": "14cbff1c843da6099f1591eb1b43c25c29f2210f3e788a37e7f6ea5d6327b444",
+  "legacyEntryCompatibility": true
+}

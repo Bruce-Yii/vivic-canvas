@@ -1,0 +1,89 @@
+{
+  "date": "2026-10-15",
+  "branch": "agent/next-iteration",
+  "scope": [
+    "three licensed-source prerecorded feedback clips",
+    "optional StepFun SSE word timing",
+    "browser boundary highlights",
+    "offline PCM RMS for the existing SmoothUI Orb"
+  ],
+  "defaults": {
+    "ttsEnabled": false,
+    "requestWordTimings": false,
+    "ttsEnabledPersisted": false,
+    "publicWordTimingPreferencePersisted": true
+  },
+  "verification": {
+    "unit": {
+      "webPassed": 329,
+      "apiPassed": 819,
+      "apiSkipped": 3
+    },
+    "typecheck": "passed",
+    "build": "passed",
+    "chromium": {
+      "command": "pnpm --filter @vivic/web exec playwright test tests/e2e/speech-feedback.spec.ts tests/e2e/speech.spec.ts tests/e2e/voices.spec.ts tests/e2e/thinking.spec.ts tests/e2e/local-data-reset.spec.ts tests/e2e/data-input.spec.ts",
+      "passed": 15,
+      "failed": 0
+    },
+    "compat": {
+      "command": "pnpm --filter @vivic/web exec playwright test --config=playwright.compat.config.ts tests/e2e/speech-feedback.spec.ts",
+      "firefoxPassed": 3,
+      "webkitPassed": 3,
+      "failed": 0
+    },
+    "note": "Unit, build, Chromium and compatibility commands were separate runs. Browser audio clocks/playback and system boundary callbacks were TEST substitutes; OfflineAudioContext decoded real bundled MP3 files."
+  },
+  "assets": {
+    "count": 3,
+    "mp3Bytes": 19911,
+    "texts": [
+      "我看看",
+      "稍等",
+      "好的"
+    ],
+    "model": "hexgrad/Kokoro-82M-v1.1-zh",
+    "modelRevision": "01e7505bd6a7a2ac4975463114c3a7650a9f7218",
+    "onnxRevision": "914313412b607d95400bcd12446233fbd1248801",
+    "modelLicense": "Apache-2.0",
+    "provenance": "apps/web/public/voice-feedback/PROVENANCE.md",
+    "manifest": "apps/web/public/voice-feedback/manifest.json",
+    "runtimeWeightDownload": false
+  },
+  "network": {
+    "onlyPlanSpeech": true,
+    "audioDownloadUrlsFollowed": false,
+    "automaticPaidRetry": false,
+    "sseMaxBytes": 8388608,
+    "audioMaxBytes": 4194304,
+    "frontendJsonMaxBytes": 6291456
+  },
+  "privacy": {
+    "hardwarePlayback": false,
+    "physicalMicrophone": false,
+    "realUserCanvasTouched": false,
+    "voicePhaseLiveCloudCalls": 0,
+    "newOAuthLogin": false,
+    "testPorts": [
+      5174,
+      8788
+    ]
+  },
+  "evidence": [
+    "evidence/voice-feedback/chromium/",
+    "evidence/voice-feedback/firefox/",
+    "evidence/voice-feedback/webkit/",
+    "evidence/voice-feedback/regression/"
+  ],
+  "notVerified": [
+    "Actual StepFun account timestamp support",
+    "Human listening and real speaker synchronization",
+    "Physical Safari/external display",
+    "Personal wake-word acoustics",
+    "Final long-duration and GPU baseline"
+  ],
+  "knownWarnings": [
+    "Existing Sherpaw WASM/Node branch and bundle size warnings",
+    "Existing React Flow attribution warning"
+  ]
+}

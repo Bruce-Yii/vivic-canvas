@@ -1,0 +1,9 @@
+{
+  "components": [
+    { "component": "Header", "bind": "/config/title" },
+    { "component": "KeyValue", "label": "训练日期", "bind": "/data/trainingDate" },
+    { "component": "Badge", "label": "训练部位", "bind": "/data/bodyPart" },
+    { "component": "Metric", "label": "训练时长（分钟）", "bind": "/data/minutes" },
+    { "component": "KeyValue", "label": "备注", "bind": "/state/note" }
+  ]
+}

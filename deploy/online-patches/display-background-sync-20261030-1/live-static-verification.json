@@ -1,0 +1,30 @@
+{
+  "staticResponses": "actual public HTTP responses without interception",
+  "files": [
+    {
+      "name": "index.html",
+      "status": 200,
+      "sha256": "d6535a1d6d518e73fa909e88bfaba051d816045907d1f18fb0c49d0e1bf6f3a1",
+      "release": "display-background-sync-20261030-1",
+      "cacheControl": "no-store",
+      "securityHeadersPresent": true
+    },
+    {
+      "name": "display-background-sync.css",
+      "status": 200,
+      "sha256": "e035b4fe62968f62fc13f9e7af3bfc6dfafab584e8876fffff75f6a155bf0705",
+      "release": "display-background-sync-20261030-1",
+      "cacheControl": "no-cache",
+      "securityHeadersPresent": true
+    },
+    {
+      "name": "DisplayApp-DkgZz97I.js",
+      "status": 200,
+      "sha256": "6ca3424ffa528e7be807d45abbefd0297eea8c95a82fbcad387c601a7e16e2cf",
+      "release": "display-background-sync-20261030-1",
+      "cacheControl": "no-cache",
+      "securityHeadersPresent": true
+    }
+  ],
+  "previousTypographyPatchPreserved": true
+}

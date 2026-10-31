@@ -1,0 +1,1233 @@
+{
+  "as_of": "2026-10-15",
+  "collected_at_utc": "2026-10-15T12:58:55.588770+00:00",
+  "scope": "Read-only repository/documentation/package inspection. No install, model inference, microphone, speaker playback or application behavior verification.",
+  "method": {
+    "package_metadata": "npm public registry, dist-tags.latest at collection time; package versions below are the immutable references.",
+    "repo_metadata": "GitHub public API, license values are automatic SPDX detection and can be absent or NOASSERTION despite a repository license file.",
+    "distribution_sizes": "Read exact npm .tgz without extraction or execution; single-file gzip via Python gzip.compress(mtime=0), no re-minification.",
+    "size_limitations": "Single files exclude external dependencies, optional plugins, models and app build effects; npm unpacked sizes are neither browser transfer nor memory."
+  },
+  "fixed_revisions": {
+    "ECdison6227/hark-ui-research": "b5b49eb46494b86d56c21654ea585ad379d9b9d7",
+    "beiyege-01/dsh-voice-ai-girlfriend": "480bbabada7335735cad591eaa55f32fe54a4214"
+  },
+  "repositories": [
+    {
+      "repo": "beiyege-01/dsh-voice-ai-girlfriend",
+      "url": "https://github.com/beiyege-01/dsh-voice-ai-girlfriend",
+      "default_branch": "main",
+      "pushed_at": "2026-09-13T16:36:44Z",
+      "archived": false,
+      "license": "NOASSERTION",
+      "description": "语音 AI 女友（Voice AI girlfriend for DeepSeek Harness）：Whisper 语音输入 + Qwen3-TTS 声音克隆 + 句子级流式朗读 + 数字人动画窗。插话/排队双模式，说话即打断。"
+    },
+    {
+      "repo": "ECdison6227/hark-ui-research",
+      "url": "https://github.com/ECdison6227/hark-ui-research",
+      "default_branch": "main",
+      "pushed_at": "2026-10-15T03:11:01Z",
+      "archived": false,
+      "license": null,
+      "description": "Hark 聊天界面研究：交互卡片、设计变量、流式同步与证据归档"
+    },
+    {
+      "repo": "shiguredo/rnnoise-wasm",
+      "url": "https://github.com/shiguredo/rnnoise-wasm",
+      "default_branch": "develop",
+      "pushed_at": "2026-07-14T13:35:58Z",
+      "archived": false,
+      "license": "Apache-2.0",
+      "description": "WebAssembly build of RNNoise"
+    },
+    {
+      "repo": "jitsi/rnnoise-wasm",
+      "url": "https://github.com/jitsi/rnnoise-wasm",
+      "default_branch": "master",
+      "pushed_at": "2025-02-03T12:28:37Z",
+      "archived": false,
+      "license": "Apache-2.0",
+      "description": "rnnoise noise suppression library as a WASM module"
+    },
+    {
+      "repo": "ricky0123/vad",
+      "url": "https://github.com/ricky0123/vad",
+      "default_branch": "master",
+      "pushed_at": "2026-09-12T18:53:24Z",
+      "archived": false,
+      "license": "NOASSERTION",
+      "description": "Voice activity detector (VAD) for the browser with a simple API"
+    },
+    {
+      "repo": "pipecat-ai/smart-turn",
+      "url": "https://github.com/pipecat-ai/smart-turn",
+      "default_branch": "main",
+      "pushed_at": "2026-01-29T12:30:26Z",
+      "archived": false,
+      "license": "BSD-2-Clause",
+      "description": null
+    },
+    {
+      "repo": "TEN-framework/ten-vad",
+      "url": "https://github.com/TEN-framework/ten-vad",
+      "default_branch": "main",
+      "pushed_at": "2026-10-09T08:53:06Z",
+      "archived": false,
+      "license": "NOASSERTION",
+      "description": "Voice Activity Detector (VAD) : low-latency, high-performance and lightweight"
+    },
+    {
+      "repo": "Supertone/supertonic",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "repo": "wuxuedaifu/supertonic_cn",
+      "url": "https://github.com/wuxuedaifu/supertonic_cn",
+      "default_branch": "main",
+      "pushed_at": "2026-08-15T10:56:26Z",
+      "archived": false,
+      "license": "MIT",
+      "description": "Supertonic-ZH — fast on-device Mandarin TTS (pure ONNX). Now with streaming synthesis for real-time dialogue (low first-audio latency, barge-in)."
+    },
+    {
+      "repo": "uzen-zone/kokoro-js",
+      "url": "https://github.com/uzen-zone/kokoro-js",
+      "default_branch": "main",
+      "pushed_at": "2026-06-19T21:41:26Z",
+      "archived": false,
+      "license": "Apache-2.0",
+      "description": "A browser-first JavaScript TTS library for Kokoro, adding local Mandarin and mixed Chinese-English speech synthesis with v1.1 Chinese model support via Transformers.js."
+    },
+    {
+      "repo": "k2-fsa/sherpa-onnx",
+      "url": "https://github.com/k2-fsa/sherpa-onnx",
+      "default_branch": "master",
+      "pushed_at": "2026-10-15T05:52:35Z",
+      "archived": false,
+      "license": "Apache-2.0",
+      "description": "Speech-to-text, text-to-speech, speaker diarization, speech enhancement, source separation, and VAD using next-gen Kaldi with onnxruntime without Internet connection. Support embedded systems, Android, iOS, HarmonyOS, Raspberry Pi, RISC-V, RK NPU, Axera NPU, Ascend NPU, x86_64 servers, websocket server/client, support 12 programming languages"
+    },
+    {
+      "repo": "pacocoursey/cmdk",
+      "url": "https://github.com/dip/cmdk",
+      "default_branch": "main",
+      "pushed_at": "2025-10-29T04:13:58Z",
+      "archived": false,
+      "license": "MIT",
+      "description": "Fast, unstyled command menu React component."
+    },
+    {
+      "repo": "krisk/Fuse",
+      "url": "https://github.com/krisk/Fuse",
+      "default_branch": "main",
+      "pushed_at": "2026-08-09T04:40:41Z",
+      "archived": false,
+      "license": "Apache-2.0",
+      "description": "Lightweight fuzzy-search, in JavaScript"
+    },
+    {
+      "repo": "zh-lx/pinyin-pro",
+      "url": "https://github.com/zh-lx/pinyin-pro",
+      "default_branch": "main",
+      "pushed_at": "2026-10-10T00:16:16Z",
+      "archived": false,
+      "license": "MIT",
+      "description": "中文转拼音、拼音音调、拼音声母、拼音韵母、多音字拼音、姓氏拼音、拼音匹配、中文分词"
+    },
+    {
+      "repo": "mourner/rbush",
+      "url": "https://github.com/mourner/rbush",
+      "default_branch": "main",
+      "pushed_at": "2026-10-02T16:26:24Z",
+      "archived": false,
+      "license": "MIT",
+      "description": "RBush — a high-performance JavaScript R-tree-based 2D spatial index for points and rectangles"
+    },
+    {
+      "repo": "TanStack/table",
+      "url": "https://github.com/TanStack/table",
+      "default_branch": "main",
+      "pushed_at": "2026-10-12T16:50:28Z",
+      "archived": false,
+      "license": "MIT",
+      "description": "🤖 Headless UI for building powerful tables & datagrids for TS/JS -  React-Table, Vue-Table, Solid-Table, Svelte-Table"
+    },
+    {
+      "repo": "TanStack/virtual",
+      "url": "https://github.com/TanStack/virtual",
+      "default_branch": "main",
+      "pushed_at": "2026-10-15T12:39:01Z",
+      "archived": false,
+      "license": "MIT",
+      "description": "🤖 Headless UI for Virtualizing Large Element Lists in JS/TS, React, Solid, Vue and Svelte"
+    },
+    {
+      "repo": "mholt/PapaParse",
+      "url": "https://github.com/mholt/PapaParse",
+      "default_branch": "master",
+      "pushed_at": "2026-10-09T07:57:23Z",
+      "archived": false,
+      "license": "MIT",
+      "description": "Fast and powerful CSV (delimited text) parser that gracefully handles large files and malformed input"
+    },
+    {
+      "repo": "josdejong/jsonrepair",
+      "url": "https://github.com/josdejong/jsonrepair",
+      "default_branch": "main",
+      "pushed_at": "2026-07-03T17:43:52Z",
+      "archived": false,
+      "license": "NOASSERTION",
+      "description": "Repair invalid JSON documents"
+    },
+    {
+      "repo": "kepano/defuddle",
+      "url": "https://github.com/kepano/defuddle",
+      "default_branch": "main",
+      "pushed_at": "2026-10-10T17:59:09Z",
+      "archived": false,
+      "license": "MIT",
+      "description": "Get the main content of any page as Markdown."
+    },
+    {
+      "repo": "WebReflection/linkedom",
+      "url": "https://github.com/WebReflection/linkedom",
+      "default_branch": "main",
+      "pushed_at": "2026-10-09T16:20:34Z",
+      "archived": false,
+      "license": "ISC",
+      "description": "A triple-linked lists based DOM implementation."
+    },
+    {
+      "repo": "wanasit/chrono",
+      "url": "https://github.com/wanasit/chrono",
+      "default_branch": "master",
+      "pushed_at": "2026-10-12T01:11:44Z",
+      "archived": false,
+      "license": "MIT",
+      "description": "A natural language date parser in Javascript"
+    },
+    {
+      "repo": "microsoft/Recognizers-Text",
+      "url": "https://github.com/microsoft/Recognizers-Text",
+      "default_branch": "master",
+      "pushed_at": "2026-04-17T06:19:03Z",
+      "archived": false,
+      "license": "MIT",
+      "description": "Microsoft.Recognizers.Text provides recognition and resolution of numbers, units, date/time, etc. in multiple languages (ZH, EN, FR, ES, PT, DE, IT, TR, HI, NL. Partial support for JA, KO, AR, SV). Packages available at: https://www.nuget.org/profiles/Recognizers.Text, https://www.npmjs.com/~recognizers.text"
+    },
+    {
+      "repo": "jkbrzt/rrule",
+      "url": "https://github.com/jkbrzt/rrule",
+      "default_branch": "master",
+      "pushed_at": "2024-06-27T17:52:15Z",
+      "archived": false,
+      "license": "NOASSERTION",
+      "description": "JavaScript library for working with recurrence rules for calendar dates as defined in the iCalendar RFC and more."
+    },
+    {
+      "repo": "JohannesKlauss/react-hotkeys-hook",
+      "url": "https://github.com/JohannesKlauss/react-hotkeys-hook",
+      "default_branch": "main",
+      "pushed_at": "2026-10-12T05:01:27Z",
+      "archived": false,
+      "license": "MIT",
+      "description": "React hook for using keyboard shortcuts in components."
+    },
+    {
+      "repo": "vercel/streamdown",
+      "url": "https://github.com/vercel/streamdown",
+      "default_branch": "main",
+      "pushed_at": "2026-10-15T12:44:19Z",
+      "archived": false,
+      "license": "NOASSERTION",
+      "description": "A drop-in replacement for react-markdown, designed for AI-powered streaming."
+    },
+    {
+      "repo": "kieler/elkjs",
+      "url": "https://github.com/kieler/elkjs",
+      "default_branch": "master",
+      "pushed_at": "2026-10-14T03:18:35Z",
+      "archived": false,
+      "license": "NOASSERTION",
+      "description": "ELK's layout algorithms for JavaScript"
+    },
+    {
+      "repo": "emilkowalski/sonner",
+      "url": "https://github.com/emilkowalski/sonner",
+      "default_branch": "main",
+      "pushed_at": "2026-08-10T11:13:03Z",
+      "archived": false,
+      "license": "MIT",
+      "description": "An opinionated toast component for React."
+    },
+    {
+      "repo": "Godefroy/micdrop",
+      "error": "HTTP Error 403: rate limit exceeded"
+    },
+    {
+      "repo": "stackblitz-labs/use-stick-to-bottom",
+      "error": "HTTP Error 403: rate limit exceeded"
+    },
+    {
+      "repo": "bring-shrubbery/squircle-js",
+      "error": "HTTP Error 403: rate limit exceeded"
+    },
+    {
+      "repo": "xmflswood/pinyin-match",
+      "error": "HTTP Error 403: rate limit exceeded"
+    },
+    {
+      "repo": "phamfoo/figma-squircle",
+      "error": "HTTP Error 403: rate limit exceeded"
+    },
+    {
+      "repo": "supertone-oss-archive/supertonic",
+      "error": "HTTP Error 403: rate limit exceeded"
+    }
+  ],
+  "packages": [
+    {
+      "package": "@shiguredo/rnnoise-wasm",
+      "version": "2025.1.5",
+      "published_at": "2025-05-09T03:50:11.279Z",
+      "license": "Apache-2.0",
+      "unpacked_bytes": 4845350,
+      "dependencies": {},
+      "peerDependencies": {},
+      "repository": {
+        "url": "git+https://github.com/shiguredo/rnnoise-wasm.git",
+        "type": "git"
+      },
+      "tarball": "https://registry.npmjs.org/@shiguredo/rnnoise-wasm/-/rnnoise-wasm-2025.1.5.tgz",
+      "registry": "https://registry.npmjs.org/%40shiguredo%2Frnnoise-wasm/2025.1.5"
+    },
+    {
+      "package": "@jitsi/rnnoise-wasm",
+      "version": "0.2.1",
+      "published_at": "2025-02-03T12:29:28.649Z",
+      "license": null,
+      "unpacked_bytes": 2076591,
+      "dependencies": {},
+      "peerDependencies": {},
+      "repository": {
+        "url": "git+https://github.com/jitsi/rnnoise-wasm.git",
+        "type": "git"
+      },
+      "tarball": "https://registry.npmjs.org/@jitsi/rnnoise-wasm/-/rnnoise-wasm-0.2.1.tgz",
+      "registry": "https://registry.npmjs.org/%40jitsi%2Frnnoise-wasm/0.2.1"
+    },
+    {
+      "package": "@ricky0123/vad-web",
+      "version": "0.0.31",
+      "published_at": "2026-09-12T16:51:24.349Z",
+      "license": "ISC",
+      "unpacked_bytes": 6755237,
+      "dependencies": {
+        "onnxruntime-web": "^1.17.0"
+      },
+      "peerDependencies": {},
+      "repository": null,
+      "tarball": "https://registry.npmjs.org/@ricky0123/vad-web/-/vad-web-0.0.31.tgz",
+      "registry": "https://registry.npmjs.org/%40ricky0123%2Fvad-web/0.0.31"
+    },
+    {
+      "package": "cmdk",
+      "version": "1.1.1",
+      "published_at": "2025-03-14T19:21:16.194Z",
+      "license": "MIT",
+      "unpacked_bytes": 81852,
+      "dependencies": {
+        "@radix-ui/react-id": "^1.1.0",
+        "@radix-ui/react-dialog": "^1.1.6",
+        "@radix-ui/react-primitive": "^2.0.2",
+        "@radix-ui/react-compose-refs": "^1.1.1"
+      },
+      "peerDependencies": {
+        "react": "^18 || ^19 || ^19.0.0-rc",
+        "react-dom": "^18 || ^19 || ^19.0.0-rc"
+      },
+      "repository": {
+        "url": "git+https://github.com/pacocoursey/cmdk.git",
+        "type": "git",
+        "directory": "cmdk"
+      },
+      "tarball": "https://registry.npmjs.org/cmdk/-/cmdk-1.1.1.tgz",
+      "registry": "https://registry.npmjs.org/cmdk/1.1.1"
+    },
+    {
+      "package": "fuse.js",
+      "version": "7.5.0",
+      "published_at": "2026-07-13T17:23:36.705Z",
+      "license": "Apache-2.0",
+      "unpacked_bytes": 417199,
+      "dependencies": {},
+      "peerDependencies": {},
+      "repository": {
+        "url": "git+https://github.com/krisk/Fuse.git",
+        "type": "git"
+      },
+      "tarball": "https://registry.npmjs.org/fuse.js/-/fuse.js-7.5.0.tgz",
+      "registry": "https://registry.npmjs.org/fuse.js/7.5.0"
+    },
+    {
+      "package": "pinyin-pro",
+      "version": "3.29.5",
+      "published_at": "2026-10-10T00:18:54.362Z",
+      "license": "MIT",
+      "unpacked_bytes": 950223,
+      "dependencies": {},
+      "peerDependencies": {},
+      "repository": {
+        "url": "git+https://github.com/zh-lx/pinyin-pro.git",
+        "type": "git",
+        "directory": "packages/pinyin-pro"
+      },
+      "tarball": "https://registry.npmjs.org/pinyin-pro/-/pinyin-pro-3.29.5.tgz",
+      "registry": "https://registry.npmjs.org/pinyin-pro/3.29.5"
+    },
+    {
+      "package": "rbush",
+      "version": "4.0.1",
+      "published_at": "2024-08-21T19:13:21.665Z",
+      "license": "MIT",
+      "unpacked_bytes": 48823,
+      "dependencies": {
+        "quickselect": "^3.0.0"
+      },
+      "peerDependencies": {},
+      "repository": {
+        "type": "git",
+        "url": "git://github.com/mourner/rbush.git"
+      },
+      "tarball": "https://registry.npmjs.org/rbush/-/rbush-4.0.1.tgz",
+      "registry": "https://registry.npmjs.org/rbush/4.0.1"
+    },
+    {
+      "package": "@tanstack/react-table",
+      "version": "9.3.1",
+      "published_at": "2026-10-12T16:50:44.806Z",
+      "license": "MIT",
+      "unpacked_bytes": 122555,
+      "dependencies": {
+        "@tanstack/table-core": "9.3.1",
+        "@tanstack/react-store": "^0.11.2"
+      },
+      "peerDependencies": {
+        "react": ">=18"
+      },
+      "repository": {
+        "url": "https://github.com/TanStack/table.git",
+        "type": "git",
+        "directory": "packages/react-table"
+      },
+      "tarball": "https://registry.npmjs.org/@tanstack/react-table/-/react-table-9.3.1.tgz",
+      "registry": "https://registry.npmjs.org/%40tanstack%2Freact-table/9.3.1"
+    },
+    {
+      "package": "@tanstack/react-virtual",
+      "version": "3.14.19",
+      "published_at": "2026-10-13T18:25:23.539Z",
+      "license": "MIT",
+      "unpacked_bytes": 63728,
+      "dependencies": {
+        "@tanstack/virtual-core": "3.19.4"
+      },
+      "peerDependencies": {
+        "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0",
+        "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
+      },
+      "repository": {
+        "url": "git+https://github.com/TanStack/virtual.git",
+        "type": "git",
+        "directory": "packages/react-virtual"
+      },
+      "tarball": "https://registry.npmjs.org/@tanstack/react-virtual/-/react-virtual-3.14.19.tgz",
+      "registry": "https://registry.npmjs.org/%40tanstack%2Freact-virtual/3.14.19"
+    },
+    {
+      "package": "papaparse",
+      "version": "5.7.0",
+      "published_at": "2026-08-24T14:28:22.981Z",
+      "license": "MIT",
+      "unpacked_bytes": 270635,
+      "dependencies": {},
+      "peerDependencies": {},
+      "repository": {
+        "url": "git+https://github.com/mholt/PapaParse.git",
+        "type": "git"
+      },
+      "tarball": "https://registry.npmjs.org/papaparse/-/papaparse-5.7.0.tgz",
+      "registry": "https://registry.npmjs.org/papaparse/5.7.0"
+    },
+    {
+      "package": "jsonrepair",
+      "version": "3.15.0",
+      "published_at": "2026-07-03T17:44:06.346Z",
+      "license": "ISC",
+      "unpacked_bytes": 583060,
+      "dependencies": {},
+      "peerDependencies": {},
+      "repository": {
+        "type": "git",
+        "url": "git+https://github.com/josdejong/jsonrepair.git"
+      },
+      "tarball": "https://registry.npmjs.org/jsonrepair/-/jsonrepair-3.15.0.tgz",
+      "registry": "https://registry.npmjs.org/jsonrepair/3.15.0"
+    },
+    {
+      "package": "defuddle",
+      "version": "0.19.5",
+      "published_at": "2026-10-10T15:35:10.787Z",
+      "license": "MIT",
+      "unpacked_bytes": 2756053,
+      "dependencies": {
+        "commander": "^12.1.0",
+        "mathml-to-latex": "^1.8.0"
+      },
+      "peerDependencies": {},
+      "repository": {
+        "url": "git+https://github.com/kepano/defuddle.git",
+        "type": "git"
+      },
+      "tarball": "https://registry.npmjs.org/defuddle/-/defuddle-0.19.5.tgz",
+      "registry": "https://registry.npmjs.org/defuddle/0.19.5"
+    },
+    {
+      "package": "linkedom",
+      "version": "0.18.13",
+      "published_at": "2026-07-07T17:34:18.446Z",
+      "license": "ISC",
+      "unpacked_bytes": 909684,
+      "dependencies": {
+        "css-select": "^7.0.0",
+        "cssom": "^0.5.0",
+        "html-escaper": "^3.0.3",
+        "htmlparser2": "^10.1.0",
+        "uhyphen": "^0.2.0"
+      },
+      "peerDependencies": {
+        "canvas": ">= 2"
+      },
+      "repository": {
+        "type": "git",
+        "url": "git+https://github.com/WebReflection/linkedom.git"
+      },
+      "tarball": "https://registry.npmjs.org/linkedom/-/linkedom-0.18.13.tgz",
+      "registry": "https://registry.npmjs.org/linkedom/0.18.13"
+    },
+    {
+      "package": "chrono-node",
+      "version": "2.10.3",
+      "published_at": "2026-10-12T01:22:35.391Z",
+      "license": "MIT",
+      "unpacked_bytes": 3163826,
+      "dependencies": {},
+      "peerDependencies": {},
+      "repository": {
+        "url": "git+https://github.com/wanasit/chrono.git",
+        "type": "git"
+      },
+      "tarball": "https://registry.npmjs.org/chrono-node/-/chrono-node-2.10.3.tgz",
+      "registry": "https://registry.npmjs.org/chrono-node/2.10.3"
+    },
+    {
+      "package": "@microsoft/recognizers-text-date-time",
+      "version": "1.3.2",
+      "published_at": "2023-07-31T17:46:41.194Z",
+      "license": "MIT",
+      "unpacked_bytes": 11037840,
+      "dependencies": {
+        "lodash": "^4.17.21",
+        "@microsoft/recognizers-text": "~1.3.1",
+        "@microsoft/recognizers-text-number": "~1.3.1",
+        "@microsoft/recognizers-text-number-with-unit": "~1.3.1"
+      },
+      "peerDependencies": {},
+      "repository": {
+        "url": "git+https://github.com/Microsoft/Recognizers-Text.git",
+        "type": "git"
+      },
+      "tarball": "https://registry.npmjs.org/@microsoft/recognizers-text-date-time/-/recognizers-text-date-time-1.3.2.tgz",
+      "registry": "https://registry.npmjs.org/%40microsoft%2Frecognizers-text-date-time/1.3.2"
+    },
+    {
+      "package": "rrule",
+      "version": "2.8.1",
+      "published_at": "2023-11-10T20:05:55.744Z",
+      "license": "BSD-3-Clause",
+      "unpacked_bytes": 687245,
+      "dependencies": {
+        "tslib": "^2.4.0"
+      },
+      "peerDependencies": {},
+      "repository": {
+        "type": "git",
+        "url": "git://github.com/jakubroztocil/rrule.git"
+      },
+      "tarball": "https://registry.npmjs.org/rrule/-/rrule-2.8.1.tgz",
+      "registry": "https://registry.npmjs.org/rrule/2.8.1"
+    },
+    {
+      "package": "react-hotkeys-hook",
+      "version": "5.3.3",
+      "published_at": "2026-06-26T14:23:15.600Z",
+      "license": "MIT",
+      "unpacked_bytes": 31030,
+      "dependencies": {},
+      "peerDependencies": {
+        "react": ">=16.8.0",
+        "react-dom": ">=16.8.0"
+      },
+      "repository": {
+        "type": "git",
+        "url": "git+https://github.com/JohannesKlauss/react-keymap-hook.git"
+      },
+      "tarball": "https://registry.npmjs.org/react-hotkeys-hook/-/react-hotkeys-hook-5.3.3.tgz",
+      "registry": "https://registry.npmjs.org/react-hotkeys-hook/5.3.3"
+    },
+    {
+      "package": "streamdown",
+      "version": "2.7.0",
+      "published_at": "2026-09-30T14:56:19.987Z",
+      "license": "Apache-2.0",
+      "unpacked_bytes": 124391,
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "marked": "^18.0.11",
+        "remend": "1.4.0",
+        "unified": "^11.0.5",
+        "rehype-raw": "^7.0.0",
+        "remark-gfm": "^4.0.1",
+        "remark-parse": "^11.0.0",
+        "rehype-harden": "^1.1.8",
+        "remark-rehype": "^11.1.2",
+        "tailwind-merge": "^3.6.0",
+        "rehype-sanitize": "^6.0.0",
+        "unist-util-visit": "^5.1.0",
+        "html-url-attributes": "^3.0.1",
+        "hast-util-to-jsx-runtime": "^2.3.6",
+        "unist-util-visit-parents": "^6.0.2"
+      },
+      "peerDependencies": {
+        "react": "^18.0.0 || ^19.0.0",
+        "react-dom": "^18.0.0 || ^19.0.0"
+      },
+      "repository": {
+        "url": "git+https://github.com/vercel/streamdown.git",
+        "type": "git",
+        "directory": "packages/streamdown"
+      },
+      "tarball": "https://registry.npmjs.org/streamdown/-/streamdown-2.7.0.tgz",
+      "registry": "https://registry.npmjs.org/streamdown/2.7.0"
+    },
+    {
+      "package": "elkjs",
+      "version": "0.12.0",
+      "published_at": "2026-07-17T08:07:54.693Z",
+      "license": "EPL-2.0 OR GPL-3.0-or-later",
+      "unpacked_bytes": 8046232,
+      "dependencies": {},
+      "peerDependencies": {},
+      "repository": {
+        "type": "git",
+        "url": "git+https://github.com/kieler/elkjs.git"
+      },
+      "tarball": "https://registry.npmjs.org/elkjs/-/elkjs-0.12.0.tgz",
+      "registry": "https://registry.npmjs.org/elkjs/0.12.0"
+    },
+    {
+      "package": "sonner",
+      "version": "2.0.8",
+      "published_at": "2026-08-09T08:46:10.174Z",
+      "license": "MIT",
+      "unpacked_bytes": 174012,
+      "dependencies": {},
+      "peerDependencies": {
+        "react": "^18.0.0 || ^19.0.0 || ^19.0.0-rc",
+        "react-dom": "^18.0.0 || ^19.0.0 || ^19.0.0-rc",
+        "@types/react": "^18.0.0 || ^19.0.0"
+      },
+      "repository": {
+        "url": "git+https://github.com/emilkowalski/sonner.git",
+        "type": "git"
+      },
+      "tarball": "https://registry.npmjs.org/sonner/-/sonner-2.0.8.tgz",
+      "registry": "https://registry.npmjs.org/sonner/2.0.8"
+    },
+    {
+      "package": "@uzen/kokoro-js",
+      "version": "1.2.4",
+      "published_at": "2026-06-19T20:44:38.015Z",
+      "license": "Apache-2.0",
+      "unpacked_bytes": 2294551,
+      "dependencies": {
+        "@huggingface/transformers": "^4.2.0",
+        "phonemizer": "^1.2.1",
+        "pinyin-pro": "^3.28.1"
+      },
+      "peerDependencies": {},
+      "repository": {
+        "type": "git",
+        "url": "git+https://github.com/uzen-zone/kokoro-js.git"
+      },
+      "tarball": "https://registry.npmjs.org/@uzen/kokoro-js/-/kokoro-js-1.2.4.tgz",
+      "registry": "https://registry.npmjs.org/%40uzen%2Fkokoro-js/1.2.4"
+    },
+    {
+      "package": "pinyin-match",
+      "version": "1.2.10",
+      "published_at": "2025-12-07T03:37:04.104Z",
+      "license": "MIT",
+      "unpacked_bytes": 486407,
+      "dependencies": {},
+      "peerDependencies": {},
+      "tarball": "https://registry.npmjs.org/pinyin-match/-/pinyin-match-1.2.10.tgz",
+      "registry": "https://registry.npmjs.org/pinyin-match/1.2.10"
+    },
+    {
+      "package": "use-stick-to-bottom",
+      "version": "1.1.6",
+      "published_at": "2026-06-04T21:02:18.160Z",
+      "license": "MIT",
+      "unpacked_bytes": 32880,
+      "dependencies": {},
+      "peerDependencies": {
+        "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
+      },
+      "tarball": "https://registry.npmjs.org/use-stick-to-bottom/-/use-stick-to-bottom-1.1.6.tgz",
+      "registry": "https://registry.npmjs.org/use-stick-to-bottom/1.1.6"
+    },
+    {
+      "package": "@squircle-js/react",
+      "version": "1.3.0",
+      "published_at": "2026-02-03T21:34:50.650Z",
+      "license": "MIT",
+      "unpacked_bytes": 47015,
+      "dependencies": {
+        "@radix-ui/react-slot": "^1.1.2",
+        "figma-squircle": "1.1.0"
+      },
+      "peerDependencies": {
+        "react": "^16.8 || ^17 || ^18 || ^19"
+      },
+      "tarball": "https://registry.npmjs.org/@squircle-js/react/-/react-1.3.0.tgz",
+      "registry": "https://registry.npmjs.org/%40squircle-js%2Freact/1.3.0"
+    },
+    {
+      "package": "figma-squircle",
+      "version": "1.1.0",
+      "published_at": "2024-09-19T07:51:01.278Z",
+      "license": "MIT",
+      "unpacked_bytes": 26579,
+      "dependencies": {},
+      "peerDependencies": {},
+      "tarball": "https://registry.npmjs.org/figma-squircle/-/figma-squircle-1.1.0.tgz",
+      "registry": "https://registry.npmjs.org/figma-squircle/1.1.0"
+    },
+    {
+      "package": "@micdrop/smart-turn",
+      "version": "0.1.0",
+      "published_at": "2026-08-31T19:24:45.079Z",
+      "license": "MIT",
+      "unpacked_bytes": 271950,
+      "dependencies": {},
+      "peerDependencies": {
+        "onnxruntime-node": ">=1.20.0",
+        "onnxruntime-react-native": ">=1.20.0",
+        "onnxruntime-web": ">=1.20.0"
+      },
+      "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Godefroy/micdrop.git",
+        "directory": "packages/smart-turn"
+      },
+      "tarball": "https://registry.npmjs.org/@micdrop/smart-turn/-/smart-turn-0.1.0.tgz",
+      "registry": "https://registry.npmjs.org/%40micdrop%2Fsmart-turn/0.1.0"
+    },
+    {
+      "package": "@huggingface/transformers",
+      "version": "4.3.1",
+      "published_at": "2026-10-06T15:54:29.246Z",
+      "license": "Apache-2.0",
+      "unpacked_bytes": 9962435,
+      "dependencies": {
+        "sharp": "^0.35.4",
+        "onnxruntime-web": "1.31.0-dev.20260914-8d85527a0",
+        "onnxruntime-node": "1.30.0",
+        "@huggingface/jinja": "^0.5.10",
+        "@huggingface/tokenizers": "^0.2.0"
+      },
+      "peerDependencies": {},
+      "repository": {
+        "url": "git+https://github.com/huggingface/transformers.js.git",
+        "type": "git"
+      },
+      "tarball": "https://registry.npmjs.org/@huggingface/transformers/-/transformers-4.3.1.tgz",
+      "registry": "https://registry.npmjs.org/%40huggingface%2Ftransformers/4.3.1"
+    },
+    {
+      "package": "onnxruntime-web",
+      "version": "1.30.0",
+      "published_at": "2026-09-14T20:20:13.234Z",
+      "license": "MIT",
+      "unpacked_bytes": 144618540,
+      "dependencies": {
+        "long": "^5.2.3",
+        "platform": "^1.3.6",
+        "protobufjs": "^7.2.4",
+        "flatbuffers": "^25.1.24",
+        "guid-typescript": "^1.0.9",
+        "onnxruntime-common": "1.30.0"
+      },
+      "peerDependencies": {},
+      "repository": {
+        "url": "git+https://github.com/Microsoft/onnxruntime.git",
+        "type": "git"
+      },
+      "tarball": "https://registry.npmjs.org/onnxruntime-web/-/onnxruntime-web-1.30.0.tgz",
+      "registry": "https://registry.npmjs.org/onnxruntime-web/1.30.0"
+    },
+    {
+      "package": "onnxruntime-node",
+      "version": "1.30.0",
+      "published_at": "2026-09-14T20:05:58.862Z",
+      "license": "MIT",
+      "unpacked_bytes": 301068136,
+      "dependencies": {
+        "adm-zip": "^0.6.0",
+        "global-agent": "^4.1.3",
+        "onnxruntime-common": "1.30.0"
+      },
+      "peerDependencies": {},
+      "repository": {
+        "url": "git+https://github.com/Microsoft/onnxruntime.git",
+        "type": "git"
+      },
+      "tarball": "https://registry.npmjs.org/onnxruntime-node/-/onnxruntime-node-1.30.0.tgz",
+      "registry": "https://registry.npmjs.org/onnxruntime-node/1.30.0"
+    }
+  ],
+  "distribution_measurements": [
+    {
+      "package": "@shiguredo/rnnoise-wasm",
+      "version": "2025.1.5",
+      "license": "Apache-2.0",
+      "dependencies": {},
+      "published_at": "2025-05-09T03:50:11.279Z",
+      "archive_bytes": 3182251,
+      "selected_distributions": [
+        {
+          "file": "package/dist/rnnoise.js",
+          "bytes": 4827304,
+          "gzip_bytes": 3215819
+        }
+      ],
+      "archive_sha256": "8e0690aee3f83fd80f45fbe69a5a243808f7a5bd42e0e28501f34dbe14700bb1"
+    },
+    {
+      "package": "@jitsi/rnnoise-wasm",
+      "version": "0.2.1",
+      "license": null,
+      "dependencies": {},
+      "published_at": "2025-02-03T12:29:28.649Z",
+      "archive_bytes": 1436285,
+      "selected_distributions": [
+        {
+          "file": "package/dist/rnnoise-sync.js",
+          "bytes": 1933102,
+          "gzip_bytes": 1340492
+        },
+        {
+          "file": "package/dist/rnnoise.wasm",
+          "bytes": 112141,
+          "gzip_bytes": 99914
+        },
+        {
+          "file": "package/dist/rnnoise.js",
+          "bytes": 12265,
+          "gzip_bytes": 3494
+        },
+        {
+          "file": "package/index.js",
+          "bytes": 174,
+          "gzip_bytes": 106
+        }
+      ],
+      "archive_sha256": "c80b015b69701699868086a30015e5e680bee41a68df4c8ad2daed8b1bbc1173"
+    },
+    {
+      "package": "cmdk",
+      "version": "1.1.1",
+      "license": "MIT",
+      "dependencies": {
+        "@radix-ui/react-id": "^1.1.0",
+        "@radix-ui/react-dialog": "^1.1.6",
+        "@radix-ui/react-primitive": "^2.0.2",
+        "@radix-ui/react-compose-refs": "^1.1.1"
+      },
+      "published_at": "2025-03-14T19:21:16.194Z",
+      "archive_bytes": 18623,
+      "selected_distributions": [
+        {
+          "file": "package/dist/index.js",
+          "bytes": 13210,
+          "gzip_bytes": 5094
+        },
+        {
+          "file": "package/dist/index.mjs",
+          "bytes": 11328,
+          "gzip_bytes": 4355
+        },
+        {
+          "file": "package/dist/command-score.js",
+          "bytes": 1407,
+          "gzip_bytes": 766
+        },
+        {
+          "file": "package/dist/chunk-NZJY6EH4.mjs",
+          "bytes": 920,
+          "gzip_bytes": 516
+        },
+        {
+          "file": "package/dist/chunk-XJATAMEX.mjs",
+          "bytes": 877,
+          "gzip_bytes": 490
+        },
+        {
+          "file": "package/dist/command-score.mjs",
+          "bytes": 63,
+          "gzip_bytes": 79
+        }
+      ],
+      "archive_sha256": "1a9be8e8b0807338445b4225c295cfcd768bb0a414e3fa317e7407ca39133c53"
+    },
+    {
+      "package": "fuse.js",
+      "version": "7.5.0",
+      "license": "Apache-2.0",
+      "dependencies": {},
+      "published_at": "2026-07-13T17:23:36.705Z",
+      "archive_bytes": 113150,
+      "selected_distributions": [
+        {
+          "file": "package/dist/fuse.mjs",
+          "bytes": 50392,
+          "gzip_bytes": 13012
+        },
+        {
+          "file": "package/dist/fuse.worker.mjs",
+          "bytes": 49402,
+          "gzip_bytes": 12638
+        },
+        {
+          "file": "package/dist/fuse.basic.mjs",
+          "bytes": 38801,
+          "gzip_bytes": 10746
+        },
+        {
+          "file": "package/dist/fuse.min.mjs",
+          "bytes": 26095,
+          "gzip_bytes": 9182
+        },
+        {
+          "file": "package/dist/fuse.worker.min.mjs",
+          "bytes": 25865,
+          "gzip_bytes": 9093
+        },
+        {
+          "file": "package/dist/fuse.basic.min.mjs",
+          "bytes": 19308,
+          "gzip_bytes": 7238
+        }
+      ],
+      "archive_sha256": "076e7375510cd2f40b86108cd7d87534cf3b32682e80df23cd2ba6f25737f168"
+    },
+    {
+      "package": "pinyin-pro",
+      "version": "3.29.5",
+      "license": "MIT",
+      "dependencies": {},
+      "published_at": "2026-10-10T00:18:54.362Z",
+      "archive_bytes": 322578,
+      "selected_distributions": [
+        {
+          "file": "package/dist/esm/data/dict1.mjs",
+          "bytes": 353483,
+          "gzip_bytes": 87273
+        },
+        {
+          "file": "package/dist/index.js",
+          "bytes": 325698,
+          "gzip_bytes": 141236
+        },
+        {
+          "file": "package/dist/esm/data/dict4.mjs",
+          "bytes": 67690,
+          "gzip_bytes": 28804
+        },
+        {
+          "file": "package/dist/esm/data/dict2.mjs",
+          "bytes": 57174,
+          "gzip_bytes": 20951
+        },
+        {
+          "file": "package/dist/esm/core/match/index.mjs",
+          "bytes": 11500,
+          "gzip_bytes": 3232
+        },
+        {
+          "file": "package/dist/esm/data/dict3.mjs",
+          "bytes": 11312,
+          "gzip_bytes": 5109
+        }
+      ],
+      "archive_sha256": "00e9d2961bb0ba2d247ba5090c242ecbf3793473c9f66f0c69af7248dd4616b4"
+    },
+    {
+      "package": "rbush",
+      "version": "4.0.1",
+      "license": "MIT",
+      "dependencies": {
+        "quickselect": "^3.0.0"
+      },
+      "published_at": "2024-08-21T19:13:21.665Z",
+      "archive_bytes": 11590,
+      "selected_distributions": [
+        {
+          "file": "package/rbush.js",
+          "bytes": 17481,
+          "gzip_bytes": 4495
+        },
+        {
+          "file": "package/index.js",
+          "bytes": 15116,
+          "gzip_bytes": 3722
+        },
+        {
+          "file": "package/rbush.min.js",
+          "bytes": 6007,
+          "gzip_bytes": 2327
+        }
+      ],
+      "archive_sha256": "a014b9d13d72b4cb657badb2961fc24429324b9db0dc1aa13f83d8dde81da410"
+    },
+    {
+      "package": "papaparse",
+      "version": "5.7.0",
+      "license": "MIT",
+      "dependencies": {},
+      "published_at": "2026-08-24T14:28:22.981Z",
+      "archive_bytes": 48656,
+      "selected_distributions": [
+        {
+          "file": "package/tests/test-cases.js",
+          "bytes": 81506,
+          "gzip_bytes": 13625
+        },
+        {
+          "file": "package/papaparse.js",
+          "bytes": 51214,
+          "gzip_bytes": 14196
+        },
+        {
+          "file": "package/papaparse.min.js",
+          "bytes": 18874,
+          "gzip_bytes": 6808
+        },
+        {
+          "file": "package/player/player.css",
+          "bytes": 12326,
+          "gzip_bytes": 1951
+        },
+        {
+          "file": "package/tests/node-tests.js",
+          "bytes": 8274,
+          "gzip_bytes": 1717
+        },
+        {
+          "file": "package/.eslintrc.js",
+          "bytes": 7017,
+          "gzip_bytes": 1844
+        }
+      ],
+      "archive_sha256": "263bac53bab292390bcf2697a8c14f0bc382ab3c192fa088e1caa9a8241956b1"
+    },
+    {
+      "package": "react-hotkeys-hook",
+      "version": "5.3.3",
+      "license": "MIT",
+      "dependencies": {},
+      "published_at": "2026-06-26T14:23:15.600Z",
+      "archive_bytes": 8790,
+      "selected_distributions": [
+        {
+          "file": "package/packages/react-hotkeys-hook/dist/index.js",
+          "bytes": 10141,
+          "gzip_bytes": 3376
+        }
+      ],
+      "archive_sha256": "afb32632a59ee1181e246d7a3172f65188be687a59dae5b10d18b6fdbc627fc0"
+    },
+    {
+      "package": "pinyin-match",
+      "version": "1.2.10",
+      "license": "MIT",
+      "dependencies": {},
+      "published_at": "2025-12-07T03:37:04.104Z",
+      "archive_bytes": 281838,
+      "selected_distributions": [
+        {
+          "file": "package/dist/traditional.js",
+          "bytes": 88923,
+          "gzip_bytes": 63095
+        },
+        {
+          "file": "package/lib/traditional.js",
+          "bytes": 88705,
+          "gzip_bytes": 62977
+        },
+        {
+          "file": "package/es/traditional.js",
+          "bytes": 88696,
+          "gzip_bytes": 62972
+        },
+        {
+          "file": "package/src/traditional_dict.js",
+          "bytes": 86724,
+          "gzip_bytes": 61262
+        },
+        {
+          "file": "package/dist/main.js",
+          "bytes": 28372,
+          "gzip_bytes": 20087
+        },
+        {
+          "file": "package/lib/main.js",
+          "bytes": 28154,
+          "gzip_bytes": 19980
+        }
+      ],
+      "archive_sha256": "3b56c503d293831277861d0d1b4bfc4efd019fa3f6211677e1ceb85e73ded1ac"
+    },
+    {
+      "package": "use-stick-to-bottom",
+      "version": "1.1.6",
+      "license": "MIT",
+      "dependencies": {},
+      "published_at": "2026-06-04T21:02:18.160Z",
+      "archive_bytes": 8946,
+      "selected_distributions": [
+        {
+          "file": "package/dist/useStickToBottom.js",
+          "bytes": 16702,
+          "gzip_bytes": 3892
+        },
+        {
+          "file": "package/dist/StickToBottom.js",
+          "bytes": 3508,
+          "gzip_bytes": 1135
+        },
+        {
+          "file": "package/dist/index.js",
+          "bytes": 75,
+          "gzip_bytes": 64
+        }
+      ],
+      "archive_sha256": "e5ee8ace95f0726edaed29224c3ee58c31010912cc21093c04c70e0b54048939"
+    },
+    {
+      "package": "@squircle-js/react",
+      "version": "1.3.0",
+      "license": "MIT",
+      "dependencies": {
+        "@radix-ui/react-slot": "^1.1.2",
+        "figma-squircle": "1.1.0"
+      },
+      "published_at": "2026-02-03T21:34:50.650Z",
+      "archive_bytes": 11178,
+      "selected_distributions": [
+        {
+          "file": "package/dist/index.js",
+          "bytes": 14540,
+          "gzip_bytes": 3484
+        },
+        {
+          "file": "package/dist/index.mjs",
+          "bytes": 11756,
+          "gzip_bytes": 2849
+        },
+        {
+          "file": "package/tsup.config.js",
+          "bytes": 261,
+          "gzip_bytes": 192
+        }
+      ],
+      "archive_sha256": "0746d17e297b11e405d45bafbfa3520d3d5b1665f9d2171326a37575c658aa51"
+    },
+    {
+      "package": "figma-squircle",
+      "version": "1.1.0",
+      "license": "MIT",
+      "dependencies": {},
+      "published_at": "2024-09-19T07:51:01.278Z",
+      "archive_bytes": 6106,
+      "selected_distributions": [
+        {
+          "file": "package/dist/index.js",
+          "bytes": 8861,
+          "gzip_bytes": 1832
+        }
+      ],
+      "archive_sha256": "4072daee0c6a6c032f9c822cf4e58fc752a20d689cf153000b7308bcf202687d"
+    }
+  ],
+  "additional_sources": [
+    {
+      "topic": "HARK component evidence",
+      "url": "https://github.com/ECdison6227/hark-ui-research/blob/b5b49eb46494b86d56c21654ea585ad379d9b9d7/reports/card-code-analysis.md"
+    },
+    {
+      "topic": "HARK design evidence",
+      "url": "https://github.com/ECdison6227/hark-ui-research/blob/b5b49eb46494b86d56c21654ea585ad379d9b9d7/reports/design-analysis.md"
+    },
+    {
+      "topic": "GT Standard font",
+      "url": "https://www.grillitype.com/typeface/gt-standard"
+    },
+    {
+      "topic": "Smart Turn model overview",
+      "url": "https://github.com/pipecat-ai/smart-turn/blob/main/README.md"
+    },
+    {
+      "topic": "Micdrop standalone adapter",
+      "url": "https://github.com/Godefroy/micdrop/blob/main/packages/smart-turn/README.md"
+    },
+    {
+      "topic": "Micdrop adapter documentation",
+      "url": "https://micdrop.dev/docs/client/turn-detection"
+    },
+    {
+      "topic": "TEN VAD additional license terms",
+      "url": "https://github.com/TEN-framework/ten-vad/blob/main/LICENSE"
+    },
+    {
+      "topic": "Supertonic archive",
+      "url": "https://github.com/supertone-oss-archive/supertonic"
+    },
+    {
+      "topic": "Supertonic Chinese gated weights",
+      "url": "https://github.com/wuxuedaifu/supertonic_cn#-weights"
+    },
+    {
+      "topic": "RNNoise upstream code license",
+      "url": "https://github.com/xiph/rnnoise/blob/372f7b4/COPYING"
+    }
+  ],
+  "license_observations": {
+    "TEN-framework/ten-vad": "Repository LICENSE adds deployment/competition terms to Apache-2.0.",
+    "ECdison6227/hark-ui-research": "No reusable HARK component package or original HARK asset license established.",
+    "jitsi/rnnoise-wasm": "Apache-2.0 wrapper; upstream RNNoise license separately BSD-3-Clause. npm uses legacy licenses field.",
+    "wuxuedaifu/supertonic_cn": "MIT code is separate from gated non-commercial evaluation weights.",
+    "supertone-oss-archive/supertonic": "MIT sample code; OpenRAIL-M model weights; archive states development/support ended."
+  }
+}

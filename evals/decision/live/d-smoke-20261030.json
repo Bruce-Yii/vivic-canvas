@@ -1,0 +1,37 @@
+{
+  "source": "ddadb2627ce0f973612ae5cc3fa7b31478a0277c",
+  "mode": "shadow",
+  "httpSmoke": [
+    {
+      "case": "CountdownCard",
+      "kind": "envelope",
+      "cardTypes": [
+        "CountdownCard"
+      ],
+      "elapsedMs": 276,
+      "usedProvider": "rules",
+      "traceMode": "shadow"
+    },
+    {
+      "case": "TodoCard",
+      "kind": "envelope",
+      "cardTypes": [
+        "TodoCard"
+      ],
+      "elapsedMs": 270,
+      "usedProvider": "rules",
+      "traceMode": "shadow"
+    },
+    {
+      "case": "overview",
+      "kind": "envelope",
+      "cardTypes": [],
+      "elapsedMs": 275,
+      "usedProvider": "rules",
+      "traceMode": "shadow"
+    }
+  ],
+  "testSpaceUnchanged": true,
+  "mainModelConnected": false,
+  "realModelQualityVerified": false
+}

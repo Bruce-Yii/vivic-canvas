@@ -1,0 +1,23 @@
+{
+  "staticResponses": "actual public HTTP responses without interception",
+  "files": [
+    {
+      "name": "index.html",
+      "status": 200,
+      "sha256": "3d955df1fa6f13afac9fa785d029313a7d96af284606e86912a96a4836289213",
+      "release": "direct-display-20261030-1",
+      "cacheControl": "no-store",
+      "securityHeadersPresent": true
+    },
+    {
+      "name": "DisplayApp-DkgZz97I.js",
+      "status": 200,
+      "sha256": "12d355e023ac3fa8ad30e0c298b05d89da737f14623fb80cba56df8319c99f9b",
+      "release": "direct-display-20261030-1",
+      "cacheControl": "no-cache",
+      "securityHeadersPresent": true
+    }
+  ],
+  "backgroundSyncPreserved": true,
+  "typographyFixPreserved": true
+}

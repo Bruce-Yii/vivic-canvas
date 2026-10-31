@@ -1,0 +1,48 @@
+{
+  "formatVersion": "0.2",
+  "id": "example.fitness-log",
+  "version": "1.0.0",
+  "name": "健身记录",
+  "description": "记录用户明确提供的训练日期、训练部位和分钟数；相对日期由宿主结合当前日期及时区解析，缺少事实时询问，不复制DEMO数据。",
+  "renderer": "declarative",
+  "host": "0.6",
+  "capabilities": [],
+  "examples": [
+    "今天练了40分钟背",
+    "帮我记下昨天练腿30分钟",
+    "记录今天胸部训练45分钟",
+    "记一条肩部训练，今天20分钟",
+    "今天练了60分钟全身"
+  ],
+  "slots": {
+    "type": "object",
+    "title": "训练事实",
+    "description": "仅填写用户提供的训练事实；日期由宿主结合用户原话、当前日期及时区确认。",
+    "additionalProperties": false,
+    "properties": {
+      "trainingDate": {
+        "type": "string",
+        "title": "训练日期",
+        "description": "YYYY-MM-DD；宿主应校验真实日历日期并解析今天/昨天，不能采用示例日期。",
+        "minLength": 10,
+        "maxLength": 10
+      },
+      "bodyPart": {
+        "type": "string",
+        "title": "训练部位",
+        "description": "依据用户原话规范化；无法确定时询问，不采用示例部位。",
+        "enum": ["背", "腿", "胸", "肩", "手臂", "核心", "全身", "其他"]
+      },
+      "minutes": {
+        "type": "integer",
+        "title": "训练分钟数",
+        "description": "用户明确给出的训练时长，1至600分钟；缺少时长时询问，不采用DEMO数值。",
+        "minimum": 1,
+        "maximum": 600
+      }
+    },
+    "required": ["trainingDate", "bodyPart", "minutes"]
+  },
+  "icon": "💪",
+  "category": "运动健康"
+}

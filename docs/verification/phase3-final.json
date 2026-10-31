@@ -1,0 +1,57 @@
+{
+  "date": "2026-10-15",
+  "unit": {
+    "web_passed": 317,
+    "api_passed": 793,
+    "external_tests_skipped": 3
+  },
+  "typecheck": "passed",
+  "build": "passed",
+  "browsers": {
+    "chromium": {
+      "startTime": "2026-10-15T09:27:05.801Z",
+      "duration": 272534.834,
+      "expected": 58,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "compat-layout": {
+      "startTime": "2026-10-15T09:36:53.770Z",
+      "duration": 134125.878,
+      "expected": 12,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "settings-notes": {
+      "startTime": "2026-10-15T09:43:13.057Z",
+      "duration": 13397.779999999999,
+      "expected": 3,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "compat-settings-notes": {
+      "startTime": "2026-10-15T09:46:41.217Z",
+      "duration": 35630.68199999999,
+      "expected": 6,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "final-regression": {
+      "startTime": "2026-10-15T09:48:25.562Z",
+      "duration": 67823.696,
+      "expected": 11,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    }
+  },
+  "audio_played": false,
+  "physical_microphone_used": false,
+  "live_browser": "../../evidence/phase3-live-browser/live.json",
+  "scope": "Separate recorded runs; Chromium 58-test full regression preceded final schedule/note additions; final 11-test regression covers latest affected features.",
+  "evidence_note": "Large raw reports/screenshots/videos remain local under ignored evidence/; this file is the portable summary."
+}

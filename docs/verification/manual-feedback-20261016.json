@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-16",
+  "branch": "agent/next-iteration",
+  "applicationSourceCommit": "4e41d95",
+  "unit": {
+    "webPassed": 358,
+    "apiPassed": 858,
+    "skipped": 3,
+    "totalPassed": 1216
+  },
+  "typecheck": true,
+  "build": true,
+  "browser": {
+    "chromium": {
+      "passed": 14,
+      "total": 14,
+      "evidence": "evidence/manual-feedback/verification/chromium-final-14.log"
+    },
+    "pinAndReminderFollowup": {
+      "passed": 3,
+      "total": 3,
+      "evidence": "evidence/manual-feedback/verification/pin-final.log"
+    },
+    "firefoxAndWebkit": {
+      "passed": 18,
+      "total": 18,
+      "evidence": "evidence/manual-feedback/verification/compat-final-18.log"
+    },
+    "note": "Separate serial runs. Final pin-task-name correction was reverified in Chromium; no claim of one all-browser full-suite run."
+  },
+  "changes": [
+    "Direct provider-verified Shanghai municipality weather",
+    "Blank table created immediately; next data fills the same ID",
+    "Named reminders share one list; pinned records remain separate",
+    "Delivered one-off timers leave the canvas; history stays in Control",
+    "Explicit current-canvas delete-all is local and undoable as a batch",
+    "New commands clear stale clarification candidates",
+    "Task names are not rejected simply for containing 并"
+  ],
+  "gpt": {
+    "source": "vivic",
+    "newAuthorizationOpenedByAgent": true,
+    "userCompletedAuthorization": true,
+    "model": "gpt-6-luna",
+    "activeProvider": "gpt",
+    "liveCases": [
+      {
+        "name": "real-gpt-note",
+        "ok": true,
+        "ms": 4223,
+        "evidence": "evidence/manual-feedback/live-2026-10-15T18-24-10-630Z/report.json"
+      },
+      {
+        "name": "real-gpt-three-reminders",
+        "ok": true,
+        "ms": 3204,
+        "evidence": "evidence/manual-feedback/live-2026-10-15T17-43-57-748Z/report.json"
+      },
+      {
+        "name": "real-gpt-search",
+        "ok": true,
+        "ms": 6316,
+        "evidence": "evidence/manual-feedback/live-2026-10-15T17-43-57-748Z/report.json"
+      },
+      {
+        "name": "real-gpt-image",
+        "ok": true,
+        "ms": 4275,
+        "evidence": "evidence/manual-feedback/live-2026-10-15T17-48-22-231Z/report.json"
+      },
+      {
+        "name": "live-shanghai-direct",
+        "ok": true,
+        "ms": 3170,
+        "evidence": "evidence/manual-feedback/live-2026-10-15T17-43-57-748Z/report.json"
+      },
+      {
+        "name": "blank-table-without-model",
+        "ok": true,
+        "ms": 11,
+        "evidence": "evidence/manual-feedback/live-2026-10-15T17-43-57-748Z/report.json"
+      }
+    ],
+    "runs": [
+      {
+        "evidence": "evidence/manual-feedback/live-2026-10-15T17-43-57-748Z/report.json",
+        "ok": false,
+        "authentication": {
+          "connected": true,
+          "source": "vivic"
+        }
+      },
+      {
+        "evidence": "evidence/manual-feedback/live-2026-10-15T17-46-31-956Z/report.json",
+        "ok": false,
+        "authentication": {
+          "connected": true,
+          "source": "vivic"
+        }
+      },
+      {
+        "evidence": "evidence/manual-feedback/live-2026-10-15T17-48-22-231Z/report.json",
+        "ok": true,
+        "authentication": {
+          "connected": true,
+          "source": "vivic"
+        }
+      },
+      {
+        "evidence": "evidence/manual-feedback/live-2026-10-15T18-24-10-630Z/report.json",
+        "ok": true,
+        "authentication": {
+          "connected": true,
+          "source": "vivic"
+        }
+      }
+    ],
+    "note": "First image attempt used wrong test attachment fields and was rejected locally; corrected single-image run passed. Completed cases were not repeated for that correction."
+  },
+  "safety": {
+    "realCanvasChanged": false,
+    "canvasResultsPersisted": false,
+    "automatedAudioPlayback": false,
+    "microphoneCaptured": false,
+    "credentialsLogged": false,
+    "pushed": false
+  },
+  "visual": {
+    "screenshots": [
+      "evidence/manual-feedback/chromium/TEST-reminder-group.png",
+      "evidence/manual-feedback/data-input/chromium/TEST-empty-table.png",
+      "evidence/manual-feedback/data-input/chromium/TEST-table-result.png"
+    ],
+    "inspectedByMainAgent": true,
+    "independentReview": false
+  },
+  "limits": [
+    "No new 30-minute soak for this source; prior soak applies to its own snapshot",
+    "Pinned reminders deliberately remain independent",
+    "Genuine location ambiguity still asks the user",
+    "Bare data fill requires a unique or focused empty table",
+    "Real voice and physical Safari/external display acceptance remain user-led",
+    "Next-case typography/details/find-card and alternative decision-model evaluation not implemented in this task"
+  ]
+}

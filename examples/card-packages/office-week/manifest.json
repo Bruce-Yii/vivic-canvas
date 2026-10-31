@@ -1,0 +1,10 @@
+{
+  "formatVersion": "0.1",
+  "id": "vivic.office-week",
+  "version": "1.0.0",
+  "name": "每周重点卡",
+  "description": "将用户给出的周计划整理成按星期分组的重点行动，支持未安排、截止说明和完成状态。它是个人计划，不是已确认的会议日程；不推测具体日期、时刻或飞书空闲情况，未提供内容留空。",
+  "renderer": "declarative",
+  "host": "0.6",
+  "capabilities": []
+}

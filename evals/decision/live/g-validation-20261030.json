@@ -1,0 +1,45 @@
+{
+  "passed": 776,
+  "failed": 22,
+  "failedTests": [
+    "connected service UI uses a natural-language question by default",
+    "connected service UI keeps query collapsed until requested, then queries the selected read tool and saves only on user click",
+    "connected service UI does not report saved when durable host save fails or throws synchronously",
+    "local launcher truthfulness and recovery prevents repeated starts and does not claim ready while warmup is pending",
+    "online onboarding through user events, with all provider requests mocked allows skipping the example, then enters explicitly limited basic mode without sending anything",
+    "online onboarding through user events, with all provider requests mocked recognizes an existing active stepfun connection and only hands a chosen draft to its owner",
+    "online onboarding through user events, with all provider requests mocked recognizes an existing active gpt connection and only hands a chosen draft to its owner",
+    "online onboarding through user events, with all provider requests mocked does not silently add a draft when the optional first instruction is unchecked",
+    "online onboarding through user events, with all provider requests mocked ignores a late status after returning, then freshly checks on re-entry",
+    "does not render a Word extract from an older paired computer",
+    "BackgroundSettings synchronizes light intensity and pause without altering theme or orb",
+    "CanvasSettings uses the owner APIs for theme, reduced motion, captions and pin",
+    "CanvasSettings supports selected-card scope and gives feedback on rejected mutations",
+    "settings panel keeps live configuration keeps provider drafts and editor state through tabs, disclosure, close and reopen",
+    "settings panel keeps live configuration suspends the modal for onboarding without dropping the configuration draft",
+    "keeps source sky when motion is paused, zero-intensity or reduced",
+    "the Hark sky requires no graphics context, including across theme switches and unmount",
+    "retains synchronized palette and reduced-motion preferences without altering the source default sky",
+    "explicit one-shot wake UI (mocked capture only) never enables on mount; a click uses only the verified fixed preset and streams PCM",
+    "explicit one-shot wake UI (mocked capture only) cleans up when owner/provider/PTT/TTS scope changes: {\"ownerKey\":\"other\"}",
+    "explicit one-shot wake UI (mocked capture only) stops mic before delivery and requires an explicit new click after one transcript",
+    "explicit one-shot wake UI (mocked capture only) keeps the cloud signal until delivery completes; changing owner aborts it and ignores completion"
+  ],
+  "newFailuresVsF5": [],
+  "suiteImportErrors": [
+    {
+      "file": "control/__tests__/SpaceEditing.test.tsx",
+      "message": "Failed to resolve import \"../CanvasManager\" from \"src/control/__tests__/SpaceEditing.test.tsx\". Does the file exist?"
+    }
+  ],
+  "typecheck": {
+    "knownErrors": 7,
+    "newErrors": 0
+  },
+  "additionalChecks": {
+    "deletionPolicy": 6,
+    "packageManagement": 4,
+    "storageRecovery": 4,
+    "decisionReport": 49
+  }
+}

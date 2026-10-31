@@ -1,0 +1,114 @@
+{
+  "checkedAt": "2026-10-16T09:38:35.391378+00:00",
+  "revision": "29005230beedca7e519d8787e34f0ccd8680f691",
+  "branch": "agent/next-iteration",
+  "codeCommits": [
+    "a84c460",
+    "3d72862",
+    "3b67061",
+    "2900523"
+  ],
+  "phase2": "not-started",
+  "userCanvasTouched": false,
+  "physicalAudioPlayed": false,
+  "physicalMicrophoneCaptured": false,
+  "tests": {
+    "unit": {
+      "webPassed": 405,
+      "apiPassed": 892,
+      "totalPassed": 1297,
+      "externalSkipped": 3,
+      "revision": "3b67061",
+      "log": "evidence/user-feedback-20261016-final/vivic-feedback-unit-final-search.txt"
+    },
+    "chromiumFull": {
+      "passed": 94,
+      "revision": "3d72862",
+      "note": "Later backend-only resource-finding alias is covered by final unit and real UI checks; frontend source unchanged.",
+      "log": "evidence/user-feedback-20261016-final/vivic-feedback-full-e2e-green.txt"
+    },
+    "compatibility": {
+      "firefoxPassed": 5,
+      "webkitPassed": 5,
+      "totalPassed": 10,
+      "revision": "29005230beedca7e519d8787e34f0ccd8680f691",
+      "log": "evidence/user-feedback-20261016-final/vivic-feedback-compat-delivery.txt"
+    },
+    "realStepfunApi": {
+      "passed": 25,
+      "backendRevision": "a84c460",
+      "evidence": "evidence/user-feedback-2026-10-16T09-05-07-791Z/api.json",
+      "note": "Returned actions inspected in synthetic context; this does not claim delivery."
+    },
+    "realStepfunBrowser": {
+      "passed": 61,
+      "pageErrors": [],
+      "revision": "29005230beedca7e519d8787e34f0ccd8680f691",
+      "evidence": "evidence/user-feedback-browser-2026-10-16T09-33-42-412Z/browser.json",
+      "note": "Actual input, camera bounds for A1/A2, 15-second delivery, recurrence twice, conditions, data, network, undo and reload. Natural weather may reuse just-fetched verified canvas data."
+    },
+    "realGpt": {
+      "passed": 5,
+      "model": "gpt-6-luna",
+      "source": "vivic",
+      "backendRevision": "a84c460",
+      "evidence": "evidence/user-feedback-gpt-2026-10-16T09-07-02-985Z/gpt.json",
+      "note": "Existing OAuth, inference, three-reminder extraction, subscription search, current image 43, no stale image."
+    },
+    "typecheck": {
+      "passed": true,
+      "log": "evidence/user-feedback-20261016-final/vivic-feedback-typecheck-final-search.txt"
+    },
+    "build": {
+      "passed": true,
+      "frontendRevision": "3d72862",
+      "log": "evidence/user-feedback-20261016-final/vivic-feedback-build-green.txt"
+    },
+    "contracts": {
+      "passed": true,
+      "log": "evidence/user-feedback-20261016-final/vivic-feedback-contracts-green.txt"
+    }
+  },
+  "sourceManifest": "evidence/user-feedback-20261016-final/verified-source-manifest.json",
+  "credentialCheck": {
+    "sourceAndDocsFilesScanned": 278,
+    "matches": 0,
+    "testCredentialPersisted": false,
+    "credentialContentInReport": false
+  },
+  "retainedHistory": [
+    {
+      "path": "evidence/user-feedback-2026-10-16T08-54-08-244Z/api.json",
+      "note": "Literal note planning failed before exact-note rule."
+    },
+    {
+      "path": "evidence/user-feedback-browser-2026-10-16T09-24-56-212Z/browser.json",
+      "note": "60/61; resource finding failed before direct finder alias."
+    },
+    {
+      "path": "evidence/user-feedback-browser-2026-10-16T09-30-25-156Z/browser.json",
+      "note": "60/61; test wrongly demanded a duplicate WeatherCard even though fresh canvas data was correctly reused."
+    },
+    {
+      "path": "evidence/user-feedback-20261016-final/vivic-feedback-full-e2e-final.txt",
+      "note": "93/94; outdated connection-label assertion, corrected before final full 94/94."
+    }
+  ],
+  "limits": [
+    "No physical listening/microphone/IME/Safari/external-screen/GPU acceptance.",
+    "No new 30-minute stability run; previous version results remain historical.",
+    "Console contains upstream library and bundler warnings.",
+    "Reminder chime uses the default system output; speech output selection belongs to TTS.",
+    "Server restart still clears the StepFun memory credential.",
+    "No phase-two deployment, invitation system, multi-user or mobile pairing has been added."
+  ],
+  "visualReminderCheck": {
+    "passed": true,
+    "captionOpacity": 1,
+    "glowOpacity": 1,
+    "remainingReminderRows": 3,
+    "screenshot": "evidence/user-feedback-20261016-final/reminder-steady.png",
+    "report": "evidence/user-feedback-20261016-final/reminder-steady.json",
+    "note": "Waited for both caption and glow to finish entering before visual review; no audio playback."
+  }
+}

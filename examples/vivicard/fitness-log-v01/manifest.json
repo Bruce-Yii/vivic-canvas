@@ -1,0 +1,12 @@
+{
+    "formatVersion":  "0.1",
+    "id":  "example.fitness-log-v01",
+    "version":  "1.0.0",
+    "name":  "健身记录（0.1兼容）",
+    "description":  "记录用户明确提供的训练日期、训练部位和分钟数；相对日期由宿主结合当前日期及时区解析，缺少事实时询问，不复制DEMO数据。",
+    "renderer":  "declarative",
+    "host":  "0.6",
+    "capabilities":  [
+
+                     ]
+}

@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "title": "显示配置",
+  "description": "固定显示偏好，不包含训练事实。",
+  "additionalProperties": false,
+  "default": { "title": "训练记录" },
+  "properties": {
+    "title": { "type": "string", "title": "卡片标题", "default": "训练记录", "minLength": 1, "maxLength": 40 }
+  },
+  "required": ["title"]
+}

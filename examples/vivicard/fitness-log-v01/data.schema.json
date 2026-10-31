@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "title": "训练事实",
+  "description": "仅填写用户提供的训练事实；日期由宿主结合用户原话、当前日期及时区确认。",
+  "additionalProperties": false,
+  "properties": {
+    "trainingDate": {
+      "type": "string",
+      "title": "训练日期",
+      "description": "YYYY-MM-DD；宿主应校验真实日历日期并解析今天/昨天，不能采用示例日期。",
+      "minLength": 10,
+      "maxLength": 10
+    },
+    "bodyPart": {
+      "type": "string",
+      "title": "训练部位",
+      "description": "依据用户原话规范化；无法确定时询问，不采用示例部位。",
+      "enum": ["背", "腿", "胸", "肩", "手臂", "核心", "全身", "其他"]
+    },
+    "minutes": {
+      "type": "integer",
+      "title": "训练分钟数",
+      "description": "用户明确给出的训练时长，1至600分钟；缺少时长时询问，不采用DEMO数值。",
+      "minimum": 1,
+      "maximum": 600
+    }
+  },
+  "required": ["trainingDate", "bodyPart", "minutes"]
+}

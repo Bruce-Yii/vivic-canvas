@@ -1,0 +1,12 @@
+{
+  "file": "ControlApp-PlatformKeyLock20261027.js",
+  "beforeSha256": "6ed6a49e4b5565be4da71821afb9b42a874a7eb5e2f2122539616f89c7f0e07f",
+  "afterSha256": "7c1643569d6a39e2a106f1658f6ee98c05ea364eaf6a73047b1d1e2ae9d9877a",
+  "changes": [
+    "Explicit return-to-home button",
+    "Independent service disclosure and form state",
+    "Keep individual drafts across disclosure changes; clear credentials when leaving settings"
+  ],
+  "version": "settings-20261028-1",
+  "entry": "main-AccessRecovery20261028-4.js"
+}

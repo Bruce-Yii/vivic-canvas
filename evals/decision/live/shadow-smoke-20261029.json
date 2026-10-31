@@ -1,0 +1,543 @@
+{
+  "complete": true,
+  "failure": null,
+  "count": 5,
+  "routeAccuracy": 1,
+  "decisionP50Ms": 1722,
+  "decisionP95Ms": 1928,
+  "extraResponseP50Ms": 255,
+  "extraResponseP95Ms": 274,
+  "explicitShadowWaitP95Ms": 251,
+  "serviceFailures": 0,
+  "legacyShapeMatches": 5,
+  "providersConnected": {
+    "off": false,
+    "shadow": false
+  },
+  "isolatedTestSpaceCleared": true,
+  "fixtureAdaptation": "Abstract AnswerCard is rendered as the existing NewsCard; no invented renderer was added.",
+  "rows": [
+    {
+      "id": "chat-01",
+      "expected": "chat",
+      "off": {
+        "id": "chat-01",
+        "expected": "chat",
+        "totalMs": 24,
+        "legacy": {
+          "kind": "unknown",
+          "usedProvider": "rules-offline",
+          "actionTypes": [],
+          "cardTypes": [],
+          "hostOperation": null,
+          "taskStatus": "failed"
+        },
+        "execution": {
+          "success": false,
+          "reason": "no-action-proposal",
+          "createdCards": 0
+        },
+        "trace": null
+      },
+      "shadow": {
+        "id": "chat-01",
+        "expected": "chat",
+        "totalMs": 298,
+        "legacy": {
+          "kind": "unknown",
+          "usedProvider": "rules-offline",
+          "actionTypes": [],
+          "cardTypes": [],
+          "hostOperation": null,
+          "taskStatus": "failed"
+        },
+        "execution": {
+          "success": false,
+          "reason": "no-action-proposal",
+          "createdCards": 0
+        },
+        "trace": {
+          "id": "decision_d4ddec89-aefc-439d-8d9b-abd53c126a7c",
+          "mode": "shadow",
+          "status": "complete",
+          "taskId": "eval_mvto4xdx_c579v_shadow_chat-01",
+          "clauses": [
+            "你好呀"
+          ],
+          "decisions": [
+            {
+              "text": "你好呀",
+              "route": "chat",
+              "probability": 0.9919097049307292,
+              "probabilities": {
+                "chat": 0.9919097049307292,
+                "answer": 0.0017191749999231434,
+                "search": 0.0010989408230621775,
+                "countdown": 0.00036034984846549967,
+                "todo": 0.0002542157259469734,
+                "note": 0.0014220348444588483,
+                "generate": 0.00024328160220209668,
+                "focus": 0.000394731093043187,
+                "overview": 0.00043722688416835456,
+                "restore": 0.0011385500514427213,
+                "highlight": 0.000057956742862379106,
+                "edit": 0.0002710791695496919,
+                "arrange": 0.00017602660727059012,
+                "delete": 0.00008442543430546929,
+                "undo": 0.00012430856146548058,
+                "unsupported": 0.00030799268110418915
+              },
+              "none": false,
+              "latencyMs": 1928,
+              "failed": false
+            }
+          ],
+          "route": "chat",
+          "probability": 0.9919097049307292,
+          "latencyMs": 1928,
+          "routeLatencyMs": 1928,
+          "legacyElapsedMs": 21,
+          "shadowWaitMs": 250,
+          "failedCount": 0,
+          "legacyKind": "unknown",
+          "legacyUsedProvider": "rules-offline",
+          "legacyActionTypes": [],
+          "legacyCardTypes": []
+        }
+      },
+      "sameLegacyShape": true
+    },
+    {
+      "id": "countdown-01",
+      "expected": "countdown",
+      "off": {
+        "id": "countdown-01",
+        "expected": "countdown",
+        "totalMs": 13,
+        "legacy": {
+          "kind": "envelope",
+          "usedProvider": "rules",
+          "actionTypes": [
+            "card.create"
+          ],
+          "cardTypes": [
+            "CountdownCard"
+          ],
+          "hostOperation": null,
+          "taskStatus": "awaiting_execution"
+        },
+        "execution": {
+          "success": true,
+          "reason": null,
+          "createdCards": 1
+        },
+        "trace": null
+      },
+      "shadow": {
+        "id": "countdown-01",
+        "expected": "countdown",
+        "totalMs": 267,
+        "legacy": {
+          "kind": "envelope",
+          "usedProvider": "rules",
+          "actionTypes": [
+            "card.create"
+          ],
+          "cardTypes": [
+            "CountdownCard"
+          ],
+          "hostOperation": null,
+          "taskStatus": "awaiting_execution"
+        },
+        "execution": {
+          "success": true,
+          "reason": null,
+          "createdCards": 1
+        },
+        "trace": {
+          "id": "decision_3462d0de-63e5-48fd-852e-f08222510baf",
+          "mode": "shadow",
+          "status": "complete",
+          "taskId": "eval_mvto4xdx_c579v_shadow_countdown-01",
+          "clauses": [
+            "倒计时50分钟"
+          ],
+          "decisions": [
+            {
+              "text": "倒计时50分钟",
+              "route": "countdown",
+              "probability": 0.9964144098468471,
+              "probabilities": {
+                "chat": 0.00010957729521256167,
+                "answer": 0.00004132064603075323,
+                "search": 0.0000841985745019904,
+                "countdown": 0.9964144098468471,
+                "todo": 0.0001171701389748301,
+                "note": 0.0002872858662722422,
+                "generate": 0.00004102979003609507,
+                "focus": 0.000036257002205735386,
+                "overview": 0.00005106923396286353,
+                "restore": 0.00002403602281924139,
+                "highlight": 0.00001739833710145786,
+                "edit": 0.0025352485474916834,
+                "arrange": 0.000040167795804245225,
+                "delete": 0.00003786390959661075,
+                "undo": 0.00004852066206371954,
+                "unsupported": 0.00011444633107885167
+              },
+              "none": false,
+              "latencyMs": 1724,
+              "failed": false
+            }
+          ],
+          "route": "countdown",
+          "probability": 0.9964144098468471,
+          "latencyMs": 1724,
+          "routeLatencyMs": 1724,
+          "legacyElapsedMs": 5,
+          "shadowWaitMs": 250,
+          "failedCount": 0,
+          "legacyKind": "envelope",
+          "legacyUsedProvider": "rules",
+          "legacyActionTypes": [
+            "card.create"
+          ],
+          "legacyCardTypes": [
+            "CountdownCard"
+          ]
+        }
+      },
+      "sameLegacyShape": true
+    },
+    {
+      "id": "todo-01",
+      "expected": "todo",
+      "off": {
+        "id": "todo-01",
+        "expected": "todo",
+        "totalMs": 8,
+        "legacy": {
+          "kind": "envelope",
+          "usedProvider": "rules",
+          "actionTypes": [
+            "card.create"
+          ],
+          "cardTypes": [
+            "TodoCard"
+          ],
+          "hostOperation": null,
+          "taskStatus": "awaiting_execution"
+        },
+        "execution": {
+          "success": true,
+          "reason": null,
+          "createdCards": 1
+        },
+        "trace": null
+      },
+      "shadow": {
+        "id": "todo-01",
+        "expected": "todo",
+        "totalMs": 263,
+        "legacy": {
+          "kind": "envelope",
+          "usedProvider": "rules",
+          "actionTypes": [
+            "card.create"
+          ],
+          "cardTypes": [
+            "TodoCard"
+          ],
+          "hostOperation": null,
+          "taskStatus": "awaiting_execution"
+        },
+        "execution": {
+          "success": true,
+          "reason": null,
+          "createdCards": 1
+        },
+        "trace": {
+          "id": "decision_ffddd926-50d6-44ea-b16b-b4c416861980",
+          "mode": "shadow",
+          "status": "complete",
+          "taskId": "eval_mvto4xdx_c579v_shadow_todo-01",
+          "clauses": [
+            "加个待办，明天交周报"
+          ],
+          "decisions": [
+            {
+              "text": "加个待办，明天交周报",
+              "route": "todo",
+              "probability": 0.81298985190485,
+              "probabilities": {
+                "chat": 0.0004994700687191542,
+                "answer": 0.00032370770937777403,
+                "search": 0.0003463355936711131,
+                "countdown": 0.001073883171064516,
+                "todo": 0.81298985190485,
+                "note": 0.01024067507241169,
+                "generate": 0.0006160788617590095,
+                "focus": 0.00045852666606737086,
+                "overview": 0.0005959918636265893,
+                "restore": 0.0002614369835819714,
+                "highlight": 0.00034244751323969224,
+                "edit": 0.16890971225758322,
+                "arrange": 0.0009053189203681214,
+                "delete": 0.0004122744883430894,
+                "undo": 0.00039004040647128266,
+                "unsupported": 0.0016342485188654738
+              },
+              "none": false,
+              "latencyMs": 1721,
+              "failed": false
+            }
+          ],
+          "route": "todo",
+          "probability": 0.81298985190485,
+          "latencyMs": 1721,
+          "routeLatencyMs": 1721,
+          "legacyElapsedMs": 2,
+          "shadowWaitMs": 250,
+          "failedCount": 0,
+          "legacyKind": "envelope",
+          "legacyUsedProvider": "rules",
+          "legacyActionTypes": [
+            "card.create"
+          ],
+          "legacyCardTypes": [
+            "TodoCard"
+          ]
+        }
+      },
+      "sameLegacyShape": true
+    },
+    {
+      "id": "focus-01",
+      "expected": "focus",
+      "off": {
+        "id": "focus-01",
+        "expected": "focus",
+        "totalMs": 10,
+        "legacy": {
+          "kind": "envelope",
+          "usedProvider": "rules-offline",
+          "actionTypes": [
+            "card.focus"
+          ],
+          "cardTypes": [],
+          "hostOperation": null,
+          "taskStatus": "awaiting_execution"
+        },
+        "execution": {
+          "success": true,
+          "reason": null,
+          "createdCards": 0
+        },
+        "trace": null
+      },
+      "shadow": {
+        "id": "focus-01",
+        "expected": "focus",
+        "totalMs": 263,
+        "legacy": {
+          "kind": "envelope",
+          "usedProvider": "rules-offline",
+          "actionTypes": [
+            "card.focus"
+          ],
+          "cardTypes": [],
+          "hostOperation": null,
+          "taskStatus": "awaiting_execution"
+        },
+        "execution": {
+          "success": true,
+          "reason": null,
+          "createdCards": 0
+        },
+        "trace": {
+          "id": "decision_5b968721-62fb-46cb-a8ca-0cdf32c14156",
+          "mode": "shadow",
+          "status": "complete",
+          "taskId": "eval_mvto4xdx_c579v_shadow_focus-01",
+          "clauses": [
+            "聚焦会议记录"
+          ],
+          "decisions": [
+            {
+              "text": "聚焦会议记录",
+              "route": "focus",
+              "probability": 0.994609620921373,
+              "probabilities": {
+                "chat": 0.0000913704503308334,
+                "answer": 0.00014106096837908429,
+                "search": 0.0001473178363173812,
+                "countdown": 0.00008214927602676812,
+                "todo": 0.00006253116057396019,
+                "note": 0.00020162976461077448,
+                "generate": 0.00012688512925108122,
+                "focus": 0.994609620921373,
+                "overview": 0.000269903696874882,
+                "restore": 0.0029571138071017877,
+                "highlight": 0.00031268098981624976,
+                "edit": 0.0005157235334713067,
+                "arrange": 0.00010619205878465484,
+                "delete": 0.00005699608628950055,
+                "undo": 0.00021978492953005898,
+                "unsupported": 0.00009903939126878614
+              },
+              "none": false,
+              "latencyMs": 1722,
+              "failed": false,
+              "target": {
+                "targetId": "note_meeting"
+              }
+            }
+          ],
+          "route": "focus",
+          "probability": 0.994609620921373,
+          "target": {
+            "targetId": "note_meeting"
+          },
+          "latencyMs": 1722,
+          "routeLatencyMs": 1722,
+          "legacyElapsedMs": 5,
+          "shadowWaitMs": 250,
+          "failedCount": 0,
+          "legacyKind": "envelope",
+          "legacyUsedProvider": "rules-offline",
+          "legacyActionTypes": [
+            "card.focus"
+          ],
+          "legacyCardTypes": []
+        }
+      },
+      "sameLegacyShape": true
+    },
+    {
+      "id": "multi-03",
+      "expected": "focus",
+      "off": {
+        "id": "multi-03",
+        "expected": "focus",
+        "totalMs": 7,
+        "legacy": {
+          "kind": "unknown",
+          "usedProvider": "rules-offline",
+          "actionTypes": [],
+          "cardTypes": [],
+          "hostOperation": null,
+          "taskStatus": "failed"
+        },
+        "execution": {
+          "success": false,
+          "reason": "no-action-proposal",
+          "createdCards": 0
+        },
+        "trace": null
+      },
+      "shadow": {
+        "id": "multi-03",
+        "expected": "focus",
+        "totalMs": 262,
+        "legacy": {
+          "kind": "unknown",
+          "usedProvider": "rules-offline",
+          "actionTypes": [],
+          "cardTypes": [],
+          "hostOperation": null,
+          "taskStatus": "failed"
+        },
+        "execution": {
+          "success": false,
+          "reason": "no-action-proposal",
+          "createdCards": 0
+        },
+        "trace": {
+          "id": "decision_cd9bb51d-86fa-49cc-8065-32a52addc0f4",
+          "mode": "shadow",
+          "status": "complete",
+          "taskId": "eval_mvto4xdx_c579v_shadow_multi-03",
+          "clauses": [
+            "聚焦左边的待办",
+            "高亮第二条"
+          ],
+          "decisions": [
+            {
+              "text": "聚焦左边的待办",
+              "route": "focus",
+              "probability": 0.9961681752523583,
+              "probabilities": {
+                "chat": 0.0000290584552369117,
+                "answer": 0.00003891907511292552,
+                "search": 0.00004275147745478998,
+                "countdown": 0.00004780024218337115,
+                "todo": 0.00012323054381999825,
+                "note": 0.00005847053059421181,
+                "generate": 0.000043233302162992385,
+                "focus": 0.9961681752523583,
+                "overview": 0.00010813221351239677,
+                "restore": 0.0011854815844975625,
+                "highlight": 0.00024549566281197586,
+                "edit": 0.000290885295541531,
+                "arrange": 0.0011774201776978091,
+                "delete": 0.000039666134267077575,
+                "undo": 0.0003236769864955651,
+                "unsupported": 0.00007760306625253725
+              },
+              "none": false,
+              "latencyMs": 1717,
+              "failed": false,
+              "target": {
+                "targetId": "todo_week"
+              }
+            },
+            {
+              "text": "高亮第二条",
+              "route": "highlight",
+              "probability": 0.9767436273753654,
+              "probabilities": {
+                "chat": 0.00043445878727276036,
+                "answer": 0.00041671601846690777,
+                "search": 0.0002913959459004887,
+                "countdown": 0.00043903539218527644,
+                "todo": 0.0008667100594444922,
+                "note": 0.0002864703132845556,
+                "generate": 0.00019371349763243196,
+                "focus": 0.00473456464964422,
+                "overview": 0.0002771871915547662,
+                "restore": 0.0003420181801734357,
+                "highlight": 0.9767436273753654,
+                "edit": 0.012724940889545861,
+                "arrange": 0.0013280006482345986,
+                "delete": 0.0002655458810433795,
+                "undo": 0.00027667721225193984,
+                "unsupported": 0.0003789379579995679
+              },
+              "none": false,
+              "latencyMs": 1768,
+              "failed": false,
+              "target": {
+                "targetId": "todo_week"
+              }
+            }
+          ],
+          "route": "focus",
+          "probability": 0.9961681752523583,
+          "target": {
+            "targetId": "todo_week"
+          },
+          "latencyMs": 3486,
+          "routeLatencyMs": 1717,
+          "legacyElapsedMs": 1,
+          "shadowWaitMs": 251,
+          "failedCount": 0,
+          "legacyKind": "unknown",
+          "legacyUsedProvider": "rules-offline",
+          "legacyActionTypes": [],
+          "legacyCardTypes": []
+        }
+      },
+      "sameLegacyShape": true
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "formatVersion": "0.1",
+  "id": "vivic.office-meeting",
+  "version": "1.0.0",
+  "name": "会议行动卡",
+  "description": "将用户粘贴的会议笔记转为结论和行动项，保留负责人、截止时间原文及待办/进行中/受阻/完成。只使用用户提供的笔记，不查询、不创建真实会议或飞书日程；未提到的信息留空。",
+  "renderer": "declarative",
+  "host": "0.6",
+  "capabilities": []
+}

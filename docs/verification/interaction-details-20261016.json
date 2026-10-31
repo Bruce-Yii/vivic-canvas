@@ -1,0 +1,113 @@
+{
+  "date": "2026-10-16",
+  "sourceCommit": "0312ab3f7b8fd9dcbee0679b125f9df02328fe64",
+  "branch": "agent/next-iteration",
+  "scope": [
+    "persistent row/card subcards",
+    "merged reminder exact targeting",
+    "frozen numbered clarification",
+    "lifecycle and switch snapshot queue repair"
+  ],
+  "unitTests": {
+    "webPassed": 376,
+    "apiPassed": 860,
+    "skipped": 3,
+    "totalPassed": 1236
+  },
+  "typecheck": "passed",
+  "build": "passed",
+  "browserRuns": [
+    {
+      "engine": "chromium",
+      "passed": 19,
+      "source": "final",
+      "log": "evidence/interaction-details/chromium.log"
+    },
+    {
+      "engine": "firefox+webkit",
+      "passed": 24,
+      "source": "before final arrow spacing/stroke refinement",
+      "log": "evidence/interaction-details/compat-before-arrow-spacing.log"
+    },
+    {
+      "engine": "firefox+webkit",
+      "passed": 12,
+      "source": "final source; subcard/number/IME/lifecycle suite",
+      "log": "evidence/interaction-details/compat-final.log"
+    }
+  ],
+  "silent": true,
+  "physicalMicrophone": false,
+  "userCanvasTouched": false,
+  "ports": [
+    5174,
+    8788
+  ],
+  "gpt": {
+    "source": "vivic",
+    "model": "gpt-6-luna",
+    "restoredExistingUserAuthorization": true,
+    "newPaidInference": false
+  },
+  "visualReview": {
+    "method": "primary agent self-inspection; no independent review",
+    "checked": [
+      "row arrow after camera pan/zoom",
+      "numbered reminder grouping",
+      "390px viewport with long Chinese content",
+      "dark surface tokens"
+    ],
+    "screenshots": [
+      {
+        "path": "evidence/interaction-details/chromium/TEST-narrow-subcard.png",
+        "sha256": "ab02931ce790d818f9237e4c388aacd84a04879cf2d26576fc705d788fc3fb6a"
+      },
+      {
+        "path": "evidence/interaction-details/chromium/TEST-numbered-reminders.png",
+        "sha256": "5fd8e2896569f41b10eecbed29007745545cb1c7f95d0f66266112be7b7d4c45"
+      },
+      {
+        "path": "evidence/interaction-details/chromium/TEST-row-subcard.png",
+        "sha256": "1e3132d613f31eef448610357192f1660222ffe15843d7148729347009b8c26c"
+      },
+      {
+        "path": "evidence/interaction-details/firefox/TEST-narrow-subcard.png",
+        "sha256": "10080e4c54379f7e8dd71973c7815e6d0e98e6b215e900ac584b343cc4771133"
+      },
+      {
+        "path": "evidence/interaction-details/firefox/TEST-numbered-reminders.png",
+        "sha256": "4c619479fb1ea2155643909ce15e6ea1d7cf2e248d8af74dece161b342b0c1cd"
+      },
+      {
+        "path": "evidence/interaction-details/firefox/TEST-row-subcard.png",
+        "sha256": "e1fd8997630da85d2e63f8c9a12f981857b03877d397013cb0caccc2dfb9cb30"
+      },
+      {
+        "path": "evidence/interaction-details/webkit/TEST-narrow-subcard.png",
+        "sha256": "0f5389a3f202f6286109414ca15d6daedac46469d2bc03cce35147b05f0667e5"
+      },
+      {
+        "path": "evidence/interaction-details/webkit/TEST-numbered-reminders.png",
+        "sha256": "33ae099311ddd33b07faaebda943fb37d691b8eb33944f1b2a82a3a029a9cb6d"
+      },
+      {
+        "path": "evidence/interaction-details/webkit/TEST-row-subcard.png",
+        "sha256": "94422c5c42fab739605189e0d8a9bf9a0b5772f99c886fd8e72922442dd58a0d"
+      }
+    ]
+  },
+  "limits": [
+    "manual one-level text subcards, 24 per parent and 2000 characters each",
+    "positional table/note edits detach source links; content remains for explicit repair",
+    "subcard deletion itself is outside the parent-card deletion undo stack",
+    "full long-content dialog, visual material redesign and pinyin search remain for next case",
+    "no new physical Safari, audio or 30-minute performance acceptance"
+  ],
+  "priorFailuresPreserved": [
+    "evidence/interaction-details/debug-pinned/",
+    "evidence/interaction-details/debug-narrow/",
+    "evidence/interaction-details/debug-switch/",
+    "evidence/interaction-details/debug-firefox-ime/",
+    "evidence/interaction-details/debug-camera-test/"
+  ]
+}

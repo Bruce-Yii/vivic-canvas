@@ -1,0 +1,7 @@
+Hark visual source notice
+
+Source: ECdison6227/rea-ui-library, commit 26ac2724, platforms/web/hark.
+Selected original assets: GT Standard L 400/500/600/700, Hark Serif 300/500, GT Standard Mono 400; 74 named SVG glyph geometries; continuous-corner geometry; two locally rendered frozen sky frames.
+The React wrappers, semantic mapping, theme scoping and Vivic content are target adaptations. Fonts, glyphs and source geometry retain their respective original rights. Research publication does not grant an open-source license for original Hark assets. These owner-requested local preview/test packages are not an assertion of commercial redistribution rights.
+No Hark account data, cookies, tokens, original APK or server implementation is included.
+Detailed paths and SHA-256: apps/web/src/components/hark/SOURCE.json in the project.

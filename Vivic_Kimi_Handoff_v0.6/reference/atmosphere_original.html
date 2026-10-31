@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>云光实验室 · 轻盈烟雾与柔光背景</title>
+<style>
+  :root{--ink:#293044;--muted:#8990a0;--line:#e7eaf2;--purple:#8c81dd;--bg:#f7f8fc;--card:#fff}
+  *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,"SF Pro Display","PingFang SC","Microsoft YaHei",sans-serif;color:var(--ink)}body{background:radial-gradient(ellipse 80% 44% at 50% -8%,#edf0ff 0%,transparent 78%),var(--bg)}button,input{font:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}
+  .app{max-width:1512px;margin:0 auto;padding:0 52px 56px}.topbar{height:79px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e9ebf4}.logo{display:flex;align-items:center;gap:11px;font-size:15px;font-weight:740;letter-spacing:.045em}.logo-mark{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border:1px solid #ddd8f8;border-radius:10px;background:linear-gradient(138deg,#d8ebfe,#f9e0f6 65%,#f7e7cf);box-shadow:0 4px 15px #d4c6f667}.logo-mark svg{height:19px;width:19px;color:#7f74c7}.top-right{display:flex;align-items:center;gap:15px;font-size:12px;color:#8f97a5}.dot-live{width:7px;height:7px;border-radius:99px;background:#8fcba8;box-shadow:0 0 0 4px #e6f7e9}.top-tag{background:#fff;border:1px solid var(--line);color:#888aab;border-radius:99px;padding:7px 12px;font-size:11px}
+  .intro{padding:39px 0 33px}.eyebrow{display:flex;align-items:center;gap:8px;font-size:10px;font-weight:780;letter-spacing:.19em;color:#9b8dc8}.eyebrow:before{content:"";width:16px;height:1px;background:#aea0d8}h1{font-size:clamp(30px,3vw,46px);line-height:1.16;margin:14px 0 11px;letter-spacing:-.045em;font-weight:700}h1 i{font-family:Georgia,"Times New Roman",serif;font-weight:400;color:#a297da;letter-spacing:-.085em}.intro p{font-size:13px;line-height:1.8;max-width:750px;color:#8990a1;margin:0}.intro strong{color:#687083;font-weight:620}
+  .studio{display:grid;grid-template-columns:minmax(0,1fr) 326px;align-items:start;gap:23px}.workspace{min-width:0}.section-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:13px}.section-label{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:730;letter-spacing:.025em}.section-label .index{font-size:10px;color:#a3a9b8;font-weight:650}.section-sub{font-size:11px;color:#a8adbb}.stage{position:relative;width:100%;height:clamp(360px,39vw,515px);min-height:350px;border-radius:23px;border:1px solid #eff0f8;overflow:hidden;background:#f6f9ff;box-shadow:0 20px 70px #858cb322,0 3px 12px #8593bf0e;isolation:isolate}.stage canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}.grain-layer{pointer-events:none;position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 140 140' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' opacity='.075' filter='url(%23n)'/%3E%3C/svg%3E");opacity:.33;mix-blend-mode:soft-light;z-index:1}.stage-top,.stage-bottom{position:absolute;z-index:3;left:26px;right:26px;display:flex;justify-content:space-between;align-items:center}.stage-top{top:24px}.stage-bottom{bottom:23px}.glass-pill{display:inline-flex;gap:8px;align-items:center;padding:8px 11px;border:1px solid #ffffffb8;color:#69728b;background:#ffffff82;backdrop-filter:blur(12px);border-radius:99px;font-size:10px;font-weight:650;letter-spacing:.065em}.tiny-spark{color:#9d8de1;font-size:13px}.stage-content{position:absolute;z-index:2;left:0;right:0;top:50%;transform:translateY(-45%);display:flex;flex-direction:column;align-items:center;pointer-events:none;transition:opacity .25s}.stage-content .big-title{font-size:clamp(48px,6.1vw,92px);letter-spacing:-.095em;color:#56617aa8;font-weight:650;line-height:1.25}.big-title em{color:#7b7cb3a8;font-family:Georgia,serif;font-weight:400;letter-spacing:-.095em}.stage-content .subtitle{margin-top:8px;font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:#747d94a8}.stage-bottom .status{display:flex;gap:9px;align-items:center;font-size:10px;color:#7c8496}.stage-bottom .line{width:24px;height:1px;background:#7e8cb766}.stage-bottom .counter{font-size:11px;color:#7b87a0;font-weight:650;letter-spacing:.11em}.stage.compare-on>canvas#scene{width:50%}.stage.compare-on .stage-content{opacity:0}.stage.compare-on .grain-layer{opacity:.12}.stage.compare-on .stage-top{right:auto}.compare-pane{display:none;position:absolute;top:0;right:0;width:50%;height:100%;z-index:1;border-left:1px solid #ffffffbb}.compare-pane canvas{width:100%;height:100%}.stage.compare-on .compare-pane{display:block}.compare-name{display:none;position:absolute;z-index:3;bottom:64px;font-size:11px;font-weight:730;color:#65708a;background:#ffffff8a;border:1px solid #fff;border-radius:100px;padding:7px 12px;backdrop-filter:blur(12px)}.stage.compare-on .compare-name{display:block}.compare-name.left{left:24px}.compare-name.right{right:24px}.stage.compare-on .stage-bottom{bottom:20px}.stage.compare-on .stage-top .glass-pill{font-size:9px}
+  .toolbar{display:flex;align-items:center;justify-content:space-between;margin:14px 0 25px}.toolgroup{display:flex;align-items:center;gap:8px}.tool{border:1px solid #e8eaf4;background:white;color:#747e91;font-size:11px;font-weight:620;display:flex;gap:7px;align-items:center;justify-content:center;border-radius:10px;min-height:34px;padding:8px 12px;transition:.18s}.tool:hover{border-color:#d3cbf4;background:#fbfaff;color:#69609b}.tool.active{background:#f2eeff;border-color:#d8cef9;color:#8373c8}.tool svg{width:13px;height:13px}.toolbar .rightnote{font-size:10px;color:#a2aab7}
+  .choose-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:14px}.choose-head h2{font-size:15px;margin:0;font-weight:760;letter-spacing:-.018em}.choose-head p{font-size:11px;margin:5px 0 0;color:#9fa5b4}.choose-head span{font-size:10px;color:#9ba3b0}.modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.mode-tile{padding:7px;border:1px solid #e8eaf2;background:white;box-shadow:0 2px 11px #b8bdd010;border-radius:13px;text-align:left;transition:transform .17s,border .17s,box-shadow .17s;min-width:0}.mode-tile:hover{transform:translateY(-2px);box-shadow:0 5px 18px #b4b4e52b}.mode-tile.selected{border-color:#b5a8ec;box-shadow:0 0 0 2px #e9e4ff,0 6px 25px #a5a2cf22}.thumb{height:87px;position:relative;overflow:hidden;border-radius:8px;background:#f5f8ff;isolation:isolate}.thumb:before,.thumb:after{content:"";position:absolute;border-radius:50%;filter:blur(12px);opacity:.92;animation:breath 9s ease-in-out infinite alternate}.thumb:before{width:85%;height:100%;left:-22%;top:-30%;background:#bacef6}.thumb:after{width:72%;height:100%;right:-22%;bottom:-35%;background:#ead2f6;animation-delay:-4s}.thumb.fog{background:linear-gradient(125deg,#fbfcff,#eef1fd,#fff6fc)}.thumb.fog:before{background:#dcecf4;transform:rotate(35deg);filter:blur(21px)}.thumb.fog:after{background:#e4cdeb;filter:blur(22px)}.thumb.ether{background:linear-gradient(125deg,#fbf8ff,#f2efff)}.thumb.ether:before{background:#d7bdfe;width:80%;height:55%;top:22%;transform:rotate(-35deg);border-radius:33% 66% 33% 70%}.thumb.ether:after{background:#f7d6e5;right:-5%;height:45%;transform:rotate(30deg);border-radius:72% 20%}.thumb.silk{background:repeating-linear-gradient(158deg,#f5f9ff 0%,#cfdefc 20%,#e9dcfa 38%,#fdfaff 51%,#e8e5fd 72%,#f8faff 100%)}.thumb.silk:before{background:#e1d6ff;width:120%;height:24%;top:12%;filter:blur(12px);transform:rotate(-21deg)}.thumb.silk:after{background:#bfdcff;width:130%;height:21%;bottom:18%;filter:blur(12px);transform:rotate(-21deg)}.thumb.aurora{background:#fbfdff}.thumb.aurora:before{width:35%;height:140%;background:#bdeada;left:10%;top:-25%;filter:blur(19px)}.thumb.aurora:after{width:44%;height:150%;background:#d8c9ff;right:8%;top:-33%;filter:blur(16px)}.thumb.grainient{background:radial-gradient(ellipse at 0 100%,#b5e0ed,#f9faff 53%,#efe0fd 83%,#fdd8dc)}.thumb.grainient:before{background:#bdd4ff;opacity:.5}.thumb.grainient:after{background:#f8c8e4;opacity:.55}.thumb .mini-number{z-index:1;position:absolute;top:8px;left:10px;font-size:9px;color:#787ca5;font-weight:800}.mode-meta{padding:10px 6px 9px;display:flex;align-items:start;justify-content:space-between;gap:6px}.mode-name{font-size:12px;font-weight:730;color:#4c5268}.mode-desc{font-size:10px;line-height:1.5;color:#9ba2b1;margin-top:4px}.checkmark{font-size:14px;color:#998bd7;opacity:0}.selected .checkmark{opacity:1}
+  .sidebar{background:#fff;border:1px solid #edeef5;border-radius:19px;padding:22px 20px 20px;box-shadow:0 8px 35px #b8bfd017;position:sticky;top:18px}.sidebar-header{display:flex;align-items:start;justify-content:space-between;padding-bottom:17px;border-bottom:1px solid #f0f0f5}.sidebar-header h2{font-size:16px;letter-spacing:-.03em;margin:1px 0 5px}.sidebar-header p{font-size:10px;color:#a1a6b5;margin:0}.sidebar-icon{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:11px;background:#f5f1ff;color:#9b8bd3}.sidebar-icon svg{width:17px;height:17px}.ctrl-section{padding:19px 0 0}.ctrl-heading{display:flex;justify-content:space-between;align-items:center;margin:0 0 11px}.ctrl-heading span{font-size:11px;font-weight:760;color:#666c7c}.ctrl-heading small{font-size:10px;color:#aaafba}.palettes{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.palette{border:1px solid #ececf3;background:#fff;border-radius:10px;padding:9px;display:flex;gap:8px;align-items:center;text-align:left;color:#808796;font-size:10px;white-space:nowrap;transition:.2s}.palette:hover{background:#fbfaff;border-color:#d5cdf3}.palette.selected{border-color:#bdb3ef;background:#faf8ff;color:#7770ad}.palette-circle{width:27px;height:27px;flex:none;border-radius:100%;border:2px solid #fff;box-shadow:0 0 0 1px #e5e7f0;background:conic-gradient(var(--p1) 0 30%,var(--p2) 30% 65%,var(--p3) 65% 100%)}
+  .divider{height:1px;background:#f0f0f6;margin:21px 0 0}.color-row{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.color-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;color:#a3a9b7;font-size:10px}.color-box{height:32px;width:100%;border-radius:9px;border:1px solid #e7e7f0;overflow:hidden;position:relative}.color-box input[type=color]{cursor:pointer;appearance:none;border:0;padding:0;width:160%;height:160%;position:absolute;left:-18%;top:-18%;background:transparent}.color-box input::-webkit-color-swatch-wrapper{padding:0}.color-box input::-webkit-color-swatch{border:0}.color-box input::-moz-color-swatch{border:0}
+  .slider-control{margin:0 0 15px}.slider-info{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#747c8d;margin-bottom:8px}.slider-info .number{font-size:10px;color:#a293d1;font-weight:740;font-variant-numeric:tabular-nums}input[type=range]{-webkit-appearance:none;appearance:none;display:block;width:100%;height:4px;border-radius:99px;outline:none;background:linear-gradient(to right,#aea2ee 0%,#d7cef8 var(--fill),#eff0f4 var(--fill),#eff0f4 100%);cursor:pointer}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:13px;height:13px;border-radius:50%;background:#fff;border:3px solid #b3a5e5;box-shadow:0 1px 4px #b7b3d0aa}input[type=range]::-moz-range-thumb{width:9px;height:9px;border-radius:50%;background:#fff;border:3px solid #b3a5e5;box-shadow:0 1px 4px #b7b3d0aa}.hint{font-size:10px;color:#9ca3af;line-height:1.75;margin-top:2px}.check-label{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#707a8b;cursor:pointer}.check-label input{appearance:none;width:30px;height:17px;border-radius:9px;background:#e5e6ed;position:relative;transition:.18s;cursor:pointer}.check-label input:before{content:"";position:absolute;height:11px;width:11px;border-radius:50%;background:white;left:3px;top:3px;box-shadow:0 1px 4px #0001;transition:.18s}.check-label input:checked{background:#b4a4eb}.check-label input:checked:before{left:16px}.reset{width:100%;border:1px solid #e9e9f3;background:#fbfbfe;color:#85849a;font-size:11px;font-weight:650;padding:12px;border-radius:11px;margin-top:20px}.reset:hover{background:#f3efff;border-color:#e0d9f7}
+  .note-box{display:flex;gap:10px;margin-top:17px;padding:13px 14px;background:linear-gradient(120deg,#f4f0ff,#f8fbff);border:1px solid #eee9fa;border-radius:12px}.note-box .star{color:#a49adb;font-size:15px}.note-box p{color:#8a87a4;font-size:10px;line-height:1.7;margin:0}.footer{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-top:32px;padding-top:20px;border-top:1px solid #e9ebf3;color:#adb1c0;font-size:10px}.footer strong{font-weight:650;color:#8f98aa}kbd{border:1px solid #e8e8f2;border-radius:4px;background:white;padding:2px 5px;font-size:10px}.toast{position:fixed;bottom:25px;left:50%;transform:translate(-50%,14px);padding:11px 17px;background:#34374b;color:#fff;border-radius:11px;font-size:12px;opacity:0;transition:.2s;pointer-events:none;z-index:30;box-shadow:0 12px 30px #3335}.toast.visible{opacity:1;transform:translate(-50%,0)}:fullscreen.stage{height:100vh;width:100vw;border-radius:0}:fullscreen.stage .stage-content .big-title{font-size:clamp(70px,8vw,155px)}
+  @keyframes breath{from{transform:translate(-8px,2px) rotate(-12deg) scale(1)}to{transform:translate(16px,-8px) rotate(10deg) scale(1.14)}}
+  @media(max-width:1160px){.app{padding:0 28px 40px}.studio{grid-template-columns:minmax(0,1fr) 290px;gap:17px}.sidebar{padding:19px 16px}.modes{gap:9px}.mode-meta{padding:8px 4px}.mode-desc{font-size:9px}.thumb{height:75px}}
+  @media(max-width:850px){.app{padding:0 18px 28px}.intro{padding:30px 0 23px}.studio{grid-template-columns:1fr}.sidebar{position:relative;top:auto;max-width:none}.stage{height:clamp(340px,57vw,530px)}.modes{grid-template-columns:repeat(3,1fr)}.thumb{height:84px}.sidebar .ctrl-section{max-width:none}.sidebar{display:grid;grid-template-columns:1fr 1fr;column-gap:24px}.sidebar-header,.sidebar>.divider,.reset,.note-box{grid-column:1/-1}.sidebar>.divider{display:none}.sidebar-header{margin-bottom:1px}.footer{margin-top:24px}}
+  @media(max-width:560px){.app{padding:0 13px 30px}.topbar{height:64px}.top-right .top-tag{display:none}h1{font-size:31px}.intro p{font-size:12px}.section-sub{display:none}.stage{min-height:325px;height:360px;border-radius:18px}.stage-content .big-title{font-size:56px}.stage-top,.stage-bottom{left:17px;right:17px}.stage-top{top:16px}.stage-bottom{bottom:17px}.toolbar{align-items:start;gap:8px}.toolgroup{flex-wrap:wrap}.tool{font-size:10px;min-height:32px;padding:7px 9px}.toolbar .rightnote{display:none}.modes{gap:8px;grid-template-columns:repeat(2,1fr)}.thumb{height:93px}.sidebar{display:block}.sidebar>.divider{display:block}.footer{line-height:1.6}.footer span:last-child{display:none}}
+  @media(prefers-reduced-motion:reduce){.thumb:before,.thumb:after{animation:none}.mode-tile,.toast{transition:none}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+  <div class="logo"><span class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round"><path d="M12 2.5c1 5 2.5 7.6 8 9.5-5.5 1.7-7 4.3-8 9.5C11 16.3 9.5 13.7 4 12c5.5-1.9 7-4.5 8-9.5Z"/><path d="m18.2 2 .4 2.7 2.6.5-2.6.5-.4 2.7-.5-2.7-2.6-.5 2.6-.5z"/></svg></span> cloud & light <span style="color:#c6c4d5;font-size:10px;letter-spacing:0;font-weight:500">/ 云光实验室</span></div>
+  <div class="top-right"><span class="dot-live"></span><span>实时动态渲染</span><span class="top-tag">100% 离线可用</span></div>
+</header>
+<section class="intro">
+  <div class="eyebrow">PASTEL ATMOSPHERE STUDIO</div>
+  <h1>把光，揉进 <i>空气里。</i></h1>
+  <p>六种轻盈的动态背景：<strong>烟雾、流体、丝绸、柔光与朦胧渐变</strong>。选择一个喜欢的氛围，再把它调成专属于你的浅色系。</p>
+</section>
+<main class="studio">
+  <div class="workspace">
+    <div class="section-heading"><div class="section-label"><span class="index">01</span> 实时预览</div><span class="section-sub">移动的光与薄雾 · 可暂停、对比、保存</span></div>
+    <div class="stage" id="stage">
+      <canvas id="scene" aria-label="实时渲染的浅色烟雾与渐变背景"></canvas>
+      <div class="compare-pane" id="comparePane"><canvas id="compareScene" aria-label="对比渲染的背景效果"></canvas></div>
+      <div class="grain-layer"></div>
+      <div class="stage-top"><span class="glass-pill"><span class="tiny-spark">✧</span> MAKE AGAIN · ATMOSPHERE</span><span class="glass-pill" id="modeBadge">01 / 06</span></div>
+      <div class="stage-content" id="stageContent"><div class="big-title">Make <em>Again.</em></div><div class="subtitle">a softer way to begin</div></div>
+      <div class="compare-name left" id="leftMode">云雾光晕</div><div class="compare-name right" id="rightMode">流光以太</div>
+      <div class="stage-bottom"><div class="status"><span class="line"></span><span id="stageCaption">一层缓缓漂浮的轻云与微光</span></div><span class="counter" id="frameCounter">LIGHT STUDY — 01</span></div>
+    </div>
+    <div class="toolbar">
+      <div class="toolgroup">
+        <button class="tool" id="pauseBtn" type="button" title="暂停或继续动画"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M5 3h3v14H5zm7 0h3v14h-3z"/></svg><span id="pauseLabel">暂停动画</span></button>
+        <button class="tool" id="compareBtn" type="button" title="与上一种效果并排对比"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2" y="3" width="16" height="14" rx="2"/><path d="M10 3v14"/></svg><span id="compareLabel">双屏对比</span></button>
+        <button class="tool" id="captureBtn" type="button" title="导出当前背景 PNG"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 2v10m-4-4 4 4 4-4M3 13v4h14v-4"/></svg>保存背景</button>
+        <button class="tool" id="fullscreenBtn" type="button" title="全屏欣赏"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M7 2H2v5m11-5h5v5M2 13v5h5m11-5v5h-5"/></svg>全屏</button>
+      </div>
+      <span class="rightnote" id="renderStatus">正在检测渲染环境…</span>
+    </div>
+    <div class="choose-head"><div><h2>探索六种氛围</h2><p>点击卡片即可切换真实动态效果</p></div><span>SELECT A STYLE ↗</span></div>
+    <div class="modes" id="modes">
+      <button class="mode-tile selected" type="button" data-mode="0" aria-pressed="true"><div class="thumb haze"><span class="mini-number">01</span></div><div class="mode-meta"><div><div class="mode-name">云雾光晕</div><div class="mode-desc">Haze · 细腻朦胧的柔光</div></div><span class="checkmark">✓</span></div></button>
+      <button class="mode-tile" type="button" data-mode="1" aria-pressed="false"><div class="thumb ether"><span class="mini-number">02</span></div><div class="mode-meta"><div><div class="mode-name">流光以太</div><div class="mode-desc">Ether · 流动融合的光雾</div></div><span class="checkmark">✓</span></div></button>
+      <button class="mode-tile" type="button" data-mode="2" aria-pressed="false"><div class="thumb silk"><span class="mini-number">03</span></div><div class="mode-meta"><div><div class="mode-name">丝绸柔光</div><div class="mode-desc">Silk · 轻纱一般的光纹</div></div><span class="checkmark">✓</span></div></button>
+      <button class="mode-tile" type="button" data-mode="3" aria-pressed="false"><div class="thumb fog"><span class="mini-number">04</span></div><div class="mode-meta"><div><div class="mode-name">漫游烟雾</div><div class="mode-desc">Fog · 如云般缓慢扩散</div></div><span class="checkmark">✓</span></div></button>
+      <button class="mode-tile" type="button" data-mode="4" aria-pressed="false"><div class="thumb aurora"><span class="mini-number">05</span></div><div class="mode-meta"><div><div class="mode-name">晨曦极光</div><div class="mode-desc">Aurora · 轻盈半透明光幕</div></div><span class="checkmark">✓</span></div></button>
+      <button class="mode-tile" type="button" data-mode="5" aria-pressed="false"><div class="thumb grainient"><span class="mini-number">06</span></div><div class="mode-meta"><div><div class="mode-name">柔粒渐变</div><div class="mode-desc">Grainient · 雾面彩色颗粒</div></div><span class="checkmark">✓</span></div></button>
+    </div>
+  </div>
+  <aside class="sidebar">
+    <div class="sidebar-header"><div><h2>调制你的光</h2><p>CUSTOMIZE YOUR ATMOSPHERE</p></div><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16M4 17h16M8 4v6m8 4v6"/><circle cx="8" cy="7" r="2" fill="#f5f1ff"/><circle cx="16" cy="17" r="2" fill="#f5f1ff"/></svg></span></div>
+    <section class="ctrl-section"><div class="ctrl-heading"><span>01 / 氛围配色</span><small>COLOR PALETTE</small></div><div class="palettes" id="palettes">
+      <button class="palette selected" type="button" data-preset="milk" aria-pressed="true"><span class="palette-circle" style="--p1:#c2d9ff;--p2:#ddcdff;--p3:#f5cfe3"></span>云朵蓝紫</button>
+      <button class="palette" type="button" data-preset="peach" aria-pressed="false"><span class="palette-circle" style="--p1:#ffdfc8;--p2:#ffeac6;--p3:#e8cff7"></span>奶油蜜桃</button>
+      <button class="palette" type="button" data-preset="lilac" aria-pressed="false"><span class="palette-circle" style="--p1:#dfc6ff;--p2:#f5cbec;--p3:#d3defa"></span>丁香莓粉</button>
+      <button class="palette" type="button" data-preset="mint" aria-pressed="false"><span class="palette-circle" style="--p1:#c3e9d7;--p2:#cde9f8;--p3:#e8d8f7"></span>薄荷微风</button>
+      <button class="palette" type="button" data-preset="dawn" aria-pressed="false"><span class="palette-circle" style="--p1:#cce0ff;--p2:#f5e0e6;--p3:#ffe5c8"></span>纯白晨光</button>
+      <button class="palette" type="button" data-preset="berry" aria-pressed="false"><span class="palette-circle" style="--p1:#becbf9;--p2:#e5d5fa;--p3:#c9eff0"></span>蓝莓牛奶</button>
+    </div></section>
+    <section class="ctrl-section"><div class="ctrl-heading"><span>自由调色</span><small>点击色块修改</small></div><div class="color-row">
+      <label class="color-wrap"><span class="color-box"><input data-color="0" type="color" value="#F8FAFF" aria-label="底色"></span>底色</label>
+      <label class="color-wrap"><span class="color-box"><input data-color="1" type="color" value="#BCD7FA" aria-label="雾蓝"></span>色彩 A</label>
+      <label class="color-wrap"><span class="color-box"><input data-color="2" type="color" value="#DEC9FA" aria-label="浅紫"></span>色彩 B</label>
+      <label class="color-wrap"><span class="color-box"><input data-color="3" type="color" value="#FADCEA" aria-label="雾粉"></span>色彩 C</label>
+    </div></section>
+    <div class="divider"></div>
+    <section class="ctrl-section"><div class="ctrl-heading"><span>02 / 动态参数</span><small>LIVE ADJUST</small></div>
+      <div class="slider-control"><div class="slider-info"><label for="density">烟雾浓度</label><span class="number" id="densityVal">68%</span></div><input id="density" type="range" min="0" max="100" value="68" style="--fill:68%"></div>
+      <div class="slider-control"><div class="slider-info"><label for="speed">流动速度</label><span class="number" id="speedVal">43%</span></div><input id="speed" type="range" min="0" max="100" value="43" style="--fill:43%"></div>
+      <div class="slider-control"><div class="slider-info"><label for="glow">光晕强度</label><span class="number" id="glowVal">66%</span></div><input id="glow" type="range" min="0" max="100" value="66" style="--fill:66%"></div>
+      <div class="slider-control"><div class="slider-info"><label for="brightness">整体明度</label><span class="number" id="brightnessVal">70%</span></div><input id="brightness" type="range" min="0" max="100" value="70" style="--fill:70%"></div>
+      <div class="hint">浅色优先：即使降低明度，也不会变成深色背景。</div>
+    </section>
+    <div class="divider"></div>
+    <section class="ctrl-section"><div class="ctrl-heading"><span>03 / 展示选项</span><small>DISPLAY</small></div><label class="check-label" for="titleToggle">显示标题文字 <input id="titleToggle" type="checkbox" checked></label></section>
+    <button class="reset" type="button" id="resetBtn">↻ &nbsp;恢复浅色默认设置</button>
+    <div class="note-box"><span class="star">✧</span><p>全部使用本地 WebGL / Canvas 渲染，无图片素材与外部链接依赖。双击 HTML 文件即可完整预览。</p></div>
+  </aside>
+</main>
+<footer class="footer"><span><strong>cloud & light</strong> · 以 React Bits 等背景效果为灵感，独立编写的轻量实现</span><span>本地打开 · 6 种效果 · 无限次调节</span></footer>
+</div>
+<div class="toast" role="status" id="toast"></div>
+<script>
+/* SELF-CONTAINED COMPONENT CODE - exact same implementation as component.js */
+/*
+ * PastelAtmosphere - zero-dependency, reusable animated atmosphere background.
+ * Usage:
+ *   const effect = new PastelAtmosphere(document.querySelector('canvas'), {
+ *     mode: 0, colors: ['#F8FAFF','#BED7F5','#E3CDF8','#FFE1D8'],
+ *     density: 64, speed: 48, glow: 60, brightness: 68
+ *   });
+ *   effect.setOptions({ mode: 3, speed: 20 });
+ *   effect.setPaused(true); effect.destroy();
+ * All motion, render code and styles for this component are self-contained.
+ * The browser never makes any network requests.
+ */
+(function (root) {
+  'use strict';
+  const vertex = `attribute vec2 a_pos;
+    void main(){gl_Position=vec4(a_pos,0.,1.);}`;
+  const fragment = `precision highp float;
+    uniform vec2 u_resolution;
+    uniform float u_time, u_density, u_speed, u_glow, u_brightness;
+    uniform int u_mode;
+    uniform vec3 u_base, u_colorA, u_colorB, u_colorC;
+    float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123);}
+    float noise(vec2 p){
+      vec2 i=floor(p),f=fract(p); f=f*f*(3.0-2.0*f);
+      return mix(mix(hash(i),hash(i+vec2(1.,0.)),f.x),mix(hash(i+vec2(0.,1.)),hash(i+1.),f.x),f.y);
+    }
+    float fbm(vec2 p){
+      float v=0.; float a=.53;
+      for(int i=0;i<4;i++){v+=a*noise(p);p=p*2.03+vec2(8.27,1.41);a*=.49;}
+      return v;
+    }
+    float ell(vec2 p, vec2 center, vec2 rad){vec2 z=(p-center)/rad;return exp(-dot(z,z)*1.16);}
+    void main(){
+      vec2 p=(gl_FragCoord.xy-0.5*u_resolution)/u_resolution.y;
+      float t=u_time*(.09+u_speed*.0041);
+      float k=u_density*.01;
+      float glow=u_glow*.01;
+      vec2 wind=vec2(t*.22,t*.076);
+      vec2 warp=vec2(fbm(p*1.18+wind),fbm(p*1.23-vec2(t*.11,-t*.17)+7.31));
+      vec2 q=p+(.42+float(u_mode)*.035)*(warp-.5);
+      float n1=fbm(q*1.79+vec2(t*.08,-t*.09));
+      float n2=fbm(q*2.35+vec2(-t*.1,t*.075)+3.94);
+      float n3=fbm(q*3.4+vec2(t*.12,-t*.15)+8.81);
+      vec3 col=u_base;
+      float a=0.,b=0.,c=0.;
+      if(u_mode==0){
+        // Cloud-light: a soft blur of drifting wisps and luminous pools
+        float veil=smoothstep(.34,.78,n1*.79+n3*.23);
+        a=ell(q,vec2(-.54+sin(t*.42)*.13,.11),vec2(.76,.61))*(.60+.48*n1);
+        b=ell(q,vec2(.47+cos(t*.33)*.12,-.11),vec2(.79,.49))*(.59+.62*n2);
+        c=ell(q,vec2(.03+sin(t*.22)*.18,.32),vec2(.67,.42))*(.30+.62*veil);
+        a+=.20*veil;
+      }else if(u_mode==1){
+        // Ether: slow liquid plumes, warped and curled like ink in water
+        float fold=sin(q.y*7.8+sin(q.x*3.8-t*.45)*1.5+warp.x*5.7-t*.33);
+        float eddy=smoothstep(-.77,.84,fold)*(.27+.73*n1);
+        a=ell(q,vec2(-.47,-.07),vec2(.79,.65))*(.42+.52*eddy);
+        b=ell(q,vec2(.36,.15),vec2(.77,.64))*(.44+.42*n2);
+        c=ell(q,vec2(.04,-.18),vec2(.68,.38))*(.2+.65*eddy);
+      }else if(u_mode==2){
+        // Silk: broad soft fabric ribbons with smooth folded highlights
+        float ridge=sin(q.y*9.4+sin(q.x*2.6+t*.21)*1.24+q.x*2.5-t*.45);
+        float ribbon=.5+.5*ridge;
+        a=smoothstep(.28,.86,ribbon)*ell(q,vec2(-.31,0.),vec2(1.35,.85))*.79;
+        b=smoothstep(.22,.86,1.-ribbon)*ell(q,vec2(.36,.0),vec2(1.24,.85))*.72;
+        c=ell(q,vec2(.04,.08),vec2(.72,.58))*(.19+.38*n1);
+      }else if(u_mode==3){
+        // Fog: broad cloud banks whose density changes in an organic way
+        float cloud=smoothstep(.28,.74,n1*.7+n2*.38);
+        float cloud2=smoothstep(.3,.76,n2*.73+n3*.33);
+        a=ell(q,vec2(-.55+sin(t*.23)*.2,.17),vec2(1.07,.55))*(.39+.65*cloud);
+        b=ell(q,vec2(.52+cos(t*.19)*.13,-.21),vec2(.99,.58))*(.46+.62*cloud2);
+        c=ell(q,vec2(.0,.27),vec2(.84,.44))*(.25+.43*cloud);
+      }else if(u_mode==4){
+        // Aurora: translucent vertical light curtains with a gentle sway
+        float bend=sin(p.x*3.7+t*.24)*.21+sin(p.y*2.1-t*.3)*.10;
+        float v1=exp(-pow((q.x+.37+bend)*2.08,2.));
+        float v2=exp(-pow((q.x-.3-bend*.77)*2.13,2.));
+        a=v1*(.52+.30*n1)*(.65+.34*sin(p.y*1.9-t*.1));
+        b=v2*(.58+.28*n2);
+        c=exp(-pow((q.x+.04+bend*.8)*2.2,2.))*(.38+.25*n3);
+      }else{
+        // Grainient: large abstract color gradients with subtle micrograin
+        a=ell(q,vec2(-.62+sin(t*.24)*.2,.23),vec2(.99,.78))*(.53+.35*n1);
+        b=ell(q,vec2(.49+cos(t*.22)*.11,-.24),vec2(.99,.72))*(.49+.43*n2);
+        c=ell(q,vec2(.15,.35),vec2(.8,.56))*(.34+.36*n3);
+      }
+      float gain=.38+.53*k;
+      col=mix(col,u_colorA,clamp(a*gain,0.,.76));
+      col=mix(col,u_colorB,clamp(b*gain,0.,.69));
+      col=mix(col,u_colorC,clamp(c*gain,0.,.62));
+      float haze=ell(p,vec2(-.22+sin(t*.29)*.17,.20),vec2(.57,.49));
+      float shine=ell(p,vec2(.53+cos(t*.25)*.11,.06),vec2(.61,.57));
+      col=mix(col,vec3(1.),clamp(.12*glow*haze+.045*glow*shine,0.,.24));
+      col=mix(col,u_colorB,clamp(.12*glow*shine,0.,.17));
+      float shift=(u_brightness-65.)/100.;
+      col=mix(col,vec3(1.),max(0.,shift)*.77);
+      col=mix(col,vec3(.9,.91,.95),max(0.,-shift)*.23);
+      // A gossamer hint of drifting microtexture, strongest on Grainient.
+      float grain=(hash(gl_FragCoord.xy+floor(t*2.))-.5);
+      col+=grain*(u_mode==5?.016:.0045);
+      gl_FragColor=vec4(clamp(col,0.,1.),1.);
+    }`;
+  const defaults = {
+    mode: 0,
+    colors: ['#F8FAFF','#BCD7FA','#DEC9FA','#FADCEA'],
+    density: 68, speed: 43, glow: 66, brightness: 70
+  };
+  function rgb(hex){
+    const h=String(hex||'#FFFFFF').replace('#','');
+    const full=h.length===3?h.split('').map(x=>x+x).join(''):h;
+    return [0,2,4].map(i=>parseInt(full.slice(i,i+2),16)/255);
+  }
+  function alpha(hex, a){const x=rgb(hex).map(v=>Math.round(v*255));return `rgba(${x.join(',')},${a})`;}
+  class PastelAtmosphere {
+    constructor(canvas, options={}){
+      this.canvas=canvas;
+      this.options={...defaults,...options,colors:[...(options.colors||defaults.colors)]};
+      this.paused=false;
+      this.time=0;
+      this.last=0;
+      this.running=true;
+      this.pointer=0;
+      this.gl=null;
+      this.fallback=null;
+      this.frame=this.frame.bind(this);
+      this.resize=this.resize.bind(this);
+      this.setup();
+      if(typeof ResizeObserver!=='undefined'){
+        this.observer=new ResizeObserver(this.resize);this.observer.observe(canvas);
+      }else{window.addEventListener('resize',this.resize);}
+      this.resize();
+      this.frameId=requestAnimationFrame(this.frame);
+    }
+    setup(){
+      const gl=this.canvas.getContext('webgl',{alpha:false,antialias:false,preserveDrawingBuffer:true,powerPreference:'low-power'});
+      if(!gl){this.fallback=this.canvas.getContext('2d');return;}
+      try{
+        const compile=(kind,code)=>{
+          let s=gl.createShader(kind);gl.shaderSource(s,code);gl.compileShader(s);
+          if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s));return s;
+        };
+        const program=gl.createProgram();
+        gl.attachShader(program,compile(gl.VERTEX_SHADER,vertex));
+        gl.attachShader(program,compile(gl.FRAGMENT_SHADER,fragment));
+        gl.linkProgram(program);
+        if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(program));
+        gl.useProgram(program);
+        const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+        gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+        const loc=gl.getAttribLocation(program,'a_pos');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+        this.uniforms={};
+        ['u_resolution','u_time','u_density','u_speed','u_glow','u_brightness','u_mode','u_base','u_colorA','u_colorB','u_colorC'].forEach(k=>this.uniforms[k]=gl.getUniformLocation(program,k));
+        this.gl=gl;
+        this.program=program;
+      }catch(e){
+        console.warn('Atmosphere WebGL unavailable; use Canvas 2D fallback.',e);
+        // A failed WebGL initialization owns the canvas context; replace its DOM node to allow 2D.
+        const copy=this.canvas.cloneNode(false);
+        this.canvas.parentNode.replaceChild(copy,this.canvas);
+        this.canvas=copy;
+        this.fallback=copy.getContext('2d');
+      }
+    }
+    resize(){
+      const box=this.canvas.getBoundingClientRect();
+      const dpr=Math.min(window.devicePixelRatio||1,1.25);
+      const pixelScale=.81;
+      const w=Math.max(1,Math.floor(box.width*dpr*pixelScale));
+      const h=Math.max(1,Math.floor(box.height*dpr*pixelScale));
+      if(w!==this.canvas.width||h!==this.canvas.height){
+        this.canvas.width=w;this.canvas.height=h;
+        if(this.gl)this.gl.viewport(0,0,w,h);
+      }
+    }
+    setOptions(updates={}){
+      this.options={...this.options,...updates,colors:updates.colors?[...updates.colors]:this.options.colors};
+      this.render();
+    }
+    setPaused(paused){this.paused=!!paused;this.render();}
+    frame(now){
+      if(!this.running)return;
+      if(this.last&&!this.paused)this.time+=Math.min((now-this.last)*.001,.07);
+      this.last=now;
+      if(!this.paused)this.render();
+      this.frameId=requestAnimationFrame(this.frame);
+    }
+    render(){
+      if(!this.canvas.width||!this.canvas.height)return;
+      const o=this.options;
+      if(this.gl){
+        const g=this.gl,u=this.uniforms;
+        g.useProgram(this.program);
+        g.uniform2f(u.u_resolution,this.canvas.width,this.canvas.height);
+        g.uniform1f(u.u_time,this.time);
+        g.uniform1f(u.u_density,o.density);
+        g.uniform1f(u.u_speed,o.speed);
+        g.uniform1f(u.u_glow,o.glow);
+        g.uniform1f(u.u_brightness,o.brightness);
+        g.uniform1i(u.u_mode,o.mode);
+        [u.u_base,u.u_colorA,u.u_colorB,u.u_colorC].forEach((location,i)=>g.uniform3fv(location,new Float32Array(rgb(o.colors[i]))));
+        g.drawArrays(g.TRIANGLE_STRIP,0,4);
+      }else if(this.fallback){this.paintFallback();}
+    }
+    paintFallback(){
+      const c=this.fallback,w=this.canvas.width,h=this.canvas.height,o=this.options;
+      c.clearRect(0,0,w,h);
+      c.fillStyle=o.colors[0];c.fillRect(0,0,w,h);
+      const t=this.time*(.025+o.speed*.0012), d=.32+.46*o.density*.01;
+      const shapes=[
+        [.27+Math.sin(t)*.12,.26+Math.cos(t*.72)*.1,.77,o.colors[1]],
+        [.76+Math.cos(t*.81)*.1,.74+Math.sin(t*.72)*.13,.8,o.colors[2]],
+        [.48+Math.sin(t*.61)*.16,.37+Math.cos(t*.56)*.12,.64,o.colors[3]],
+      ];
+      c.globalCompositeOperation='source-over';
+      shapes.forEach(([x,y,r,color],i)=>{
+        let gx=x*w,gy=y*h,rad=Math.max(w,h)*r*.79;
+        let grad=c.createRadialGradient(gx,gy,0,gx,gy,rad);
+        grad.addColorStop(0,alpha(color,.75*d));grad.addColorStop(.3,alpha(color,.46*d));grad.addColorStop(1,alpha(color,0));
+        c.fillStyle=grad;c.fillRect(0,0,w,h);
+      });
+      // Organic, translucent smoke ribbons remain animated even without WebGL.
+      if(o.mode===0||o.mode===1||o.mode===3){
+        c.lineCap='round';
+        const repeats=o.mode===3?21:o.mode===1?16:11;
+        for(let j=0;j<repeats;j++){
+          const yBase=h*(.02+j*(o.mode===3?.050:.075));
+          c.beginPath();
+          for(let i=0;i<=55;i++){
+            const x=-w*.11+(i/55)*w*1.22;
+            const phase=i/55*9.6+j*.39+t*(o.mode===1?1.24:.59);
+            const amp=h*(o.mode===1?.105:o.mode===0?.056:.032);
+            const y=yBase+Math.sin(phase)*amp+Math.sin(phase*.53+j*1.6)*h*.023;
+            if(i===0)c.moveTo(x,y);else c.lineTo(x,y);
+          }
+          c.lineWidth=h*(o.mode===3?.073:.039);
+          c.strokeStyle=alpha(o.colors[j%3+1],(o.mode===3?.048:o.mode===1?.071:.040)*d);
+          c.stroke();
+        }
+      }
+      // Light veil ribbons in canvas-only environments.
+      if(o.mode===2||o.mode===4){
+        c.lineCap='round';
+        for(let i=0;i<15;i++){
+          const yy=h*(.11+i*.058),phase=t*.7+i*.27;
+          c.beginPath();
+          for(let j=0;j<=34;j++){
+            let x=j/34*w,y=yy+Math.sin(x/w*5.8+phase)*h*.10;
+            if(j===0)c.moveTo(x,y);else c.lineTo(x,y);
+          }
+          c.strokeStyle=alpha(o.colors[i%3+1],.06*d);c.lineWidth=h*.045;c.stroke();
+        }
+      }
+      if(o.mode===5){
+        for(let i=0;i<400;i++){
+          c.fillStyle='rgba(255,255,255,.024)';
+          c.fillRect((i*1337.39)%w,(i*2323.19)%h,1,1);
+        }
+      }
+    }
+    snapshot(){this.render();return this.canvas.toDataURL('image/png');}
+    destroy(){this.running=false;cancelAnimationFrame(this.frameId);this.observer?.disconnect();if(!this.observer)window.removeEventListener('resize',this.resize);}
+  }
+  root.PastelAtmosphere=PastelAtmosphere;
+})(typeof window!=='undefined'?window:globalThis);
+
+</script>
+<script>
+(function(){
+  'use strict';
+  const MODE_NAMES=['云雾光晕','流光以太','丝绸柔光','漫游烟雾','晨曦极光','柔粒渐变'];
+  const MODE_CAPTIONS=['一层缓缓漂浮的轻云与微光','如水彩般慢慢融合的流体薄雾','柔顺的丝绸纹理，带一点珠光','飘散、交叠的轻薄雾团','透明光幕温柔地摇曳','细颗粒包裹柔软的粉彩渐变'];
+  const PRESETS={
+    milk:['#F8FAFF','#BCD7FA','#DEC9FA','#FADCEA'],
+    peach:['#FFFBF7','#FFDCC9','#FFE8C8','#E9D3F7'],
+    lilac:['#FCF9FF','#DEC6FC','#F6CDE8','#CFDCFA'],
+    mint:['#F8FFFC','#C5EAD9','#CBE9F7','#E9D6F5'],
+    dawn:['#FFFFFF','#CFE2FA','#F7DFE8','#FBE4D1'],
+    berry:['#FBFCFF','#C5D1F9','#E5D5FC','#C5EAF0']
+  };
+  const defaults={mode:0,preset:'milk',density:68,speed:43,glow:66,brightness:70,showTitle:true};
+  let state={...defaults}, previousMode=1, comparing=false, paused=false, secondary=null;
+  const $=id=>document.getElementById(id), scene=$('scene'),stage=$('stage');
+  const fx=new PastelAtmosphere(scene,{...state,colors:PRESETS[state.preset]});
+  const toast=(message)=>{const el=$('toast');el.textContent=message;el.classList.add('visible');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('visible'),2400);};
+  function updateModes(){
+    document.querySelectorAll('[data-mode]').forEach(b=>{const active=Number(b.dataset.mode)===state.mode;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));});
+    $('modeBadge').textContent=String(state.mode+1).padStart(2,'0')+' / 06';
+    $('frameCounter').textContent='LIGHT STUDY — '+String(state.mode+1).padStart(2,'0');
+    $('stageCaption').textContent=MODE_CAPTIONS[state.mode];
+    $('leftMode').textContent=MODE_NAMES[state.mode];
+    $('rightMode').textContent=MODE_NAMES[previousMode];
+  }
+  function updatePalettes(){
+    document.querySelectorAll('[data-preset]').forEach(b=>{const active=b.dataset.preset===state.preset;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));});
+  }
+  function applyColors(colors){
+    document.querySelectorAll('[data-color]').forEach((input,i)=>input.value=colors[i]);
+    fx.setOptions({colors});if(secondary)secondary.setOptions({colors});
+  }
+  function applySliders(){
+    ['density','speed','glow','brightness'].forEach(k=>{
+      let input=$(k);input.value=state[k];input.style.setProperty('--fill',state[k]+'%');$(k+'Val').textContent=state[k]+'%';
+    });
+    fx.setOptions({density:state.density,speed:state.speed,glow:state.glow,brightness:state.brightness});
+    if(secondary)secondary.setOptions({density:state.density,speed:state.speed,glow:state.glow,brightness:state.brightness});
+  }
+  function syncSecond(){if(secondary){secondary.setOptions({mode:previousMode});$('rightMode').textContent=MODE_NAMES[previousMode];}}
+  document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{
+    const next=Number(b.dataset.mode);if(next===state.mode)return;
+    previousMode=state.mode;state.mode=next;
+    fx.setOptions({mode:next});syncSecond();updateModes();
+  }));
+  document.querySelectorAll('[data-preset]').forEach(b=>b.addEventListener('click',()=>{
+    state.preset=b.dataset.preset;updatePalettes();applyColors(PRESETS[state.preset]);
+  }));
+  document.querySelectorAll('[data-color]').forEach(input=>input.addEventListener('input',()=>{
+    state.preset='custom';updatePalettes();
+    const colors=[...document.querySelectorAll('[data-color]')].map(el=>el.value);
+    applyColors(colors);
+  }));
+  ['density','speed','glow','brightness'].forEach(key=>{
+    $(key).addEventListener('input',e=>{state[key]=Number(e.target.value);applySliders();});
+  });
+  $('titleToggle').addEventListener('change',e=>{$('stageContent').style.opacity=e.target.checked?'':'0';state.showTitle=e.target.checked;});
+  $('pauseBtn').addEventListener('click',()=>{
+    paused=!paused;fx.setPaused(paused);if(secondary)secondary.setPaused(paused);
+    $('pauseLabel').textContent=paused?'继续动画':'暂停动画';
+    $('pauseBtn').classList.toggle('active',paused);
+    $('pauseBtn').querySelector('svg').innerHTML=paused?'<path d="m5 2 12 8-12 8z"/>':'<path d="M5 3h3v14H5zm7 0h3v14h-3z"/>';
+  });
+  $('compareBtn').addEventListener('click',()=>{
+    comparing=!comparing;stage.classList.toggle('compare-on',comparing);$('compareBtn').classList.toggle('active',comparing);
+    $('compareLabel').textContent=comparing?'退出对比':'双屏对比';
+    if(comparing){
+      if(!secondary){secondary=new PastelAtmosphere($('compareScene'),{...state,colors:[...document.querySelectorAll('[data-color]')].map(x=>x.value),mode:previousMode});secondary.setPaused(paused);}
+      else syncSecond();
+      secondary.setPaused(paused);
+      $('stageCaption').textContent='左：当前方案　｜　右：上一方案';
+      requestAnimationFrame(()=>{fx.resize();secondary.resize();});
+    }else{if(secondary)secondary.setPaused(true);$('stageCaption').textContent=MODE_CAPTIONS[state.mode];requestAnimationFrame(()=>fx.resize());}
+  });
+  $('captureBtn').addEventListener('click',()=>{
+    try{
+      let data;
+      if(comparing&&secondary){
+        const a=document.createElement('canvas');a.width=1400;a.height=780;
+        const context=a.getContext('2d');context.drawImage(fx.canvas,0,0,700,780);context.drawImage(secondary.canvas,700,0,700,780);
+        data=a.toDataURL('image/png');
+      }else data=fx.snapshot();
+      const link=document.createElement('a');link.href=data;link.download=`cloud-light-${state.mode+1}-${state.preset}.png`;document.body.append(link);link.click();link.remove();
+      toast('背景图片已保存为 PNG');
+    }catch(e){console.error(e);toast('浏览器阻止了图片导出，请尝试其他浏览器');}
+  });
+  $('fullscreenBtn').addEventListener('click',async()=>{
+    try{if(document.fullscreenElement)await document.exitFullscreen();else await stage.requestFullscreen();}
+    catch(e){toast('当前浏览器不支持此全屏方式');}
+  });
+  $('resetBtn').addEventListener('click',()=>{
+    state={...defaults};previousMode=1;paused=false;
+    fx.setPaused(false);if(secondary)secondary.setPaused(false);
+    $('pauseLabel').textContent='暂停动画';$('pauseBtn').classList.remove('active');$('pauseBtn').querySelector('svg').innerHTML='<path d="M5 3h3v14H5zm7 0h3v14h-3z"/>'; 
+    fx.setOptions({mode:0});updateModes();updatePalettes();applyColors(PRESETS[state.preset]);applySliders();
+    $('titleToggle').checked=true;$('stageContent').style.opacity='';
+    syncSecond();toast('已恢复清透蓝紫默认效果');
+  });
+  document.addEventListener('keydown',e=>{if(e.code==='Space'&&!['INPUT','BUTTON','TEXTAREA'].includes(document.activeElement.tagName)){e.preventDefault();$('pauseBtn').click();}});
+  updateModes();applyColors(PRESETS[state.preset]);applySliders();
+  $('renderStatus').textContent=fx.gl?'WebGL 实时光雾':'Canvas 轻量渲染';
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){$('pauseBtn').click();}
+})();
+</script>
+</body>
+</html>

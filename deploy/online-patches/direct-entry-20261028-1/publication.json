@@ -1,0 +1,7 @@
+{
+  "release": "direct-entry-20261028-1",
+  "previous": "/opt/vivic-preview-20261025/releases/startup-recovery-20261028-1/web",
+  "runtimeSha256": "860c3f41a6bb3ee9a4377b875ae3de86b6c8001cae8fc5da5b6e2cd69fcc6129",
+  "fullScreenStartupRemoved": true,
+  "sessionPrefetch": true
+}

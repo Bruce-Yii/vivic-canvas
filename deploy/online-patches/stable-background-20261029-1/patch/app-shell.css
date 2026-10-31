@@ -1,0 +1,3 @@
+html,body,#root{min-height:100%;margin:0;background:var(--vivic-initial-base,#f3f7fb)}
+.vivic-inline-notice{position:fixed;z-index:2000;bottom:22px;left:50%;transform:translateX(-50%);box-sizing:border-box;max-width:calc(100% - 32px);padding:10px 15px;border-radius:16px;display:flex;align-items:center;gap:12px;background:#fffffff5;border:1px solid #dce7f0;box-shadow:0 8px 32px #293c521a;color:#293c52;font:14px/1.5 system-ui,sans-serif}.vivic-inline-notice button{flex-shrink:0;border:0;background:#eaf1f8;color:#293c52;border-radius:18px;padding:6px 12px;font:inherit;cursor:pointer}
+.vivic-inline-notice button:focus-visible{outline:2px solid #5a8cc8;outline-offset:3px}

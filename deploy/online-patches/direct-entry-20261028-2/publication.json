@@ -1,0 +1,7 @@
+{
+  "release": "direct-entry-20261028-2",
+  "previous": "/opt/vivic-preview-20261025/releases/direct-entry-20261028-1/web",
+  "assetVersion": "direct-entry-20261028-1",
+  "entryPriority": "high",
+  "redundantRoutePreloadsRemoved": true
+}

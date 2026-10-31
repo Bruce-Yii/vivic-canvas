@@ -1,0 +1,1567 @@
+{
+  "at": "2026-10-30T03:00:57.339Z",
+  "mode": "on",
+  "scope": "Frozen synthetic API replay with the real connected main model; persistence and execution receipts. Transient browser visuals are verified separately.",
+  "datasetVersion": "vivic-route-v1-20261029",
+  "rows": [
+    {
+      "id": "chat-01",
+      "text": "你好呀",
+      "expected": "chat",
+      "expectedTarget": null,
+      "totalMs": 4566,
+      "kind": "envelope",
+      "message": "",
+      "plannerProgress": 1,
+      "trace": {
+        "id": "decision_f69bd8b7-c3e0-400e-99de-ee91a3650109",
+        "mode": "on",
+        "status": "complete",
+        "taskId": "g_f23994405da9_chat-01",
+        "clauses": [
+          "你好呀"
+        ],
+        "decisions": [
+          {
+            "text": "你好呀",
+            "route": "chat",
+            "probability": 0.9919097049307292,
+            "probabilities": {
+              "chat": 0.9919097049307292,
+              "answer": 0.0017191749999231434,
+              "search": 0.0010989408230621775,
+              "countdown": 0.00036034984846549967,
+              "todo": 0.0002542157259469734,
+              "note": 0.0014220348444588483,
+              "generate": 0.00024328160220209668,
+              "focus": 0.000394731093043187,
+              "overview": 0.00043722688416835456,
+              "restore": 0.0011385500514427213,
+              "highlight": 5.7956742862379106e-05,
+              "edit": 0.0002710791695496919,
+              "arrange": 0.00017602660727059012,
+              "delete": 8.442543430546929e-05,
+              "undo": 0.00012430856146548058,
+              "unsupported": 0.00030799268110418915
+            },
+            "none": false,
+            "latencyMs": 2025,
+            "failed": false
+          }
+        ],
+        "route": "chat",
+        "probability": 0.9919097049307292,
+        "latencyMs": 2025,
+        "routeLatencyMs": 2025,
+        "legacyElapsedMs": 4509,
+        "shadowWaitMs": 0,
+        "failedCount": 0,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "createdTypes": [],
+      "clarification": null,
+      "routeCorrect": true,
+      "observedTarget": null,
+      "targetCorrect": null,
+      "execution": {
+        "committed": true,
+        "createdCardIds": []
+      },
+      "receiptStatus": "completed"
+    },
+    {
+      "id": "chat-02",
+      "text": "早上好，今天心情不错",
+      "expected": "chat",
+      "expectedTarget": null,
+      "totalMs": 7511,
+      "kind": "envelope",
+      "message": "",
+      "plannerProgress": 1,
+      "trace": {
+        "id": "decision_14608772-9412-4772-8525-db0c4514ab75",
+        "mode": "on",
+        "status": "complete",
+        "taskId": "g_f23994405da9_chat-02",
+        "clauses": [
+          "早上好，今天心情不错"
+        ],
+        "decisions": [
+          {
+            "text": "早上好，今天心情不错",
+            "route": "chat",
+            "probability": 0.9949079321900822,
+            "probabilities": {
+              "chat": 0.9949079321900822,
+              "answer": 0.0004830919304913202,
+              "search": 0.0004210030865888666,
+              "countdown": 0.00022660566686368786,
+              "todo": 0.00020066312833089036,
+              "note": 0.002399194442804209,
+              "generate": 0.00013035264723928715,
+              "focus": 0.00014070631550425027,
+              "overview": 0.00016284352848370377,
+              "restore": 0.0003519904244971178,
+              "highlight": 3.678444298647976e-05,
+              "edit": 0.00019206666902516848,
+              "arrange": 9.406500065349095e-05,
+              "delete": 4.301218699850227e-05,
+              "undo": 6.244169985640813e-05,
+              "unsupported": 0.0001472466395943686
+            },
+            "none": false,
+            "latencyMs": 1791,
+            "failed": false
+          }
+        ],
+        "route": "chat",
+        "probability": 0.9949079321900822,
+        "latencyMs": 1791,
+        "routeLatencyMs": 1791,
+        "legacyElapsedMs": 7459,
+        "shadowWaitMs": 0,
+        "failedCount": 0,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "createdTypes": [],
+      "clarification": null,
+      "routeCorrect": true,
+      "observedTarget": null,
+      "targetCorrect": null,
+      "execution": {
+        "committed": true,
+        "createdCardIds": []
+      },
+      "receiptStatus": "completed"
+    },
+    {
+      "id": "chat-03",
+      "text": "谢谢你，帮大忙了",
+      "expected": "chat",
+      "expectedTarget": null,
+      "totalMs": 4575,
+      "kind": "envelope",
+      "message": "",
+      "plannerProgress": 1,
+      "trace": {
+        "id": "decision_914f52e4-7005-496d-b620-f461e070dc3c",
+        "mode": "on",
+        "status": "complete",
+        "taskId": "g_f23994405da9_chat-03",
+        "clauses": [
+          "谢谢你，帮大忙了"
+        ],
+        "decisions": [
+          {
+            "text": "谢谢你，帮大忙了",
+            "route": "chat",
+            "probability": 0.9981251526933904,
+            "probabilities": {
+              "chat": 0.9981251526933904,
+              "answer": 0.0005346404276489779,
+              "search": 9.69829796533897e-05,
+              "countdown": 6.888789954942232e-05,
+              "todo": 6.252492219002619e-05,
+              "note": 0.00038659507272262745,
+              "generate": 4.895020144818322e-05,
+              "focus": 5.192436466945059e-05,
+              "overview": 8.459445819488555e-05,
+              "restore": 0.00017649298237159376,
+              "highlight": 1.4213802158794754e-05,
+              "edit": 0.00012852298512973525,
+              "arrange": 4.642882813598561e-05,
+              "delete": 2.620759549575112e-05,
+              "undo": 7.255959396763359e-05,
+              "unsupported": 7.53211932730754e-05
+            },
+            "none": false,
+            "latencyMs": 1856,
+            "failed": false
+          }
+        ],
+        "route": "chat",
+        "probability": 0.9981251526933904,
+        "latencyMs": 1856,
+        "routeLatencyMs": 1856,
+        "legacyElapsedMs": 4522,
+        "shadowWaitMs": 0,
+        "failedCount": 0,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "createdTypes": [],
+      "clarification": null,
+      "routeCorrect": true,
+      "observedTarget": null,
+      "targetCorrect": null,
+      "execution": {
+        "committed": true,
+        "createdCardIds": []
+      },
+      "receiptStatus": "completed"
+    },
+    {
+      "id": "chat-04",
+      "text": "哈哈哈你好可爱",
+      "expected": "chat",
+      "expectedTarget": null,
+      "totalMs": 4880,
+      "kind": "envelope",
+      "message": "",
+      "plannerProgress": 1,
+      "trace": {
+        "id": "decision_c9382411-bf6e-40e6-b599-491e0380a144",
+        "mode": "on",
+        "status": "complete",
+        "taskId": "g_f23994405da9_chat-04",
+        "clauses": [
+          "哈哈哈你好可爱"
+        ],
+        "decisions": [
+          {
+            "text": "哈哈哈你好可爱",
+            "route": "chat",
+            "probability": 0.9886483255487114,
+            "probabilities": {
+              "chat": 0.9886483255487114,
+              "answer": 0.0026848432940849523,
+              "search": 0.0007029575446579988,
+              "countdown": 0.00045744235213119157,
+              "todo": 0.0003291750996197138,
+              "note": 0.0046141864450606395,
+              "generate": 0.00035174737972973324,
+              "focus": 0.00027509428367650647,
+              "overview": 0.00026657699937822756,
+              "restore": 0.0004097987243782534,
+              "highlight": 8.001226786509831e-05,
+              "edit": 0.00035608590145741237,
+              "arrange": 0.00020075208004893293,
+              "delete": 0.00010898354601685545,
+              "undo": 0.0001399700364457631,
+              "unsupported": 0.0003740484967373853
+            },
+            "none": false,
+            "latencyMs": 1831,
+            "failed": false
+          }
+        ],
+        "route": "chat",
+        "probability": 0.9886483255487114,
+        "latencyMs": 1832,
+        "routeLatencyMs": 1831,
+        "legacyElapsedMs": 4826,
+        "shadowWaitMs": 0,
+        "failedCount": 0,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "createdTypes": [],
+      "clarification": null,
+      "routeCorrect": true,
+      "observedTarget": null,
+      "targetCorrect": null,
+      "execution": {
+        "committed": true,
+        "createdCardIds": []
+      },
+      "receiptStatus": "completed"
+    },
+    {
+      "id": "chat-05",
+      "text": "我今天好累啊",
+      "expected": "chat",
+      "expectedTarget": null,
+      "totalMs": 19694,
+      "kind": "envelope",
+      "message": "",
+      "plannerProgress": 1,
+      "trace": {
+        "id": "decision_fb1f3a91-fbff-407d-89af-64631cae1d83",
+        "mode": "on",
+        "status": "complete",
+        "taskId": "g_f23994405da9_chat-05",
+        "clauses": [
+          "我今天好累啊"
+        ],
+        "decisions": [
+          {
+            "text": "我今天好累啊",
+            "route": "chat",
+            "probability": 0.988692620678892,
+            "probabilities": {
+              "chat": 0.988692620678892,
+              "answer": 0.000866731024726919,
+              "search": 0.0007506940225804631,
+              "countdown": 0.0006172905976400524,
+              "todo": 0.0007798277132615833,
+              "note": 0.004886189998130083,
+              "generate": 0.00038387161688262054,
+              "focus": 0.00028672342629076274,
+              "overview": 0.0003918589993351815,
+              "restore": 0.0005424677884624258,
+              "highlight": 8.274563074037484e-05,
+              "edit": 0.0006071439389088534,
+              "arrange": 0.00019317053336716936,
+              "delete": 0.00011195866163983414,
+              "undo": 0.0001658724457732259,
+              "unsupported": 0.0006408329233685689
+            },
+            "none": false,
+            "latencyMs": 1805,
+            "failed": false
+          }
+        ],
+        "route": "chat",
+        "probability": 0.988692620678892,
+        "latencyMs": 1805,
+        "routeLatencyMs": 1805,
+        "legacyElapsedMs": 19640,
+        "shadowWaitMs": 0,
+        "failedCount": 0,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "createdTypes": [],
+      "clarification": null,
+      "routeCorrect": true,
+      "observedTarget": null,
+      "targetCorrect": null,
+      "execution": {
+        "committed": true,
+        "createdCardIds": []
+      },
+      "receiptStatus": "completed"
+    },
+    {
+      "id": "chat-06",
+      "text": "嗯嗯好的",
+      "expected": "chat",
+      "expectedTarget": null,
+      "totalMs": 4161,
+      "kind": "envelope",
+      "message": "",
+      "plannerProgress": 1,
+      "trace": {
+        "id": "decision_09bf03c0-4824-4ac1-ac4a-a7690486d18e",
+        "mode": "on",
+        "status": "complete",
+        "taskId": "g_f23994405da9_chat-06",
+        "clauses": [
+          "嗯嗯好的"
+        ],
+        "decisions": [
+          {
+            "text": "嗯嗯好的",
+            "route": "chat",
+            "probability": 0.9142399602777537,
+            "probabilities": {
+              "chat": 0.9142399602777537,
+              "answer": 0.02517365177318811,
+              "search": 0.003993341536401212,
+              "countdown": 0.00205200450974543,
+              "todo": 0.00242169506960466,
+              "note": 0.011660096604489896,
+              "generate": 0.0011970664099002363,
+              "focus": 0.005661908102621947,
+              "overview": 0.004115808740455653,
+              "restore": 0.01584945012435512,
+              "highlight": 0.0005609337693576346,
+              "edit": 0.006917283348079973,
+              "arrange": 0.001653330662738087,
+              "delete": 0.0007384584036425458,
+              "undo": 0.001953610697972658,
+              "unsupported": 0.0018113999696931064
+            },
+            "none": false,
+            "latencyMs": 1897,
+            "failed": false
+          }
+        ],
+        "route": "chat",
+        "probability": 0.9142399602777537,
+        "latencyMs": 1897,
+        "routeLatencyMs": 1897,
+        "legacyElapsedMs": 4108,
+        "shadowWaitMs": 0,
+        "failedCount": 0,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "createdTypes": [],
+      "clarification": null,
+      "routeCorrect": true,
+      "observedTarget": null,
+      "targetCorrect": null,
+      "execution": {
+        "committed": true,
+        "createdCardIds": []
+      },
+      "receiptStatus": "completed"
+    },
+    {
+      "id": "chat-07",
+      "text": "晚安，明天见",
+      "expected": "chat",
+      "expectedTarget": null,
+      "totalMs": 5104,
+      "kind": "envelope",
+      "message": "",
+      "plannerProgress": 1,
+      "trace": {
+        "id": "decision_8574f066-7b28-4109-b51e-efcdff57b98e",
+        "mode": "on",
+        "status": "complete",
+        "taskId": "g_f23994405da9_chat-07",
+        "clauses": [
+          "晚安，明天见"
+        ],
+        "decisions": [
+          {
+            "text": "晚安，明天见",
+            "route": "chat",
+            "probability": 0.9924515825693057,
+            "probabilities": {
+              "chat": 0.9924515825693057,
+              "answer": 0.0006930378966133923,
+              "search": 0.0004780766091237838,
+              "countdown": 0.0003603262765814576,
+              "todo": 0.0002748463272246323,
+              "note": 0.002894011163317176,
+              "generate": 0.0001681796131253636,
+              "focus": 0.0001300862326018418,
+              "overview": 0.0003290547266328653,
+              "restore": 0.0008678469990400024,
+              "highlight": 4.099542645134229e-05,
+              "edit": 0.0004794814210774948,
+              "arrange": 0.00015754302120334326,
+              "delete": 9.363695321738325e-05,
+              "undo": 0.00012600749272925318,
+              "unsupported": 0.00045528727175501955
+            },
+            "none": false,
+            "latencyMs": 1805,
+            "failed": false
+          }
+        ],
+        "route": "chat",
+        "probability": 0.9924515825693057,
+        "latencyMs": 1805,
+        "routeLatencyMs": 1805,
+        "legacyElapsedMs": 5052,
+        "shadowWaitMs": 0,
+        "failedCount": 0,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "createdTypes": [],
+      "clarification": null,
+      "routeCorrect": true,
+      "observedTarget": null,
+      "targetCorrect": null,
+      "execution": {
+        "committed": true,
+        "createdCardIds": []
+      },
+      "receiptStatus": "completed"
+    },
+    {
+      "id": "chat-08",
+      "text": "你叫什么名字",
+      "expected": "chat",
+      "expectedTarget": null,
+      "totalMs": 5859,
+      "kind": "envelope",
+      "message": "",
+      "plannerProgress": 1,
+      "trace": {
+        "id": "decision_5e90a596-9cc8-43c6-b7db-576b7a3cd9bf",
+        "mode": "on",
+        "status": "failed",
+        "taskId": "g_f23994405da9_chat-08",
+        "clauses": [
+          "你叫什么名字"
+        ],
+        "decisions": [
+          {
+            "text": "你叫什么名字",
+            "route": null,
+            "probability": 0,
+            "probabilities": {},
+            "none": true,
+            "latencyMs": 4004,
+            "failed": true
+          }
+        ],
+        "route": null,
+        "probability": 0,
+        "latencyMs": 4004,
+        "routeLatencyMs": 4004,
+        "legacyElapsedMs": 5804,
+        "shadowWaitMs": 0,
+        "failedCount": 1,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "createdTypes": [],
+      "clarification": null,
+      "routeCorrect": false,
+      "observedTarget": null,
+      "targetCorrect": null,
+      "execution": {
+        "committed": true,
+        "createdCardIds": []
+      },
+      "receiptStatus": "completed"
+    },
+    {
+      "id": "chat-09",
+      "text": "hello there",
+      "expected": "chat",
+      "expectedTarget": null,
+      "totalMs": 5825,
+      "kind": "envelope",
+      "message": "",
+      "plannerProgress": 1,
+      "trace": {
+        "id": "decision_562973c6-3e88-4bd4-a709-b6bdba8a50d2",
+        "mode": "on",
+        "status": "failed",
+        "taskId": "g_f23994405da9_chat-09",
+        "clauses": [
+          "hello there"
+        ],
+        "decisions": [
+          {
+            "text": "hello there",
+            "route": null,
+            "probability": 0,
+            "probabilities": {},
+            "none": true,
+            "latencyMs": 4000,
+            "failed": true
+          }
+        ],
+        "route": null,
+        "probability": 0,
+        "latencyMs": 4000,
+        "routeLatencyMs": 4000,
+        "legacyElapsedMs": 5768,
+        "shadowWaitMs": 0,
+        "failedCount": 1,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "createdTypes": [],
+      "clarification": null,
+      "routeCorrect": false,
+      "observedTarget": null,
+      "targetCorrect": null,
+      "execution": {
+        "committed": true,
+        "createdCardIds": []
+      },
+      "receiptStatus": "completed"
+    },
+    {
+      "id": "chat-10",
+      "text": "陪我聊会儿天吧",
+      "expected": "chat",
+      "expectedTarget": null,
+      "totalMs": 6648,
+      "kind": "envelope",
+      "message": "",
+      "plannerProgress": 1,
+      "trace": {
+        "id": "decision_c0cca48d-155d-433d-a83b-789cfb085bd0",
+        "mode": "on",
+        "status": "failed",
+        "taskId": "g_f23994405da9_chat-10",
+        "clauses": [
+          "陪我聊会儿天吧"
+        ],
+        "decisions": [
+          {
+            "text": "陪我聊会儿天吧",
+            "route": null,
+            "probability": 0,
+            "probabilities": {},
+            "none": true,
+            "latencyMs": 4000,
+            "failed": true
+          }
+        ],
+        "route": null,
+        "probability": 0,
+        "latencyMs": 4001,
+        "routeLatencyMs": 4000,
+        "legacyElapsedMs": 6592,
+        "shadowWaitMs": 0,
+        "failedCount": 1,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "createdTypes": [],
+      "clarification": null,
+      "routeCorrect": false,
+      "observedTarget": null,
+      "targetCorrect": null,
+      "execution": {
+        "committed": true,
+        "createdCardIds": []
+      },
+      "receiptStatus": "completed"
+    },
+    {
+      "id": "answer-01",
+      "text": "给我介绍一下谷歌这家公司",
+      "expected": "answer",
+      "expectedTarget": null,
+      "totalMs": 8920,
+      "kind": "envelope",
+      "message": "",
+      "plannerProgress": 1,
+      "trace": {
+        "id": "decision_7460b74c-086a-4f81-8123-3750f274d348",
+        "mode": "on",
+        "status": "failed",
+        "taskId": "g_f23994405da9_answer-01",
+        "clauses": [
+          "给我介绍一下谷歌这家公司"
+        ],
+        "decisions": [
+          {
+            "text": "给我介绍一下谷歌这家公司",
+            "route": null,
+            "probability": 0,
+            "probabilities": {},
+            "none": true,
+            "latencyMs": 4000,
+            "failed": true
+          }
+        ],
+        "route": null,
+        "probability": 0,
+        "latencyMs": 4000,
+        "routeLatencyMs": 4000,
+        "legacyElapsedMs": 8868,
+        "shadowWaitMs": 0,
+        "failedCount": 1,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "card.create",
+          "card.focus",
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [
+          "NewsCard"
+        ],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "createdTypes": [
+        "NewsCard"
+      ],
+      "clarification": null,
+      "routeCorrect": false,
+      "observedTarget": null,
+      "targetCorrect": null,
+      "execution": {
+        "committed": true,
+        "createdCardIds": [
+          "news_fa07fda2-bd5b-4a7d-b39f-f9afddc7fc03"
+        ]
+      },
+      "receiptStatus": "completed"
+    },
+    {
+      "id": "answer-02",
+      "text": "量子计算是什么原理",
+      "expected": "answer",
+      "expectedTarget": null,
+      "totalMs": 13198,
+      "kind": "envelope",
+      "message": "",
+      "plannerProgress": 1,
+      "trace": {
+        "id": "decision_b36014ea-3df4-4ebb-acf6-346787b5b0aa",
+        "mode": "on",
+        "status": "failed",
+        "taskId": "g_f23994405da9_answer-02",
+        "clauses": [
+          "量子计算是什么原理"
+        ],
+        "decisions": [
+          {
+            "text": "量子计算是什么原理",
+            "route": null,
+            "probability": 0,
+            "probabilities": {},
+            "none": true,
+            "latencyMs": 4001,
+            "failed": true
+          }
+        ],
+        "route": null,
+        "probability": 0,
+        "latencyMs": 4001,
+        "routeLatencyMs": 4001,
+        "legacyElapsedMs": 13141,
+        "shadowWaitMs": 0,
+        "failedCount": 1,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "card.create",
+          "card.focus",
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [
+          "NewsCard"
+        ],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "createdTypes": [
+        "NewsCard"
+      ],
+      "clarification": null,
+      "routeCorrect": false,
+      "observedTarget": null,
+      "targetCorrect": null,
+      "execution": {
+        "committed": true,
+        "createdCardIds": [
+          "news_349f27e7-28c7-455d-8c25-870ae215f39e"
+        ]
+      },
+      "receiptStatus": "completed"
+    },
+    {
+      "id": "answer-03",
+      "text": "为什么天空是蓝色的",
+      "expected": "answer",
+      "expectedTarget": null,
+      "totalMs": 7387,
+      "kind": "envelope",
+      "message": "",
+      "plannerProgress": 1,
+      "trace": {
+        "id": "decision_d30bcde8-da0a-4617-b877-e7c9353d0fed",
+        "mode": "on",
+        "status": "failed",
+        "taskId": "g_f23994405da9_answer-03",
+        "clauses": [
+          "为什么天空是蓝色的"
+        ],
+        "decisions": [
+          {
+            "text": "为什么天空是蓝色的",
+            "route": null,
+            "probability": 0,
+            "probabilities": {},
+            "none": true,
+            "latencyMs": 4001,
+            "failed": true
+          }
+        ],
+        "route": null,
+        "probability": 0,
+        "latencyMs": 4001,
+        "routeLatencyMs": 4001,
+        "legacyElapsedMs": 7331,
+        "shadowWaitMs": 0,
+        "failedCount": 1,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "card.create",
+          "card.focus",
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [
+          "NewsCard"
+        ],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "createdTypes": [
+        "NewsCard"
+      ],
+      "clarification": null,
+      "routeCorrect": false,
+      "observedTarget": null,
+      "targetCorrect": null,
+      "execution": {
+        "committed": true,
+        "createdCardIds": [
+          "news_9fadf5cb-ad7d-435b-bf68-5cc82d02bfd5"
+        ]
+      },
+      "receiptStatus": "completed"
+    },
+    {
+      "id": "answer-04",
+      "text": "MBTI里INTJ和INTP有什么区别",
+      "expected": "answer",
+      "expectedTarget": null,
+      "totalMs": 20584,
+      "kind": "envelope",
+      "message": "",
+      "plannerProgress": 1,
+      "trace": {
+        "id": "decision_aee7808e-106c-4575-84ec-2aecf60b4c17",
+        "mode": "on",
+        "status": "failed",
+        "taskId": "g_f23994405da9_answer-04",
+        "clauses": [
+          "MBTI里INTJ和INTP有什么区别"
+        ],
+        "decisions": [
+          {
+            "text": "MBTI里INTJ和INTP有什么区别",
+            "route": null,
+            "probability": 0,
+            "probabilities": {},
+            "none": true,
+            "latencyMs": 4001,
+            "failed": true
+          }
+        ],
+        "route": null,
+        "probability": 0,
+        "latencyMs": 4001,
+        "routeLatencyMs": 4001,
+        "legacyElapsedMs": 20534,
+        "shadowWaitMs": 0,
+        "failedCount": 1,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "card.create",
+          "card.focus",
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [
+          "NewsCard"
+        ],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "createdTypes": [
+        "NewsCard"
+      ],
+      "clarification": null,
+      "routeCorrect": false,
+      "observedTarget": null,
+      "targetCorrect": null,
+      "execution": {
+        "committed": true,
+        "createdCardIds": [
+          "news_9ce28c96-a7ff-4c09-8b37-81da8e4e7b6d"
+        ]
+      },
+      "receiptStatus": "completed"
+    },
+    {
+      "id": "answer-05",
+      "text": "失眠的话有什么改善方法吗",
+      "expected": "answer",
+      "expectedTarget": null,
+      "totalMs": 9419,
+      "kind": "envelope",
+      "message": "",
+      "plannerProgress": 1,
+      "trace": {
+        "id": "decision_05433041-5654-48b1-a653-5029d39926f3",
+        "mode": "on",
+        "status": "failed",
+        "taskId": "g_f23994405da9_answer-05",
+        "clauses": [
+          "失眠的话有什么改善方法吗"
+        ],
+        "decisions": [
+          {
+            "text": "失眠的话有什么改善方法吗",
+            "route": null,
+            "probability": 0,
+            "probabilities": {},
+            "none": true,
+            "latencyMs": 4000,
+            "failed": true
+          }
+        ],
+        "route": null,
+        "probability": 0,
+        "latencyMs": 4000,
+        "routeLatencyMs": 4000,
+        "legacyElapsedMs": 9365,
+        "shadowWaitMs": 0,
+        "failedCount": 1,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "card.create",
+          "card.focus",
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [
+          "NewsCard"
+        ],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "createdTypes": [
+        "NewsCard"
+      ],
+      "clarification": null,
+      "routeCorrect": false,
+      "observedTarget": null,
+      "targetCorrect": null,
+      "execution": {
+        "committed": true,
+        "createdCardIds": [
+          "news_e91abeb5-28ed-42c8-b99f-57b01ce3bf37"
+        ]
+      },
+      "receiptStatus": "completed"
+    },
+    {
+      "id": "answer-06",
+      "text": "这句话里的删除所有卡片是什么意思",
+      "expected": "answer",
+      "expectedTarget": null,
+      "totalMs": 10824,
+      "kind": "envelope",
+      "message": "",
+      "plannerProgress": 1,
+      "trace": {
+        "id": "decision_771ca186-fc61-4c5b-9137-8f2520f23bdb",
+        "mode": "on",
+        "status": "failed",
+        "taskId": "g_f23994405da9_answer-06",
+        "clauses": [
+          "这句话里的删除所有卡片是什么意思"
+        ],
+        "decisions": [
+          {
+            "text": "这句话里的删除所有卡片是什么意思",
+            "route": null,
+            "probability": 0,
+            "probabilities": {},
+            "none": true,
+            "latencyMs": 4001,
+            "failed": true
+          }
+        ],
+        "route": null,
+        "probability": 0,
+        "latencyMs": 4001,
+        "routeLatencyMs": 4001,
+        "legacyElapsedMs": 10775,
+        "shadowWaitMs": 0,
+        "failedCount": 1,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "card.create",
+          "card.focus",
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [
+          "NewsCard"
+        ],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "createdTypes": [
+        "NewsCard"
+      ],
+      "clarification": null,
+      "routeCorrect": false,
+      "observedTarget": null,
+      "targetCorrect": null,
+      "execution": {
+        "committed": true,
+        "createdCardIds": [
+          "news_c5bec614-1e5c-410f-8d34-330b5827de84"
+        ]
+      },
+      "receiptStatus": "completed"
+    },
+    {
+      "id": "answer-07",
+      "text": "解释一下什么叫倒计时提醒",
+      "expected": "answer",
+      "expectedTarget": null,
+      "totalMs": 19660,
+      "kind": "envelope",
+      "message": "",
+      "plannerProgress": 1,
+      "trace": {
+        "id": "decision_b89e9b0b-e40c-433e-9e7b-dcba0bd580ce",
+        "mode": "on",
+        "status": "failed",
+        "taskId": "g_f23994405da9_answer-07",
+        "clauses": [
+          "解释一下什么叫倒计时提醒"
+        ],
+        "decisions": [
+          {
+            "text": "解释一下什么叫倒计时提醒",
+            "route": null,
+            "probability": 0,
+            "probabilities": {},
+            "none": true,
+            "latencyMs": 4000,
+            "failed": true
+          }
+        ],
+        "route": null,
+        "probability": 0,
+        "latencyMs": 4000,
+        "routeLatencyMs": 4000,
+        "legacyElapsedMs": 19606,
+        "shadowWaitMs": 0,
+        "failedCount": 1,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "card.create",
+          "card.focus",
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [
+          "NoteCard"
+        ],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "createdTypes": [
+        "NoteCard"
+      ],
+      "clarification": null,
+      "routeCorrect": false,
+      "observedTarget": null,
+      "targetCorrect": null,
+      "execution": {
+        "committed": true,
+        "createdCardIds": [
+          "note_e9ac2f0e-acdf-4e7d-9727-ddb67a77a642"
+        ]
+      },
+      "receiptStatus": "completed"
+    },
+    {
+      "id": "answer-08",
+      "text": "帮我讲讲罗马帝国为什么衰落",
+      "expected": "answer",
+      "expectedTarget": null,
+      "totalMs": 8790,
+      "kind": "envelope",
+      "message": "",
+      "plannerProgress": 1,
+      "trace": {
+        "id": "decision_38695473-2080-4bec-b2cc-951a92ec06a8",
+        "mode": "on",
+        "status": "failed",
+        "taskId": "g_f23994405da9_answer-08",
+        "clauses": [
+          "帮我讲讲罗马帝国为什么衰落"
+        ],
+        "decisions": [
+          {
+            "text": "帮我讲讲罗马帝国为什么衰落",
+            "route": null,
+            "probability": 0,
+            "probabilities": {},
+            "none": true,
+            "latencyMs": 115,
+            "failed": true
+          }
+        ],
+        "route": null,
+        "probability": 0,
+        "latencyMs": 115,
+        "routeLatencyMs": 115,
+        "legacyElapsedMs": 8741,
+        "shadowWaitMs": 0,
+        "failedCount": 1,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "card.create",
+          "card.focus",
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [
+          "NewsCard"
+        ],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "createdTypes": [
+        "NewsCard"
+      ],
+      "clarification": null,
+      "routeCorrect": false,
+      "observedTarget": null,
+      "targetCorrect": null,
+      "execution": {
+        "committed": true,
+        "createdCardIds": [
+          "news_5e0530bb-6f50-47ef-ba76-82c741818529"
+        ]
+      },
+      "receiptStatus": "completed"
+    },
+    {
+      "id": "answer-09",
+      "text": "如果我想学吉他应该从哪里开始",
+      "expected": "answer",
+      "expectedTarget": null,
+      "totalMs": 6970,
+      "kind": "envelope",
+      "message": "",
+      "plannerProgress": 1,
+      "trace": {
+        "id": "decision_c3d18ad7-352f-4e2c-87e0-bfe3728d6325",
+        "mode": "on",
+        "status": "failed",
+        "taskId": "g_f23994405da9_answer-09",
+        "clauses": [
+          "如果我想学吉他应该从哪里开始"
+        ],
+        "decisions": [
+          {
+            "text": "如果我想学吉他应该从哪里开始",
+            "route": null,
+            "probability": 0,
+            "probabilities": {},
+            "none": true,
+            "latencyMs": 199,
+            "failed": true
+          }
+        ],
+        "route": null,
+        "probability": 0,
+        "latencyMs": 199,
+        "routeLatencyMs": 199,
+        "legacyElapsedMs": 6921,
+        "shadowWaitMs": 0,
+        "failedCount": 1,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "card.create",
+          "card.focus",
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [
+          "NewsCard"
+        ],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "createdTypes": [
+        "NewsCard"
+      ],
+      "clarification": null,
+      "routeCorrect": false,
+      "observedTarget": null,
+      "targetCorrect": null,
+      "execution": {
+        "committed": true,
+        "createdCardIds": [
+          "news_468c5c3f-f8ee-4dae-bdb9-4dfb586e176c"
+        ]
+      },
+      "receiptStatus": "completed"
+    },
+    {
+      "id": "answer-10",
+      "text": "第一次去日本旅游要注意什么",
+      "expected": "answer",
+      "expectedTarget": null,
+      "totalMs": 11503,
+      "kind": "envelope",
+      "message": "",
+      "plannerProgress": 2,
+      "trace": {
+        "id": "decision_b302c243-bb72-4727-89c3-3fd3c8a000dc",
+        "mode": "on",
+        "status": "failed",
+        "taskId": "g_f23994405da9_answer-10",
+        "clauses": [
+          "第一次去日本旅游要注意什么"
+        ],
+        "decisions": [
+          {
+            "text": "第一次去日本旅游要注意什么",
+            "route": null,
+            "probability": 0,
+            "probabilities": {},
+            "none": true,
+            "latencyMs": 111,
+            "failed": true
+          }
+        ],
+        "route": null,
+        "probability": 0,
+        "latencyMs": 112,
+        "routeLatencyMs": 111,
+        "legacyElapsedMs": 11449,
+        "shadowWaitMs": 0,
+        "failedCount": 1,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "card.create",
+          "card.focus",
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [
+          "NewsCard"
+        ],
+        "plannerCalls": 2,
+        "directClauses": 0
+      },
+      "createdTypes": [
+        "NewsCard"
+      ],
+      "clarification": null,
+      "routeCorrect": false,
+      "observedTarget": null,
+      "targetCorrect": null,
+      "execution": {
+        "committed": true,
+        "createdCardIds": [
+          "news_f21e6e6c-fa0b-4e74-b427-2fc191768887"
+        ]
+      },
+      "receiptStatus": "completed"
+    },
+    {
+      "id": "answer-11",
+      "text": "react 和 vue 选哪个好",
+      "expected": "answer",
+      "expectedTarget": null,
+      "totalMs": 11278,
+      "kind": "envelope",
+      "message": "",
+      "plannerProgress": 1,
+      "trace": {
+        "id": "decision_69da8e3a-8600-432e-915c-3c183acbbd0e",
+        "mode": "on",
+        "status": "failed",
+        "taskId": "g_f23994405da9_answer-11",
+        "clauses": [
+          "react 和 vue 选哪个好"
+        ],
+        "decisions": [
+          {
+            "text": "react 和 vue 选哪个好",
+            "route": null,
+            "probability": 0,
+            "probabilities": {},
+            "none": true,
+            "latencyMs": 111,
+            "failed": true
+          }
+        ],
+        "route": null,
+        "probability": 0,
+        "latencyMs": 111,
+        "routeLatencyMs": 111,
+        "legacyElapsedMs": 11226,
+        "shadowWaitMs": 0,
+        "failedCount": 1,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "card.create",
+          "card.focus",
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [
+          "NewsCard"
+        ],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "createdTypes": [
+        "NewsCard"
+      ],
+      "clarification": null,
+      "routeCorrect": false,
+      "observedTarget": null,
+      "targetCorrect": null,
+      "execution": {
+        "committed": true,
+        "createdCardIds": [
+          "news_5e40dfe9-b1ab-4255-b29e-8d41484a7284"
+        ]
+      },
+      "receiptStatus": "completed"
+    },
+    {
+      "id": "answer-12",
+      "text": "这张谷歌的卡片讲了什么",
+      "expected": "answer",
+      "expectedTarget": null,
+      "totalMs": 4583,
+      "kind": "envelope",
+      "message": "",
+      "plannerProgress": 1,
+      "trace": {
+        "id": "decision_8c899c4f-d42a-42d5-a82b-a99e52cf9ab8",
+        "mode": "on",
+        "status": "failed",
+        "taskId": "g_f23994405da9_answer-12",
+        "clauses": [
+          "这张谷歌的卡片讲了什么"
+        ],
+        "decisions": [
+          {
+            "text": "这张谷歌的卡片讲了什么",
+            "route": null,
+            "probability": 0,
+            "probabilities": {},
+            "none": true,
+            "latencyMs": 115,
+            "failed": true
+          }
+        ],
+        "route": null,
+        "probability": 0,
+        "latencyMs": 115,
+        "routeLatencyMs": 115,
+        "legacyElapsedMs": 4529,
+        "shadowWaitMs": 0,
+        "failedCount": 1,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "card.create",
+          "card.focus",
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [
+          "NewsCard"
+        ],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "createdTypes": [
+        "NewsCard"
+      ],
+      "clarification": null,
+      "routeCorrect": false,
+      "observedTarget": null,
+      "targetCorrect": null,
+      "execution": {
+        "committed": true,
+        "createdCardIds": [
+          "news_f98daec8-4b93-4652-8a27-bc8ae29fca97"
+        ]
+      },
+      "receiptStatus": "completed"
+    },
+    {
+      "id": "search-01",
+      "text": "今天有什么科技新闻",
+      "expected": "search",
+      "expectedTarget": null,
+      "totalMs": 4078,
+      "kind": "clarify",
+      "message": "请提供具体的科技新闻链接或内容，以便我为您摘要。",
+      "plannerProgress": 1,
+      "trace": {
+        "id": "decision_abf55f89-44d0-4fc9-ac5c-cbd5d4c40890",
+        "mode": "on",
+        "status": "failed",
+        "taskId": "g_f23994405da9_search-01",
+        "clauses": [
+          "今天有什么科技新闻"
+        ],
+        "decisions": [
+          {
+            "text": "今天有什么科技新闻",
+            "route": null,
+            "probability": 0,
+            "probabilities": {},
+            "none": true,
+            "latencyMs": 110,
+            "failed": true
+          }
+        ],
+        "route": null,
+        "probability": 0,
+        "latencyMs": 110,
+        "routeLatencyMs": 110,
+        "legacyElapsedMs": 4020,
+        "shadowWaitMs": 0,
+        "failedCount": 1,
+        "legacyKind": "clarify",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [],
+        "legacyCardTypes": [],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "createdTypes": [],
+      "clarification": null,
+      "routeCorrect": false,
+      "observedTarget": null,
+      "targetCorrect": null,
+      "execution": {
+        "committed": false,
+        "createdCardIds": [],
+        "reason": "no-action-proposal"
+      },
+      "replayCancelledUnansweredClarification": "cancelled"
+    },
+    {
+      "id": "search-02",
+      "text": "查一下现在黄金多少钱一克",
+      "expected": "search",
+      "expectedTarget": null,
+      "totalMs": 6772,
+      "kind": "envelope",
+      "message": "",
+      "plannerProgress": 0,
+      "trace": {
+        "id": "decision_75014ac2-c03d-48d2-be33-eb717423ac41",
+        "mode": "on",
+        "status": "failed",
+        "taskId": "g_f23994405da9_search-02",
+        "clauses": [
+          "查一下现在黄金多少钱一克"
+        ],
+        "decisions": [
+          {
+            "text": "查一下现在黄金多少钱一克",
+            "route": null,
+            "probability": 0,
+            "probabilities": {},
+            "none": true,
+            "latencyMs": 4000,
+            "failed": true
+          }
+        ],
+        "route": null,
+        "probability": 0,
+        "latencyMs": 4000,
+        "routeLatencyMs": 4000,
+        "legacyElapsedMs": 6722,
+        "shadowWaitMs": 0,
+        "failedCount": 1,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "search",
+        "legacyActionTypes": [
+          "card.create",
+          "card.create",
+          "card.create",
+          "canvas.fit",
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [
+          "SearchResultCard",
+          "SearchResultCard",
+          "SearchResultCard"
+        ],
+        "plannerCalls": 0,
+        "directClauses": 0
+      },
+      "createdTypes": [
+        "SearchResultCard",
+        "SearchResultCard",
+        "SearchResultCard"
+      ],
+      "clarification": null,
+      "routeCorrect": false,
+      "observedTarget": null,
+      "targetCorrect": null,
+      "execution": {
+        "committed": true,
+        "createdCardIds": [
+          "search_38bb2407-6e1c-4fe9-bc9b-3c81c8af7443",
+          "search_b0d134f5-2f71-4418-b4a1-bde5bc0e7fd8",
+          "search_f44cf0d8-c412-4c3b-be6a-52b2abb20281"
+        ]
+      },
+      "receiptStatus": "completed"
+    }
+  ],
+  "complete": false,
+  "cleanup": false,
+  "modelConnected": true,
+  "datasetCaseCount": 161,
+  "interrupted": {
+    "reason": "Resident health reported loaded=false and paused_for_large_model=true during another large-model memory lease.",
+    "rowsRecorded": 24,
+    "evaluationSpaceManuallyCleared": true
+  }
+}

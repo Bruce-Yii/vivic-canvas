@@ -1,0 +1,17 @@
+{
+  "release": "direct-display-20261030-1",
+  "previous": "/opt/vivic-preview-20261025/releases/display-background-sync-20261030-1/web",
+  "indexSha256": "d6535a1d6d518e73fa909e88bfaba051d816045907d1f18fb0c49d0e1bf6f3a1",
+  "unchangedEntrypoint": "/assets/card-packages-20261030-1/vivic-startup-confirmation-20261030.js",
+  "modifiedJavaScript": {
+    "DisplayApp-DkgZz97I.js": {
+      "beforeSha256": "6ca3424ffa528e7be807d45abbefd0297eea8c95a82fbcad387c601a7e16e2cf",
+      "afterSha256": "12d355e023ac3fa8ad30e0c298b05d89da737f14623fb80cba56df8319c99f9b"
+    }
+  },
+  "changes": [
+    "Skip the standby and awakening opening orb in the display window",
+    "Render the real canvas as soon as its complete snapshot is ready",
+    "Keep the canvas visible after the initial snapshot, including owner disconnects"
+  ]
+}

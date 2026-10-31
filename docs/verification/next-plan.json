@@ -1,0 +1,234 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-10-15T14:20:23.769Z",
+  "branch": "agent/next-iteration",
+  "applicationSourceCommit": "4db5446",
+  "unit": {
+    "web": {
+      "passed": 354,
+      "command": "pnpm --filter @vivic/web test --maxWorkers=1",
+      "evidence": "evidence/next-plan/verification/web-unit-4db5446.log"
+    },
+    "api": {
+      "passed": 855,
+      "skipped": 3,
+      "command": "pnpm --filter @vivic/local-api test --maxWorkers=1",
+      "evidence": "evidence/next-plan/verification/api-unit-final.log"
+    },
+    "totalPassed": 1209,
+    "evidence": "evidence/next-plan/verification/"
+  },
+  "typecheck": {
+    "passed": true,
+    "command": "pnpm typecheck",
+    "evidence": "evidence/next-plan/verification/typecheck-4db5446.log"
+  },
+  "build": {
+    "passed": true,
+    "command": "pnpm build",
+    "limits": [
+      "Existing Sherpaw WASM/Node branch warnings",
+      "Existing bundle-size advisory"
+    ],
+    "evidence": "evidence/next-plan/verification/build-4db5446.log"
+  },
+  "chromium": {
+    "fullRun": {
+      "passed": 71,
+      "failed": 2,
+      "total": 73,
+      "evidence": "evidence/next-plan/verification/chromium-first-full.log",
+      "failureReason": "Two obsolete assertions: offline prerecorded TTS availability and an exact focus command now bypassing the LLM."
+    },
+    "affectedAfterAssertionFix": {
+      "passed": 10,
+      "failed": 0,
+      "evidence": "evidence/next-plan/verification/chromium-affected.log"
+    },
+    "note": "Separate runs, not a claim of one all-green Chromium 73-test run."
+  },
+  "compatibility": {
+    "engines": [
+      "firefox",
+      "webkit"
+    ],
+    "latestAffected": {
+      "passed": 16,
+      "failed": 0,
+      "reactBackgroundUpdateWarningObserved": false,
+      "evidence": "evidence/next-plan/verification/compat-final.log"
+    },
+    "retainedFailedRuns": [
+      "evidence/next-plan/verification/compat-before-background-fix.log",
+      "evidence/next-plan/verification/compat-task-delay-insufficient.log"
+    ],
+    "note": "Native WebKit Blob storage plus forced byte fallback were exercised; device/notification/voice-clone APIs were mocked. WebKit is not physical Safari."
+  },
+  "decision": {
+    "model": "jaredpalmer/kev-0.8b",
+    "defaultEnabled": false,
+    "sourceRevision": "dd375f27fd61486c52204205e10a0d2e10f3b34a",
+    "cases": 180,
+    "rawCorrect": 124,
+    "rawAccuracy": 0.6888888888888889,
+    "accepted": 25,
+    "acceptedCorrect": 25,
+    "coverage": 0.1388888888888889,
+    "p95Ms": 558.5759579999976,
+    "gpuActiveBytes": 1504791242,
+    "evidence": "evidence/next-plan/kev-evaluation-2026-10-15T13-00-47-525Z.json",
+    "limits": [
+      "Synthetic Chinese template evaluation, not independent user acceptance",
+      "Conservative gate selected on synthetic data",
+      "Model never executes delete",
+      "P95 measured during concurrent browser regression"
+    ]
+  },
+  "article": {
+    "liveFetchPassed": true,
+    "actualPipelineEnvelopePassed": true,
+    "canvasPersisted": false,
+    "evidence": [
+      "evidence/next-plan/live-public-article.json",
+      "evidence/next-plan/live-article-intent.json"
+    ]
+  },
+  "wake": {
+    "passed": true,
+    "checks": 4,
+    "syntheticSpeakers": [
+      3,
+      6,
+      9
+    ],
+    "microphone": false,
+    "audioPlayback": false,
+    "session": {
+      "elapsedMs": 300024.7000000179,
+      "listeningElapsedMs": 298938.7999999821,
+      "frames": 4397056,
+      "events": [
+        {
+          "type": "status",
+          "status": "stopped"
+        },
+        {
+          "type": "status",
+          "status": "loading"
+        },
+        {
+          "type": "status",
+          "status": "listening"
+        },
+        {
+          "type": "status",
+          "status": "stopped"
+        },
+        {
+          "type": "fallback",
+          "message": "本次前台监听已到时，请重新开启或使用 PTT/文字。"
+        },
+        {
+          "type": "status",
+          "status": "stopped"
+        }
+      ],
+      "syntheticSilenceOnly": true,
+      "microphone": false
+    },
+    "evidence": "evidence/next-plan/default-wake-2026-10-15T13-27-21-127Z/report.json",
+    "note": "300s session includes initialization; PCM is file/silence injection, not physical listening acceptance."
+  },
+  "connections": {
+    "existingPiGptRestored": true,
+    "model": "gpt-6-luna",
+    "newOAuthFlowTested": false,
+    "stepfunNeedsReconnect": true,
+    "credentialsStoredInRepository": false,
+    "finalObservedAt": "2026-10-15T14:19:55.246Z",
+    "finalStatus": [
+      {
+        "name": "stepfun",
+        "connected": false
+      },
+      {
+        "name": "gpt",
+        "connected": true,
+        "model": "gpt-6-luna"
+      }
+    ]
+  },
+  "stability": {
+    "state": "passed",
+    "passed": true,
+    "evidence": "evidence/phase3-stability/2026-10-15T13-39-03-281Z-chromium/report.json",
+    "analysis": "evidence/phase3-stability/2026-10-15T13-39-03-281Z-chromium/analysis.json",
+    "requestedMinutes": 30,
+    "startedAt": "2026-10-15T13:40:21.218Z",
+    "finishedAt": "2026-10-15T14:10:23.912Z",
+    "monotonicElapsedMs": 1802577,
+    "isoElapsedMs": 1802694,
+    "checksPassed": 24,
+    "checksFailed": 0,
+    "pageErrors": 0,
+    "runtimeDiagnostics": 0,
+    "recordVideo": false,
+    "videoFiles": 0,
+    "cards": 60,
+    "microphoneAttempts": 0,
+    "audioAttempts": 0,
+    "blockedExternalRequests": 0,
+    "nativeWebglLoss": {
+      "supported": true,
+      "nativeExtension": true,
+      "drawCallsAfterLoss": 0,
+      "screenshot": "evidence/phase3-stability/2026-10-15T13-39-03-281Z-chromium/screenshots/native-webgl-context-loss-fallback.png"
+    },
+    "cleanup": {
+      "startedAt": "2026-10-15T14:10:23.915Z",
+      "contextClosed": true,
+      "browserClosed": true,
+      "serverClosed": true,
+      "snapshotRemoved": true,
+      "finishedAt": "2026-10-15T14:10:24.016Z"
+    },
+    "mainAsset": {
+      "path": "assets/index-CSWLYR1D.js",
+      "bytes": 3311069,
+      "sha256": "b24a903249b0c6332e31c57b1495860206c2a0c323322f2b069e2b607a16f3ca"
+    },
+    "displaySoakHeapBytes": {
+      "min": 14583428,
+      "max": 31202815,
+      "scope": "JS heap only, not RSS; separate document lifetimes"
+    },
+    "displayPerWindowRafP95MsRange": [
+      16.700000000004366,
+      700
+    ],
+    "performanceMeaning": "Headless instrumented TEST baseline, backend offline; rAF is callback timing, not presented FPS or a physical GPU smoothness pass.",
+    "retainedPreRuns": [
+      {
+        "evidence": "evidence/phase3-stability/2026-10-15T13-33-29-088Z-chromium",
+        "state": "failed",
+        "reason": "Old harness expected offline text for exact local fit before soak started."
+      },
+      {
+        "evidence": "evidence/phase3-stability/2026-10-15T13-36-11-808Z-chromium",
+        "state": "interrupted",
+        "reason": "Stopped to rebuild final source after source-summary credential-filter correction."
+      }
+    ],
+    "expectedConsoleErrors": [
+      "Static offline API HTTP 503 only"
+    ]
+  },
+  "limits": [
+    "Kev remains an optional narrow Chinese experiment",
+    "No physical microphone/speaker/actual output-device acceptance",
+    "No actual Plan timestamp or cloned-voice account acceptance; cloning requires an already uploaded File ID",
+    "No physical Safari or external-display acceptance",
+    "Pure Web cannot guarantee timely delivery with all Control/browser windows closed or during system sleep",
+    "No push, merge or publish"
+  ]
+}

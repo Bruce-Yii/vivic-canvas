@@ -1,0 +1,1 @@
+{"type":"object","additionalProperties":false,"properties":{"current":{"type":"number","title":"已完成","minimum":0,"maximum":1000000},"percent":{"type":"number","title":"进度百分比","minimum":0,"maximum":100},"note":{"type":"string","title":"备注","maxLength":300}},"required":["current","percent","note"]}

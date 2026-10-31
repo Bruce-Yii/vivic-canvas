@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "title": "卡片标题",
+      "maxLength": 80,
+      "description": "沿用用户给出的标题；没有标题时使用卡片用途。",
+      "minLength": 1
+    },
+    "context": {
+      "type": "string",
+      "title": "计划说明",
+      "maxLength": 1200,
+      "description": "仅整理用户已提供的信息；缺失时留空。",
+      "default": ""
+    }
+  },
+  "required": [
+    "title"
+  ],
+  "additionalProperties": false
+}

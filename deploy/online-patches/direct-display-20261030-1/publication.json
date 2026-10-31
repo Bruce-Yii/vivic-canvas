@@ -1,0 +1,27 @@
+{
+  "release": "direct-display-20261030-1",
+  "previous": "/opt/vivic-preview-20261025/releases/display-background-sync-20261030-1/web",
+  "frontend": "/opt/vivic-preview-20261025/releases/direct-display-20261030-1/web",
+  "changedWebFiles": [
+    "assets/card-packages-20261030-1/DisplayApp-DkgZz97I.js",
+    "index.html"
+  ],
+  "indexSha256": "3d955df1fa6f13afac9fa785d029313a7d96af284606e86912a96a4836289213",
+  "backendChanged": false,
+  "accountDataChanged": false,
+  "binaryStorageReused": true,
+  "candidateQaPassed": true,
+  "candidateChecks": 8,
+  "state": "published",
+  "publicResourcesVerified": true,
+  "liveQaPassed": true,
+  "liveChecks": 8,
+  "openingOrbFrames": 0,
+  "pixelComparisonPassed": true,
+  "currentStartup": "/assets/card-packages-20261030-1/vivic-startup-v58.js",
+  "currentRuntime": "/assets/card-packages-20261030-1/app-runtime-v58.js",
+  "currentIndexSha256": "84c30f0e761105c155553caa6b1ff5c4c5b21562aa76288f7fd65b35850b072c",
+  "parallelMaintenanceChangesPreserved": true,
+  "previousHtmlChangedByParallelMaintenance": true,
+  "apiAndSecurityConfigPreserved": true
+}

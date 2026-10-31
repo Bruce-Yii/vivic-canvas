@@ -1,0 +1,24 @@
+.vivic-travel { min-height: 0; overflow-wrap: anywhere; }
+.vivic-travel-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+.vivic-travel-item { border-top: 1px solid var(--border); padding-top: 12px; display: flex; gap: 10px; }
+.vivic-travel-item[data-selected] { border-color: var(--vivic-accent); }
+.vivic-travel-image { width:64px; height:64px; flex:none; object-fit:cover; border-radius:12px; overflow:hidden; }
+.vivic-travel-image.vivic-scene-placeholder { font-size:10px; padding:4px; }
+.vivic-travel-detail { min-width: 0; flex: 1; font-size: 13px; }
+.vivic-travel-detail p { margin: 5px 0; font-size: 11px; line-height: 1.5; }
+.vivic-travel-facts, .vivic-travel-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.vivic-travel-facts > span, .vivic-travel-actions a { display: inline-flex; align-items: center; gap: 3px; }
+.vivic-travel-tag { color: var(--vivic-muted-ink); font-size: 10px; }
+.vivic-travel-actions { margin-top: 7px; font-size: 11px; }
+.vivic-travel-actions button { border: 1px solid var(--border); padding: 3px 8px; border-radius: 6px; }
+.vivic-travel-actions button[aria-pressed=true] { color: var(--vivic-accent); }
+.vivic-travel-actions a { color: var(--vivic-accent); }
+.vivic-travel-notes { display: grid; gap: 5px; margin-top: 14px; font-size: 11px; color: var(--vivic-muted-ink); }
+.vivic-travel-notes textarea { color: var(--card-foreground); background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 6px; resize: vertical; min-height: 50px; }
+.vivic-travel-detail > strong { display:block; font-size:15px; line-height:21px; font-weight:500; }
+.vivic-travel-facts { margin-top:8px; }
+.vivic-travel-facts > span:first-child { font-size:16px; font-weight:500; font-variant-numeric:tabular-nums; }
+.vivic-travel-facts .vivic-travel-tag { font-size:11px; }
+.vivic-travel-notes { font-size:13px; }
+.vivic-travel-notes textarea { width:100%; font:inherit; padding:10px 12px; border-radius:12px; }
+@container vivic-card-content (max-width:280px) { .vivic-travel-item { flex-direction:column; }.vivic-travel-image { width:100%; height:120px; } }

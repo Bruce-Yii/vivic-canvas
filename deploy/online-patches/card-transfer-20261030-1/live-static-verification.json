@@ -1,0 +1,519 @@
+{
+  "release": "card-transfer-20261030-1",
+  "checks": [
+    {
+      "name": "CardDropOrbs-Bl13dsXm.js",
+      "status": 200,
+      "expectedSha256": "9a30bf7d54a697d2c596815a64f6f86a8fa08f419247a33114980fd691bab787",
+      "actualSha256": "9a30bf7d54a697d2c596815a64f6f86a8fa08f419247a33114980fd691bab787",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "vivic-startup-v59.js",
+      "status": 200,
+      "expectedSha256": "66651b687897d3e8be8d222fc214ab99d07f6c1277f8cba5d392a06152a1ebea",
+      "actualSha256": "66651b687897d3e8be8d222fc214ab99d07f6c1277f8cba5d392a06152a1ebea",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "index.html",
+      "status": 200,
+      "expectedSha256": "ab2db1d6004765797aa1ea80347e066e74afa392d5085d1da40213a9dbb5c667",
+      "actualSha256": "ab2db1d6004765797aa1ea80347e066e74afa392d5085d1da40213a9dbb5c667",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-store",
+      "cspPreserved": true
+    },
+    {
+      "name": "canvasStore-Kqevnh2f.js",
+      "status": 200,
+      "expectedSha256": "97f65c5e9a1a65ad623b0d1a5f52bf2b08144da6d045c8cec9bd77a88ee0a424",
+      "actualSha256": "97f65c5e9a1a65ad623b0d1a5f52bf2b08144da6d045c8cec9bd77a88ee0a424",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "ControlApp-ConfirmationGuard20261030.js",
+      "status": 200,
+      "expectedSha256": "1aa8c2abb33663eb2cce350e7a78210c72bb5d0482f2436f4e76dbd1b1d065de",
+      "actualSha256": "1aa8c2abb33663eb2cce350e7a78210c72bb5d0482f2436f4e76dbd1b1d065de",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "app-runtime-v59.js",
+      "status": 200,
+      "expectedSha256": "429f87533fc319ff1e9cf62aac56409166d805bef6ae7d80c1b6fe3516d01cde",
+      "actualSha256": "429f87533fc319ff1e9cf62aac56409166d805bef6ae7d80c1b6fe3516d01cde",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "canvasRecord-C52pBrNW.js",
+      "status": 200,
+      "expectedSha256": "6d5f80dcfc612417fdbaa934ed357352863fcb2d400726b8b38e84645ede18dc",
+      "actualSha256": "6d5f80dcfc612417fdbaa934ed357352863fcb2d400726b8b38e84645ede18dc",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "rolldown-runtime-Dd_uD5pT.js",
+      "status": 200,
+      "expectedSha256": "c5f0356f5d0918a3137e4e811fd18950efe8ac8f6bf84d1d4da7811c477a24d8",
+      "actualSha256": "c5f0356f5d0918a3137e4e811fd18950efe8ac8f6bf84d1d4da7811c477a24d8",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "react-CQOZoUwg.js",
+      "status": 200,
+      "expectedSha256": "54295d34ec628fd3da1aac723c641b473806f3c745af537fc0e71c069bb19aba",
+      "actualSha256": "54295d34ec628fd3da1aac723c641b473806f3c745af537fc0e71c069bb19aba",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "browserRuntime-CMMGoec6.js",
+      "status": 200,
+      "expectedSha256": "e467f61fa9643bc21fa41c0d7049f6012c151a453e2197be781a4b80958031d4",
+      "actualSha256": "e467f61fa9643bc21fa41c0d7049f6012c151a453e2197be781a4b80958031d4",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "DisplayApp-DkgZz97I.js",
+      "status": 200,
+      "expectedSha256": "41fc5980086ba6d43c214ad5237f15dac11724589ace17183ec55c0e186384be",
+      "actualSha256": "41fc5980086ba6d43c214ad5237f15dac11724589ace17183ec55c0e186384be",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "app-runtime.js",
+      "status": 200,
+      "expectedSha256": "722b07eb6f40bb0cc9dd496e1c7fca8ad0822d3c414459a28cb3da90d6bc6338",
+      "actualSha256": "722b07eb6f40bb0cc9dd496e1c7fca8ad0822d3c414459a28cb3da90d6bc6338",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "id-Ck2KiIKf.js",
+      "status": 200,
+      "expectedSha256": "241474d0b45f8ae80f18595c56db5b7214f2e287a1f428e3194c29e0e245335f",
+      "actualSha256": "241474d0b45f8ae80f18595c56db5b7214f2e287a1f428e3194c29e0e245335f",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "metrics-CVmPtUmp.js",
+      "status": 200,
+      "expectedSha256": "5997c1431e853957cb68d47e98a03aa80871f166a2a135ec8ef0db2da3228d2f",
+      "actualSha256": "5997c1431e853957cb68d47e98a03aa80871f166a2a135ec8ef0db2da3228d2f",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "contracts-Cpxl3DEm.js",
+      "status": 200,
+      "expectedSha256": "7694bca92446c1b2f828d17a3dbc3dfb3cd051299129c94d8d8087df0083c0e7",
+      "actualSha256": "7694bca92446c1b2f828d17a3dbc3dfb3cd051299129c94d8d8087df0083c0e7",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "use-reduced-motion-Dl6x9R7S.js",
+      "status": 200,
+      "expectedSha256": "4b07b4a578311051171bb9c0598c330a527fe4d71543fa4bc247d43766b882dc",
+      "actualSha256": "4b07b4a578311051171bb9c0598c330a527fe4d71543fa4bc247d43766b882dc",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "ControlDialogContent-DB5PiJCw.js",
+      "status": 200,
+      "expectedSha256": "13698f1a6d721efd351ea4a6684e19fb4dc3c3e27e0a36309d7e79ce58d93664",
+      "actualSha256": "13698f1a6d721efd351ea4a6684e19fb4dc3c3e27e0a36309d7e79ce58d93664",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "VivicCard-Cl3vEjqG.js",
+      "status": 200,
+      "expectedSha256": "fa3ea29b111f86bbc8dbbbb5a1483cb1ab63f8f4c0aae8840ae76f9655627d81",
+      "actualSha256": "fa3ea29b111f86bbc8dbbbb5a1483cb1ab63f8f4c0aae8840ae76f9655627d81",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "db-DwVrmwpG.js",
+      "status": 200,
+      "expectedSha256": "fd4a9dd32ae70ac50eaddc61822069f2ddbb9e4499101b7055d44f5516dd7787",
+      "actualSha256": "fd4a9dd32ae70ac50eaddc61822069f2ddbb9e4499101b7055d44f5516dd7787",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "assetStore-CmQVDZeV.js",
+      "status": 200,
+      "expectedSha256": "bec0b0796c731ba39a24c915dd79a07a3f2e0210a839731977c5ded87c919441",
+      "actualSha256": "bec0b0796c731ba39a24c915dd79a07a3f2e0210a839731977c5ded87c919441",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "preload-helper-BLdHbfdN.js",
+      "status": 200,
+      "expectedSha256": "5c613363d15f934ac7b2943b98182dcdb57607857c0c472b0750840db5e8716b",
+      "actualSha256": "5c613363d15f934ac7b2943b98182dcdb57607857c0c472b0750840db5e8716b",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "jsx-runtime-DREnUpxT.js",
+      "status": 200,
+      "expectedSha256": "6bf5fc5976a047d946f41fe6938e6994d56b43d786a37bf74c429562bc2ffe34",
+      "actualSha256": "6bf5fc5976a047d946f41fe6938e6994d56b43d786a37bf74c429562bc2ffe34",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "react-DdN5SUqT.js",
+      "status": 200,
+      "expectedSha256": "43f222d6cadbad97445fb102a2d9c86ebdb6b60a59b504c98d9891a57916640c",
+      "actualSha256": "43f222d6cadbad97445fb102a2d9c86ebdb6b60a59b504c98d9891a57916640c",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "src-Dl5CdtQc.js",
+      "status": 200,
+      "expectedSha256": "68b35cabfd85686b7bfd209a2b34bcb74a3cd92ce472171290e56a8ebab40068",
+      "actualSha256": "68b35cabfd85686b7bfd209a2b34bcb74a3cd92ce472171290e56a8ebab40068",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "mediaStore-Bb6jGldv.js",
+      "status": 200,
+      "expectedSha256": "58e89e5a33c7e06ac855501b91007d0697b6c689e52c7921be57eaed1a9e4e15",
+      "actualSha256": "58e89e5a33c7e06ac855501b91007d0697b6c689e52c7921be57eaed1a9e4e15",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "contracts-Cpxl3DEm.js",
+      "status": 200,
+      "expectedSha256": "7694bca92446c1b2f828d17a3dbc3dfb3cd051299129c94d8d8087df0083c0e7",
+      "actualSha256": "7694bca92446c1b2f828d17a3dbc3dfb3cd051299129c94d8d8087df0083c0e7",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "definitionStore-CIOvHtrM.js",
+      "status": 200,
+      "expectedSha256": "9cffd2cf8cd4931577f7e217690ff25fafeaf12a2866ba1416aae538144239b1",
+      "actualSha256": "9cffd2cf8cd4931577f7e217690ff25fafeaf12a2866ba1416aae538144239b1",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "displayStatus-CtZhyj0T.js",
+      "status": 200,
+      "expectedSha256": "aa94e6adabf184e08365065beb4379c280f101adcd171fbb21a5fd607402f935",
+      "actualSha256": "aa94e6adabf184e08365065beb4379c280f101adcd171fbb21a5fd607402f935",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "canvasRecord-C52pBrNW.js",
+      "status": 200,
+      "expectedSha256": "6d5f80dcfc612417fdbaa934ed357352863fcb2d400726b8b38e84645ede18dc",
+      "actualSha256": "6d5f80dcfc612417fdbaa934ed357352863fcb2d400726b8b38e84645ede18dc",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "src-BByP9_62.js",
+      "status": 200,
+      "expectedSha256": "59c11950f13a1765a0a9336f213097d790b9695783c89771be9691d954a1947c",
+      "actualSha256": "59c11950f13a1765a0a9336f213097d790b9695783c89771be9691d954a1947c",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "HostedMediaScope-DbdKpUOa.js",
+      "status": 200,
+      "expectedSha256": "5dd7bfc1d462bd99420d2b60c67ec9dcfcde5a0a0bfebeaf4105bdd04c8d3c28",
+      "actualSha256": "5dd7bfc1d462bd99420d2b60c67ec9dcfcde5a0a0bfebeaf4105bdd04c8d3c28",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "palettes-y4eFPjSE.js",
+      "status": 200,
+      "expectedSha256": "d7c7131f9ecc3429dea898afc9cbe7d665ba89b2c094b92d4f1b70772ddd45e4",
+      "actualSha256": "d7c7131f9ecc3429dea898afc9cbe7d665ba89b2c094b92d4f1b70772ddd45e4",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "AnimatePresence-DKL2Zc5d.js",
+      "status": 200,
+      "expectedSha256": "a9f3678290af38980d63d5fb243564a72400244a8fa567bbbd8fe1fc9d256c7d",
+      "actualSha256": "a9f3678290af38980d63d5fb243564a72400244a8fa567bbbd8fe1fc9d256c7d",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "client-DPyQbKzT.js",
+      "status": 200,
+      "expectedSha256": "a0d98631a6802b30e82e351460a1f82e8e12a602d1e8378b7cf1eca7399a827f",
+      "actualSha256": "a0d98631a6802b30e82e351460a1f82e8e12a602d1e8378b7cf1eca7399a827f",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "canvasStore-Kqevnh2f.js",
+      "status": 200,
+      "expectedSha256": "97f65c5e9a1a65ad623b0d1a5f52bf2b08144da6d045c8cec9bd77a88ee0a424",
+      "actualSha256": "97f65c5e9a1a65ad623b0d1a5f52bf2b08144da6d045c8cec9bd77a88ee0a424",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "browserRuntime-CMMGoec6.js",
+      "status": 200,
+      "expectedSha256": "e467f61fa9643bc21fa41c0d7049f6012c151a453e2197be781a4b80958031d4",
+      "actualSha256": "e467f61fa9643bc21fa41c0d7049f6012c151a453e2197be781a4b80958031d4",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "dist-Bcow9Ss5.js",
+      "status": 200,
+      "expectedSha256": "ea20c1c063c8148149dafb9c981f2a014e6be7e1a17976abc3ae4e353a689d96",
+      "actualSha256": "ea20c1c063c8148149dafb9c981f2a014e6be7e1a17976abc3ae4e353a689d96",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "HarkPrimitives-AuthLayout20261027-noring.css",
+      "status": 200,
+      "expectedSha256": "6630f9ca1709ac4580425bb366044d1cfedfb83397b15ed454b69577aeb5dd95",
+      "actualSha256": "6630f9ca1709ac4580425bb366044d1cfedfb83397b15ed454b69577aeb5dd95",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "HostedDefinitionScope-DbdKpUOa.js",
+      "status": 200,
+      "expectedSha256": "5dd7bfc1d462bd99420d2b60c67ec9dcfcde5a0a0bfebeaf4105bdd04c8d3c28",
+      "actualSha256": "5dd7bfc1d462bd99420d2b60c67ec9dcfcde5a0a0bfebeaf4105bdd04c8d3c28",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "siri-orb-DhmJ8ZQk.css",
+      "status": 200,
+      "expectedSha256": "336e23fa42228a47b2d903a9407c10b822492296799ba92c92331ae3ffcd459d",
+      "actualSha256": "336e23fa42228a47b2d903a9407c10b822492296799ba92c92331ae3ffcd459d",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "siri-orb-DLFUd4qh.js",
+      "status": 200,
+      "expectedSha256": "a870238d3c04b3c94dd1861b825cc626b2d460976e7d767871d477aca5439e28",
+      "actualSha256": "a870238d3c04b3c94dd1861b825cc626b2d460976e7d767871d477aca5439e28",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "HarkPrimitives-BXpmshXq.js",
+      "status": 200,
+      "expectedSha256": "b8d757f58a01a4b03880fd1de715e72315e3624161eaccc4015b7beeb6f62556",
+      "actualSha256": "b8d757f58a01a4b03880fd1de715e72315e3624161eaccc4015b7beeb6f62556",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "client-M1ms_vrj.js",
+      "status": 200,
+      "expectedSha256": "996a04fc913c4e8cf6f9301eb80acc2f11f4ceafd1694e24a631846a8d571cdc",
+      "actualSha256": "996a04fc913c4e8cf6f9301eb80acc2f11f4ceafd1694e24a631846a8d571cdc",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "storage-DDPBn6nA.js",
+      "status": 200,
+      "expectedSha256": "88535f50ca0d3109ab949ab33e7e9bc7421b980eb139abde248385ad5f31333e",
+      "actualSha256": "88535f50ca0d3109ab949ab33e7e9bc7421b980eb139abde248385ad5f31333e",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "vivic-collision-guard.js",
+      "status": 200,
+      "expectedSha256": "caeeb7a29b295c81b0b0488903af48249f862a3b46abc13936d8dc435adec2f3",
+      "actualSha256": "caeeb7a29b295c81b0b0488903af48249f862a3b46abc13936d8dc435adec2f3",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "app-shell.css",
+      "status": 200,
+      "expectedSha256": "67c8e66a92740d5cd34c03d78a252c90060a8a7def212abe87403a92052c6835",
+      "actualSha256": "67c8e66a92740d5cd34c03d78a252c90060a8a7def212abe87403a92052c6835",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "display-owner-fallback.js",
+      "status": 200,
+      "expectedSha256": "3dc61c3426a1540c15ee44ade55b7f48fa3f22102aedad048f59a0c806e80f6c",
+      "actualSha256": "3dc61c3426a1540c15ee44ade55b7f48fa3f22102aedad048f59a0c806e80f6c",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "main-BxvZcBKO-v60.css",
+      "status": 200,
+      "expectedSha256": "8fe8070532e0183078b9901d9b4f6a5d930cc78bfd6d8e2983b023455b3f3853",
+      "actualSha256": "8fe8070532e0183078b9901d9b4f6a5d930cc78bfd6d8e2983b023455b3f3853",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "assets-CvC5Gp3C.css",
+      "status": 200,
+      "expectedSha256": "5ba2996b2e5b07119ae5c77edac4d746a7f6739df93ef7b5b6b5ff239c4a04d1",
+      "actualSha256": "5ba2996b2e5b07119ae5c77edac4d746a7f6739df93ef7b5b6b5ff239c4a04d1",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "display-background-sync.css",
+      "status": 200,
+      "expectedSha256": "e035b4fe62968f62fc13f9e7af3bfc6dfafab584e8876fffff75f6a155bf0705",
+      "actualSha256": "e035b4fe62968f62fc13f9e7af3bfc6dfafab584e8876fffff75f6a155bf0705",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "background-typography.css",
+      "status": 200,
+      "expectedSha256": "ec423ee797ff2986f2ed48f6e28a9284bdd5a79c82217883b5a3ad4494bc2bff",
+      "actualSha256": "ec423ee797ff2986f2ed48f6e28a9284bdd5a79c82217883b5a3ad4494bc2bff",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "atelier-background-v50.css",
+      "status": 200,
+      "expectedSha256": "de76dce0627a32cea1ddd8416cdb45e93de5bf8132ef2e6a5eec3fa2344e441a",
+      "actualSha256": "de76dce0627a32cea1ddd8416cdb45e93de5bf8132ef2e6a5eec3fa2344e441a",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "display-contrast-20261030-2.css",
+      "status": 200,
+      "expectedSha256": "a7f75c427ae84f7f185ae9483c7885a90065e395c629577d562801d44c0a77de",
+      "actualSha256": "a7f75c427ae84f7f185ae9483c7885a90065e395c629577d562801d44c0a77de",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "card-actions-removed.css",
+      "status": 200,
+      "expectedSha256": "bbf94177a9f773394785b801b18fc65c4f78a3091c98e9c4ef52de11ca29b7b6",
+      "actualSha256": "bbf94177a9f773394785b801b18fc65c4f78a3091c98e9c4ef52de11ca29b7b6",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "card-transfer-ui.css",
+      "status": 200,
+      "expectedSha256": "97bb87de4342a4248b01b684e165d34d94827fcbf6e2c6a087dba23a62ebb806",
+      "actualSha256": "97bb87de4342a4248b01b684e165d34d94827fcbf6e2c6a087dba23a62ebb806",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "card-packages.css",
+      "status": 200,
+      "expectedSha256": "7f3920140c83ca232386bfc97584d77f3a7d33d5fa19983edf37563b7a9038e2",
+      "actualSha256": "7f3920140c83ca232386bfc97584d77f3a7d33d5fa19983edf37563b7a9038e2",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    },
+    {
+      "name": "card-transfer-ui.js",
+      "status": 200,
+      "expectedSha256": "635527e791da5f2bec61d27ef428362946348bafb6f5e687a1f8ad4c7f3c8c8f",
+      "actualSha256": "635527e791da5f2bec61d27ef428362946348bafb6f5e687a1f8ad4c7f3c8c8f",
+      "release": "card-transfer-20261030-1",
+      "cacheControl": "no-cache",
+      "cspPreserved": true
+    }
+  ],
+  "unmodifiedFilesVerified": 52
+}

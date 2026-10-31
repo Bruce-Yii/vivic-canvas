@@ -1,0 +1,16 @@
+{
+  "release": "voice-v4-20261030-1",
+  "previous": "/opt/vivic-preview-20261025/releases/card-transfer-20261030-1/web",
+  "frontend": "/opt/vivic-preview-20261025/releases/voice-v4-20261030-1/web",
+  "state": "published",
+  "rulesReadBeforeModification": true,
+  "backendChanged": false,
+  "userDataChanged": false,
+  "binaryStorageReused": true,
+  "candidateQaPassed": true,
+  "candidateChecks": 9,
+  "sourceFingerprint": "9ccd751cdf7300d6bf86fd8009131010330e6c4a8ca8a03c9d6233e7fcf7fa5e",
+  "gitArchival": "pending existing daily archival; no historic release deleted",
+  "publicResourcesVerified": true,
+  "healthOk": true
+}

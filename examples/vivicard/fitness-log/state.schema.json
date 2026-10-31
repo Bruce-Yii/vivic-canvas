@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "title": "个人状态",
+  "description": "用户后续可编辑的备注，默认空字符串，不推断训练强度或感受。",
+  "additionalProperties": false,
+  "default": { "note": "" },
+  "properties": {
+    "note": { "type": "string", "title": "备注", "default": "", "maxLength": 120 }
+  },
+  "required": ["note"]
+}

@@ -1,0 +1,95 @@
+{
+  "mode": "candidate",
+  "staticResources": "public resources plus candidate HTML and DisplayApp JavaScript",
+  "accountApis": "isolated simulated account and canvas records",
+  "checks": [
+    {
+      "label": "real-popup-directly-shows-the-existing-note",
+      "sampledAnimationFrames": 171,
+      "openingOrbFrames": 0,
+      "canvasVisible": true,
+      "noteVisible": true,
+      "backgroundMatches": true
+    },
+    {
+      "label": "awakening-stage-keeps-canvas-without-opening-orb",
+      "sampledAnimationFrames": 194,
+      "openingOrbFrames": 0,
+      "canvasVisible": true,
+      "noteVisible": true,
+      "backgroundMatches": true
+    },
+    {
+      "label": "display-refresh-does-not-replay-opening-orb",
+      "sampledAnimationFrames": 134,
+      "openingOrbFrames": 0,
+      "canvasVisible": true,
+      "noteVisible": true,
+      "backgroundMatches": true
+    },
+    {
+      "label": "actual-workspace-response-feedback-remains-available",
+      "passed": true
+    },
+    {
+      "label": "reopen-with-delayed-session-has-no-opening-orb",
+      "sampledAnimationFrames": 252,
+      "openingOrbFrames": 0,
+      "canvasVisible": true,
+      "noteVisible": true,
+      "backgroundMatches": true
+    },
+    {
+      "label": "mobile-width-shows-the-space-directly",
+      "sampledAnimationFrames": 261,
+      "openingOrbFrames": 0,
+      "canvasVisible": true,
+      "noteVisible": true,
+      "backgroundMatches": true
+    },
+    {
+      "label": "user-page-refresh-retains-current-display-space",
+      "sampledAnimationFrames": 401,
+      "openingOrbFrames": 0,
+      "canvasVisible": true,
+      "noteVisible": true,
+      "backgroundMatches": true
+    },
+    {
+      "label": "empty-space-opens-directly-without-an-orb",
+      "sampledAnimationFrames": 158,
+      "openingOrbFrames": 0,
+      "canvasVisible": true,
+      "noteVisible": false,
+      "backgroundMatches": true
+    }
+  ],
+  "videos": [
+    "D:\\\u5546\u8d5b\\VIVIC\u82cf\u5ba2\u677e\\direct-display\\videos\\candidate\\page@5071d7084238e4951b9fe5a185e95f03.webm",
+    "D:\\\u5546\u8d5b\\VIVIC\u82cf\u5ba2\u677e\\direct-display\\videos\\candidate\\page@462c19c177197734c2492749aad25662.webm"
+  ],
+  "emptySpaceVideo": "D:\\\u5546\u8d5b\\VIVIC\u82cf\u5ba2\u677e\\direct-display\\videos\\candidate\\page@b6a4da5310a6c7c6d4fbffb1c38130bb.webm",
+  "errors": [],
+  "pixelComparison": {
+    "source": "actual rendered screenshots and Playwright screen recording, not CSS declarations",
+    "backgroundRegion": [
+      80,
+      160,
+      380,
+      620
+    ],
+    "userPageAndDisplayScreenshotMaximumChannelDifference": 0,
+    "targetRgb": [
+      229,
+      240,
+      236
+    ],
+    "startupVideo": "D:\\\u5546\u8d5b\\VIVIC\u82cf\u5ba2\u677e\\direct-display\\videos\\candidate\\page@462c19c177197734c2492749aad25662.webm",
+    "sampledFrames": 28,
+    "firstCorrectFrameSeconds": 0.0,
+    "leadingBrowserFramesBeforeCurrentBackground": 0,
+    "postFirstPaintMismatches": 0,
+    "delayedSessionMs": 1800,
+    "lossyVideoCodecChannelTolerance": 6
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "release": "display-contrast-20261030-1",
+  "base_files_verified": 1866,
+  "overlay_files_verified": 3,
+  "backend_restarted": false,
+  "health_ok": true,
+  "free_bytes": 9095913472,
+  "previous_frontend": "/opt/vivic-preview-20261025/releases/card-packages-20261030-1/web",
+  "current_frontend": "/opt/vivic-preview-20261025/releases/display-contrast-20261030-1/web"
+}

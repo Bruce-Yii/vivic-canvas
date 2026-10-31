@@ -1,0 +1,376 @@
+{
+  "mode": "candidate",
+  "staticResources": "actual public static resources plus candidate HTML/CSS",
+  "accountApis": "isolated simulated account APIs; no production account or user data modified",
+  "checks": [
+    {
+      "label": "opening-from-the-real-display-button",
+      "theme": "light",
+      "background": "rgb(244, 246, 241)",
+      "settings": {
+        "vivicLayer": "shared",
+        "vivicAtmosphere": "mint",
+        "vivicAtmosphereTheme": "light",
+        "spaceEffect": "silk",
+        "spaceSpeed": "1",
+        "spaceStrength": "0.28",
+        "spaceMotion": "off",
+        "spacePhase": "idle",
+        "spaceRunning": "false",
+        "reducedMotion": "true"
+      },
+      "style": "background: rgb(244, 246, 241); --atelier-base: #f4f6f1; --atelier-glow-1: #c9e5d7; --atelier-glow-2: #e3efcd; --atelier-accent: #4f9278; --atelier-strength: 0.28; --atelier-duration: 20s; --atelier-travel: 4%; --atelier-scale: 1.1;"
+    },
+    {
+      "label": "already-open-window-follows-light-palette",
+      "theme": "light",
+      "background": "rgb(251, 246, 245)",
+      "settings": {
+        "vivicLayer": "shared",
+        "vivicAtmosphere": "berry",
+        "vivicAtmosphereTheme": "light",
+        "spaceEffect": "silk",
+        "spaceSpeed": "1",
+        "spaceStrength": "0.28",
+        "spaceMotion": "off",
+        "spacePhase": "idle",
+        "spaceRunning": "false",
+        "reducedMotion": "true"
+      },
+      "style": "background: rgb(251, 246, 245); --atelier-base: #fbf6f5; --atelier-glow-1: #f7dce7; --atelier-glow-2: #f9ead6; --atelier-accent: #be8295; --atelier-strength: 0.28; --atelier-duration: 20s; --atelier-travel: 4%; --atelier-scale: 1.1;"
+    },
+    {
+      "label": "already-open-window-follows-dark-theme-and-palette",
+      "theme": "dark",
+      "background": "rgb(7, 27, 37)",
+      "settings": {
+        "vivicLayer": "shared",
+        "vivicAtmosphere": "ocean",
+        "vivicAtmosphereTheme": "dark",
+        "spaceEffect": "silk",
+        "spaceSpeed": "1",
+        "spaceStrength": "0.28",
+        "spaceMotion": "off",
+        "spacePhase": "idle",
+        "spaceRunning": "false",
+        "reducedMotion": "true"
+      },
+      "style": "background: rgb(7, 27, 37); --atelier-base: #071b25; --atelier-glow-1: #146b79; --atelier-glow-2: #345aab; --atelier-accent: #86dfe6; --atelier-strength: 0.28; --atelier-duration: 20s; --atelier-travel: 4%; --atelier-scale: 1.1;"
+    },
+    {
+      "label": "dark-workspace-canvas-reveals-the-shared-background",
+      "theme": "dark",
+      "background": "rgb(7, 27, 37)",
+      "settings": {
+        "vivicLayer": "shared",
+        "vivicAtmosphere": "ocean",
+        "vivicAtmosphereTheme": "dark",
+        "spaceEffect": "silk",
+        "spaceSpeed": "1",
+        "spaceStrength": "0.28",
+        "spaceMotion": "off",
+        "spacePhase": "idle",
+        "spaceRunning": "false",
+        "reducedMotion": "true"
+      },
+      "style": "background: rgb(7, 27, 37); --atelier-base: #071b25; --atelier-glow-1: #146b79; --atelier-glow-2: #345aab; --atelier-accent: #86dfe6; --atelier-strength: 0.28; --atelier-duration: 20s; --atelier-travel: 4%; --atelier-scale: 1.1;"
+    },
+    {
+      "label": "all-four-custom-colors-follow-without-reopening",
+      "theme": "light",
+      "background": "rgb(229, 240, 236)",
+      "settings": {
+        "vivicLayer": "shared",
+        "vivicAtmosphere": "mint",
+        "vivicAtmosphereTheme": "light",
+        "spaceEffect": "silk",
+        "spaceSpeed": "1",
+        "spaceStrength": "0.28",
+        "spaceMotion": "off",
+        "spacePhase": "idle",
+        "spaceRunning": "false",
+        "reducedMotion": "true"
+      },
+      "style": "background: rgb(229, 240, 236); --atelier-base: #E5F0EC; --atelier-glow-1: #B7E2D2; --atelier-glow-2: #E9EFCE; --atelier-accent: #4F8270; --atelier-strength: 0.28; --atelier-duration: 20s; --atelier-travel: 4%; --atelier-scale: 1.1;"
+    },
+    {
+      "label": "effect-glow-follows-live",
+      "theme": "light",
+      "background": "rgb(229, 240, 236)",
+      "settings": {
+        "vivicLayer": "shared",
+        "vivicAtmosphere": "mint",
+        "vivicAtmosphereTheme": "light",
+        "spaceEffect": "glow",
+        "spaceSpeed": "1",
+        "spaceStrength": "0.28",
+        "spaceMotion": "off",
+        "spacePhase": "idle",
+        "spaceRunning": "false",
+        "reducedMotion": "true"
+      },
+      "style": "background: rgb(229, 240, 236); --atelier-base: #E5F0EC; --atelier-glow-1: #B7E2D2; --atelier-glow-2: #E9EFCE; --atelier-accent: #4F8270; --atelier-strength: 0.28; --atelier-duration: 15s; --atelier-travel: 4%; --atelier-scale: 1.1;"
+    },
+    {
+      "label": "effect-aurora-follows-live",
+      "theme": "light",
+      "background": "rgb(229, 240, 236)",
+      "settings": {
+        "vivicLayer": "shared",
+        "vivicAtmosphere": "mint",
+        "vivicAtmosphereTheme": "light",
+        "spaceEffect": "aurora",
+        "spaceSpeed": "1",
+        "spaceStrength": "0.28",
+        "spaceMotion": "off",
+        "spacePhase": "idle",
+        "spaceRunning": "false",
+        "reducedMotion": "true"
+      },
+      "style": "background: rgb(229, 240, 236); --atelier-base: #E5F0EC; --atelier-glow-1: #B7E2D2; --atelier-glow-2: #E9EFCE; --atelier-accent: #4F8270; --atelier-strength: 0.28; --atelier-duration: 12s; --atelier-travel: 4%; --atelier-scale: 1.1;"
+    },
+    {
+      "label": "effect-silk-follows-live",
+      "theme": "light",
+      "background": "rgb(229, 240, 236)",
+      "settings": {
+        "vivicLayer": "shared",
+        "vivicAtmosphere": "mint",
+        "vivicAtmosphereTheme": "light",
+        "spaceEffect": "silk",
+        "spaceSpeed": "1",
+        "spaceStrength": "0.28",
+        "spaceMotion": "off",
+        "spacePhase": "idle",
+        "spaceRunning": "false",
+        "reducedMotion": "true"
+      },
+      "style": "background: rgb(229, 240, 236); --atelier-base: #E5F0EC; --atelier-glow-1: #B7E2D2; --atelier-glow-2: #E9EFCE; --atelier-accent: #4F8270; --atelier-strength: 0.28; --atelier-duration: 20s; --atelier-travel: 4%; --atelier-scale: 1.1;"
+    },
+    {
+      "label": "effect-liquid-follows-live",
+      "theme": "light",
+      "background": "rgb(229, 240, 236)",
+      "settings": {
+        "vivicLayer": "shared",
+        "vivicAtmosphere": "mint",
+        "vivicAtmosphereTheme": "light",
+        "spaceEffect": "liquid",
+        "spaceSpeed": "1",
+        "spaceStrength": "0.28",
+        "spaceMotion": "off",
+        "spacePhase": "idle",
+        "spaceRunning": "false",
+        "reducedMotion": "true"
+      },
+      "style": "background: rgb(229, 240, 236); --atelier-base: #E5F0EC; --atelier-glow-1: #B7E2D2; --atelier-glow-2: #E9EFCE; --atelier-accent: #4F8270; --atelier-strength: 0.28; --atelier-duration: 15s; --atelier-travel: 4%; --atelier-scale: 1.1;"
+    },
+    {
+      "label": "effect-none-follows-live",
+      "theme": "light",
+      "background": "rgb(229, 240, 236)",
+      "settings": {
+        "vivicLayer": "shared",
+        "vivicAtmosphere": "mint",
+        "vivicAtmosphereTheme": "light",
+        "spaceEffect": "none",
+        "spaceSpeed": "1",
+        "spaceStrength": "0.28",
+        "spaceMotion": "off",
+        "spacePhase": "idle",
+        "spaceRunning": "false",
+        "reducedMotion": "true"
+      },
+      "style": "background: rgb(229, 240, 236); --atelier-base: #E5F0EC; --atelier-glow-1: #B7E2D2; --atelier-glow-2: #E9EFCE; --atelier-accent: #4F8270; --atelier-strength: 0.28; --atelier-duration: 15s; --atelier-travel: 4%; --atelier-scale: 1.1;"
+    },
+    {
+      "label": "speed-and-strength-follow-live",
+      "theme": "light",
+      "background": "rgb(229, 240, 236)",
+      "settings": {
+        "vivicLayer": "shared",
+        "vivicAtmosphere": "mint",
+        "vivicAtmosphereTheme": "light",
+        "spaceEffect": "none",
+        "spaceSpeed": "1.75",
+        "spaceStrength": "0.62",
+        "spaceMotion": "off",
+        "spacePhase": "idle",
+        "spaceRunning": "false",
+        "reducedMotion": "true"
+      },
+      "style": "background: rgb(229, 240, 236); --atelier-base: #E5F0EC; --atelier-glow-1: #B7E2D2; --atelier-glow-2: #E9EFCE; --atelier-accent: #4F8270; --atelier-strength: 0.62; --atelier-duration: 8.571428571428571s; --atelier-travel: 4%; --atelier-scale: 1.1;"
+    },
+    {
+      "label": "motion-vivid-follows-live",
+      "theme": "light",
+      "background": "rgb(229, 240, 236)",
+      "settings": {
+        "vivicLayer": "shared",
+        "vivicAtmosphere": "mint",
+        "vivicAtmosphereTheme": "light",
+        "spaceEffect": "none",
+        "spaceSpeed": "1.75",
+        "spaceStrength": "0.62",
+        "spaceMotion": "vivid",
+        "spacePhase": "idle",
+        "spaceRunning": "false"
+      },
+      "style": "background: rgb(229, 240, 236); --atelier-base: #E5F0EC; --atelier-glow-1: #B7E2D2; --atelier-glow-2: #E9EFCE; --atelier-accent: #4F8270; --atelier-strength: 0.62; --atelier-duration: 8.571428571428571s; --atelier-travel: 7%; --atelier-scale: 1.18;"
+    },
+    {
+      "label": "motion-subtle-follows-live",
+      "theme": "light",
+      "background": "rgb(229, 240, 236)",
+      "settings": {
+        "vivicLayer": "shared",
+        "vivicAtmosphere": "mint",
+        "vivicAtmosphereTheme": "light",
+        "spaceEffect": "none",
+        "spaceSpeed": "1.75",
+        "spaceStrength": "0.62",
+        "spaceMotion": "subtle",
+        "spacePhase": "idle",
+        "spaceRunning": "false"
+      },
+      "style": "background: rgb(229, 240, 236); --atelier-base: #E5F0EC; --atelier-glow-1: #B7E2D2; --atelier-glow-2: #E9EFCE; --atelier-accent: #4F8270; --atelier-strength: 0.62; --atelier-duration: 8.571428571428571s; --atelier-travel: 4%; --atelier-scale: 1.1;"
+    },
+    {
+      "label": "motion-off-follows-live",
+      "theme": "light",
+      "background": "rgb(229, 240, 236)",
+      "settings": {
+        "vivicLayer": "shared",
+        "vivicAtmosphere": "mint",
+        "vivicAtmosphereTheme": "light",
+        "spaceEffect": "none",
+        "spaceSpeed": "1.75",
+        "spaceStrength": "0.62",
+        "spaceMotion": "off",
+        "spacePhase": "idle",
+        "spaceRunning": "false",
+        "reducedMotion": "true"
+      },
+      "style": "background: rgb(229, 240, 236); --atelier-base: #E5F0EC; --atelier-glow-1: #B7E2D2; --atelier-glow-2: #E9EFCE; --atelier-accent: #4F8270; --atelier-strength: 0.62; --atelier-duration: 8.571428571428571s; --atelier-travel: 4%; --atelier-scale: 1.1;"
+    },
+    {
+      "label": "display-refresh-retains-background",
+      "theme": "light",
+      "background": "rgb(229, 240, 236)",
+      "settings": {
+        "vivicLayer": "shared",
+        "vivicAtmosphere": "mint",
+        "vivicAtmosphereTheme": "light",
+        "spaceEffect": "none",
+        "spaceSpeed": "1.75",
+        "spaceStrength": "0.62",
+        "spaceMotion": "off",
+        "spacePhase": "idle",
+        "spaceRunning": "false",
+        "reducedMotion": "true"
+      },
+      "style": "background: rgb(229, 240, 236); --atelier-base: #E5F0EC; --atelier-glow-1: #B7E2D2; --atelier-glow-2: #E9EFCE; --atelier-accent: #4F8270; --atelier-strength: 0.62; --atelier-duration: 8.571428571428571s; --atelier-travel: 4%; --atelier-scale: 1.1;"
+    },
+    {
+      "label": "pinned-display-follows-account-background-after-archive-switch",
+      "theme": "light",
+      "background": "rgb(247, 245, 252)",
+      "settings": {
+        "vivicLayer": "shared",
+        "vivicAtmosphere": "lilac",
+        "vivicAtmosphereTheme": "light",
+        "spaceEffect": "none",
+        "spaceSpeed": "1.75",
+        "spaceStrength": "0.62",
+        "spaceMotion": "off",
+        "spacePhase": "idle",
+        "spaceRunning": "false",
+        "reducedMotion": "true"
+      },
+      "style": "background: rgb(247, 245, 252); --atelier-base: #f7f5fc; --atelier-glow-1: #e4dbfa; --atelier-glow-2: #f4dce9; --atelier-accent: #8571b8; --atelier-strength: 0.62; --atelier-duration: 8.571428571428571s; --atelier-travel: 4%; --atelier-scale: 1.1;"
+    },
+    {
+      "label": "user-page-refresh-keeps-display-in-sync",
+      "theme": "light",
+      "background": "rgb(229, 240, 236)",
+      "settings": {
+        "vivicLayer": "shared",
+        "vivicAtmosphere": "lilac",
+        "vivicAtmosphereTheme": "light",
+        "spaceEffect": "none",
+        "spaceSpeed": "1.75",
+        "spaceStrength": "0.62",
+        "spaceMotion": "off",
+        "spacePhase": "idle",
+        "spaceRunning": "false",
+        "reducedMotion": "true"
+      },
+      "style": "background: rgb(229, 240, 236); --atelier-base: #E5F0EC; --atelier-glow-1: #e4dbfa; --atelier-glow-2: #f4dce9; --atelier-accent: #8571b8; --atelier-strength: 0.62; --atelier-duration: 8.571428571428571s; --atelier-travel: 4%; --atelier-scale: 1.1;"
+    },
+    {
+      "label": "reopened-display-with-delayed-session-starts-with-current-background",
+      "theme": "light",
+      "background": "rgb(229, 240, 236)",
+      "settings": {
+        "vivicLayer": "shared",
+        "vivicAtmosphere": "lilac",
+        "vivicAtmosphereTheme": "light",
+        "spaceEffect": "none",
+        "spaceSpeed": "1.75",
+        "spaceStrength": "0.62",
+        "spaceMotion": "off",
+        "spacePhase": "idle",
+        "spaceRunning": "false",
+        "reducedMotion": "true"
+      },
+      "style": "background: rgb(229, 240, 236); --atelier-base: #E5F0EC; --atelier-glow-1: #e4dbfa; --atelier-glow-2: #f4dce9; --atelier-accent: #8571b8; --atelier-strength: 0.62; --atelier-duration: 8.571428571428571s; --atelier-travel: 4%; --atelier-scale: 1.1;"
+    },
+    {
+      "label": "mobile-width-keeps-background",
+      "theme": "light",
+      "background": "rgb(229, 240, 236)",
+      "settings": {
+        "vivicLayer": "shared",
+        "vivicAtmosphere": "lilac",
+        "vivicAtmosphereTheme": "light",
+        "spaceEffect": "none",
+        "spaceSpeed": "1.75",
+        "spaceStrength": "0.62",
+        "spaceMotion": "off",
+        "spacePhase": "idle",
+        "spaceRunning": "false",
+        "reducedMotion": "true"
+      },
+      "style": "background: rgb(229, 240, 236); --atelier-base: #E5F0EC; --atelier-glow-1: #e4dbfa; --atelier-glow-2: #f4dce9; --atelier-accent: #8571b8; --atelier-strength: 0.62; --atelier-duration: 8.571428571428571s; --atelier-travel: 4%; --atelier-scale: 1.1;"
+    }
+  ],
+  "videos": [
+    "D:\\\u5546\u8d5b\\VIVIC\u82cf\u5ba2\u677e\\display-background-sync\\videos\\candidate\\page@8fdd9b5403eba1c7498fca6c00385f4c.webm",
+    "D:\\\u5546\u8d5b\\VIVIC\u82cf\u5ba2\u677e\\display-background-sync\\videos\\candidate\\page@f85dd6ee990be9665680ffda648ad094.webm"
+  ],
+  "errors": [],
+  "realPopupButton": true,
+  "productionAccountCreated": false,
+  "pixelComparison": {
+    "source": "actual rendered screenshots and Playwright screen recording, not CSS declarations",
+    "backgroundRegion": [
+      80,
+      160,
+      380,
+      620
+    ],
+    "userPageAndDisplayScreenshotMaximumChannelDifference": 0,
+    "targetRgb": [
+      229,
+      240,
+      236
+    ],
+    "startupVideo": "D:\\\u5546\u8d5b\\VIVIC\u82cf\u5ba2\u677e\\display-background-sync\\videos\\candidate\\page@f85dd6ee990be9665680ffda648ad094.webm",
+    "sampledFrames": 28,
+    "firstCorrectFrameSeconds": 0.0,
+    "leadingBrowserFramesBeforeCurrentBackground": 0,
+    "postFirstPaintMismatches": 0,
+    "delayedSessionMs": 1800,
+    "lossyVideoCodecChannelTolerance": 6
+  }
+}

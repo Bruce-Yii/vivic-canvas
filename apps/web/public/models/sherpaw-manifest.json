@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "packageVersion": "0.3.0",
+  "sourceCommit": "2b12da09ab0cf45894e9565c386bf003cf44a106",
+  "models": [
+    {
+      "id": "asr-zh",
+      "kind": "asr",
+      "label": "中文 / 中英本地识别",
+      "license": "Apache-2.0",
+      "repository": "moeru-ai/sherpaw-x-asr-zh-en-480ms-int8",
+      "revision": "d9ab70a45493b97ae76e08574fcbc5ad0c5d0039",
+      "url": "https://huggingface.co/moeru-ai/sherpaw-x-asr-zh-en-480ms-int8/resolve/d9ab70a45493b97ae76e08574fcbc5ad0c5d0039/install/bin/wasm/preload.data",
+      "bytes": 169227953,
+      "sha256": "3e1c128c7fdb00c18636a3e68889bd75e55bbf779a5a980a1d08b1ec1d098c2a",
+      "licenseUrl": "https://huggingface.co/moeru-ai/sherpaw-x-asr-zh-en-480ms-int8/blob/d9ab70a45493b97ae76e08574fcbc5ad0c5d0039/LICENSE",
+      "metadata": {
+        "files": [
+          {
+            "filename": "/decoder.onnx",
+            "start": 0,
+            "end": 11309084
+          },
+          {
+            "filename": "/encoder.onnx",
+            "start": 11309084,
+            "end": 166587725
+          },
+          {
+            "filename": "/joiner.onnx",
+            "start": 166587725,
+            "end": 169169147
+          },
+          {
+            "filename": "/tokens.txt",
+            "start": 169169147,
+            "end": 169227953
+          }
+        ],
+        "remote_package_size": 169227953
+      }
+    },
+    {
+      "id": "kws-zh-en",
+      "kind": "kws",
+      "label": "本地唤醒词检测",
+      "license": "Apache-2.0",
+      "repository": "moeru-ai/sherpa-onnx-kws-zipformer-zh-en-3M-2025-12-20",
+      "revision": "1770a4b22db32184c110ac43c601db17cc9c93f8",
+      "url": "https://huggingface.co/moeru-ai/sherpa-onnx-kws-zipformer-zh-en-3M-2025-12-20/resolve/1770a4b22db32184c110ac43c601db17cc9c93f8/install/bin/wasm/preload.data",
+      "bytes": 13076183,
+      "sha256": "4ca3ae0d147df1576fac87a4837f5a8959f4f87600a8306c57cc67eb8b40494d",
+      "licenseUrl": "https://huggingface.co/moeru-ai/sherpa-onnx-kws-zipformer-zh-en-3M-2025-12-20/blob/1770a4b22db32184c110ac43c601db17cc9c93f8/LICENSE",
+      "metadata": {
+        "files": [
+          {
+            "filename": "/decoder.onnx",
+            "start": 0,
+            "end": 759829
+          },
+          {
+            "filename": "/encoder.onnx",
+            "start": 759829,
+            "end": 12736101
+          },
+          {
+            "filename": "/joiner.onnx",
+            "start": 12736101,
+            "end": 13074255
+          },
+          {
+            "filename": "/tokens.txt",
+            "start": 13074255,
+            "end": 13076183
+          }
+        ],
+        "remote_package_size": 13076183
+      }
+    },
+    {
+      "id": "vad",
+      "kind": "vad",
+      "label": "本地语音分段",
+      "license": "MIT",
+      "repository": "csukuangfj/vad",
+      "revision": "fba88cd2e921609e7675c3aaf51e0b9b295da4bc",
+      "url": "https://huggingface.co/csukuangfj/vad/resolve/fba88cd2e921609e7675c3aaf51e0b9b295da4bc/silero_vad_v5.onnx",
+      "bytes": 2313101,
+      "sha256": "6b99cbfd39246b6706f98ec13c7c50c6b299181f2474fa05cbc8046acc274396",
+      "licenseUrl": "https://github.com/snakers4/silero-vad/blob/master/LICENSE",
+      "sourceUrl": "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/silero_vad_v5.onnx"
+    }
+  ]
+}

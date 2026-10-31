@@ -1,0 +1,4 @@
+.launcher-model-picker { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-top:16px; font-size:13px; }
+.launcher-model-picker select { max-width:100%; min-height:38px; padding:8px 12px; border-radius:14px; color:var(--hark-ink); background:var(--hark-composer); border:1px solid var(--hark-stroke); font:inherit; }
+.launcher-model-picker select:focus-visible { outline:2px solid var(--hark-ink); outline-offset:3px; }
+.launcher-model-picker select:disabled { opacity:.5; }

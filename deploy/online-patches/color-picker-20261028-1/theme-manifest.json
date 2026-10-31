@@ -1,0 +1,16 @@
+{
+  "sourceVersion": "theme-atelier-20261028-1",
+  "changes": {
+    "atelier-background.js": {
+      "beforeSha256": "2492f102b6eab91c115611b1920768811ca6510c26e10f74ab4529d815db6ab5",
+      "normalizedBeforeSha256": "2492f102b6eab91c115611b1920768811ca6510c26e10f74ab4529d815db6ab5"
+    },
+    "atelier-background.css": {
+      "beforeSha256": "f817c002feb0926c1e3179f32a53971a5ce55c0f6707f31aa53fefa4d2c1f185",
+      "normalizedBeforeSha256": "f817c002feb0926c1e3179f32a53971a5ce55c0f6707f31aa53fefa4d2c1f185"
+    }
+  },
+  "newFiles": [],
+  "version": "color-picker-20261028-1",
+  "entry": "main-AccessRecovery20261028-7.js"
+}

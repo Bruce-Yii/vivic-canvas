@@ -1,0 +1,251 @@
+{
+  "at": "2026-10-29T17:35:34.570Z",
+  "model": "step-5-preview",
+  "mode": "shadow",
+  "observerDrainBetweenCases": true,
+  "scope": "Frozen creation/answer subset plus one real vision case. Synthetic inputs, actual hosted HTTP and upstream model.",
+  "originalCaseCount": 59,
+  "rows": [
+    {
+      "id": "answer-02",
+      "route": "answer",
+      "text": "量子计算是什么原理",
+      "totalMs": 10919,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NewsCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NewsCard",
+          "displayProps": {
+            "headline": "量子计算是什么原理",
+            "summary": "量子计算利用量子比特的叠加与纠缠等特性，通过量子门操作进行并行计算，在特定问题上比经典计算机更快。",
+            "keyPoints": [
+              "量子比特可同时处于0和1的叠加态",
+              "量子纠缠使远距离量子比特状态关联",
+              "量子门操控量子态实现计算",
+              "测量会导致叠加态坍缩为经典结果",
+              "适用于因数分解、搜索、模拟等特定问题"
+            ],
+            "summaryBy": "ai"
+          },
+          "sourceData": {
+            "contract": "answer"
+          }
+        }
+      ],
+      "trace": {
+        "route": "answer",
+        "probability": 0.8536321751939121,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "answer-06",
+      "route": "answer",
+      "text": "这句话里的删除所有卡片是什么意思",
+      "totalMs": 19131,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NewsCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NewsCard",
+          "displayProps": {
+            "headline": "“删除所有卡片”是什么意思",
+            "summary": "指将当前画布或工作区中的全部卡片一次性移除的操作指令，通常用于清空界面、清理临时内容。",
+            "keyPoints": [
+              "属于操作指令，不是卡片内容",
+              "作用范围是当前画布内的所有卡片",
+              "执行后界面会被清空"
+            ],
+            "summaryBy": "ai"
+          },
+          "sourceData": {
+            "contract": "answer"
+          }
+        }
+      ],
+      "trace": {
+        "route": "answer",
+        "probability": 0.806599295331047,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "generate-04",
+      "route": "generate",
+      "text": "做一个表格对比iPhone和华为的参数，用我给的数据：iPhone 6.1寸 华为6.7寸",
+      "totalMs": 32519,
+      "plannerCalls": 3,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "ComparisonCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "ComparisonCard",
+          "displayProps": {
+            "title": "iPhone 与华为参数对比",
+            "options": [
+              {
+                "id": "o-1",
+                "name": "iPhone"
+              },
+              {
+                "id": "o-2",
+                "name": "华为"
+              }
+            ],
+            "criteria": [
+              {
+                "id": "k-1",
+                "name": "屏幕尺寸",
+                "values": [
+                  6.1,
+                  6.7
+                ],
+                "unit": "寸"
+              }
+            ]
+          },
+          "sourceData": {
+            "scene": "option_comparison",
+            "provenance": "user-text"
+          }
+        }
+      ],
+      "trace": {
+        "route": "generate",
+        "probability": 0.9593465884836091,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "generate-07",
+      "route": "generate",
+      "text": "帮我做一个下周的健身计划",
+      "totalMs": 44358,
+      "plannerCalls": 2,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NoteCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NoteCard",
+          "displayProps": {
+            "text": "下周健身计划建议：周一有氧运动30分钟，周二上肢力量训练，周三休息或轻度瑜伽，周四下肢力量训练，周五有氧运动30分钟，周六全身拉伸放松，周日充分休息。训练前热身，注意补水与循序渐进。"
+          },
+          "sourceData": {}
+        }
+      ],
+      "trace": {
+        "route": "generate",
+        "probability": 0.9134181745781221,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "vision-01",
+      "route": "image_analysis",
+      "text": "分析这张图片里左右两块色块的颜色，并保留图片。",
+      "totalMs": 12655,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NewsCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "retainedImage": true,
+      "cards": [
+        {
+          "type": "NewsCard",
+          "displayProps": {
+            "headline": "左侧为蓝色色块，右侧为橙色色块",
+            "summary": "图片中并排展示两个圆角矩形色块，左侧为蓝色，右侧为橙色。",
+            "keyPoints": [
+              "左侧色块为蓝色",
+              "右侧色块为橙色",
+              "两个色块均为圆角矩形",
+              "色块在白色背景上水平排列"
+            ],
+            "image": "media:image_ed73ec8ad240ff7049936e3d9e3a469a73abc7807506b149e8bdd643fffc903f",
+            "summaryBy": "ai"
+          },
+          "sourceData": {}
+        }
+      ],
+      "trace": {
+        "route": "unsupported",
+        "probability": 0.6917799675118446,
+        "status": "complete",
+        "failedCount": 0
+      },
+      "imageColorsCorrect": true
+    }
+  ],
+  "complete": true,
+  "cleanup": true,
+  "modelCapabilities": [
+    "structured",
+    "chat",
+    "vision"
+  ],
+  "selectedCaseIds": [
+    "answer-02",
+    "answer-06",
+    "generate-04",
+    "generate-07"
+  ],
+  "summary": {
+    "requests": 5,
+    "modelRequests": 5,
+    "plannerCalls": 8,
+    "repairedRequests": 2,
+    "finalUnreliableParameters": 0,
+    "kindCounts": {
+      "envelope": 5
+    },
+    "allLatencyMs": {
+      "p50": 19131,
+      "p95": 44358
+    },
+    "modelLatencyMs": {
+      "p50": 19131,
+      "p95": 44358
+    }
+  }
+}

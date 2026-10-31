@@ -1,0 +1,10 @@
+{
+  "formatVersion": "0.1",
+  "id": "vivic.office-tasks",
+  "version": "1.0.0",
+  "name": "工作推进卡",
+  "description": "把用户提供的工作事项整理为可编辑任务，支持负责人、原文截止说明、优先级、受阻与完成状态。用于工作推进/项目任务，不替代已有目标进度卡。只整理用户事实；缺失负责人和截止说明留空，不编造飞书任务或真实日程。",
+  "renderer": "declarative",
+  "host": "0.6",
+  "capabilities": []
+}

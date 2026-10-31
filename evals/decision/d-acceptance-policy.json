@@ -1,0 +1,45 @@
+{
+  "version": "d-acceptance-20261030",
+  "scope": "All 59 frozen cases whose primary route is answer/countdown/todo/note/generate, plus one generated two-color image. The other two search-led compound cases are outside this D creation/answer subset.",
+  "selection": ["answer", "countdown", "todo", "note", "generate"],
+  "reasonableClarificationCases": ["countdown-09", "todo-07", "generate-01", "generate-08", "generate-10"],
+  "defaultCreatedTypes": {
+    "answer": ["NewsCard"],
+    "countdown": ["CountdownCard"],
+    "todo": ["TodoCard"],
+    "note": ["NoteCard"]
+  },
+  "compoundRequiredTypes": {
+    "multi-01": ["NoteCard", "CountdownCard"],
+    "multi-05": ["NewsCard", "TodoCard"],
+    "multi-07": ["CountdownCard", "CountdownCard"],
+    "multi-08": ["TodoCard"]
+  },
+  "generateAllowedTypes": {
+    "generate-01": ["NoteCard"],
+    "generate-02": ["WeeklyScheduleCard", "NoteCard", "RoadmapCard"],
+    "generate-03": ["NoteCard", "NewsCard"],
+    "generate-04": ["TableCard", "ComparisonCard"],
+    "generate-05": ["NoteCard", "TodoCard"],
+    "generate-06": ["NoteCard"],
+    "generate-07": ["WeeklyScheduleCard", "NoteCard", "RoadmapCard"],
+    "generate-08": ["NoteCard"],
+    "generate-09": ["ChartCard"],
+    "generate-10": ["NoteCard"],
+    "generate-11": ["TodoCard", "NoteCard"]
+  },
+  "metrics": {
+    "rawModelRejection": "Planner retries imply earlier model proposals failed validation. Count separately from transport retries and normal model clarifications.",
+    "finalModelRejection": "Among information-sufficient original requests that actually reached the model and obtained a response, count requests still rejected by schema, slots, grounding or execution validation after allowed repair. Count an original request once, excluding pure rules and genuine missing-information clarifications; report transport errors separately.",
+    "taskSuccess": "A valid card is insufficient: check expected type, all requested items, no invented input facts, and a successful normal owner commit/receipt. Subjective content quality and medical/current claims require separate review.",
+    "latency": "Report all requests separately from requests that actually called the planner. Do not present fast rule timings as model generation latency."
+  },
+  "reviewNotes": [
+    "General-purpose drafts may use explicit placeholders; missing leave/product details may also be clarified.",
+    "For moving/packing requests, retain the user's general task; do not claim invented packing items came from the user.",
+    "Meeting and Google fixtures contain limited usable text. A review-question request has no actual book excerpt to derive questions from.",
+    "Multi-07 must retain both drinking water and taking medicine at the requested duration; no drug name or dosage may be added.",
+    "General knowledge answers and illustrative travel/exercise plans are not independently verified current, medical or personalized advice.",
+    "The acceptance policy was recorded before full-run outputs were reviewed; keep initial results when any fix is retested."
+  ]
+}

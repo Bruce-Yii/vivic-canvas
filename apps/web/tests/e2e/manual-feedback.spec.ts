@@ -1,0 +1,60 @@
+import { expect, test } from "@playwright/test";
+import path from "node:path";
+import { readIntentResult, activeCanvasId, sendCommand, openSpace } from "./helpers1";
+test.use({ video: { mode: "on", size: { width: 1440, height: 900 } } });
+test.beforeEach(async ({ context }) => {
+  await context.addInitScript(() => {
+    HTMLMediaElement.prototype.play = async () => { throw new Error("TEST no audio"); };
+    navigator.mediaDevices.getUserMedia = async () => { throw new Error("TEST no microphone"); };
+  });
+});
+test("individually added reminders share one labeled card, shrink on delivery and never return as zero cards after refresh", async ({ page, context }, info) => {
+  await page.goto("/control"); await expect(page.locator("[data-vivic-control]")).toHaveAttribute("data-vivic-owner", "owner");
+  const display = await context.newPage(); await display.goto(`/display?canvasId=${await activeCanvasId(page)}`);
+  await sendCommand(page, "8秒后提醒我喝水"); await expect(display.locator("[data-vivic-reminder-row]")).toHaveCount(1);
+  await sendCommand(page, "16秒后提醒我休息"); await expect(display.locator("[data-vivic-reminder-row]")).toHaveCount(2);
+  await sendCommand(page, "24秒后提醒我开会"); await expect(display.locator("[data-vivic-reminder-row]")).toHaveCount(3);
+  await expect(display.locator(".vivic-card")).toHaveCount(1);
+  await expect(display.locator("[data-vivic-reminder-list]")).toContainText("喝水");
+  await expect(display.locator("[data-vivic-reminder-list]")).toContainText("休息");
+  await display.screenshot({ path: path.resolve(process.cwd(), "../../evidence/manual-feedback", info.project.name || "chromium", "TEST-reminder-group.png") });
+  await sendCommand(page, "暂停开会提醒"); await openSpace(page, "提醒"); await expect(page.locator("[data-vivic-reminder]").filter({ hasText: "开会" })).toContainText("已暂停");
+  await expect(display.locator("[data-vivic-reminder-row]").filter({ hasText: "喝水" })).toHaveCount(0, { timeout: 12000 });
+  await expect(display.locator("[data-vivic-reminder-row]")).toHaveCount(2);
+  await display.reload(); await expect(display.locator("[data-vivic-reminder-row]")).toHaveCount(2);
+  await expect(display.locator(".vivic-card")).toHaveCount(1);
+  await expect(page.locator("[data-vivic-reminder-notice]")).toContainText("喝水");
+  await sendCommand(page, "删除所有卡片"); await expect(display.locator(".vivic-card")).toHaveCount(0);
+  await sendCommand(page, "撤销"); await expect(display.locator("[data-vivic-reminder-row]").filter({ hasText: "开会" })).toHaveCount(1);
+  await display.close();
+});
+test("delete-all works locally, clears stale clarification and undoes the entire batch", async ({ page, context }) => {
+  await page.goto("/control"); await expect(page.locator("[data-vivic-control]")).toHaveAttribute("data-vivic-owner", "owner");
+  const display = await context.newPage(); await display.goto(`/display?canvasId=${await activeCanvasId(page)}`);
+  await sendCommand(page, "添加待办：喝水"); await expect(display.locator(".vivic-card")).toHaveCount(1);
+  await sendCommand(page, "添加待办：休息"); await expect(display.locator(".vivic-card")).toHaveCount(2);
+  let calls = 0; page.on("response", async response => { if (response.url().endsWith("/api/intent")) { const result = await readIntentResult(response); if (result.usedProvider === "stepfun" || result.usedProvider === "gpt") calls++; } });
+  await sendCommand(page, "删除待办"); await expect(page.locator("[data-vivic-clarify-candidate]")).toHaveCount(2);
+  await sendCommand(page, "删除所有卡片"); await expect(display.locator(".vivic-card")).toHaveCount(0);
+  await expect(page.locator("[data-vivic-clarify]")).toHaveCount(0); expect(calls).toBe(0);
+  await sendCommand(page, "撤销"); await expect(display.locator(".vivic-card")).toHaveCount(2);
+  await display.reload(); await expect(display.locator(".vivic-card")).toHaveCount(2);
+  await display.close();
+});
+test("pinning splits a reminder out of the group, preserves its coordinates on additions and joins again when unpinned", async ({ page, context }) => {
+  await page.goto("/control"); await expect(page.locator("[data-vivic-control]")).toHaveAttribute("data-vivic-owner", "owner");
+  const display = await context.newPage(); await display.goto(`/display?canvasId=${await activeCanvasId(page)}`);
+  await sendCommand(page, "60分钟后提醒我TEST固定"); await expect(display.locator("[data-vivic-reminder-row]")).toHaveCount(1);
+  await sendCommand(page, "60分钟后提醒我TEST合并"); await expect(display.locator("[data-vivic-reminder-row]")).toHaveCount(2);
+  await openSpace(page, "提醒");
+  const id = await page.locator("[data-vivic-reminder]").filter({ hasText: "TEST固定" }).getAttribute("data-vivic-reminder");
+  await openSpace(page, "卡片"); await page.locator(`[data-vivic-pin="${id}"]`).click(); await expect(display.locator(".vivic-card")).toHaveCount(2);
+  const position = () => page.evaluate(id => window.__vivic!.getState().cards.find(card => card.record.id === id)!.record.layout, id!);
+  const fixed = await position();
+  await sendCommand(page, "60分钟后提醒我TEST新增"); await expect(display.locator("[data-vivic-reminder-row]")).toHaveCount(3);
+  await expect(display.locator(".vivic-card")).toHaveCount(2); expect(await position()).toEqual(fixed);
+  await display.reload(); await expect(display.locator(".vivic-card")).toHaveCount(2);
+  await openSpace(page, "卡片"); await page.locator(`[data-vivic-pin="${id}"]`).click(); await expect(display.locator(".vivic-card")).toHaveCount(1);
+  await expect(display.locator("[data-vivic-reminder-row]")).toHaveCount(3);
+  await display.close();
+});

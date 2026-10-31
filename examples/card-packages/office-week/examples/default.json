@@ -1,0 +1,43 @@
+{
+  "name": "DEMO · 可交互样例",
+  "config": {
+    "title": "DEMO · 本周重点",
+    "context": "本周只推进三件关键事项；以下为虚构演示计划。",
+    "period": "本周"
+  },
+  "data": {
+    "origin": "demo"
+  },
+  "state": {
+    "items": [
+      {
+        "id": "demo-outline",
+        "title": "完成方案大纲",
+        "day": "周一",
+        "owner": "我",
+        "due": "",
+        "status": "完成",
+        "note": ""
+      },
+      {
+        "id": "demo-review",
+        "title": "评审交互稿",
+        "day": "周三",
+        "owner": "",
+        "due": "",
+        "status": "进行中",
+        "note": ""
+      },
+      {
+        "id": "demo-wrap",
+        "title": "整理周回顾",
+        "day": "周五",
+        "owner": "我",
+        "due": "",
+        "status": "待办",
+        "note": ""
+      }
+    ],
+    "note": ""
+  }
+}

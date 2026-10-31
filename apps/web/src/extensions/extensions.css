@@ -1,0 +1,13 @@
+.vivic-extension-dialog { width: min(94vw, 900px); max-height: 92vh; overflow-y: auto; }
+.vivic-extension-preview { padding: 30px; border-radius: 16px; overflow: hidden; }
+.vivic-extension-preview-card { max-width: 420px; margin: auto; padding: 20px; border-radius: 16px; color: #172033; background: rgba(255,255,255,.9); --card-foreground: #172033; --border: #d4dbe5; --vivic-muted-ink: #596377; --vivic-accent: #6353d6; --vivic-track: #e5e7eb; }
+.vivic-extension-preview.dark .vivic-extension-preview-card { color: #edf0fa; background: rgba(18,24,40,.94); --card-foreground: #edf0fa; --border: #41485b; --vivic-muted-ink: #b5bfd5; --vivic-accent: #c0a9ff; --vivic-track: #3c4356; }
+.vivic-extension-progress { appearance: none; height: 8px; overflow: hidden; border: 0; border-radius: 999px; background: var(--vivic-track, #e5e7ef); color: var(--vivic-accent, #7c68df); }
+.vivic-extension-progress::-webkit-progress-bar { background: var(--vivic-track, #e5e7ef); border-radius: 999px; }
+.vivic-extension-progress::-webkit-progress-value { background: var(--vivic-accent, #7c68df); border-radius: 999px; }
+.vivic-extension-progress::-moz-progress-bar { background: var(--vivic-accent, #7c68df); border-radius: 999px; }
+.vivic-extension-content { min-width:0; overflow-wrap:anywhere; }
+.vivic-extension-image { height:176px; width:100%; border-radius:var(--radius-md); }
+.vivic-extension-table { min-width:0; max-width:100%; overflow:auto; overscroll-behavior:contain; scrollbar-width:thin; }
+.vivic-extension-table :is(th,td) { min-width:72px; max-width:240px; overflow-wrap:anywhere; vertical-align:top; }
+.vivic-extension-table:focus-visible { outline:2px solid var(--ring); outline-offset:-2px; }

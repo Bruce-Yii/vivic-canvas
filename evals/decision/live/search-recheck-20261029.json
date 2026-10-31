@@ -1,0 +1,147 @@
+{
+  "complete": true,
+  "failure": null,
+  "count": 1,
+  "missingTraces": 0,
+  "pendingTraces": 0,
+  "routeAccuracy": 1,
+  "routeP50Ms": 1824,
+  "routeP95Ms": 1824,
+  "decisionP50Ms": 1824,
+  "decisionP95Ms": 1824,
+  "extraResponseP50Ms": -238,
+  "extraResponseP95Ms": -238,
+  "deterministicTimingSamples": 0,
+  "deterministicExtraP50Ms": null,
+  "deterministicExtraP95Ms": null,
+  "explicitShadowWaitP95Ms": 250,
+  "serviceFailures": 0,
+  "legacyShapeMatches": 1,
+  "providersConnected": {
+    "off": false,
+    "shadow": false
+  },
+  "realLlmCompared": false,
+  "replayScope": "API/data persistence and response-shape checks; no browser visual validation. Unconnected model paths are not real LLM quality measurements.",
+  "isolatedTestSpaceCleared": true,
+  "fixtureAdaptation": "Abstract AnswerCard is rendered as the existing NewsCard; no invented renderer was added.",
+  "rows": [
+    {
+      "id": "search-06",
+      "expected": "search",
+      "off": {
+        "id": "search-06",
+        "expected": "search",
+        "totalMs": 1526,
+        "legacy": {
+          "kind": "envelope",
+          "usedProvider": "search",
+          "actionTypes": [
+            "card.create",
+            "card.create",
+            "card.create",
+            "canvas.fit"
+          ],
+          "cardTypes": [
+            "SearchResultCard",
+            "SearchResultCard",
+            "SearchResultCard"
+          ],
+          "hostOperation": null,
+          "taskStatus": "awaiting_execution"
+        },
+        "execution": {
+          "success": true,
+          "reason": null,
+          "createdCards": 3
+        },
+        "trace": null
+      },
+      "shadow": {
+        "id": "search-06",
+        "expected": "search",
+        "totalMs": 1288,
+        "legacy": {
+          "kind": "envelope",
+          "usedProvider": "search",
+          "actionTypes": [
+            "card.create",
+            "card.create",
+            "card.create",
+            "canvas.fit"
+          ],
+          "cardTypes": [
+            "SearchResultCard",
+            "SearchResultCard",
+            "SearchResultCard"
+          ],
+          "hostOperation": null,
+          "taskStatus": "awaiting_execution"
+        },
+        "execution": {
+          "success": true,
+          "reason": null,
+          "createdCards": 3
+        },
+        "trace": {
+          "id": "decision_f9c75a43-4cfb-4b8e-999d-e9c26f423960",
+          "mode": "shadow",
+          "status": "complete",
+          "taskId": "eval_mvtowjjj_txx26_shadow_search-06",
+          "clauses": [
+            "上网查查OpenAI这周有什么动态"
+          ],
+          "decisions": [
+            {
+              "text": "上网查查OpenAI这周有什么动态",
+              "route": "search",
+              "probability": 0.9920503690648333,
+              "probabilities": {
+                "chat": 0.0011873744934556031,
+                "answer": 0.001814139548789938,
+                "search": 0.9920503690648333,
+                "countdown": 0.0003764592303230685,
+                "todo": 0.0004089152529816631,
+                "note": 0.0013144634462998776,
+                "generate": 0.0004101421899245095,
+                "focus": 0.0002203218042293815,
+                "overview": 0.00028224773602667663,
+                "restore": 0.00018455664754994043,
+                "highlight": 0.000058874177556711954,
+                "edit": 0.00018193134550548965,
+                "arrange": 0.00010235840654519604,
+                "delete": 0.000040190494360900415,
+                "undo": 0.00004975580556270763,
+                "unsupported": 0.0013179003560550013
+              },
+              "none": false,
+              "latencyMs": 1824,
+              "failed": false
+            }
+          ],
+          "route": "search",
+          "probability": 0.9920503690648333,
+          "latencyMs": 1824,
+          "routeLatencyMs": 1824,
+          "legacyElapsedMs": 1032,
+          "shadowWaitMs": 250,
+          "failedCount": 0,
+          "legacyKind": "envelope",
+          "legacyUsedProvider": "search",
+          "legacyActionTypes": [
+            "card.create",
+            "card.create",
+            "card.create",
+            "canvas.fit"
+          ],
+          "legacyCardTypes": [
+            "SearchResultCard",
+            "SearchResultCard",
+            "SearchResultCard"
+          ]
+        }
+      },
+      "sameLegacyShape": true
+    }
+  ]
+}

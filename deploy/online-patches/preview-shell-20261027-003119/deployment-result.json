@@ -1,0 +1,14 @@
+{
+  "release": "preview-shell-20261027-003119",
+  "deployedAt": "2026-10-26T16:36:05.986Z",
+  "publicUrl": "https://vivic.edsionc.top/",
+  "image": "vivic-preview-20261025:preview-shell-20261027-003119",
+  "imageId": "sha256:6a48cace6c5aeb1e5a070dd32474f68734c67c09a4e9cafa89221c93c9ba3b4b",
+  "indexSha256": "2311abefaa1c278b99d375fbd94ec39573ed62e478945431d0cc4fea54d5c87f",
+  "archiveSha256": "1c0cb7604d974ae283e2d50db15cfae8adcd09025e5de9c120e38a7f3e93a0d8",
+  "rollbackContainer": "vivic-before-preview-shell-20261027-003119",
+  "dataMount": "/var/lib/vivic-preview-20261025:/data/vivic",
+  "consistentDataBackup": "/opt/vivic-preview-20261025/releases/preview-shell-20261027-003119/data-before.tar.gz",
+  "loggedInLinuxVerification": true,
+  "publicResourcesVerified": true
+}

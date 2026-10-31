@@ -1,0 +1,172 @@
+{
+  "pageErrors": [],
+  "results": [],
+  "checks": [
+    "ambiguous deletion asks before mutation",
+    "selection asks separate deletion confirmation",
+    "cancel keeps both cards",
+    "selection asks separate deletion confirmation",
+    "explicit confirmation deletes one selected card"
+  ],
+  "complete": true,
+  "cleanup": true,
+  "requests": [
+    {
+      "path": "/api/intent",
+      "method": "POST",
+      "keys": [
+        "text",
+        "canvasContext",
+        "task"
+      ],
+      "text": "删除便签",
+      "task": {
+        "id": "task_mvun06bv_ad434e18"
+      },
+      "contextVersion": 1234
+    },
+    {
+      "path": "/api/intent",
+      "method": "POST",
+      "keys": [
+        "text",
+        "canvasContext",
+        "continuation",
+        "task"
+      ],
+      "text": "1号",
+      "task": {
+        "id": "task_mvun06bv_ad434e18"
+      },
+      "contextVersion": 1234
+    },
+    {
+      "path": "/api/intent",
+      "method": "POST",
+      "keys": [
+        "text",
+        "canvasContext",
+        "continuation",
+        "task"
+      ],
+      "text": "算了",
+      "task": {
+        "id": "task_mvun06bv_ad434e18"
+      },
+      "contextVersion": 1234
+    },
+    {
+      "path": "/api/space/owner/canvases/space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+      "method": "PUT",
+      "keys": [
+        "record",
+        "expectedVersion",
+        "requestId"
+      ],
+      "expectedVersion": 1244,
+      "recordVersion": 1235,
+      "focusHistory": []
+    },
+    {
+      "path": "/api/intent",
+      "method": "POST",
+      "keys": [
+        "text",
+        "canvasContext",
+        "task"
+      ],
+      "text": "删除便签",
+      "task": {
+        "id": "task_mvun0adh_31202332"
+      },
+      "contextVersion": 1235
+    },
+    {
+      "path": "/api/intent",
+      "method": "POST",
+      "keys": [
+        "text",
+        "canvasContext",
+        "continuation",
+        "task"
+      ],
+      "text": "1号",
+      "task": {
+        "id": "task_mvun0adh_31202332"
+      },
+      "contextVersion": 1235
+    },
+    {
+      "path": "/api/intent",
+      "method": "POST",
+      "keys": [
+        "text",
+        "canvasContext",
+        "continuation",
+        "task"
+      ],
+      "text": "确定",
+      "task": {
+        "id": "task_mvun0adh_31202332"
+      },
+      "contextVersion": 1235
+    },
+    {
+      "path": "/api/space/owner/canvases/space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+      "method": "PUT",
+      "keys": [
+        "record",
+        "expectedVersion",
+        "requestId"
+      ],
+      "expectedVersion": 1245,
+      "recordVersion": 1236,
+      "focusHistory": []
+    },
+    {
+      "path": "/api/space/owner/canvases/space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+      "method": "PUT",
+      "keys": [
+        "record",
+        "expectedVersion",
+        "requestId"
+      ],
+      "expectedVersion": 1246,
+      "recordVersion": 1236,
+      "focusHistory": []
+    },
+    {
+      "path": "/api/intent",
+      "method": "POST",
+      "keys": [
+        "text",
+        "canvasContext",
+        "task"
+      ],
+      "text": "确定",
+      "task": {
+        "id": "task_mvun0adh_31202332",
+        "receipt": {
+          "executionId": "exec_26854ddb-7f81-428d-a5f8-32e3935ee419",
+          "status": "succeeded",
+          "createdCardIds": []
+        }
+      },
+      "contextVersion": 1236
+    },
+    {
+      "path": "/api/space/owner/canvases/space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+      "method": "PUT",
+      "keys": [
+        "record",
+        "expectedVersion",
+        "requestId"
+      ],
+      "expectedVersion": 1247,
+      "recordVersion": 1237,
+      "focusHistory": []
+    }
+  ],
+  "candidateButtons": 2,
+  "usedCandidateClick": true
+}

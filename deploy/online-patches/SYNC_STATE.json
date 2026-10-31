@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "synced_at": "2026-10-30T15:13:11+0800",
+  "sync_epoch": 1793344391.6828399,
+  "releases": [],
+  "frontend": "/opt/vivic-preview-20261025/releases/clarification-guard-20261030-2/web",
+  "container": "vivic-preview-20261027",
+  "image": "vivic-api:3b91986a93bc9c89c7907dbb8247d5fdb8663396"
+}

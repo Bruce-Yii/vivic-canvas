@@ -1,0 +1,6 @@
+.online-workspace-host{min-height:100dvh}
+.online-workspace-host[hidden]{display:none!important}
+.online-session-screen{position:relative;min-height:100dvh;display:grid;place-items:center;padding:24px}
+.online-session-card{width:min(100%,512px);padding:32px;--surface-blur:blur(50px)}
+.online-session-card h1{margin:0;font:500 28px/34px var(--hark-serif)}
+.online-session-card p{color:var(--hark-secondary);font:400 15px/22px var(--hark-font);margin:16px 0 24px}

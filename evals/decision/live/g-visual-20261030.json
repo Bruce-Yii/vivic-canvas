@@ -1,0 +1,50 @@
+{
+  "source": "Current public frontend; genuine G model samples restored through the normal owner API without changing facts.",
+  "cases": [
+    {
+      "id": "vision",
+      "surface": "user",
+      "pageErrors": 0,
+      "imageDecoded": true,
+      "screenshot": "g-vision-user.png"
+    },
+    {
+      "id": "vision",
+      "surface": "display",
+      "pageErrors": 0,
+      "imageDecoded": true,
+      "screenshot": "g-vision-display.png"
+    },
+    {
+      "id": "multi",
+      "surface": "user",
+      "pageErrors": 0,
+      "screenshot": "g-multi-user.png"
+    },
+    {
+      "id": "multi",
+      "surface": "display",
+      "pageErrors": 0,
+      "screenshot": "g-multi-display.png"
+    },
+    {
+      "id": "extension",
+      "surface": "user",
+      "pageErrors": 0,
+      "screenshot": "g-extension-user.png"
+    },
+    {
+      "id": "extension",
+      "surface": "display",
+      "pageErrors": 0,
+      "screenshot": "g-extension-display.png"
+    }
+  ],
+  "pageErrors": [],
+  "cleanup": {
+    "emptySpace": true,
+    "emptyCatalog": true,
+    "emptyAssets": true
+  },
+  "complete": true
+}

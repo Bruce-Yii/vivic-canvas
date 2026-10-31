@@ -1,0 +1,1 @@
+{"formatVersion":"0.1","id":"vivic.goal-progress","version":"1.0.0","name":"个人目标进度","description":"用标题、已完成数量和目标量追踪个人目标。数据由用户提供，不查询外部服务。","renderer":"declarative","host":"0.6","capabilities":[]}

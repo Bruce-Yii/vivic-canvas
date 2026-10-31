@@ -1,0 +1,161 @@
+{
+  "version": 1,
+  "asOf": "2026-10-20",
+  "sourceScope": "2026-10-19 meeting PDF, progress workbook, Lark transcripts and current conversation; Vivic only",
+  "remoteIssuesCreated": false,
+  "sourceMain": "c20a2170e0273831261e0e1169fe5f7b7c687843",
+  "tasks": [
+    {
+      "id": "PLAT-01",
+      "title": "发布卡片接入契约、参考样例与最小集成接口",
+      "owner": "程佳锐",
+      "githubAssignee": null,
+      "priority": "P0",
+      "status": "工单草稿",
+      "branch": "feat/card-contract-v01",
+      "dependsOn": [],
+      "schedule": "会议计划约 10/20–10/21；以实际可交付为准",
+      "source": "PDF p1/p7；进度表 r4/r8；会议一 00:16:24",
+      "issueUrl": null,
+      "spec": "docs/tasks/20261020/PLAT-01.md",
+      "startNow": "本轮文档/Skill 已在本机草稿中；先审阅发布，再做最小接线。",
+      "integration": "可导入包宿主由 PLAT-02 后续完成；不把它设为 TRAVEL-01 独立实验的前置。",
+      "githubAccount": "ECdison6227"
+    },
+    {
+      "id": "TRAVEL-01",
+      "title": "飞猪旅游系列：选定一条场景并完成 MCP 独立结构化试跑",
+      "owner": "xlz",
+      "githubAssignee": null,
+      "priority": "P0",
+      "status": "工单草稿",
+      "branch": "feat/fliggy-travel-poc",
+      "dependsOn": [],
+      "schedule": "会议安排 10/23–24 集中做；约 10/25 比赛截止尚未核实",
+      "source": "PDF p3/p7–8；表格 r6/r18；会议二 00:24:14–00:26:24",
+      "issueUrl": null,
+      "spec": "docs/tasks/20261020/TRAVEL-01.md",
+      "startNow": "不必等整套平台/卡片 SDK；用自己的独立模块和已授权服务先验证。",
+      "integration": "最终进入 Vivic 需要 PLAT-01 对齐契约，由程佳锐集中接线；高德等第二服务另列需要后再接。",
+      "githubAccount": "franzkotkowski330-collab"
+    },
+    {
+      "id": "TRAVEL-02",
+      "title": "飞猪旅游系列：实现卡片视图、参数编辑与独立预览",
+      "owner": "xlz",
+      "githubAssignee": null,
+      "priority": "P0",
+      "status": "工单草稿",
+      "branch": "feat/fliggy-travel-cards",
+      "dependsOn": [
+        "TRAVEL-01",
+        "PLAT-01"
+      ],
+      "schedule": "与 23–24 日旅游计划配合；先交一个场景，勿一次铺全旅游品类",
+      "source": "PDF p3/p7–8；表格 r6/r18；用户本会话的参数/主题要求",
+      "issueUrl": null,
+      "spec": "docs/tasks/20261020/TRAVEL-02.md",
+      "startNow": "可先画布局和做组件骨架；字段草案固定后，用 fixture 并行，真实 Key 不阻挡 UI。",
+      "integration": "真实场景数据来自 TRAVEL-01，正式画布/注册来自 PLAT-01；两者没接完时保留 Draft 或只关闭视图子任务。",
+      "githubAccount": "franzkotkowski330-collab"
+    },
+    {
+      "id": "UI-01",
+      "title": "新手引导、配置、个性化、Store 与设置页 HTML 原型",
+      "owner": "xlz",
+      "githubAssignee": null,
+      "priority": "P1",
+      "status": "工单草稿",
+      "branch": "design/onboarding-settings",
+      "dependsOn": [],
+      "schedule": "旅游优先之后推进；会议没有确认此项上线日期",
+      "source": "PDF p6–8；表格 r15–17；会议二 00:13:42、00:19:32–00:21:10",
+      "issueUrl": null,
+      "spec": "docs/tasks/20261020/UI-01.md",
+      "startNow": "可读参考、做 HTML 原型；不等决策/启动器实际接通。",
+      "integration": "实际接入另开集成工单；核心能力与尚未确定的产品顺序不能由原型擅自决定。",
+      "githubAccount": "franzkotkowski330-collab"
+    },
+    {
+      "id": "DEC-01",
+      "title": "决策模型评估与独立适配：API / 本地、超时与降级",
+      "owner": "马泽瑜",
+      "githubAssignee": null,
+      "priority": "P0",
+      "status": "工单草稿",
+      "branch": "feat/decision-provider",
+      "dependsOn": [],
+      "schedule": "会议要求优先；具体进度/剩余时间先由本人盘点",
+      "source": "PDF p7–8；表格 r19/r23；会议二 00:30:40–00:31:26；用户10/20补充",
+      "issueUrl": null,
+      "spec": "docs/tasks/20261020/DEC-01.md",
+      "startNow": "整理并继续自己的已有成果，离线验证/接口模块不等旅游卡和 UI。",
+      "integration": "最终 default/enable/fallback 与请求链路接入需与程佳锐固定接口，另集成 PR；不要让 UI 先猜状态字段。",
+      "githubAccount": "Shenbeijc"
+    },
+    {
+      "id": "RUN-01",
+      "title": "本地启动器最小闭环：能力状态、启动、停止与重连",
+      "owner": "马泽瑜",
+      "githubAssignee": null,
+      "priority": "P1",
+      "status": "工单草稿",
+      "branch": "feat/local-connector",
+      "dependsOn": [
+        "DEC-01"
+      ],
+      "schedule": "决策路径确定后；不要求首版同时打包全部语音模型",
+      "source": "PDF p6–8；表格 r22；会议二 00:08:18–00:12:45",
+      "issueUrl": null,
+      "spec": "docs/tasks/20261020/RUN-01.md",
+      "startNow": "可先读现有启动链路、给状态协议和 mock 设计；DEC-01 选定服务后做真实运行。",
+      "integration": "语音/唤醒模型各自按能力扩展，真实麦克风和声音遵循授权；云端进程的 localhost 不是用户电脑。",
+      "githubAccount": "Shenbeijc"
+    },
+    {
+      "id": "PLAT-02",
+      "title": "设置导包、静态校验与隔离 Vivic Test Space 试跑",
+      "owner": "程佳锐",
+      "githubAssignee": null,
+      "priority": "P1",
+      "status": "工单草稿",
+      "branch": "feat/card-test-space",
+      "dependsOn": [
+        "PLAT-01"
+      ],
+      "schedule": "持续平台建设；不作为旅游独立 PoC/比赛演示的强制前置",
+      "source": "用户10/20本会话明确确认；补充于19日会议",
+      "issueUrl": null,
+      "spec": "docs/tasks/20261020/PLAT-02.md",
+      "startNow": "包协议固定后可用参考卡先做宿主，不等飞猪所有场景。",
+      "integration": "真实飞猪卡由 TRAVEL-02 接入验证；市场、计费、分享与远端部署另排。",
+      "githubAccount": "ECdison6227"
+    },
+    {
+      "id": "DEMO-01",
+      "title": "旅游场景演示、录屏与可复现交付材料",
+      "owner": "xlz（程佳锐负责集成验收）",
+      "githubAssignee": null,
+      "priority": "P0",
+      "status": "工单草稿",
+      "branch": "docs/travel-demo",
+      "dependsOn": [
+        "TRAVEL-01",
+        "TRAVEL-02",
+        "PLAT-01"
+      ],
+      "schedule": "配合 23–24 日计划；提交日期/报名方式待官方核对",
+      "source": "PDF p3–4/p7–8；表格 r5/r6/r18",
+      "issueUrl": null,
+      "spec": "docs/tasks/20261020/DEMO-01.md",
+      "startNow": "可以先选场景、写脚本和验收清单；录制成片等链路稳定。",
+      "integration": "不强行等待真实商店、订阅收费或完整插件 SDK；如依赖未完成，真实标注阶段并由维护者决定演示范围。",
+      "githubAccount": "franzkotkowski330-collab"
+    }
+  ],
+  "confirmedGitHubAccounts": {
+    "程佳锐": "ECdison6227",
+    "xlz": "franzkotkowski330-collab",
+    "马泽瑜": "Shenbeijc"
+  }
+}

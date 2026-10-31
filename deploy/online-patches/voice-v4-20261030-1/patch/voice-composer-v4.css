@@ -1,0 +1,39 @@
+.vivic-composer[data-vivic-input-mode]{position:relative;gap:8px}
+.vv4-surface{position:relative;width:100%;height:132px;isolation:isolate;transition:height .64s cubic-bezier(.22,1,.36,1)}
+.vv4-surface[data-mode=text]{height:48px}
+.vv4-original{width:100%;position:absolute;top:0;transition:opacity .22s,transform .64s cubic-bezier(.22,1,.36,1);transform-origin:center}
+.vv4-surface[data-mode=voice] .vv4-original{opacity:0;pointer-events:none;transform:translateY(12px) scaleX(.14) scaleY(1.5)}
+.vv4-surface[data-mode=text] .vv4-original{opacity:1;transform:none;transition-delay:.15s,0s}
+.vv4-stage{position:absolute;inset:0 0 auto;height:72px;pointer-events:none}
+.vv4-orb{position:absolute;left:calc(50% - 36px);top:0;width:72px;height:72px;border:0;border-radius:50%;padding:0;background:none;pointer-events:auto;transform:scale(1);transition:transform .8s cubic-bezier(.2,.8,.2,1),left .64s cubic-bezier(.22,1,.36,1),top .64s cubic-bezier(.22,1,.36,1),width .64s cubic-bezier(.22,1,.36,1),height .64s cubic-bezier(.22,1,.36,1)}
+.vv4-orb:focus-visible,.vv4-keyboard:focus-visible{outline:2px solid var(--vc-focus,#8eb3cc);outline-offset:5px}
+.vv4-orb-inner{display:block;position:absolute;inset:0;width:72px;height:72px;transition:opacity .25s,transform .64s cubic-bezier(.22,1,.36,1)}
+.vv4-orb:disabled{cursor:default}
+.vv4-soft{position:absolute;inset:-9%;border-radius:50%;opacity:0;transform:rotate(-24deg) scale(.83);transition:opacity .9s,transform 1s cubic-bezier(.22,1,.36,1);background:conic-gradient(from 18deg,transparent 0 8%,#b9e6ef80 22%,#ffffff75 31%,transparent 42% 54%,#dbc4ea80 67%,#fff9 76%,transparent 91%);mask-image:radial-gradient(circle,transparent 47%,#0006 53%,#000c 61%,#0005 67%,transparent 72%);filter:blur(.4px)}
+.vv4-soft.second{inset:-18% -12%;transform:rotate(47deg) scale(.83);filter:blur(1px)}
+.vv4-halo{position:absolute;left:50%;top:50%;width:290px;height:205px;pointer-events:none;transform:translate(-50%,-39%) scale(.52);opacity:.035;transition:opacity 1s,transform 1.2s cubic-bezier(.22,1,.36,1);z-index:-1;filter:blur(20px);background:radial-gradient(ellipse 38% 60% at 30% 52%,#59c5e6,transparent 77%),radial-gradient(ellipse 40% 49% at 70% 40%,#d18bdb,transparent 80%)}
+.vv4-glow{position:absolute;left:50%;top:17px;width:min(340px,85vw);height:105px;transform:translateX(-50%) scaleX(.7);opacity:0;filter:blur(22px);pointer-events:none;z-index:-1;transition:opacity .8s,transform 1s cubic-bezier(.22,1,.36,1);background:radial-gradient(ellipse 34% 60% at 24% 50%,#c1e9f4,transparent 80%),radial-gradient(ellipse 34% 54% at 62% 45%,#e4c9ed,transparent 80%)}
+.vv4-surface:is([data-phase=listening],[data-phase=recording]) .vv4-orb{transform:translateY(-6px) scale(1.6)}
+.vv4-surface[data-phase=thinking] .vv4-orb,.vv4-surface[data-phase=transcribing] .vv4-orb{transform:translateY(-3px) scale(1.1)}
+.vv4-surface:is([data-phase=listening],[data-phase=recording]) .vv4-soft{opacity:.68;transform:rotate(-12deg) scale(1.06)}
+.vv4-surface:is([data-phase=listening],[data-phase=recording]) .vv4-soft.second{opacity:.45;transform:rotate(38deg) scale(1.1)}
+.vv4-surface:is([data-phase=listening],[data-phase=recording]) .vv4-halo{opacity:.16;transform:translate(-50%,-31%) scale(1.03)}
+.vv4-surface:is([data-phase=listening],[data-phase=recording]) .vv4-glow{opacity:.24;transform:translateX(-50%) scaleX(1.02)}
+.vv4-keyboard{position:absolute;left:calc(50% + 62px);top:18px;width:36px;height:36px;display:grid;place-items:center;border:1px solid #d7e1e96b;border-radius:50%;background:#ffffff4d;color:var(--vc-ink-muted,#8e9eaa);opacity:.85;pointer-events:auto;transition:left .8s cubic-bezier(.22,1,.36,1),opacity .22s,transform .35s}
+.vv4-keyboard:hover{background:#ffffffa6;opacity:1;transform:translateY(-1px)}
+.vv4-surface:is([data-phase=listening],[data-phase=recording]) .vv4-keyboard{left:calc(50% + 96px)}
+.vv4-wake-hint{position:absolute;top:98px;left:50%;transform:translateX(-50%);width:min(420px,calc(100vw - 44px));margin:0;text-align:center;font-size:11px;line-height:1.7;color:var(--vc-ink-muted,#8e9da9);pointer-events:none;transition:opacity .25s}
+.vv4-wake-hint[data-error=true]{font-size:10px}
+.vv4-surface:is([data-phase=listening],[data-phase=recording],[data-phase=transcribing],[data-phase=thinking]) .vv4-wake-hint:not([data-error=true]){opacity:0}
+.vv4-draft-note{position:absolute;left:50%;top:119px;transform:translateX(-50%);white-space:nowrap;font-size:9px;color:var(--vc-ink-muted,#8b9ca8)}
+.vv4-surface[data-mode=text] .vv4-stage{pointer-events:none;visibility:hidden;transition:visibility 0s .64s}
+.vv4-surface[data-mode=text] .vv4-orb{left:calc(100% - 40px);top:2px;width:32px;height:44px;transform:none;pointer-events:none}
+.vv4-surface[data-mode=text][data-has-draft=true] .vv4-orb{left:calc(100% - 78px)}
+.vv4-surface[data-mode=text] .vv4-orb-inner{opacity:0;transform:scale(.28);transform-origin:top left}
+.vv4-surface[data-mode=text] .vv4-keyboard,.vv4-surface[data-mode=text] .vv4-wake-hint,.vv4-surface[data-mode=text] .vv4-draft-note{opacity:0;pointer-events:none}
+.vv4-surface[data-mode=text] .vv4-halo{display:none}
+.vivic-composer[data-vivic-input-mode] .vv4-wake-controller{display:none}
+.vivic-composer[data-vivic-input-mode=voice] [data-vivic-voice-note],.vivic-composer[data-vivic-input-mode=voice] [data-vivic-raw-transcript],.vivic-composer[data-vivic-input-mode=voice] [data-vivic-unapplied-voice],.vivic-composer[data-vivic-input-mode=voice] [data-vivic-voice-review]{display:none!important}
+.vivic-chat-footer:has([data-vivic-input-mode=voice][data-vivic-voice-phase=listening]) [data-vivic-command-feedback],.vivic-chat-footer:has([data-vivic-input-mode=voice][data-vivic-voice-phase=recording]) [data-vivic-command-feedback],.vivic-chat-footer:has([data-vivic-input-mode=voice][data-vivic-voice-phase=transcribing]) [data-vivic-command-feedback]{opacity:0!important;visibility:hidden}
+@media(max-width:480px){.vv4-halo{width:230px;height:180px}.vv4-wake-hint{font-size:10px}.vv4-draft-note{font-size:9px}}
+@media(prefers-reduced-motion:reduce){.vv4-surface,.vv4-original,.vv4-orb,.vv4-orb-inner,.vv4-soft,.vv4-halo,.vv4-glow,.vv4-keyboard,.vv4-wake-hint{transition-duration:1ms!important;transition-delay:0s!important;animation:none!important}}

@@ -1,0 +1,99 @@
+{
+  "date": "2026-10-16",
+  "preFixRevision": "7240968",
+  "codeRevision": "0d1bb6a40db3f71ecb2d0ac59ae76ae92566f420",
+  "cause": "Previous entry 5173 belonged to another project; HTTP 200 alone had been mistaken for Vivic availability.",
+  "entry": {
+    "control": "http://localhost:5175/control",
+    "display": "http://localhost:5175/display",
+    "api": "http://127.0.0.1:8787",
+    "listenHost": "127.0.0.1",
+    "defaultPort": 5175,
+    "strictPort": true,
+    "title": "Vivic",
+    "otherProjectAt5173": {
+      "title": "舞台 · 发布会工作台",
+      "leftRunning": true
+    }
+  },
+  "unit": {
+    "web": 386,
+    "api": 883,
+    "passed": 1269,
+    "skipped": 3,
+    "failed": 0,
+    "log": "evidence/entry-port-20261016/unit.txt"
+  },
+  "typecheck": {
+    "passed": true,
+    "log": "evidence/entry-port-20261016/typecheck.txt"
+  },
+  "build": {
+    "passed": true,
+    "log": "evidence/entry-port-20261016/build.txt"
+  },
+  "browserControl": {
+    "passed": 4,
+    "failed": 0,
+    "ports": [
+      5174,
+      8788
+    ],
+    "dailyDefaultOverriddenByTestCLI": true,
+    "log": "evidence/entry-port-20261016/browser-control.txt"
+  },
+  "liveBrowserAtDailyPort": {
+    "at": "2026-10-16T08:06:47.734Z",
+    "url": "http://localhost:5175/control",
+    "title": "Vivic",
+    "controlHeading": true,
+    "api": {
+      "status": 200,
+      "kind": "envelope",
+      "usedProvider": "rules"
+    },
+    "displayURL": "http://localhost:5175/display?canvasId=canvas_mvaop2on_838c39ff",
+    "displayCards": 1,
+    "pageErrors": [],
+    "audioPlayed": false,
+    "physicalMicrophoneUsed": false,
+    "realUserCanvasTouched": false,
+    "realLLMQuotaUsed": false
+  },
+  "liveBrowserRecord": "evidence/entry-port-20261016/live-browser.json",
+  "portCollision": {
+    "expectedExitCode": 1,
+    "silentFallback": false,
+    "log": "evidence/entry-port-20261016/port-collision.txt"
+  },
+  "security": {
+    "exactNewOriginsAllowed": [
+      "http://localhost:5175",
+      "http://127.0.0.1:5175"
+    ],
+    "explicitOriginOverridePreserved": true,
+    "otherLocalPortRejected": true,
+    "providersBeforeReload": [
+      {
+        "name": "stepfun",
+        "connected": false
+      },
+      {
+        "name": "gpt",
+        "connected": false
+      }
+    ],
+    "credentialsReadOrPrinted": false,
+    "realUserCanvasReadOrChanged": false,
+    "userDataMigrated": false,
+    "audioPlayed": false,
+    "physicalMicrophoneUsed": false,
+    "realLLMQuotaUsed": false
+  },
+  "storageNote": "Browser storage is origin-specific; old 5173 data remains, not automatically copied to 5175.",
+  "report": "docs/entry-port-20261016.md",
+  "evidence": "evidence/entry-port-20261016/",
+  "pushed": false,
+  "merged": false,
+  "published": false
+}

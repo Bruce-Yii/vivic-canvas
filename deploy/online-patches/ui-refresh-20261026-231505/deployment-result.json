@@ -1,0 +1,19 @@
+{
+  "product": "Vivic Online",
+  "deployedAt": "2026-10-26T23:17:00+08:00",
+  "publicUrl": "https://vivic.edsionc.top/",
+  "releaseDirectory": "/opt/vivic-preview-20261025/releases/ui-refresh-20261026-231505",
+  "archiveSha256": "31302c384b3d1a68b5e08442982d5623d7d62b31efc66610517b3352484a1551",
+  "indexSha256": "2cc6cc743f584b4561f73f5dfa8f15f0ddeb3fa6e92d98edf6edc6811ec5bcd6",
+  "image": "vivic-preview-20261025:cursor-owner-20261026",
+  "container": "vivic-preview-20261025",
+  "dataMount": "/var/lib/vivic-preview-20261025:/data/vivic",
+  "staticMount": "/opt/vivic-preview-20261025/releases/ui-refresh-20261026-231505/dist-online:/app/apps/web/dist-online:ro",
+  "health": "ok",
+  "publicBrowserStatus": 200,
+  "publicBrowserErrors": 0,
+  "publicBrowserFailedRequests": 0,
+  "rollbackContainer": "vivic-preview-20261025-before-ui-refresh-20261026-231505",
+  "rollbackPreviousDist": "/opt/vivic-preview-20261025/releases/ui-refresh-20261026-231505/previous-dist-online",
+  "note": "Container restart clears in-memory model credentials; persistent account and Space data remain unchanged."
+}

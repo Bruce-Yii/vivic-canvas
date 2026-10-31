@@ -1,0 +1,17 @@
+{
+  "release": "light-default-20261029-1",
+  "assetPrefix": "/assets/light-default-20261029-1",
+  "indexSha256": "9443c371c2996728c4d0ec655fd56550a80fe665cee93864a5fcc9fb0fc6b303",
+  "hashes": {
+    "app-runtime.js": "56e352108300b507baa23044f2e9496c6487daba1b56fe954b7d52851c29b225",
+    "vivic-startup.js": "a0c8eec08f968897a4f1759ae9c44dbe11a8ce34ab642c0f4e76cb6dce7d6896",
+    "app-shell.css": "2188ff153e1ee319de0e6f6bb445551e5d2b63817c7e7cddd09b6951776404b1",
+    "atelier-background.js": "7fe70fdbd5c9a28f2f3bd9c1bd7cc603703a8cde20789965ec8a1876a3e0673a",
+    "atelier-background.css": "5ebee202da61b24c0cea0eeb8c3f4adbf105d620048d5ca0b5dcaf2326ed6b0f",
+    "canvasStore-Kqevnh2f.js": "4135c910ed13c188600f900ec13fc182462e669ab67023438f46a33a00da0624",
+    "palettes-y4eFPjSE.js": "db4d9e8cbb3eae025270bd961f224c32368ff5a9a0473bb4518c5759c299f3c8",
+    "browserRuntime-CMMGoec6.js": "b60ac65338581e19b4da3815b80b8091c1acf6f0596f5819dc05f61759d8b17d",
+    "ControlApp-TutorialEntry20261028.js": "3d29c26664ba506db0a4a7427b24117fcac05b78e18ae9a82c259280d205f70c",
+    "main-BxvZcBKO-v34.css": "89a33cffe481b5f675e4351edaa0b4ca1c6c6d888a1c09309f63ad88ab16adbf"
+  }
+}

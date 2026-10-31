@@ -1,0 +1,2 @@
+FROM vivic-preview-20261027:owner-1050
+COPY --chown=node:node scripts/hosted-data.ts /app/scripts/hosted-data.ts

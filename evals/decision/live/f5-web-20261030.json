@@ -1,0 +1,41 @@
+{
+  "stage": false,
+  "checks": [
+    "v0.2 preview displays explicit DEMO facts",
+    "preview did not install or create a card",
+    "installed exact v0.2 hash",
+    "package survives page reload",
+    "real chat instruction creates and persists an extension card",
+    "real model uses today back and 40 minutes",
+    "real card renders on the chat surface after normal owner API layout change",
+    "real facts visible without DEMO values",
+    "disable refreshes an already open display through BroadcastChannel",
+    "re-enable restores original card without data changes",
+    "in-use version uninstall returns 409 and keeps the card",
+    "download and reimport deduplicate exact package",
+    "390px page has no horizontal overflow",
+    "no browser page errors"
+  ],
+  "pageErrors": [],
+  "screenshots": [
+    "f5-live-empty.png",
+    "f5-live-preview.png",
+    "f5-live-installed.png",
+    "f5-live-real-chat.png",
+    "f5-live-display.png",
+    "f5-live-disabled.png",
+    "f5-live-reference-protection.png",
+    "f5-live-mobile-manager.png"
+  ],
+  "cleanup": {
+    "emptySpace": true,
+    "emptyCatalog": true
+  },
+  "realModelElapsedMs": 5648,
+  "realModelData": {
+    "trainingDate": "2026-10-30",
+    "bodyPart": "背",
+    "minutes": 40
+  },
+  "renderProvenance": "New genuine StepFun model request from the actual chat UI; normal owner persistence, no injected card."
+}

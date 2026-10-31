@@ -1,0 +1,6006 @@
+{
+  "protocolVersion": "vivic-f-eval-v1",
+  "runId": "mvu0yx44_b4fcf1ab",
+  "startedAt": "2026-10-29T20:57:57.028Z",
+  "complete": true,
+  "passed": true,
+  "syntheticDataOnly": true,
+  "scope": "Live HTTP/SSE, factual accuracy, routing and normal owner persistence; no browser/UI visual validation.",
+  "checks": [
+    {
+      "name": "evaluation-identity-matched",
+      "pass": true,
+      "observed": null
+    },
+    {
+      "name": "initial-space-and-assets-empty",
+      "pass": true,
+      "observed": null
+    }
+  ],
+  "package": {
+    "filename": "fitness-log-v02.vivicard",
+    "id": "example.fitness-log",
+    "version": "1.0.0",
+    "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2",
+    "manifest": {
+      "formatVersion": "0.2",
+      "id": "example.fitness-log",
+      "version": "1.0.0",
+      "name": "健身记录",
+      "description": "记录用户明确提供的训练日期、训练部位和分钟数；相对日期由宿主结合当前日期及时区解析，缺少事实时询问，不复制DEMO数据。",
+      "renderer": "declarative",
+      "host": "0.6",
+      "capabilities": [],
+      "examples": [
+        "今天练了40分钟背",
+        "帮我记下昨天练腿30分钟",
+        "记录今天胸部训练45分钟",
+        "记一条肩部训练，今天20分钟",
+        "今天练了60分钟全身"
+      ],
+      "slots": {
+        "type": "object",
+        "title": "训练事实",
+        "description": "仅填写用户提供的训练事实；日期由宿主结合用户原话、当前日期及时区确认。",
+        "additionalProperties": false,
+        "properties": {
+          "trainingDate": {
+            "type": "string",
+            "title": "训练日期",
+            "description": "YYYY-MM-DD；宿主应校验真实日历日期并解析今天/昨天，不能采用示例日期。",
+            "minLength": 10,
+            "maxLength": 10
+          },
+          "bodyPart": {
+            "type": "string",
+            "title": "训练部位",
+            "description": "依据用户原话规范化；无法确定时询问，不采用示例部位。",
+            "enum": [
+              "背",
+              "腿",
+              "胸",
+              "肩",
+              "手臂",
+              "核心",
+              "全身",
+              "其他"
+            ]
+          },
+          "minutes": {
+            "type": "integer",
+            "title": "训练分钟数",
+            "description": "用户明确给出的训练时长，1至600分钟；缺少时长时询问，不采用DEMO数值。",
+            "minimum": 1,
+            "maximum": 600
+          }
+        },
+        "required": [
+          "trainingDate",
+          "bodyPart",
+          "minutes"
+        ]
+      },
+      "icon": "💪",
+      "category": "运动健康"
+    },
+    "demoExamples": [
+      {
+        "name": "DEMO：虚构的腿部训练25分钟",
+        "config": {
+          "title": "训练记录"
+        },
+        "data": {
+          "trainingDate": "2026-01-15",
+          "bodyPart": "腿",
+          "minutes": 25
+        },
+        "state": {
+          "note": "DEMO：日期、部位和分钟数均为虚构示例"
+        }
+      }
+    ],
+    "previouslyInstalled": false
+  },
+  "steps": [
+    {
+      "name": "install-and-list-exact-hash",
+      "status": "passed",
+      "key": "example.fitness-log@1.0.0#094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2",
+      "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2",
+      "enabled": true,
+      "deduplicated": false
+    },
+    {
+      "name": "export-real-zip-with-same-hash",
+      "status": "passed",
+      "bytes": 2827,
+      "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2",
+      "manifest": {
+        "formatVersion": "0.2",
+        "id": "example.fitness-log",
+        "version": "1.0.0",
+        "name": "健身记录",
+        "description": "记录用户明确提供的训练日期、训练部位和分钟数；相对日期由宿主结合当前日期及时区解析，缺少事实时询问，不复制DEMO数据。",
+        "renderer": "declarative",
+        "host": "0.6",
+        "capabilities": [],
+        "examples": [
+          "今天练了40分钟背",
+          "帮我记下昨天练腿30分钟",
+          "记录今天胸部训练45分钟",
+          "记一条肩部训练，今天20分钟",
+          "今天练了60分钟全身"
+        ],
+        "slots": {
+          "additionalProperties": false,
+          "description": "仅填写用户提供的训练事实；日期由宿主结合用户原话、当前日期及时区确认。",
+          "properties": {
+            "bodyPart": {
+              "description": "依据用户原话规范化；无法确定时询问，不采用示例部位。",
+              "enum": [
+                "背",
+                "腿",
+                "胸",
+                "肩",
+                "手臂",
+                "核心",
+                "全身",
+                "其他"
+              ],
+              "title": "训练部位",
+              "type": "string"
+            },
+            "minutes": {
+              "description": "用户明确给出的训练时长，1至600分钟；缺少时长时询问，不采用DEMO数值。",
+              "maximum": 600,
+              "minimum": 1,
+              "title": "训练分钟数",
+              "type": "integer"
+            },
+            "trainingDate": {
+              "description": "YYYY-MM-DD；宿主应校验真实日历日期并解析今天/昨天，不能采用示例日期。",
+              "maxLength": 10,
+              "minLength": 10,
+              "title": "训练日期",
+              "type": "string"
+            }
+          },
+          "required": [
+            "trainingDate",
+            "bodyPart",
+            "minutes"
+          ],
+          "title": "训练事实",
+          "type": "object"
+        },
+        "icon": "💪",
+        "category": "运动健康"
+      }
+    },
+    {
+      "name": "referenced-delete-is-409",
+      "status": "passed",
+      "response": {
+        "status": 409,
+        "ok": false,
+        "data": {
+          "ok": false,
+          "code": "definition-in-use",
+          "message": "当前Space仍有卡片引用此版本，请先删除引用卡片，或仅停用卡片包。"
+        }
+      }
+    },
+    {
+      "name": "disable-package",
+      "status": "passed",
+      "response": {
+        "ok": true,
+        "record": {
+          "key": "example.fitness-log@1.0.0#094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2",
+          "definition": {
+            "manifest": {
+              "formatVersion": "0.2",
+              "id": "example.fitness-log",
+              "version": "1.0.0",
+              "name": "健身记录",
+              "description": "记录用户明确提供的训练日期、训练部位和分钟数；相对日期由宿主结合当前日期及时区解析，缺少事实时询问，不复制DEMO数据。",
+              "renderer": "declarative",
+              "host": "0.6",
+              "capabilities": [],
+              "examples": [
+                "今天练了40分钟背",
+                "帮我记下昨天练腿30分钟",
+                "记录今天胸部训练45分钟",
+                "记一条肩部训练，今天20分钟",
+                "今天练了60分钟全身"
+              ],
+              "slots": {
+                "type": "object",
+                "title": "训练事实",
+                "description": "仅填写用户提供的训练事实；日期由宿主结合用户原话、当前日期及时区确认。",
+                "additionalProperties": false,
+                "properties": {
+                  "trainingDate": {
+                    "type": "string",
+                    "title": "训练日期",
+                    "description": "YYYY-MM-DD；宿主应校验真实日历日期并解析今天/昨天，不能采用示例日期。",
+                    "minLength": 10,
+                    "maxLength": 10
+                  },
+                  "bodyPart": {
+                    "type": "string",
+                    "title": "训练部位",
+                    "description": "依据用户原话规范化；无法确定时询问，不采用示例部位。",
+                    "enum": [
+                      "背",
+                      "腿",
+                      "胸",
+                      "肩",
+                      "手臂",
+                      "核心",
+                      "全身",
+                      "其他"
+                    ]
+                  },
+                  "minutes": {
+                    "type": "integer",
+                    "title": "训练分钟数",
+                    "description": "用户明确给出的训练时长，1至600分钟；缺少时长时询问，不采用DEMO数值。",
+                    "minimum": 1,
+                    "maximum": 600
+                  }
+                },
+                "required": [
+                  "trainingDate",
+                  "bodyPart",
+                  "minutes"
+                ]
+              },
+              "icon": "💪",
+              "category": "运动健康"
+            },
+            "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2",
+            "configSchema": {
+              "type": "object",
+              "title": "显示配置",
+              "description": "固定显示偏好，不包含训练事实。",
+              "additionalProperties": false,
+              "default": {
+                "title": "训练记录"
+              },
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "title": "卡片标题",
+                  "default": "训练记录",
+                  "minLength": 1,
+                  "maxLength": 40
+                }
+              },
+              "required": [
+                "title"
+              ]
+            },
+            "dataSchema": {
+              "type": "object",
+              "title": "训练事实",
+              "description": "仅填写用户提供的训练事实；日期由宿主结合用户原话、当前日期及时区确认。",
+              "additionalProperties": false,
+              "properties": {
+                "trainingDate": {
+                  "type": "string",
+                  "title": "训练日期",
+                  "description": "YYYY-MM-DD；宿主应校验真实日历日期并解析今天/昨天，不能采用示例日期。",
+                  "minLength": 10,
+                  "maxLength": 10
+                },
+                "bodyPart": {
+                  "type": "string",
+                  "title": "训练部位",
+                  "description": "依据用户原话规范化；无法确定时询问，不采用示例部位。",
+                  "enum": [
+                    "背",
+                    "腿",
+                    "胸",
+                    "肩",
+                    "手臂",
+                    "核心",
+                    "全身",
+                    "其他"
+                  ]
+                },
+                "minutes": {
+                  "type": "integer",
+                  "title": "训练分钟数",
+                  "description": "用户明确给出的训练时长，1至600分钟；缺少时长时询问，不采用DEMO数值。",
+                  "minimum": 1,
+                  "maximum": 600
+                }
+              },
+              "required": [
+                "trainingDate",
+                "bodyPart",
+                "minutes"
+              ]
+            },
+            "stateSchema": {
+              "type": "object",
+              "title": "个人状态",
+              "description": "用户后续可编辑的备注，默认空字符串，不推断训练强度或感受。",
+              "additionalProperties": false,
+              "default": {
+                "note": ""
+              },
+              "properties": {
+                "note": {
+                  "type": "string",
+                  "title": "备注",
+                  "default": "",
+                  "maxLength": 120
+                }
+              },
+              "required": [
+                "note"
+              ]
+            },
+            "ui": {
+              "components": [
+                {
+                  "component": "Header",
+                  "bind": "/config/title"
+                },
+                {
+                  "component": "KeyValue",
+                  "label": "训练日期",
+                  "bind": "/data/trainingDate"
+                },
+                {
+                  "component": "Badge",
+                  "label": "训练部位",
+                  "bind": "/data/bodyPart"
+                },
+                {
+                  "component": "Metric",
+                  "label": "训练时长（分钟）",
+                  "bind": "/data/minutes"
+                },
+                {
+                  "component": "KeyValue",
+                  "label": "备注",
+                  "bind": "/state/note"
+                }
+              ]
+            },
+            "examples": [
+              {
+                "name": "DEMO：虚构的腿部训练25分钟",
+                "config": {
+                  "title": "训练记录"
+                },
+                "data": {
+                  "trainingDate": "2026-01-15",
+                  "bodyPart": "腿",
+                  "minutes": 25
+                },
+                "state": {
+                  "note": "DEMO：日期、部位和分钟数均为虚构示例"
+                }
+              }
+            ],
+            "files": {
+              "config.schema.json": {
+                "type": "object",
+                "title": "显示配置",
+                "description": "固定显示偏好，不包含训练事实。",
+                "additionalProperties": false,
+                "default": {
+                  "title": "训练记录"
+                },
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "title": "卡片标题",
+                    "default": "训练记录",
+                    "minLength": 1,
+                    "maxLength": 40
+                  }
+                },
+                "required": [
+                  "title"
+                ]
+              },
+              "data.schema.json": {
+                "type": "object",
+                "title": "训练事实",
+                "description": "仅填写用户提供的训练事实；日期由宿主结合用户原话、当前日期及时区确认。",
+                "additionalProperties": false,
+                "properties": {
+                  "trainingDate": {
+                    "type": "string",
+                    "title": "训练日期",
+                    "description": "YYYY-MM-DD；宿主应校验真实日历日期并解析今天/昨天，不能采用示例日期。",
+                    "minLength": 10,
+                    "maxLength": 10
+                  },
+                  "bodyPart": {
+                    "type": "string",
+                    "title": "训练部位",
+                    "description": "依据用户原话规范化；无法确定时询问，不采用示例部位。",
+                    "enum": [
+                      "背",
+                      "腿",
+                      "胸",
+                      "肩",
+                      "手臂",
+                      "核心",
+                      "全身",
+                      "其他"
+                    ]
+                  },
+                  "minutes": {
+                    "type": "integer",
+                    "title": "训练分钟数",
+                    "description": "用户明确给出的训练时长，1至600分钟；缺少时长时询问，不采用DEMO数值。",
+                    "minimum": 1,
+                    "maximum": 600
+                  }
+                },
+                "required": [
+                  "trainingDate",
+                  "bodyPart",
+                  "minutes"
+                ]
+              },
+              "examples/default.json": {
+                "name": "DEMO：虚构的腿部训练25分钟",
+                "config": {
+                  "title": "训练记录"
+                },
+                "data": {
+                  "trainingDate": "2026-01-15",
+                  "bodyPart": "腿",
+                  "minutes": 25
+                },
+                "state": {
+                  "note": "DEMO：日期、部位和分钟数均为虚构示例"
+                }
+              },
+              "manifest.json": {
+                "formatVersion": "0.2",
+                "id": "example.fitness-log",
+                "version": "1.0.0",
+                "name": "健身记录",
+                "description": "记录用户明确提供的训练日期、训练部位和分钟数；相对日期由宿主结合当前日期及时区解析，缺少事实时询问，不复制DEMO数据。",
+                "renderer": "declarative",
+                "host": "0.6",
+                "capabilities": [],
+                "examples": [
+                  "今天练了40分钟背",
+                  "帮我记下昨天练腿30分钟",
+                  "记录今天胸部训练45分钟",
+                  "记一条肩部训练，今天20分钟",
+                  "今天练了60分钟全身"
+                ],
+                "slots": {
+                  "type": "object",
+                  "title": "训练事实",
+                  "description": "仅填写用户提供的训练事实；日期由宿主结合用户原话、当前日期及时区确认。",
+                  "additionalProperties": false,
+                  "properties": {
+                    "trainingDate": {
+                      "type": "string",
+                      "title": "训练日期",
+                      "description": "YYYY-MM-DD；宿主应校验真实日历日期并解析今天/昨天，不能采用示例日期。",
+                      "minLength": 10,
+                      "maxLength": 10
+                    },
+                    "bodyPart": {
+                      "type": "string",
+                      "title": "训练部位",
+                      "description": "依据用户原话规范化；无法确定时询问，不采用示例部位。",
+                      "enum": [
+                        "背",
+                        "腿",
+                        "胸",
+                        "肩",
+                        "手臂",
+                        "核心",
+                        "全身",
+                        "其他"
+                      ]
+                    },
+                    "minutes": {
+                      "type": "integer",
+                      "title": "训练分钟数",
+                      "description": "用户明确给出的训练时长，1至600分钟；缺少时长时询问，不采用DEMO数值。",
+                      "minimum": 1,
+                      "maximum": 600
+                    }
+                  },
+                  "required": [
+                    "trainingDate",
+                    "bodyPart",
+                    "minutes"
+                  ]
+                },
+                "icon": "💪",
+                "category": "运动健康"
+              },
+              "state.schema.json": {
+                "type": "object",
+                "title": "个人状态",
+                "description": "用户后续可编辑的备注，默认空字符串，不推断训练强度或感受。",
+                "additionalProperties": false,
+                "default": {
+                  "note": ""
+                },
+                "properties": {
+                  "note": {
+                    "type": "string",
+                    "title": "备注",
+                    "default": "",
+                    "maxLength": 120
+                  }
+                },
+                "required": [
+                  "note"
+                ]
+              },
+              "ui.json": {
+                "components": [
+                  {
+                    "component": "Header",
+                    "bind": "/config/title"
+                  },
+                  {
+                    "component": "KeyValue",
+                    "label": "训练日期",
+                    "bind": "/data/trainingDate"
+                  },
+                  {
+                    "component": "Badge",
+                    "label": "训练部位",
+                    "bind": "/data/bodyPart"
+                  },
+                  {
+                    "component": "Metric",
+                    "label": "训练时长（分钟）",
+                    "bind": "/data/minutes"
+                  },
+                  {
+                    "component": "KeyValue",
+                    "label": "备注",
+                    "bind": "/state/note"
+                  }
+                ]
+              }
+            }
+          },
+          "enabled": false
+        }
+      }
+    },
+    {
+      "name": "re-enable-package",
+      "status": "passed",
+      "response": {
+        "ok": true,
+        "record": {
+          "key": "example.fitness-log@1.0.0#094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2",
+          "definition": {
+            "manifest": {
+              "formatVersion": "0.2",
+              "id": "example.fitness-log",
+              "version": "1.0.0",
+              "name": "健身记录",
+              "description": "记录用户明确提供的训练日期、训练部位和分钟数；相对日期由宿主结合当前日期及时区解析，缺少事实时询问，不复制DEMO数据。",
+              "renderer": "declarative",
+              "host": "0.6",
+              "capabilities": [],
+              "examples": [
+                "今天练了40分钟背",
+                "帮我记下昨天练腿30分钟",
+                "记录今天胸部训练45分钟",
+                "记一条肩部训练，今天20分钟",
+                "今天练了60分钟全身"
+              ],
+              "slots": {
+                "additionalProperties": false,
+                "description": "仅填写用户提供的训练事实；日期由宿主结合用户原话、当前日期及时区确认。",
+                "properties": {
+                  "bodyPart": {
+                    "description": "依据用户原话规范化；无法确定时询问，不采用示例部位。",
+                    "enum": [
+                      "背",
+                      "腿",
+                      "胸",
+                      "肩",
+                      "手臂",
+                      "核心",
+                      "全身",
+                      "其他"
+                    ],
+                    "title": "训练部位",
+                    "type": "string"
+                  },
+                  "minutes": {
+                    "description": "用户明确给出的训练时长，1至600分钟；缺少时长时询问，不采用DEMO数值。",
+                    "maximum": 600,
+                    "minimum": 1,
+                    "title": "训练分钟数",
+                    "type": "integer"
+                  },
+                  "trainingDate": {
+                    "description": "YYYY-MM-DD；宿主应校验真实日历日期并解析今天/昨天，不能采用示例日期。",
+                    "maxLength": 10,
+                    "minLength": 10,
+                    "title": "训练日期",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "trainingDate",
+                  "bodyPart",
+                  "minutes"
+                ],
+                "title": "训练事实",
+                "type": "object"
+              },
+              "icon": "💪",
+              "category": "运动健康"
+            },
+            "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2",
+            "configSchema": {
+              "additionalProperties": false,
+              "default": {
+                "title": "训练记录"
+              },
+              "description": "固定显示偏好，不包含训练事实。",
+              "properties": {
+                "title": {
+                  "default": "训练记录",
+                  "maxLength": 40,
+                  "minLength": 1,
+                  "title": "卡片标题",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "title"
+              ],
+              "title": "显示配置",
+              "type": "object"
+            },
+            "dataSchema": {
+              "additionalProperties": false,
+              "description": "仅填写用户提供的训练事实；日期由宿主结合用户原话、当前日期及时区确认。",
+              "properties": {
+                "bodyPart": {
+                  "description": "依据用户原话规范化；无法确定时询问，不采用示例部位。",
+                  "enum": [
+                    "背",
+                    "腿",
+                    "胸",
+                    "肩",
+                    "手臂",
+                    "核心",
+                    "全身",
+                    "其他"
+                  ],
+                  "title": "训练部位",
+                  "type": "string"
+                },
+                "minutes": {
+                  "description": "用户明确给出的训练时长，1至600分钟；缺少时长时询问，不采用DEMO数值。",
+                  "maximum": 600,
+                  "minimum": 1,
+                  "title": "训练分钟数",
+                  "type": "integer"
+                },
+                "trainingDate": {
+                  "description": "YYYY-MM-DD；宿主应校验真实日历日期并解析今天/昨天，不能采用示例日期。",
+                  "maxLength": 10,
+                  "minLength": 10,
+                  "title": "训练日期",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "trainingDate",
+                "bodyPart",
+                "minutes"
+              ],
+              "title": "训练事实",
+              "type": "object"
+            },
+            "stateSchema": {
+              "additionalProperties": false,
+              "default": {
+                "note": ""
+              },
+              "description": "用户后续可编辑的备注，默认空字符串，不推断训练强度或感受。",
+              "properties": {
+                "note": {
+                  "default": "",
+                  "maxLength": 120,
+                  "title": "备注",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "note"
+              ],
+              "title": "个人状态",
+              "type": "object"
+            },
+            "ui": {
+              "components": [
+                {
+                  "component": "Header",
+                  "bind": "/config/title"
+                },
+                {
+                  "component": "KeyValue",
+                  "label": "训练日期",
+                  "bind": "/data/trainingDate"
+                },
+                {
+                  "component": "Badge",
+                  "label": "训练部位",
+                  "bind": "/data/bodyPart"
+                },
+                {
+                  "component": "Metric",
+                  "label": "训练时长（分钟）",
+                  "bind": "/data/minutes"
+                },
+                {
+                  "component": "KeyValue",
+                  "label": "备注",
+                  "bind": "/state/note"
+                }
+              ]
+            },
+            "examples": [
+              {
+                "name": "DEMO：虚构的腿部训练25分钟",
+                "config": {
+                  "title": "训练记录"
+                },
+                "data": {
+                  "bodyPart": "腿",
+                  "minutes": 25,
+                  "trainingDate": "2026-01-15"
+                },
+                "state": {
+                  "note": "DEMO：日期、部位和分钟数均为虚构示例"
+                }
+              }
+            ],
+            "files": {
+              "config.schema.json": {
+                "additionalProperties": false,
+                "default": {
+                  "title": "训练记录"
+                },
+                "description": "固定显示偏好，不包含训练事实。",
+                "properties": {
+                  "title": {
+                    "default": "训练记录",
+                    "maxLength": 40,
+                    "minLength": 1,
+                    "title": "卡片标题",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "title"
+                ],
+                "title": "显示配置",
+                "type": "object"
+              },
+              "data.schema.json": {
+                "additionalProperties": false,
+                "description": "仅填写用户提供的训练事实；日期由宿主结合用户原话、当前日期及时区确认。",
+                "properties": {
+                  "bodyPart": {
+                    "description": "依据用户原话规范化；无法确定时询问，不采用示例部位。",
+                    "enum": [
+                      "背",
+                      "腿",
+                      "胸",
+                      "肩",
+                      "手臂",
+                      "核心",
+                      "全身",
+                      "其他"
+                    ],
+                    "title": "训练部位",
+                    "type": "string"
+                  },
+                  "minutes": {
+                    "description": "用户明确给出的训练时长，1至600分钟；缺少时长时询问，不采用DEMO数值。",
+                    "maximum": 600,
+                    "minimum": 1,
+                    "title": "训练分钟数",
+                    "type": "integer"
+                  },
+                  "trainingDate": {
+                    "description": "YYYY-MM-DD；宿主应校验真实日历日期并解析今天/昨天，不能采用示例日期。",
+                    "maxLength": 10,
+                    "minLength": 10,
+                    "title": "训练日期",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "trainingDate",
+                  "bodyPart",
+                  "minutes"
+                ],
+                "title": "训练事实",
+                "type": "object"
+              },
+              "examples/default.json": {
+                "config": {
+                  "title": "训练记录"
+                },
+                "data": {
+                  "bodyPart": "腿",
+                  "minutes": 25,
+                  "trainingDate": "2026-01-15"
+                },
+                "name": "DEMO：虚构的腿部训练25分钟",
+                "state": {
+                  "note": "DEMO：日期、部位和分钟数均为虚构示例"
+                }
+              },
+              "manifest.json": {
+                "capabilities": [],
+                "category": "运动健康",
+                "description": "记录用户明确提供的训练日期、训练部位和分钟数；相对日期由宿主结合当前日期及时区解析，缺少事实时询问，不复制DEMO数据。",
+                "examples": [
+                  "今天练了40分钟背",
+                  "帮我记下昨天练腿30分钟",
+                  "记录今天胸部训练45分钟",
+                  "记一条肩部训练，今天20分钟",
+                  "今天练了60分钟全身"
+                ],
+                "formatVersion": "0.2",
+                "host": "0.6",
+                "icon": "💪",
+                "id": "example.fitness-log",
+                "name": "健身记录",
+                "renderer": "declarative",
+                "slots": {
+                  "additionalProperties": false,
+                  "description": "仅填写用户提供的训练事实；日期由宿主结合用户原话、当前日期及时区确认。",
+                  "properties": {
+                    "bodyPart": {
+                      "description": "依据用户原话规范化；无法确定时询问，不采用示例部位。",
+                      "enum": [
+                        "背",
+                        "腿",
+                        "胸",
+                        "肩",
+                        "手臂",
+                        "核心",
+                        "全身",
+                        "其他"
+                      ],
+                      "title": "训练部位",
+                      "type": "string"
+                    },
+                    "minutes": {
+                      "description": "用户明确给出的训练时长，1至600分钟；缺少时长时询问，不采用DEMO数值。",
+                      "maximum": 600,
+                      "minimum": 1,
+                      "title": "训练分钟数",
+                      "type": "integer"
+                    },
+                    "trainingDate": {
+                      "description": "YYYY-MM-DD；宿主应校验真实日历日期并解析今天/昨天，不能采用示例日期。",
+                      "maxLength": 10,
+                      "minLength": 10,
+                      "title": "训练日期",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "trainingDate",
+                    "bodyPart",
+                    "minutes"
+                  ],
+                  "title": "训练事实",
+                  "type": "object"
+                },
+                "version": "1.0.0"
+              },
+              "state.schema.json": {
+                "additionalProperties": false,
+                "default": {
+                  "note": ""
+                },
+                "description": "用户后续可编辑的备注，默认空字符串，不推断训练强度或感受。",
+                "properties": {
+                  "note": {
+                    "default": "",
+                    "maxLength": 120,
+                    "title": "备注",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "note"
+                ],
+                "title": "个人状态",
+                "type": "object"
+              },
+              "ui.json": {
+                "components": [
+                  {
+                    "bind": "/config/title",
+                    "component": "Header"
+                  },
+                  {
+                    "bind": "/data/trainingDate",
+                    "component": "KeyValue",
+                    "label": "训练日期"
+                  },
+                  {
+                    "bind": "/data/bodyPart",
+                    "component": "Badge",
+                    "label": "训练部位"
+                  },
+                  {
+                    "bind": "/data/minutes",
+                    "component": "Metric",
+                    "label": "训练时长（分钟）"
+                  },
+                  {
+                    "bind": "/state/note",
+                    "component": "KeyValue",
+                    "label": "备注"
+                  }
+                ]
+              }
+            }
+          },
+          "enabled": true
+        }
+      }
+    }
+  ],
+  "cases": [
+    {
+      "id": "record-40",
+      "text": "今天练了40分钟背",
+      "expected": {
+        "kind": "record",
+        "minutes": 40
+      },
+      "checks": [
+        {
+          "name": "sse-accepted",
+          "pass": true,
+          "observed": null
+        },
+        {
+          "name": "trace-complete-on",
+          "pass": true,
+          "observed": {
+            "id": "decision_71407074-5cd0-44ad-92bd-b6778d887c02",
+            "mode": "on",
+            "status": "complete",
+            "taskId": "feval_mvu0yx44_b4fcf1ab_record-40",
+            "clauses": [
+              "今天练了40分钟背"
+            ],
+            "decisions": [
+              {
+                "text": "今天练了40分钟背",
+                "route": "ext.example.fitness-log",
+                "probability": 0.9895293835937664,
+                "probabilities": {
+                  "chat": 0.003408994165130381,
+                  "answer": 9.015787491298608e-05,
+                  "search": 7.630434937493089e-05,
+                  "countdown": 0.0002246400015973968,
+                  "todo": 0.0001739062413538191,
+                  "note": 0.005815677578404632,
+                  "generate": 6.096044268952538e-05,
+                  "focus": 4.2749392628809795e-05,
+                  "overview": 8.167184798553602e-05,
+                  "restore": 2.581053679429331e-05,
+                  "highlight": 4.104274003005352e-05,
+                  "edit": 0.00018654015496143977,
+                  "arrange": 4.477153081507111e-05,
+                  "delete": 7.054645527047594e-05,
+                  "undo": 6.599940424105934e-05,
+                  "unsupported": 6.084369004319246e-05,
+                  "ext.example.fitness-log": 0.9895293835937664
+                },
+                "none": false,
+                "latencyMs": 1716,
+                "failed": false
+              }
+            ],
+            "route": "ext.example.fitness-log",
+            "probability": 0.9895293835937664,
+            "latencyMs": 1716,
+            "routeLatencyMs": 1716,
+            "legacyElapsedMs": 4287,
+            "shadowWaitMs": 0,
+            "failedCount": 0,
+            "legacyKind": "envelope",
+            "legacyUsedProvider": "stepfun",
+            "legacyActionTypes": [
+              "card.create",
+              "card.focus",
+              "subtitle.show"
+            ],
+            "legacyCardTypes": [
+              "ExtensionCard"
+            ],
+            "plannerCalls": 1,
+            "directClauses": 0
+          }
+        },
+        {
+          "name": "extension-route",
+          "pass": true,
+          "observed": "ext.example.fitness-log"
+        },
+        {
+          "name": "real-main-model-call-recorded",
+          "pass": true,
+          "observed": {
+            "planner": 1,
+            "directClauses": 0,
+            "usedProvider": "stepfun"
+          }
+        },
+        {
+          "name": "extension-has-no-new-direct-execution-grant",
+          "pass": true,
+          "observed": 0
+        },
+        {
+          "name": "single-fresh-extension-card",
+          "pass": true,
+          "observed": [
+            {
+              "id": "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+              "type": "ExtensionCard"
+            }
+          ]
+        },
+        {
+          "name": "exact-installed-definition",
+          "pass": true,
+          "observed": {
+            "id": "example.fitness-log",
+            "version": "1.0.0",
+            "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+          }
+        },
+        {
+          "name": "today-in-shanghai",
+          "pass": true,
+          "observed": {
+            "actual": "2026-10-30",
+            "dates": [
+              "2026-10-30"
+            ]
+          }
+        },
+        {
+          "name": "exact-user-facts-not-demo-or-coercion",
+          "pass": true,
+          "observed": {
+            "actual": {
+              "trainingDate": "2026-10-30",
+              "bodyPart": "背",
+              "minutes": 40
+            },
+            "expectedMinutes": 40,
+            "expectedBodyPart": "背"
+          }
+        },
+        {
+          "name": "only-explicit-display-defaults",
+          "pass": true,
+          "observed": {
+            "config": {
+              "title": "训练记录"
+            },
+            "state": {
+              "note": ""
+            }
+          }
+        },
+        {
+          "name": "no-invented-source-facts",
+          "pass": true,
+          "observed": null
+        },
+        {
+          "name": "no-unrequested-mutation-or-host-operation",
+          "pass": true,
+          "observed": null
+        },
+        {
+          "name": "real-pending-execution-id",
+          "pass": true,
+          "observed": null
+        },
+        {
+          "name": "card-schema",
+          "pass": true,
+          "observed": null
+        },
+        {
+          "name": "instance-schema",
+          "pass": true,
+          "observed": null
+        },
+        {
+          "name": "real-execution-receipt-completed",
+          "pass": true,
+          "observed": {
+            "protocolVersion": "vivic-decision-v2",
+            "id": "feval_mvu0yx44_b4fcf1ab_record-40",
+            "step": 0,
+            "status": "completed",
+            "canvasVersion": 769,
+            "decision": "legacy-fallback",
+            "reason": "v2_not_configured"
+          }
+        },
+        {
+          "name": "previous-records-preserved",
+          "pass": true,
+          "observed": null
+        },
+        {
+          "name": "one-new-record-persisted",
+          "pass": true,
+          "observed": null
+        }
+      ],
+      "status": "passed",
+      "execution": {
+        "committed": true,
+        "requestId": "feval_mvu0yx44_b4fcf1ab_1_record-40-commit",
+        "storageReceipt": {
+          "requestId": "feval_mvu0yx44_b4fcf1ab_1_record-40-commit",
+          "status": "succeeded",
+          "version": 769
+        },
+        "recoveredAfterWriteError": null,
+        "createdCardIds": [
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93"
+        ],
+        "ownerAfterCommit": {
+          "serverVersion": 769,
+          "record": {
+            "schemaVersion": 1,
+            "id": "space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+            "title": "路由评测专用（非用户空间）",
+            "version": 769,
+            "updatedAt": "2026-10-29T20:58:01.876Z",
+            "cardsById": {
+              "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93": {
+                "id": "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+                "variant": "standard",
+                "sources": [],
+                "layout": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 360,
+                  "height": 300,
+                  "pinned": false,
+                  "surface": "display"
+                },
+                "metadata": {
+                  "createdAt": "2026-10-29T20:58:01.803Z",
+                  "updatedAt": "2026-10-29T20:58:01.803Z",
+                  "aliases": [
+                    "健身记录"
+                  ]
+                },
+                "type": "ExtensionCard",
+                "displayProps": {
+                  "def": {
+                    "id": "example.fitness-log",
+                    "version": "1.0.0",
+                    "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+                  },
+                  "config": {
+                    "title": "训练记录"
+                  },
+                  "data": {
+                    "trainingDate": "2026-10-30",
+                    "bodyPart": "背",
+                    "minutes": 40
+                  },
+                  "state": {
+                    "note": ""
+                  }
+                },
+                "sourceData": {}
+              }
+            },
+            "cardOrder": [
+              "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93"
+            ],
+            "viewport": {
+              "x": 0,
+              "y": 0,
+              "zoom": 1
+            },
+            "focusHistory": [
+              "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93"
+            ],
+            "processedRequestIds": [
+              "slots_df529e48-dedb-40a8-a73d-b59c555b80ab"
+            ]
+          }
+        }
+      },
+      "ownerBefore": {
+        "schemaVersion": 1,
+        "id": "space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+        "title": "路由评测专用（非用户空间）",
+        "version": 768,
+        "updatedAt": "2026-10-29T18:59:42.654Z",
+        "cardsById": {},
+        "cardOrder": [],
+        "viewport": {
+          "x": 0,
+          "y": 0,
+          "zoom": 1
+        },
+        "focusHistory": [],
+        "processedRequestIds": []
+      },
+      "taskId": "feval_mvu0yx44_b4fcf1ab_record-40",
+      "startedAt": "2026-10-29T20:57:57.507Z",
+      "todayShanghaiStart": "2026-10-30",
+      "events": [
+        {
+          "event": "accepted",
+          "elapsedMs": 28,
+          "data": {
+            "requestId": "e1d50981-8e3a-4b61-9e51-1d8361cf0100"
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 1747,
+          "data": {
+            "requestId": "e1d50981-8e3a-4b61-9e51-1d8361cf0100",
+            "stage": "rules",
+            "status": "started"
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 1747,
+          "data": {
+            "requestId": "e1d50981-8e3a-4b61-9e51-1d8361cf0100",
+            "stage": "rules",
+            "status": "completed",
+            "elapsedMs": 1
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 1747,
+          "data": {
+            "requestId": "e1d50981-8e3a-4b61-9e51-1d8361cf0100",
+            "stage": "data",
+            "status": "started"
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 1747,
+          "data": {
+            "requestId": "e1d50981-8e3a-4b61-9e51-1d8361cf0100",
+            "stage": "data",
+            "status": "completed",
+            "elapsedMs": 1
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 1747,
+          "data": {
+            "requestId": "e1d50981-8e3a-4b61-9e51-1d8361cf0100",
+            "stage": "planner",
+            "status": "started"
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 4312,
+          "data": {
+            "requestId": "e1d50981-8e3a-4b61-9e51-1d8361cf0100",
+            "stage": "planner",
+            "status": "completed",
+            "elapsedMs": 2543
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 4312,
+          "data": {
+            "requestId": "e1d50981-8e3a-4b61-9e51-1d8361cf0100",
+            "stage": "total",
+            "status": "completed",
+            "elapsedMs": 2568
+          }
+        },
+        {
+          "event": "result",
+          "elapsedMs": 4312,
+          "data": {
+            "trace": {
+              "id": "decision_71407074-5cd0-44ad-92bd-b6778d887c02",
+              "mode": "on",
+              "status": "complete",
+              "taskId": "feval_mvu0yx44_b4fcf1ab_record-40",
+              "clauses": [
+                "今天练了40分钟背"
+              ],
+              "decisions": [
+                {
+                  "text": "今天练了40分钟背",
+                  "route": "ext.example.fitness-log",
+                  "probability": 0.9895293835937664,
+                  "probabilities": {
+                    "chat": 0.003408994165130381,
+                    "answer": 9.015787491298608e-05,
+                    "search": 7.630434937493089e-05,
+                    "countdown": 0.0002246400015973968,
+                    "todo": 0.0001739062413538191,
+                    "note": 0.005815677578404632,
+                    "generate": 6.096044268952538e-05,
+                    "focus": 4.2749392628809795e-05,
+                    "overview": 8.167184798553602e-05,
+                    "restore": 2.581053679429331e-05,
+                    "highlight": 4.104274003005352e-05,
+                    "edit": 0.00018654015496143977,
+                    "arrange": 4.477153081507111e-05,
+                    "delete": 7.054645527047594e-05,
+                    "undo": 6.599940424105934e-05,
+                    "unsupported": 6.084369004319246e-05,
+                    "ext.example.fitness-log": 0.9895293835937664
+                  },
+                  "none": false,
+                  "latencyMs": 1716,
+                  "failed": false
+                }
+              ],
+              "route": "ext.example.fitness-log",
+              "probability": 0.9895293835937664,
+              "latencyMs": 1716,
+              "routeLatencyMs": 1716,
+              "legacyElapsedMs": 4287,
+              "shadowWaitMs": 0,
+              "failedCount": 0,
+              "legacyKind": "envelope",
+              "legacyUsedProvider": "stepfun",
+              "legacyActionTypes": [
+                "card.create",
+                "card.focus",
+                "subtitle.show"
+              ],
+              "legacyCardTypes": [
+                "ExtensionCard"
+              ],
+              "plannerCalls": 1,
+              "directClauses": 0
+            },
+            "kind": "envelope",
+            "envelope": {
+              "schemaVersion": "0.6",
+              "requestId": "slots_df529e48-dedb-40a8-a73d-b59c555b80ab",
+              "canvasId": "space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+              "spokenText": "已记录今天背部训练40分钟。",
+              "actions": [
+                {
+                  "type": "card.create",
+                  "card": {
+                    "id": "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+                    "variant": "standard",
+                    "sources": [],
+                    "layout": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 360,
+                      "height": 300,
+                      "pinned": false
+                    },
+                    "metadata": {
+                      "createdAt": "2026-10-29T20:58:01.803Z",
+                      "updatedAt": "2026-10-29T20:58:01.803Z",
+                      "aliases": [
+                        "健身记录"
+                      ]
+                    },
+                    "type": "ExtensionCard",
+                    "displayProps": {
+                      "def": {
+                        "id": "example.fitness-log",
+                        "version": "1.0.0",
+                        "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+                      },
+                      "config": {
+                        "title": "训练记录"
+                      },
+                      "data": {
+                        "trainingDate": "2026-10-30",
+                        "bodyPart": "背",
+                        "minutes": 40
+                      },
+                      "state": {
+                        "note": ""
+                      }
+                    },
+                    "sourceData": {}
+                  }
+                },
+                {
+                  "type": "card.focus",
+                  "targetId": "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93"
+                },
+                {
+                  "type": "subtitle.show",
+                  "text": "已记录：2026-10-30 背部训练 40分钟。"
+                }
+              ]
+            },
+            "task": {
+              "protocolVersion": "vivic-decision-v2",
+              "id": "feval_mvu0yx44_b4fcf1ab_record-40",
+              "step": 0,
+              "status": "awaiting_execution",
+              "executionId": "exec_93eb68d6-b174-47f6-a7d2-1cfc141b22e5",
+              "canvasVersion": 768,
+              "decision": "legacy-fallback",
+              "reason": "v2_not_configured"
+            },
+            "usedProvider": "stepfun"
+          }
+        }
+      ],
+      "result": {
+        "trace": {
+          "id": "decision_71407074-5cd0-44ad-92bd-b6778d887c02",
+          "mode": "on",
+          "status": "complete",
+          "taskId": "feval_mvu0yx44_b4fcf1ab_record-40",
+          "clauses": [
+            "今天练了40分钟背"
+          ],
+          "decisions": [
+            {
+              "text": "今天练了40分钟背",
+              "route": "ext.example.fitness-log",
+              "probability": 0.9895293835937664,
+              "probabilities": {
+                "chat": 0.003408994165130381,
+                "answer": 9.015787491298608e-05,
+                "search": 7.630434937493089e-05,
+                "countdown": 0.0002246400015973968,
+                "todo": 0.0001739062413538191,
+                "note": 0.005815677578404632,
+                "generate": 6.096044268952538e-05,
+                "focus": 4.2749392628809795e-05,
+                "overview": 8.167184798553602e-05,
+                "restore": 2.581053679429331e-05,
+                "highlight": 4.104274003005352e-05,
+                "edit": 0.00018654015496143977,
+                "arrange": 4.477153081507111e-05,
+                "delete": 7.054645527047594e-05,
+                "undo": 6.599940424105934e-05,
+                "unsupported": 6.084369004319246e-05,
+                "ext.example.fitness-log": 0.9895293835937664
+              },
+              "none": false,
+              "latencyMs": 1716,
+              "failed": false
+            }
+          ],
+          "route": "ext.example.fitness-log",
+          "probability": 0.9895293835937664,
+          "latencyMs": 1716,
+          "routeLatencyMs": 1716,
+          "legacyElapsedMs": 4287,
+          "shadowWaitMs": 0,
+          "failedCount": 0,
+          "legacyKind": "envelope",
+          "legacyUsedProvider": "stepfun",
+          "legacyActionTypes": [
+            "card.create",
+            "card.focus",
+            "subtitle.show"
+          ],
+          "legacyCardTypes": [
+            "ExtensionCard"
+          ],
+          "plannerCalls": 1,
+          "directClauses": 0
+        },
+        "kind": "envelope",
+        "envelope": {
+          "schemaVersion": "0.6",
+          "requestId": "slots_df529e48-dedb-40a8-a73d-b59c555b80ab",
+          "canvasId": "space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+          "spokenText": "已记录今天背部训练40分钟。",
+          "actions": [
+            {
+              "type": "card.create",
+              "card": {
+                "id": "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+                "variant": "standard",
+                "sources": [],
+                "layout": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 360,
+                  "height": 300,
+                  "pinned": false
+                },
+                "metadata": {
+                  "createdAt": "2026-10-29T20:58:01.803Z",
+                  "updatedAt": "2026-10-29T20:58:01.803Z",
+                  "aliases": [
+                    "健身记录"
+                  ]
+                },
+                "type": "ExtensionCard",
+                "displayProps": {
+                  "def": {
+                    "id": "example.fitness-log",
+                    "version": "1.0.0",
+                    "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+                  },
+                  "config": {
+                    "title": "训练记录"
+                  },
+                  "data": {
+                    "trainingDate": "2026-10-30",
+                    "bodyPart": "背",
+                    "minutes": 40
+                  },
+                  "state": {
+                    "note": ""
+                  }
+                },
+                "sourceData": {}
+              }
+            },
+            {
+              "type": "card.focus",
+              "targetId": "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93"
+            },
+            {
+              "type": "subtitle.show",
+              "text": "已记录：2026-10-30 背部训练 40分钟。"
+            }
+          ]
+        },
+        "task": {
+          "protocolVersion": "vivic-decision-v2",
+          "id": "feval_mvu0yx44_b4fcf1ab_record-40",
+          "step": 0,
+          "status": "awaiting_execution",
+          "executionId": "exec_93eb68d6-b174-47f6-a7d2-1cfc141b22e5",
+          "canvasVersion": 768,
+          "decision": "legacy-fallback",
+          "reason": "v2_not_configured"
+        },
+        "usedProvider": "stepfun"
+      },
+      "responseLatencyMs": 4328,
+      "todayShanghaiEnd": "2026-10-30",
+      "finishedResponseAt": "2026-10-29T20:58:01.836Z",
+      "cards": [
+        {
+          "id": "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+          "variant": "standard",
+          "sources": [],
+          "layout": {
+            "x": 0,
+            "y": 0,
+            "width": 360,
+            "height": 300,
+            "pinned": false
+          },
+          "metadata": {
+            "createdAt": "2026-10-29T20:58:01.803Z",
+            "updatedAt": "2026-10-29T20:58:01.803Z",
+            "aliases": [
+              "健身记录"
+            ]
+          },
+          "type": "ExtensionCard",
+          "displayProps": {
+            "def": {
+              "id": "example.fitness-log",
+              "version": "1.0.0",
+              "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+            },
+            "config": {
+              "title": "训练记录"
+            },
+            "data": {
+              "trainingDate": "2026-10-30",
+              "bodyPart": "背",
+              "minutes": 40
+            },
+            "state": {
+              "note": ""
+            }
+          },
+          "sourceData": {}
+        }
+      ],
+      "initialTrace": {
+        "id": "decision_71407074-5cd0-44ad-92bd-b6778d887c02",
+        "mode": "on",
+        "status": "complete",
+        "taskId": "feval_mvu0yx44_b4fcf1ab_record-40",
+        "clauses": [
+          "今天练了40分钟背"
+        ],
+        "decisions": [
+          {
+            "text": "今天练了40分钟背",
+            "route": "ext.example.fitness-log",
+            "probability": 0.9895293835937664,
+            "probabilities": {
+              "chat": 0.003408994165130381,
+              "answer": 9.015787491298608e-05,
+              "search": 7.630434937493089e-05,
+              "countdown": 0.0002246400015973968,
+              "todo": 0.0001739062413538191,
+              "note": 0.005815677578404632,
+              "generate": 6.096044268952538e-05,
+              "focus": 4.2749392628809795e-05,
+              "overview": 8.167184798553602e-05,
+              "restore": 2.581053679429331e-05,
+              "highlight": 4.104274003005352e-05,
+              "edit": 0.00018654015496143977,
+              "arrange": 4.477153081507111e-05,
+              "delete": 7.054645527047594e-05,
+              "undo": 6.599940424105934e-05,
+              "unsupported": 6.084369004319246e-05,
+              "ext.example.fitness-log": 0.9895293835937664
+            },
+            "none": false,
+            "latencyMs": 1716,
+            "failed": false
+          }
+        ],
+        "route": "ext.example.fitness-log",
+        "probability": 0.9895293835937664,
+        "latencyMs": 1716,
+        "routeLatencyMs": 1716,
+        "legacyElapsedMs": 4287,
+        "shadowWaitMs": 0,
+        "failedCount": 0,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "card.create",
+          "card.focus",
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [
+          "ExtensionCard"
+        ],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "decisionLog": {
+        "id": 385,
+        "at": "2026-10-29T20:58:01.820Z",
+        "accountId": "account_a45eca6f-a56e-4899-89f6-0137b52d35d6",
+        "spaceId": "space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+        "path": "browser",
+        "text": "今天练了40分钟背",
+        "trace": {
+          "id": "decision_71407074-5cd0-44ad-92bd-b6778d887c02",
+          "mode": "on",
+          "status": "complete",
+          "taskId": "feval_mvu0yx44_b4fcf1ab_record-40",
+          "clauses": [
+            "今天练了40分钟背"
+          ],
+          "decisions": [
+            {
+              "text": "今天练了40分钟背",
+              "route": "ext.example.fitness-log",
+              "probability": 0.9895293835937664,
+              "probabilities": {
+                "chat": 0.003408994165130381,
+                "answer": 9.015787491298608e-05,
+                "search": 7.630434937493089e-05,
+                "countdown": 0.0002246400015973968,
+                "todo": 0.0001739062413538191,
+                "note": 0.005815677578404632,
+                "generate": 6.096044268952538e-05,
+                "focus": 4.2749392628809795e-05,
+                "overview": 8.167184798553602e-05,
+                "restore": 2.581053679429331e-05,
+                "highlight": 4.104274003005352e-05,
+                "edit": 0.00018654015496143977,
+                "arrange": 4.477153081507111e-05,
+                "delete": 7.054645527047594e-05,
+                "undo": 6.599940424105934e-05,
+                "unsupported": 6.084369004319246e-05,
+                "ext.example.fitness-log": 0.9895293835937664
+              },
+              "none": false,
+              "latencyMs": 1716,
+              "failed": false
+            }
+          ],
+          "route": "ext.example.fitness-log",
+          "probability": 0.9895293835937664,
+          "latencyMs": 1716,
+          "routeLatencyMs": 1716,
+          "legacyElapsedMs": 4287,
+          "shadowWaitMs": 0,
+          "failedCount": 0,
+          "legacyKind": "envelope",
+          "legacyUsedProvider": "stepfun",
+          "legacyActionTypes": [
+            "card.create",
+            "card.focus",
+            "subtitle.show"
+          ],
+          "legacyCardTypes": [
+            "ExtensionCard"
+          ],
+          "plannerCalls": 1,
+          "directClauses": 0
+        },
+        "outcome": "succeeded",
+        "undone": false
+      },
+      "traceSource": "decision-log",
+      "trace": {
+        "id": "decision_71407074-5cd0-44ad-92bd-b6778d887c02",
+        "mode": "on",
+        "status": "complete",
+        "taskId": "feval_mvu0yx44_b4fcf1ab_record-40",
+        "clauses": [
+          "今天练了40分钟背"
+        ],
+        "decisions": [
+          {
+            "text": "今天练了40分钟背",
+            "route": "ext.example.fitness-log",
+            "probability": 0.9895293835937664,
+            "probabilities": {
+              "chat": 0.003408994165130381,
+              "answer": 9.015787491298608e-05,
+              "search": 7.630434937493089e-05,
+              "countdown": 0.0002246400015973968,
+              "todo": 0.0001739062413538191,
+              "note": 0.005815677578404632,
+              "generate": 6.096044268952538e-05,
+              "focus": 4.2749392628809795e-05,
+              "overview": 8.167184798553602e-05,
+              "restore": 2.581053679429331e-05,
+              "highlight": 4.104274003005352e-05,
+              "edit": 0.00018654015496143977,
+              "arrange": 4.477153081507111e-05,
+              "delete": 7.054645527047594e-05,
+              "undo": 6.599940424105934e-05,
+              "unsupported": 6.084369004319246e-05,
+              "ext.example.fitness-log": 0.9895293835937664
+            },
+            "none": false,
+            "latencyMs": 1716,
+            "failed": false
+          }
+        ],
+        "route": "ext.example.fitness-log",
+        "probability": 0.9895293835937664,
+        "latencyMs": 1716,
+        "routeLatencyMs": 1716,
+        "legacyElapsedMs": 4287,
+        "shadowWaitMs": 0,
+        "failedCount": 0,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "card.create",
+          "card.focus",
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [
+          "ExtensionCard"
+        ],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "calls": {
+        "planner": 1,
+        "directClauses": 0,
+        "usedProvider": "stepfun"
+      },
+      "observedFacts": {
+        "trainingDate": "2026-10-30",
+        "bodyPart": "背",
+        "minutes": 40
+      },
+      "receiptResponse": {
+        "kind": "task",
+        "task": {
+          "protocolVersion": "vivic-decision-v2",
+          "id": "feval_mvu0yx44_b4fcf1ab_record-40",
+          "step": 0,
+          "status": "completed",
+          "canvasVersion": 769,
+          "decision": "legacy-fallback",
+          "reason": "v2_not_configured"
+        },
+        "message": "已完成。"
+      },
+      "ownerAfter": {
+        "schemaVersion": 1,
+        "id": "space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+        "title": "路由评测专用（非用户空间）",
+        "version": 769,
+        "updatedAt": "2026-10-29T20:58:01.876Z",
+        "cardsById": {
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93": {
+            "id": "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+            "variant": "standard",
+            "sources": [],
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 360,
+              "height": 300,
+              "pinned": false,
+              "surface": "display"
+            },
+            "metadata": {
+              "createdAt": "2026-10-29T20:58:01.803Z",
+              "updatedAt": "2026-10-29T20:58:01.803Z",
+              "aliases": [
+                "健身记录"
+              ]
+            },
+            "type": "ExtensionCard",
+            "displayProps": {
+              "def": {
+                "id": "example.fitness-log",
+                "version": "1.0.0",
+                "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+              },
+              "config": {
+                "title": "训练记录"
+              },
+              "data": {
+                "trainingDate": "2026-10-30",
+                "bodyPart": "背",
+                "minutes": 40
+              },
+              "state": {
+                "note": ""
+              }
+            },
+            "sourceData": {}
+          }
+        },
+        "cardOrder": [
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93"
+        ],
+        "viewport": {
+          "x": 0,
+          "y": 0,
+          "zoom": 1
+        },
+        "focusHistory": [
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93"
+        ],
+        "processedRequestIds": [
+          "slots_df529e48-dedb-40a8-a73d-b59c555b80ab"
+        ]
+      },
+      "totalLatencyMs": 4427
+    },
+    {
+      "id": "generalize-35",
+      "text": "再记一次背部锻炼，今天做了35分钟",
+      "expected": {
+        "kind": "record",
+        "minutes": 35
+      },
+      "checks": [
+        {
+          "name": "sse-accepted",
+          "pass": true,
+          "observed": null
+        },
+        {
+          "name": "trace-complete-on",
+          "pass": true,
+          "observed": {
+            "id": "decision_8c2ec5e1-c197-4e3c-848d-e45804ac1a53",
+            "mode": "on",
+            "status": "complete",
+            "taskId": "feval_mvu0yx44_b4fcf1ab_generalize-35",
+            "clauses": [
+              "再记一次背部锻炼，今天做了35分钟"
+            ],
+            "decisions": [
+              {
+                "text": "再记一次背部锻炼，今天做了35分钟",
+                "route": "ext.example.fitness-log",
+                "probability": 0.9957505527540758,
+                "probabilities": {
+                  "chat": 0.0004029704876560753,
+                  "answer": 3.164665406581054e-05,
+                  "search": 2.4282880192678128e-05,
+                  "countdown": 6.491413292786061e-05,
+                  "todo": 4.6983197703372154e-05,
+                  "note": 0.0007043437966315641,
+                  "generate": 2.3239399003892693e-05,
+                  "focus": 4.196244321647285e-05,
+                  "overview": 2.1952881013799294e-05,
+                  "restore": 1.283260353478901e-05,
+                  "highlight": 3.220185837675512e-05,
+                  "edit": 0.0026210014717111705,
+                  "arrange": 2.0754403532795674e-05,
+                  "delete": 2.9060645199196593e-05,
+                  "undo": 0.00014080419159801798,
+                  "unsupported": 3.0496199560070526e-05,
+                  "ext.example.fitness-log": 0.9957505527540758
+                },
+                "none": false,
+                "latencyMs": 1716,
+                "failed": false
+              }
+            ],
+            "route": "ext.example.fitness-log",
+            "probability": 0.9957505527540758,
+            "latencyMs": 1716,
+            "routeLatencyMs": 1716,
+            "legacyElapsedMs": 8268,
+            "shadowWaitMs": 0,
+            "failedCount": 0,
+            "legacyKind": "envelope",
+            "legacyUsedProvider": "stepfun",
+            "legacyActionTypes": [
+              "card.create",
+              "card.focus",
+              "subtitle.show"
+            ],
+            "legacyCardTypes": [
+              "ExtensionCard"
+            ],
+            "plannerCalls": 1,
+            "directClauses": 0
+          }
+        },
+        {
+          "name": "extension-route",
+          "pass": true,
+          "observed": "ext.example.fitness-log"
+        },
+        {
+          "name": "real-main-model-call-recorded",
+          "pass": true,
+          "observed": {
+            "planner": 1,
+            "directClauses": 0,
+            "usedProvider": "stepfun"
+          }
+        },
+        {
+          "name": "extension-has-no-new-direct-execution-grant",
+          "pass": true,
+          "observed": 0
+        },
+        {
+          "name": "single-fresh-extension-card",
+          "pass": true,
+          "observed": [
+            {
+              "id": "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd",
+              "type": "ExtensionCard"
+            }
+          ]
+        },
+        {
+          "name": "exact-installed-definition",
+          "pass": true,
+          "observed": {
+            "id": "example.fitness-log",
+            "version": "1.0.0",
+            "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+          }
+        },
+        {
+          "name": "today-in-shanghai",
+          "pass": true,
+          "observed": {
+            "actual": "2026-10-30",
+            "dates": [
+              "2026-10-30"
+            ]
+          }
+        },
+        {
+          "name": "exact-user-facts-not-demo-or-coercion",
+          "pass": true,
+          "observed": {
+            "actual": {
+              "trainingDate": "2026-10-30",
+              "bodyPart": "背",
+              "minutes": 35
+            },
+            "expectedMinutes": 35,
+            "expectedBodyPart": "背"
+          }
+        },
+        {
+          "name": "only-explicit-display-defaults",
+          "pass": true,
+          "observed": {
+            "config": {
+              "title": "训练记录"
+            },
+            "state": {
+              "note": ""
+            }
+          }
+        },
+        {
+          "name": "no-invented-source-facts",
+          "pass": true,
+          "observed": null
+        },
+        {
+          "name": "no-unrequested-mutation-or-host-operation",
+          "pass": true,
+          "observed": null
+        },
+        {
+          "name": "real-pending-execution-id",
+          "pass": true,
+          "observed": null
+        },
+        {
+          "name": "card-schema",
+          "pass": true,
+          "observed": null
+        },
+        {
+          "name": "instance-schema",
+          "pass": true,
+          "observed": null
+        },
+        {
+          "name": "real-execution-receipt-completed",
+          "pass": true,
+          "observed": {
+            "protocolVersion": "vivic-decision-v2",
+            "id": "feval_mvu0yx44_b4fcf1ab_generalize-35",
+            "step": 0,
+            "status": "completed",
+            "canvasVersion": 770,
+            "decision": "legacy-fallback",
+            "reason": "v2_not_configured"
+          }
+        },
+        {
+          "name": "previous-records-preserved",
+          "pass": true,
+          "observed": null
+        },
+        {
+          "name": "one-new-record-persisted",
+          "pass": true,
+          "observed": null
+        },
+        {
+          "name": "generalization-is-not-an-exact-manifest-example",
+          "pass": true,
+          "observed": null
+        }
+      ],
+      "status": "passed",
+      "execution": {
+        "committed": true,
+        "requestId": "feval_mvu0yx44_b4fcf1ab_2_generalize-35-commit",
+        "storageReceipt": {
+          "requestId": "feval_mvu0yx44_b4fcf1ab_2_generalize-35-commit",
+          "status": "succeeded",
+          "version": 770
+        },
+        "recoveredAfterWriteError": null,
+        "createdCardIds": [
+          "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd"
+        ],
+        "ownerAfterCommit": {
+          "serverVersion": 770,
+          "record": {
+            "schemaVersion": 1,
+            "id": "space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+            "title": "路由评测专用（非用户空间）",
+            "version": 770,
+            "updatedAt": "2026-10-29T20:58:10.254Z",
+            "cardsById": {
+              "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93": {
+                "id": "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+                "variant": "standard",
+                "sources": [],
+                "layout": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 360,
+                  "height": 300,
+                  "pinned": false,
+                  "surface": "display"
+                },
+                "metadata": {
+                  "createdAt": "2026-10-29T20:58:01.803Z",
+                  "updatedAt": "2026-10-29T20:58:01.803Z",
+                  "aliases": [
+                    "健身记录"
+                  ]
+                },
+                "type": "ExtensionCard",
+                "displayProps": {
+                  "def": {
+                    "id": "example.fitness-log",
+                    "version": "1.0.0",
+                    "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+                  },
+                  "config": {
+                    "title": "训练记录"
+                  },
+                  "data": {
+                    "trainingDate": "2026-10-30",
+                    "bodyPart": "背",
+                    "minutes": 40
+                  },
+                  "state": {
+                    "note": ""
+                  }
+                },
+                "sourceData": {}
+              },
+              "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd": {
+                "id": "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd",
+                "variant": "standard",
+                "sources": [],
+                "layout": {
+                  "x": 408,
+                  "y": 0,
+                  "width": 360,
+                  "height": 300,
+                  "pinned": false,
+                  "surface": "display"
+                },
+                "metadata": {
+                  "createdAt": "2026-10-29T20:58:10.212Z",
+                  "updatedAt": "2026-10-29T20:58:10.212Z",
+                  "aliases": [
+                    "健身记录"
+                  ]
+                },
+                "type": "ExtensionCard",
+                "displayProps": {
+                  "def": {
+                    "id": "example.fitness-log",
+                    "version": "1.0.0",
+                    "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+                  },
+                  "config": {
+                    "title": "训练记录"
+                  },
+                  "data": {
+                    "trainingDate": "2026-10-30",
+                    "bodyPart": "背",
+                    "minutes": 35
+                  },
+                  "state": {
+                    "note": ""
+                  }
+                },
+                "sourceData": {}
+              }
+            },
+            "cardOrder": [
+              "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+              "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd"
+            ],
+            "viewport": {
+              "x": 0,
+              "y": 0,
+              "zoom": 1
+            },
+            "focusHistory": [
+              "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+              "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd"
+            ],
+            "processedRequestIds": [
+              "slots_df529e48-dedb-40a8-a73d-b59c555b80ab",
+              "slots_9c5bf77e-b65d-46fa-9768-623ab0f6aa8b"
+            ]
+          }
+        }
+      },
+      "ownerBefore": {
+        "schemaVersion": 1,
+        "id": "space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+        "title": "路由评测专用（非用户空间）",
+        "version": 769,
+        "updatedAt": "2026-10-29T20:58:01.876Z",
+        "cardsById": {
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93": {
+            "id": "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+            "variant": "standard",
+            "sources": [],
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 360,
+              "height": 300,
+              "pinned": false,
+              "surface": "display"
+            },
+            "metadata": {
+              "createdAt": "2026-10-29T20:58:01.803Z",
+              "updatedAt": "2026-10-29T20:58:01.803Z",
+              "aliases": [
+                "健身记录"
+              ]
+            },
+            "type": "ExtensionCard",
+            "displayProps": {
+              "def": {
+                "id": "example.fitness-log",
+                "version": "1.0.0",
+                "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+              },
+              "config": {
+                "title": "训练记录"
+              },
+              "data": {
+                "trainingDate": "2026-10-30",
+                "bodyPart": "背",
+                "minutes": 40
+              },
+              "state": {
+                "note": ""
+              }
+            },
+            "sourceData": {}
+          }
+        },
+        "cardOrder": [
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93"
+        ],
+        "viewport": {
+          "x": 0,
+          "y": 0,
+          "zoom": 1
+        },
+        "focusHistory": [
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93"
+        ],
+        "processedRequestIds": [
+          "slots_df529e48-dedb-40a8-a73d-b59c555b80ab"
+        ]
+      },
+      "taskId": "feval_mvu0yx44_b4fcf1ab_generalize-35",
+      "startedAt": "2026-10-29T20:58:01.935Z",
+      "todayShanghaiStart": "2026-10-30",
+      "events": [
+        {
+          "event": "accepted",
+          "elapsedMs": 13,
+          "data": {
+            "requestId": "d03fa08e-bbc3-4254-a489-426d4fbd870d"
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 1730,
+          "data": {
+            "requestId": "d03fa08e-bbc3-4254-a489-426d4fbd870d",
+            "stage": "rules",
+            "status": "started"
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 1730,
+          "data": {
+            "requestId": "d03fa08e-bbc3-4254-a489-426d4fbd870d",
+            "stage": "rules",
+            "status": "completed",
+            "elapsedMs": 0
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 1730,
+          "data": {
+            "requestId": "d03fa08e-bbc3-4254-a489-426d4fbd870d",
+            "stage": "data",
+            "status": "started"
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 1730,
+          "data": {
+            "requestId": "d03fa08e-bbc3-4254-a489-426d4fbd870d",
+            "stage": "data",
+            "status": "completed",
+            "elapsedMs": 0
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 1730,
+          "data": {
+            "requestId": "d03fa08e-bbc3-4254-a489-426d4fbd870d",
+            "stage": "planner",
+            "status": "started"
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 8279,
+          "data": {
+            "requestId": "d03fa08e-bbc3-4254-a489-426d4fbd870d",
+            "stage": "planner",
+            "status": "completed",
+            "elapsedMs": 6545
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 8279,
+          "data": {
+            "requestId": "d03fa08e-bbc3-4254-a489-426d4fbd870d",
+            "stage": "total",
+            "status": "completed",
+            "elapsedMs": 6551
+          }
+        },
+        {
+          "event": "result",
+          "elapsedMs": 8279,
+          "data": {
+            "trace": {
+              "id": "decision_8c2ec5e1-c197-4e3c-848d-e45804ac1a53",
+              "mode": "on",
+              "status": "complete",
+              "taskId": "feval_mvu0yx44_b4fcf1ab_generalize-35",
+              "clauses": [
+                "再记一次背部锻炼，今天做了35分钟"
+              ],
+              "decisions": [
+                {
+                  "text": "再记一次背部锻炼，今天做了35分钟",
+                  "route": "ext.example.fitness-log",
+                  "probability": 0.9957505527540758,
+                  "probabilities": {
+                    "chat": 0.0004029704876560753,
+                    "answer": 3.164665406581054e-05,
+                    "search": 2.4282880192678128e-05,
+                    "countdown": 6.491413292786061e-05,
+                    "todo": 4.6983197703372154e-05,
+                    "note": 0.0007043437966315641,
+                    "generate": 2.3239399003892693e-05,
+                    "focus": 4.196244321647285e-05,
+                    "overview": 2.1952881013799294e-05,
+                    "restore": 1.283260353478901e-05,
+                    "highlight": 3.220185837675512e-05,
+                    "edit": 0.0026210014717111705,
+                    "arrange": 2.0754403532795674e-05,
+                    "delete": 2.9060645199196593e-05,
+                    "undo": 0.00014080419159801798,
+                    "unsupported": 3.0496199560070526e-05,
+                    "ext.example.fitness-log": 0.9957505527540758
+                  },
+                  "none": false,
+                  "latencyMs": 1716,
+                  "failed": false
+                }
+              ],
+              "route": "ext.example.fitness-log",
+              "probability": 0.9957505527540758,
+              "latencyMs": 1716,
+              "routeLatencyMs": 1716,
+              "legacyElapsedMs": 8268,
+              "shadowWaitMs": 0,
+              "failedCount": 0,
+              "legacyKind": "envelope",
+              "legacyUsedProvider": "stepfun",
+              "legacyActionTypes": [
+                "card.create",
+                "card.focus",
+                "subtitle.show"
+              ],
+              "legacyCardTypes": [
+                "ExtensionCard"
+              ],
+              "plannerCalls": 1,
+              "directClauses": 0
+            },
+            "kind": "envelope",
+            "envelope": {
+              "schemaVersion": "0.6",
+              "requestId": "slots_9c5bf77e-b65d-46fa-9768-623ab0f6aa8b",
+              "canvasId": "space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+              "spokenText": "已记录今天背部训练35分钟",
+              "actions": [
+                {
+                  "type": "card.create",
+                  "card": {
+                    "id": "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd",
+                    "variant": "standard",
+                    "sources": [],
+                    "layout": {
+                      "x": 384,
+                      "y": 0,
+                      "width": 360,
+                      "height": 300,
+                      "pinned": false
+                    },
+                    "metadata": {
+                      "createdAt": "2026-10-29T20:58:10.212Z",
+                      "updatedAt": "2026-10-29T20:58:10.212Z",
+                      "aliases": [
+                        "健身记录"
+                      ]
+                    },
+                    "type": "ExtensionCard",
+                    "displayProps": {
+                      "def": {
+                        "id": "example.fitness-log",
+                        "version": "1.0.0",
+                        "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+                      },
+                      "config": {
+                        "title": "训练记录"
+                      },
+                      "data": {
+                        "trainingDate": "2026-10-30",
+                        "bodyPart": "背",
+                        "minutes": 35
+                      },
+                      "state": {
+                        "note": ""
+                      }
+                    },
+                    "sourceData": {}
+                  }
+                },
+                {
+                  "type": "card.focus",
+                  "targetId": "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd"
+                },
+                {
+                  "type": "subtitle.show",
+                  "text": "已为您记录2026-10-30的背部锻炼，时长35分钟。"
+                }
+              ]
+            },
+            "task": {
+              "protocolVersion": "vivic-decision-v2",
+              "id": "feval_mvu0yx44_b4fcf1ab_generalize-35",
+              "step": 0,
+              "status": "awaiting_execution",
+              "executionId": "exec_00493ec5-60c3-4877-b06a-b962ac5e75f6",
+              "canvasVersion": 769,
+              "decision": "legacy-fallback",
+              "reason": "v2_not_configured"
+            },
+            "usedProvider": "stepfun"
+          }
+        }
+      ],
+      "result": {
+        "trace": {
+          "id": "decision_8c2ec5e1-c197-4e3c-848d-e45804ac1a53",
+          "mode": "on",
+          "status": "complete",
+          "taskId": "feval_mvu0yx44_b4fcf1ab_generalize-35",
+          "clauses": [
+            "再记一次背部锻炼，今天做了35分钟"
+          ],
+          "decisions": [
+            {
+              "text": "再记一次背部锻炼，今天做了35分钟",
+              "route": "ext.example.fitness-log",
+              "probability": 0.9957505527540758,
+              "probabilities": {
+                "chat": 0.0004029704876560753,
+                "answer": 3.164665406581054e-05,
+                "search": 2.4282880192678128e-05,
+                "countdown": 6.491413292786061e-05,
+                "todo": 4.6983197703372154e-05,
+                "note": 0.0007043437966315641,
+                "generate": 2.3239399003892693e-05,
+                "focus": 4.196244321647285e-05,
+                "overview": 2.1952881013799294e-05,
+                "restore": 1.283260353478901e-05,
+                "highlight": 3.220185837675512e-05,
+                "edit": 0.0026210014717111705,
+                "arrange": 2.0754403532795674e-05,
+                "delete": 2.9060645199196593e-05,
+                "undo": 0.00014080419159801798,
+                "unsupported": 3.0496199560070526e-05,
+                "ext.example.fitness-log": 0.9957505527540758
+              },
+              "none": false,
+              "latencyMs": 1716,
+              "failed": false
+            }
+          ],
+          "route": "ext.example.fitness-log",
+          "probability": 0.9957505527540758,
+          "latencyMs": 1716,
+          "routeLatencyMs": 1716,
+          "legacyElapsedMs": 8268,
+          "shadowWaitMs": 0,
+          "failedCount": 0,
+          "legacyKind": "envelope",
+          "legacyUsedProvider": "stepfun",
+          "legacyActionTypes": [
+            "card.create",
+            "card.focus",
+            "subtitle.show"
+          ],
+          "legacyCardTypes": [
+            "ExtensionCard"
+          ],
+          "plannerCalls": 1,
+          "directClauses": 0
+        },
+        "kind": "envelope",
+        "envelope": {
+          "schemaVersion": "0.6",
+          "requestId": "slots_9c5bf77e-b65d-46fa-9768-623ab0f6aa8b",
+          "canvasId": "space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+          "spokenText": "已记录今天背部训练35分钟",
+          "actions": [
+            {
+              "type": "card.create",
+              "card": {
+                "id": "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd",
+                "variant": "standard",
+                "sources": [],
+                "layout": {
+                  "x": 384,
+                  "y": 0,
+                  "width": 360,
+                  "height": 300,
+                  "pinned": false
+                },
+                "metadata": {
+                  "createdAt": "2026-10-29T20:58:10.212Z",
+                  "updatedAt": "2026-10-29T20:58:10.212Z",
+                  "aliases": [
+                    "健身记录"
+                  ]
+                },
+                "type": "ExtensionCard",
+                "displayProps": {
+                  "def": {
+                    "id": "example.fitness-log",
+                    "version": "1.0.0",
+                    "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+                  },
+                  "config": {
+                    "title": "训练记录"
+                  },
+                  "data": {
+                    "trainingDate": "2026-10-30",
+                    "bodyPart": "背",
+                    "minutes": 35
+                  },
+                  "state": {
+                    "note": ""
+                  }
+                },
+                "sourceData": {}
+              }
+            },
+            {
+              "type": "card.focus",
+              "targetId": "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd"
+            },
+            {
+              "type": "subtitle.show",
+              "text": "已为您记录2026-10-30的背部锻炼，时长35分钟。"
+            }
+          ]
+        },
+        "task": {
+          "protocolVersion": "vivic-decision-v2",
+          "id": "feval_mvu0yx44_b4fcf1ab_generalize-35",
+          "step": 0,
+          "status": "awaiting_execution",
+          "executionId": "exec_00493ec5-60c3-4877-b06a-b962ac5e75f6",
+          "canvasVersion": 769,
+          "decision": "legacy-fallback",
+          "reason": "v2_not_configured"
+        },
+        "usedProvider": "stepfun"
+      },
+      "responseLatencyMs": 8280,
+      "todayShanghaiEnd": "2026-10-30",
+      "finishedResponseAt": "2026-10-29T20:58:10.216Z",
+      "cards": [
+        {
+          "id": "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd",
+          "variant": "standard",
+          "sources": [],
+          "layout": {
+            "x": 384,
+            "y": 0,
+            "width": 360,
+            "height": 300,
+            "pinned": false
+          },
+          "metadata": {
+            "createdAt": "2026-10-29T20:58:10.212Z",
+            "updatedAt": "2026-10-29T20:58:10.212Z",
+            "aliases": [
+              "健身记录"
+            ]
+          },
+          "type": "ExtensionCard",
+          "displayProps": {
+            "def": {
+              "id": "example.fitness-log",
+              "version": "1.0.0",
+              "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+            },
+            "config": {
+              "title": "训练记录"
+            },
+            "data": {
+              "trainingDate": "2026-10-30",
+              "bodyPart": "背",
+              "minutes": 35
+            },
+            "state": {
+              "note": ""
+            }
+          },
+          "sourceData": {}
+        }
+      ],
+      "initialTrace": {
+        "id": "decision_8c2ec5e1-c197-4e3c-848d-e45804ac1a53",
+        "mode": "on",
+        "status": "complete",
+        "taskId": "feval_mvu0yx44_b4fcf1ab_generalize-35",
+        "clauses": [
+          "再记一次背部锻炼，今天做了35分钟"
+        ],
+        "decisions": [
+          {
+            "text": "再记一次背部锻炼，今天做了35分钟",
+            "route": "ext.example.fitness-log",
+            "probability": 0.9957505527540758,
+            "probabilities": {
+              "chat": 0.0004029704876560753,
+              "answer": 3.164665406581054e-05,
+              "search": 2.4282880192678128e-05,
+              "countdown": 6.491413292786061e-05,
+              "todo": 4.6983197703372154e-05,
+              "note": 0.0007043437966315641,
+              "generate": 2.3239399003892693e-05,
+              "focus": 4.196244321647285e-05,
+              "overview": 2.1952881013799294e-05,
+              "restore": 1.283260353478901e-05,
+              "highlight": 3.220185837675512e-05,
+              "edit": 0.0026210014717111705,
+              "arrange": 2.0754403532795674e-05,
+              "delete": 2.9060645199196593e-05,
+              "undo": 0.00014080419159801798,
+              "unsupported": 3.0496199560070526e-05,
+              "ext.example.fitness-log": 0.9957505527540758
+            },
+            "none": false,
+            "latencyMs": 1716,
+            "failed": false
+          }
+        ],
+        "route": "ext.example.fitness-log",
+        "probability": 0.9957505527540758,
+        "latencyMs": 1716,
+        "routeLatencyMs": 1716,
+        "legacyElapsedMs": 8268,
+        "shadowWaitMs": 0,
+        "failedCount": 0,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "card.create",
+          "card.focus",
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [
+          "ExtensionCard"
+        ],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "decisionLog": {
+        "id": 386,
+        "at": "2026-10-29T20:58:10.214Z",
+        "accountId": "account_a45eca6f-a56e-4899-89f6-0137b52d35d6",
+        "spaceId": "space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+        "path": "browser",
+        "text": "再记一次背部锻炼，今天做了35分钟",
+        "trace": {
+          "id": "decision_8c2ec5e1-c197-4e3c-848d-e45804ac1a53",
+          "mode": "on",
+          "status": "complete",
+          "taskId": "feval_mvu0yx44_b4fcf1ab_generalize-35",
+          "clauses": [
+            "再记一次背部锻炼，今天做了35分钟"
+          ],
+          "decisions": [
+            {
+              "text": "再记一次背部锻炼，今天做了35分钟",
+              "route": "ext.example.fitness-log",
+              "probability": 0.9957505527540758,
+              "probabilities": {
+                "chat": 0.0004029704876560753,
+                "answer": 3.164665406581054e-05,
+                "search": 2.4282880192678128e-05,
+                "countdown": 6.491413292786061e-05,
+                "todo": 4.6983197703372154e-05,
+                "note": 0.0007043437966315641,
+                "generate": 2.3239399003892693e-05,
+                "focus": 4.196244321647285e-05,
+                "overview": 2.1952881013799294e-05,
+                "restore": 1.283260353478901e-05,
+                "highlight": 3.220185837675512e-05,
+                "edit": 0.0026210014717111705,
+                "arrange": 2.0754403532795674e-05,
+                "delete": 2.9060645199196593e-05,
+                "undo": 0.00014080419159801798,
+                "unsupported": 3.0496199560070526e-05,
+                "ext.example.fitness-log": 0.9957505527540758
+              },
+              "none": false,
+              "latencyMs": 1716,
+              "failed": false
+            }
+          ],
+          "route": "ext.example.fitness-log",
+          "probability": 0.9957505527540758,
+          "latencyMs": 1716,
+          "routeLatencyMs": 1716,
+          "legacyElapsedMs": 8268,
+          "shadowWaitMs": 0,
+          "failedCount": 0,
+          "legacyKind": "envelope",
+          "legacyUsedProvider": "stepfun",
+          "legacyActionTypes": [
+            "card.create",
+            "card.focus",
+            "subtitle.show"
+          ],
+          "legacyCardTypes": [
+            "ExtensionCard"
+          ],
+          "plannerCalls": 1,
+          "directClauses": 0
+        },
+        "outcome": "succeeded",
+        "undone": false
+      },
+      "traceSource": "decision-log",
+      "trace": {
+        "id": "decision_8c2ec5e1-c197-4e3c-848d-e45804ac1a53",
+        "mode": "on",
+        "status": "complete",
+        "taskId": "feval_mvu0yx44_b4fcf1ab_generalize-35",
+        "clauses": [
+          "再记一次背部锻炼，今天做了35分钟"
+        ],
+        "decisions": [
+          {
+            "text": "再记一次背部锻炼，今天做了35分钟",
+            "route": "ext.example.fitness-log",
+            "probability": 0.9957505527540758,
+            "probabilities": {
+              "chat": 0.0004029704876560753,
+              "answer": 3.164665406581054e-05,
+              "search": 2.4282880192678128e-05,
+              "countdown": 6.491413292786061e-05,
+              "todo": 4.6983197703372154e-05,
+              "note": 0.0007043437966315641,
+              "generate": 2.3239399003892693e-05,
+              "focus": 4.196244321647285e-05,
+              "overview": 2.1952881013799294e-05,
+              "restore": 1.283260353478901e-05,
+              "highlight": 3.220185837675512e-05,
+              "edit": 0.0026210014717111705,
+              "arrange": 2.0754403532795674e-05,
+              "delete": 2.9060645199196593e-05,
+              "undo": 0.00014080419159801798,
+              "unsupported": 3.0496199560070526e-05,
+              "ext.example.fitness-log": 0.9957505527540758
+            },
+            "none": false,
+            "latencyMs": 1716,
+            "failed": false
+          }
+        ],
+        "route": "ext.example.fitness-log",
+        "probability": 0.9957505527540758,
+        "latencyMs": 1716,
+        "routeLatencyMs": 1716,
+        "legacyElapsedMs": 8268,
+        "shadowWaitMs": 0,
+        "failedCount": 0,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "card.create",
+          "card.focus",
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [
+          "ExtensionCard"
+        ],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "calls": {
+        "planner": 1,
+        "directClauses": 0,
+        "usedProvider": "stepfun"
+      },
+      "observedFacts": {
+        "trainingDate": "2026-10-30",
+        "bodyPart": "背",
+        "minutes": 35
+      },
+      "receiptResponse": {
+        "kind": "task",
+        "task": {
+          "protocolVersion": "vivic-decision-v2",
+          "id": "feval_mvu0yx44_b4fcf1ab_generalize-35",
+          "step": 0,
+          "status": "completed",
+          "canvasVersion": 770,
+          "decision": "legacy-fallback",
+          "reason": "v2_not_configured"
+        },
+        "message": "已完成。"
+      },
+      "ownerAfter": {
+        "schemaVersion": 1,
+        "id": "space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+        "title": "路由评测专用（非用户空间）",
+        "version": 770,
+        "updatedAt": "2026-10-29T20:58:10.254Z",
+        "cardsById": {
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93": {
+            "id": "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+            "variant": "standard",
+            "sources": [],
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 360,
+              "height": 300,
+              "pinned": false,
+              "surface": "display"
+            },
+            "metadata": {
+              "createdAt": "2026-10-29T20:58:01.803Z",
+              "updatedAt": "2026-10-29T20:58:01.803Z",
+              "aliases": [
+                "健身记录"
+              ]
+            },
+            "type": "ExtensionCard",
+            "displayProps": {
+              "def": {
+                "id": "example.fitness-log",
+                "version": "1.0.0",
+                "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+              },
+              "config": {
+                "title": "训练记录"
+              },
+              "data": {
+                "trainingDate": "2026-10-30",
+                "bodyPart": "背",
+                "minutes": 40
+              },
+              "state": {
+                "note": ""
+              }
+            },
+            "sourceData": {}
+          },
+          "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd": {
+            "id": "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd",
+            "variant": "standard",
+            "sources": [],
+            "layout": {
+              "x": 408,
+              "y": 0,
+              "width": 360,
+              "height": 300,
+              "pinned": false,
+              "surface": "display"
+            },
+            "metadata": {
+              "createdAt": "2026-10-29T20:58:10.212Z",
+              "updatedAt": "2026-10-29T20:58:10.212Z",
+              "aliases": [
+                "健身记录"
+              ]
+            },
+            "type": "ExtensionCard",
+            "displayProps": {
+              "def": {
+                "id": "example.fitness-log",
+                "version": "1.0.0",
+                "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+              },
+              "config": {
+                "title": "训练记录"
+              },
+              "data": {
+                "trainingDate": "2026-10-30",
+                "bodyPart": "背",
+                "minutes": 35
+              },
+              "state": {
+                "note": ""
+              }
+            },
+            "sourceData": {}
+          }
+        },
+        "cardOrder": [
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+          "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd"
+        ],
+        "viewport": {
+          "x": 0,
+          "y": 0,
+          "zoom": 1
+        },
+        "focusHistory": [
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+          "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd"
+        ],
+        "processedRequestIds": [
+          "slots_df529e48-dedb-40a8-a73d-b59c555b80ab",
+          "slots_9c5bf77e-b65d-46fa-9768-623ab0f6aa8b"
+        ]
+      },
+      "totalLatencyMs": 8382,
+      "notInManifestExamples": true
+    },
+    {
+      "id": "missing-minutes",
+      "text": "今天练背",
+      "expected": {
+        "kind": "clarify",
+        "reason": "No duration supplied for a new record; previous records are not evidence."
+      },
+      "checks": [
+        {
+          "name": "sse-accepted",
+          "pass": true,
+          "observed": null
+        },
+        {
+          "name": "trace-complete-on",
+          "pass": true,
+          "observed": {
+            "id": "decision_b61edeca-aa65-4083-a852-e7b5b72e831f",
+            "mode": "on",
+            "status": "complete",
+            "taskId": "feval_mvu0yx44_b4fcf1ab_missing-minutes",
+            "clauses": [
+              "今天练背"
+            ],
+            "decisions": [
+              {
+                "text": "今天练背",
+                "route": "ext.example.fitness-log",
+                "probability": 0.9199750986326323,
+                "probabilities": {
+                  "chat": 0.029540416091693486,
+                  "answer": 0.0007840753276338829,
+                  "search": 0.00045439113080167505,
+                  "countdown": 0.0008241032166980288,
+                  "todo": 0.0040142801312906895,
+                  "note": 0.00885106290243564,
+                  "generate": 0.00038461760964783874,
+                  "focus": 0.001188828804829396,
+                  "overview": 0.000792890382890974,
+                  "restore": 0.00039689269942414076,
+                  "highlight": 0.00034720885435156166,
+                  "edit": 0.030348184573694214,
+                  "arrange": 0.0005643594806605219,
+                  "delete": 0.0005419630907052135,
+                  "undo": 0.0004817346246106615,
+                  "unsupported": 0.000509892445999846,
+                  "ext.example.fitness-log": 0.9199750986326323
+                },
+                "none": false,
+                "latencyMs": 1961,
+                "failed": false
+              }
+            ],
+            "route": "ext.example.fitness-log",
+            "probability": 0.9199750986326323,
+            "latencyMs": 1961,
+            "routeLatencyMs": 1961,
+            "legacyElapsedMs": 2998,
+            "shadowWaitMs": 0,
+            "failedCount": 0,
+            "legacyKind": "clarify",
+            "legacyUsedProvider": "stepfun",
+            "legacyActionTypes": [],
+            "legacyCardTypes": [],
+            "plannerCalls": 1,
+            "directClauses": 0
+          }
+        },
+        {
+          "name": "clarification-not-error-or-coerced-record",
+          "pass": true,
+          "observed": {
+            "kind": "clarify",
+            "task": {
+              "protocolVersion": "vivic-decision-v2",
+              "id": "feval_mvu0yx44_b4fcf1ab_missing-minutes",
+              "step": 0,
+              "status": "awaiting_clarification",
+              "canvasVersion": 770,
+              "decision": "legacy-fallback",
+              "reason": "v2_not_configured",
+              "clarification": {
+                "question": "请问今天练背多少分钟？",
+                "candidates": []
+              }
+            },
+            "message": "请问今天练背多少分钟？"
+          }
+        },
+        {
+          "name": "no-new-extension-or-other-write-proposal",
+          "pass": true,
+          "observed": null
+        },
+        {
+          "name": "space-unchanged-without-confirmed-execution",
+          "pass": true,
+          "observed": null
+        }
+      ],
+      "status": "passed",
+      "execution": {
+        "committed": false
+      },
+      "ownerBefore": {
+        "schemaVersion": 1,
+        "id": "space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+        "title": "路由评测专用（非用户空间）",
+        "version": 770,
+        "updatedAt": "2026-10-29T20:58:10.254Z",
+        "cardsById": {
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93": {
+            "id": "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+            "variant": "standard",
+            "sources": [],
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 360,
+              "height": 300,
+              "pinned": false,
+              "surface": "display"
+            },
+            "metadata": {
+              "createdAt": "2026-10-29T20:58:01.803Z",
+              "updatedAt": "2026-10-29T20:58:01.803Z",
+              "aliases": [
+                "健身记录"
+              ]
+            },
+            "type": "ExtensionCard",
+            "displayProps": {
+              "def": {
+                "id": "example.fitness-log",
+                "version": "1.0.0",
+                "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+              },
+              "config": {
+                "title": "训练记录"
+              },
+              "data": {
+                "trainingDate": "2026-10-30",
+                "bodyPart": "背",
+                "minutes": 40
+              },
+              "state": {
+                "note": ""
+              }
+            },
+            "sourceData": {}
+          },
+          "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd": {
+            "id": "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd",
+            "variant": "standard",
+            "sources": [],
+            "layout": {
+              "x": 408,
+              "y": 0,
+              "width": 360,
+              "height": 300,
+              "pinned": false,
+              "surface": "display"
+            },
+            "metadata": {
+              "createdAt": "2026-10-29T20:58:10.212Z",
+              "updatedAt": "2026-10-29T20:58:10.212Z",
+              "aliases": [
+                "健身记录"
+              ]
+            },
+            "type": "ExtensionCard",
+            "displayProps": {
+              "def": {
+                "id": "example.fitness-log",
+                "version": "1.0.0",
+                "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+              },
+              "config": {
+                "title": "训练记录"
+              },
+              "data": {
+                "trainingDate": "2026-10-30",
+                "bodyPart": "背",
+                "minutes": 35
+              },
+              "state": {
+                "note": ""
+              }
+            },
+            "sourceData": {}
+          }
+        },
+        "cardOrder": [
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+          "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd"
+        ],
+        "viewport": {
+          "x": 0,
+          "y": 0,
+          "zoom": 1
+        },
+        "focusHistory": [
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+          "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd"
+        ],
+        "processedRequestIds": [
+          "slots_df529e48-dedb-40a8-a73d-b59c555b80ab",
+          "slots_9c5bf77e-b65d-46fa-9768-623ab0f6aa8b"
+        ]
+      },
+      "taskId": "feval_mvu0yx44_b4fcf1ab_missing-minutes",
+      "startedAt": "2026-10-29T20:58:10.335Z",
+      "todayShanghaiStart": "2026-10-30",
+      "events": [
+        {
+          "event": "accepted",
+          "elapsedMs": 13,
+          "data": {
+            "requestId": "f51867d0-163a-4d35-a528-a3f408f858fa"
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 1974,
+          "data": {
+            "requestId": "f51867d0-163a-4d35-a528-a3f408f858fa",
+            "stage": "rules",
+            "status": "started"
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 1974,
+          "data": {
+            "requestId": "f51867d0-163a-4d35-a528-a3f408f858fa",
+            "stage": "rules",
+            "status": "completed",
+            "elapsedMs": 0
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 1974,
+          "data": {
+            "requestId": "f51867d0-163a-4d35-a528-a3f408f858fa",
+            "stage": "data",
+            "status": "started"
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 1974,
+          "data": {
+            "requestId": "f51867d0-163a-4d35-a528-a3f408f858fa",
+            "stage": "data",
+            "status": "completed",
+            "elapsedMs": 0
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 1974,
+          "data": {
+            "requestId": "f51867d0-163a-4d35-a528-a3f408f858fa",
+            "stage": "planner",
+            "status": "started"
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 3010,
+          "data": {
+            "requestId": "f51867d0-163a-4d35-a528-a3f408f858fa",
+            "stage": "planner",
+            "status": "completed",
+            "elapsedMs": 1035
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 3010,
+          "data": {
+            "requestId": "f51867d0-163a-4d35-a528-a3f408f858fa",
+            "stage": "total",
+            "status": "completed",
+            "elapsedMs": 1036
+          }
+        },
+        {
+          "event": "result",
+          "elapsedMs": 3010,
+          "data": {
+            "trace": {
+              "id": "decision_b61edeca-aa65-4083-a852-e7b5b72e831f",
+              "mode": "on",
+              "status": "complete",
+              "taskId": "feval_mvu0yx44_b4fcf1ab_missing-minutes",
+              "clauses": [
+                "今天练背"
+              ],
+              "decisions": [
+                {
+                  "text": "今天练背",
+                  "route": "ext.example.fitness-log",
+                  "probability": 0.9199750986326323,
+                  "probabilities": {
+                    "chat": 0.029540416091693486,
+                    "answer": 0.0007840753276338829,
+                    "search": 0.00045439113080167505,
+                    "countdown": 0.0008241032166980288,
+                    "todo": 0.0040142801312906895,
+                    "note": 0.00885106290243564,
+                    "generate": 0.00038461760964783874,
+                    "focus": 0.001188828804829396,
+                    "overview": 0.000792890382890974,
+                    "restore": 0.00039689269942414076,
+                    "highlight": 0.00034720885435156166,
+                    "edit": 0.030348184573694214,
+                    "arrange": 0.0005643594806605219,
+                    "delete": 0.0005419630907052135,
+                    "undo": 0.0004817346246106615,
+                    "unsupported": 0.000509892445999846,
+                    "ext.example.fitness-log": 0.9199750986326323
+                  },
+                  "none": false,
+                  "latencyMs": 1961,
+                  "failed": false
+                }
+              ],
+              "route": "ext.example.fitness-log",
+              "probability": 0.9199750986326323,
+              "latencyMs": 1961,
+              "routeLatencyMs": 1961,
+              "legacyElapsedMs": 2998,
+              "shadowWaitMs": 0,
+              "failedCount": 0,
+              "legacyKind": "clarify",
+              "legacyUsedProvider": "stepfun",
+              "legacyActionTypes": [],
+              "legacyCardTypes": [],
+              "plannerCalls": 1,
+              "directClauses": 0
+            },
+            "kind": "clarify",
+            "task": {
+              "protocolVersion": "vivic-decision-v2",
+              "id": "feval_mvu0yx44_b4fcf1ab_missing-minutes",
+              "step": 0,
+              "status": "awaiting_clarification",
+              "canvasVersion": 770,
+              "decision": "legacy-fallback",
+              "reason": "v2_not_configured",
+              "clarification": {
+                "question": "请问今天练背多少分钟？",
+                "candidates": []
+              }
+            },
+            "message": "请问今天练背多少分钟？",
+            "usedProvider": "stepfun"
+          }
+        }
+      ],
+      "result": {
+        "trace": {
+          "id": "decision_b61edeca-aa65-4083-a852-e7b5b72e831f",
+          "mode": "on",
+          "status": "complete",
+          "taskId": "feval_mvu0yx44_b4fcf1ab_missing-minutes",
+          "clauses": [
+            "今天练背"
+          ],
+          "decisions": [
+            {
+              "text": "今天练背",
+              "route": "ext.example.fitness-log",
+              "probability": 0.9199750986326323,
+              "probabilities": {
+                "chat": 0.029540416091693486,
+                "answer": 0.0007840753276338829,
+                "search": 0.00045439113080167505,
+                "countdown": 0.0008241032166980288,
+                "todo": 0.0040142801312906895,
+                "note": 0.00885106290243564,
+                "generate": 0.00038461760964783874,
+                "focus": 0.001188828804829396,
+                "overview": 0.000792890382890974,
+                "restore": 0.00039689269942414076,
+                "highlight": 0.00034720885435156166,
+                "edit": 0.030348184573694214,
+                "arrange": 0.0005643594806605219,
+                "delete": 0.0005419630907052135,
+                "undo": 0.0004817346246106615,
+                "unsupported": 0.000509892445999846,
+                "ext.example.fitness-log": 0.9199750986326323
+              },
+              "none": false,
+              "latencyMs": 1961,
+              "failed": false
+            }
+          ],
+          "route": "ext.example.fitness-log",
+          "probability": 0.9199750986326323,
+          "latencyMs": 1961,
+          "routeLatencyMs": 1961,
+          "legacyElapsedMs": 2998,
+          "shadowWaitMs": 0,
+          "failedCount": 0,
+          "legacyKind": "clarify",
+          "legacyUsedProvider": "stepfun",
+          "legacyActionTypes": [],
+          "legacyCardTypes": [],
+          "plannerCalls": 1,
+          "directClauses": 0
+        },
+        "kind": "clarify",
+        "task": {
+          "protocolVersion": "vivic-decision-v2",
+          "id": "feval_mvu0yx44_b4fcf1ab_missing-minutes",
+          "step": 0,
+          "status": "awaiting_clarification",
+          "canvasVersion": 770,
+          "decision": "legacy-fallback",
+          "reason": "v2_not_configured",
+          "clarification": {
+            "question": "请问今天练背多少分钟？",
+            "candidates": []
+          }
+        },
+        "message": "请问今天练背多少分钟？",
+        "usedProvider": "stepfun"
+      },
+      "responseLatencyMs": 3011,
+      "todayShanghaiEnd": "2026-10-30",
+      "finishedResponseAt": "2026-10-29T20:58:13.347Z",
+      "cards": [],
+      "initialTrace": {
+        "id": "decision_b61edeca-aa65-4083-a852-e7b5b72e831f",
+        "mode": "on",
+        "status": "complete",
+        "taskId": "feval_mvu0yx44_b4fcf1ab_missing-minutes",
+        "clauses": [
+          "今天练背"
+        ],
+        "decisions": [
+          {
+            "text": "今天练背",
+            "route": "ext.example.fitness-log",
+            "probability": 0.9199750986326323,
+            "probabilities": {
+              "chat": 0.029540416091693486,
+              "answer": 0.0007840753276338829,
+              "search": 0.00045439113080167505,
+              "countdown": 0.0008241032166980288,
+              "todo": 0.0040142801312906895,
+              "note": 0.00885106290243564,
+              "generate": 0.00038461760964783874,
+              "focus": 0.001188828804829396,
+              "overview": 0.000792890382890974,
+              "restore": 0.00039689269942414076,
+              "highlight": 0.00034720885435156166,
+              "edit": 0.030348184573694214,
+              "arrange": 0.0005643594806605219,
+              "delete": 0.0005419630907052135,
+              "undo": 0.0004817346246106615,
+              "unsupported": 0.000509892445999846,
+              "ext.example.fitness-log": 0.9199750986326323
+            },
+            "none": false,
+            "latencyMs": 1961,
+            "failed": false
+          }
+        ],
+        "route": "ext.example.fitness-log",
+        "probability": 0.9199750986326323,
+        "latencyMs": 1961,
+        "routeLatencyMs": 1961,
+        "legacyElapsedMs": 2998,
+        "shadowWaitMs": 0,
+        "failedCount": 0,
+        "legacyKind": "clarify",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [],
+        "legacyCardTypes": [],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "decisionLog": {
+        "id": 387,
+        "at": "2026-10-29T20:58:13.345Z",
+        "accountId": "account_a45eca6f-a56e-4899-89f6-0137b52d35d6",
+        "spaceId": "space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+        "path": "browser",
+        "text": "今天练背",
+        "trace": {
+          "id": "decision_b61edeca-aa65-4083-a852-e7b5b72e831f",
+          "mode": "on",
+          "status": "complete",
+          "taskId": "feval_mvu0yx44_b4fcf1ab_missing-minutes",
+          "clauses": [
+            "今天练背"
+          ],
+          "decisions": [
+            {
+              "text": "今天练背",
+              "route": "ext.example.fitness-log",
+              "probability": 0.9199750986326323,
+              "probabilities": {
+                "chat": 0.029540416091693486,
+                "answer": 0.0007840753276338829,
+                "search": 0.00045439113080167505,
+                "countdown": 0.0008241032166980288,
+                "todo": 0.0040142801312906895,
+                "note": 0.00885106290243564,
+                "generate": 0.00038461760964783874,
+                "focus": 0.001188828804829396,
+                "overview": 0.000792890382890974,
+                "restore": 0.00039689269942414076,
+                "highlight": 0.00034720885435156166,
+                "edit": 0.030348184573694214,
+                "arrange": 0.0005643594806605219,
+                "delete": 0.0005419630907052135,
+                "undo": 0.0004817346246106615,
+                "unsupported": 0.000509892445999846,
+                "ext.example.fitness-log": 0.9199750986326323
+              },
+              "none": false,
+              "latencyMs": 1961,
+              "failed": false
+            }
+          ],
+          "route": "ext.example.fitness-log",
+          "probability": 0.9199750986326323,
+          "latencyMs": 1961,
+          "routeLatencyMs": 1961,
+          "legacyElapsedMs": 2998,
+          "shadowWaitMs": 0,
+          "failedCount": 0,
+          "legacyKind": "clarify",
+          "legacyUsedProvider": "stepfun",
+          "legacyActionTypes": [],
+          "legacyCardTypes": [],
+          "plannerCalls": 1,
+          "directClauses": 0
+        },
+        "outcome": "clarify",
+        "undone": false
+      },
+      "traceSource": "decision-log",
+      "trace": {
+        "id": "decision_b61edeca-aa65-4083-a852-e7b5b72e831f",
+        "mode": "on",
+        "status": "complete",
+        "taskId": "feval_mvu0yx44_b4fcf1ab_missing-minutes",
+        "clauses": [
+          "今天练背"
+        ],
+        "decisions": [
+          {
+            "text": "今天练背",
+            "route": "ext.example.fitness-log",
+            "probability": 0.9199750986326323,
+            "probabilities": {
+              "chat": 0.029540416091693486,
+              "answer": 0.0007840753276338829,
+              "search": 0.00045439113080167505,
+              "countdown": 0.0008241032166980288,
+              "todo": 0.0040142801312906895,
+              "note": 0.00885106290243564,
+              "generate": 0.00038461760964783874,
+              "focus": 0.001188828804829396,
+              "overview": 0.000792890382890974,
+              "restore": 0.00039689269942414076,
+              "highlight": 0.00034720885435156166,
+              "edit": 0.030348184573694214,
+              "arrange": 0.0005643594806605219,
+              "delete": 0.0005419630907052135,
+              "undo": 0.0004817346246106615,
+              "unsupported": 0.000509892445999846,
+              "ext.example.fitness-log": 0.9199750986326323
+            },
+            "none": false,
+            "latencyMs": 1961,
+            "failed": false
+          }
+        ],
+        "route": "ext.example.fitness-log",
+        "probability": 0.9199750986326323,
+        "latencyMs": 1961,
+        "routeLatencyMs": 1961,
+        "legacyElapsedMs": 2998,
+        "shadowWaitMs": 0,
+        "failedCount": 0,
+        "legacyKind": "clarify",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [],
+        "legacyCardTypes": [],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "calls": {
+        "planner": 1,
+        "directClauses": 0,
+        "usedProvider": "stepfun"
+      },
+      "observedFacts": [],
+      "cancellation": {
+        "kind": "task",
+        "task": {
+          "protocolVersion": "vivic-decision-v2",
+          "id": "feval_mvu0yx44_b4fcf1ab_missing-minutes",
+          "step": 0,
+          "status": "cancelled",
+          "canvasVersion": 770,
+          "decision": "legacy-fallback",
+          "reason": "v2_not_configured"
+        },
+        "message": "已取消尚未执行的步骤。"
+      },
+      "ownerAfter": {
+        "schemaVersion": 1,
+        "id": "space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+        "title": "路由评测专用（非用户空间）",
+        "version": 770,
+        "updatedAt": "2026-10-29T20:58:10.254Z",
+        "cardsById": {
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93": {
+            "id": "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+            "variant": "standard",
+            "sources": [],
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 360,
+              "height": 300,
+              "pinned": false,
+              "surface": "display"
+            },
+            "metadata": {
+              "createdAt": "2026-10-29T20:58:01.803Z",
+              "updatedAt": "2026-10-29T20:58:01.803Z",
+              "aliases": [
+                "健身记录"
+              ]
+            },
+            "type": "ExtensionCard",
+            "displayProps": {
+              "def": {
+                "id": "example.fitness-log",
+                "version": "1.0.0",
+                "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+              },
+              "config": {
+                "title": "训练记录"
+              },
+              "data": {
+                "trainingDate": "2026-10-30",
+                "bodyPart": "背",
+                "minutes": 40
+              },
+              "state": {
+                "note": ""
+              }
+            },
+            "sourceData": {}
+          },
+          "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd": {
+            "id": "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd",
+            "variant": "standard",
+            "sources": [],
+            "layout": {
+              "x": 408,
+              "y": 0,
+              "width": 360,
+              "height": 300,
+              "pinned": false,
+              "surface": "display"
+            },
+            "metadata": {
+              "createdAt": "2026-10-29T20:58:10.212Z",
+              "updatedAt": "2026-10-29T20:58:10.212Z",
+              "aliases": [
+                "健身记录"
+              ]
+            },
+            "type": "ExtensionCard",
+            "displayProps": {
+              "def": {
+                "id": "example.fitness-log",
+                "version": "1.0.0",
+                "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+              },
+              "config": {
+                "title": "训练记录"
+              },
+              "data": {
+                "trainingDate": "2026-10-30",
+                "bodyPart": "背",
+                "minutes": 35
+              },
+              "state": {
+                "note": ""
+              }
+            },
+            "sourceData": {}
+          }
+        },
+        "cardOrder": [
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+          "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd"
+        ],
+        "viewport": {
+          "x": 0,
+          "y": 0,
+          "zoom": 1
+        },
+        "focusHistory": [
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+          "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd"
+        ],
+        "processedRequestIds": [
+          "slots_df529e48-dedb-40a8-a73d-b59c555b80ab",
+          "slots_9c5bf77e-b65d-46fa-9768-623ab0f6aa8b"
+        ]
+      },
+      "totalLatencyMs": 3076
+    },
+    {
+      "id": "out-of-range-900",
+      "text": "今天背部训练900分钟",
+      "expected": {
+        "kind": "clarify",
+        "minutes": 900,
+        "reason": "Above schema maximum; substituting any other duration is a failure."
+      },
+      "checks": [
+        {
+          "name": "sse-accepted",
+          "pass": true,
+          "observed": null
+        },
+        {
+          "name": "trace-complete-on",
+          "pass": true,
+          "observed": {
+            "id": "decision_6fe4de88-2b7f-4808-b090-def33f46a863",
+            "mode": "on",
+            "status": "complete",
+            "taskId": "feval_mvu0yx44_b4fcf1ab_out-of-range-900",
+            "clauses": [
+              "今天背部训练900分钟"
+            ],
+            "decisions": [
+              {
+                "text": "今天背部训练900分钟",
+                "route": "ext.example.fitness-log",
+                "probability": 0.9887284745537561,
+                "probabilities": {
+                  "chat": 0.0010250791672960177,
+                  "answer": 6.848221606715835e-05,
+                  "search": 5.9602341090981045e-05,
+                  "countdown": 0.00020895587705364069,
+                  "todo": 0.0001041483466835047,
+                  "note": 0.0006167957124882321,
+                  "generate": 5.341076636895848e-05,
+                  "focus": 0.0001290641131332096,
+                  "overview": 8.485844900249388e-05,
+                  "restore": 5.460383439540006e-05,
+                  "highlight": 7.90959764193353e-05,
+                  "edit": 0.008379810285869297,
+                  "arrange": 6.611658375765379e-05,
+                  "delete": 8.241553923573576e-05,
+                  "undo": 0.00016365712321429862,
+                  "unsupported": 9.542911416795307e-05,
+                  "ext.example.fitness-log": 0.9887284745537561
+                },
+                "none": false,
+                "latencyMs": 1846,
+                "failed": false
+              }
+            ],
+            "route": "ext.example.fitness-log",
+            "probability": 0.9887284745537561,
+            "latencyMs": 1846,
+            "routeLatencyMs": 1846,
+            "legacyElapsedMs": 24200,
+            "shadowWaitMs": 0,
+            "failedCount": 0,
+            "legacyKind": "clarify",
+            "legacyUsedProvider": "stepfun",
+            "legacyActionTypes": [],
+            "legacyCardTypes": [],
+            "plannerCalls": 1,
+            "directClauses": 0
+          }
+        },
+        {
+          "name": "clarification-not-error-or-coerced-record",
+          "pass": true,
+          "observed": {
+            "kind": "clarify",
+            "task": {
+              "protocolVersion": "vivic-decision-v2",
+              "id": "feval_mvu0yx44_b4fcf1ab_out-of-range-900",
+              "step": 0,
+              "status": "awaiting_clarification",
+              "canvasVersion": 770,
+              "decision": "legacy-fallback",
+              "reason": "v2_not_configured",
+              "clarification": {
+                "question": "训练时长请输入1-600分钟之间的数字",
+                "candidates": []
+              }
+            },
+            "message": "训练时长请输入1-600分钟之间的数字"
+          }
+        },
+        {
+          "name": "no-new-extension-or-other-write-proposal",
+          "pass": true,
+          "observed": null
+        },
+        {
+          "name": "space-unchanged-without-confirmed-execution",
+          "pass": true,
+          "observed": null
+        }
+      ],
+      "status": "passed",
+      "execution": {
+        "committed": false
+      },
+      "ownerBefore": {
+        "schemaVersion": 1,
+        "id": "space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+        "title": "路由评测专用（非用户空间）",
+        "version": 770,
+        "updatedAt": "2026-10-29T20:58:10.254Z",
+        "cardsById": {
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93": {
+            "id": "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+            "variant": "standard",
+            "sources": [],
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 360,
+              "height": 300,
+              "pinned": false,
+              "surface": "display"
+            },
+            "metadata": {
+              "createdAt": "2026-10-29T20:58:01.803Z",
+              "updatedAt": "2026-10-29T20:58:01.803Z",
+              "aliases": [
+                "健身记录"
+              ]
+            },
+            "type": "ExtensionCard",
+            "displayProps": {
+              "def": {
+                "id": "example.fitness-log",
+                "version": "1.0.0",
+                "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+              },
+              "config": {
+                "title": "训练记录"
+              },
+              "data": {
+                "trainingDate": "2026-10-30",
+                "bodyPart": "背",
+                "minutes": 40
+              },
+              "state": {
+                "note": ""
+              }
+            },
+            "sourceData": {}
+          },
+          "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd": {
+            "id": "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd",
+            "variant": "standard",
+            "sources": [],
+            "layout": {
+              "x": 408,
+              "y": 0,
+              "width": 360,
+              "height": 300,
+              "pinned": false,
+              "surface": "display"
+            },
+            "metadata": {
+              "createdAt": "2026-10-29T20:58:10.212Z",
+              "updatedAt": "2026-10-29T20:58:10.212Z",
+              "aliases": [
+                "健身记录"
+              ]
+            },
+            "type": "ExtensionCard",
+            "displayProps": {
+              "def": {
+                "id": "example.fitness-log",
+                "version": "1.0.0",
+                "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+              },
+              "config": {
+                "title": "训练记录"
+              },
+              "data": {
+                "trainingDate": "2026-10-30",
+                "bodyPart": "背",
+                "minutes": 35
+              },
+              "state": {
+                "note": ""
+              }
+            },
+            "sourceData": {}
+          }
+        },
+        "cardOrder": [
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+          "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd"
+        ],
+        "viewport": {
+          "x": 0,
+          "y": 0,
+          "zoom": 1
+        },
+        "focusHistory": [
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+          "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd"
+        ],
+        "processedRequestIds": [
+          "slots_df529e48-dedb-40a8-a73d-b59c555b80ab",
+          "slots_9c5bf77e-b65d-46fa-9768-623ab0f6aa8b"
+        ]
+      },
+      "taskId": "feval_mvu0yx44_b4fcf1ab_out-of-range-900",
+      "startedAt": "2026-10-29T20:58:13.415Z",
+      "todayShanghaiStart": "2026-10-30",
+      "events": [
+        {
+          "event": "accepted",
+          "elapsedMs": 10,
+          "data": {
+            "requestId": "52d7e842-4e32-41da-af04-83b050ff6de1"
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 1858,
+          "data": {
+            "requestId": "52d7e842-4e32-41da-af04-83b050ff6de1",
+            "stage": "rules",
+            "status": "started"
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 1858,
+          "data": {
+            "requestId": "52d7e842-4e32-41da-af04-83b050ff6de1",
+            "stage": "rules",
+            "status": "completed",
+            "elapsedMs": 0
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 1858,
+          "data": {
+            "requestId": "52d7e842-4e32-41da-af04-83b050ff6de1",
+            "stage": "data",
+            "status": "started"
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 1858,
+          "data": {
+            "requestId": "52d7e842-4e32-41da-af04-83b050ff6de1",
+            "stage": "data",
+            "status": "completed",
+            "elapsedMs": 0
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 1858,
+          "data": {
+            "requestId": "52d7e842-4e32-41da-af04-83b050ff6de1",
+            "stage": "planner",
+            "status": "started"
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 24209,
+          "data": {
+            "requestId": "52d7e842-4e32-41da-af04-83b050ff6de1",
+            "stage": "planner",
+            "status": "completed",
+            "elapsedMs": 22352
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 24209,
+          "data": {
+            "requestId": "52d7e842-4e32-41da-af04-83b050ff6de1",
+            "stage": "total",
+            "status": "completed",
+            "elapsedMs": 22353
+          }
+        },
+        {
+          "event": "result",
+          "elapsedMs": 24209,
+          "data": {
+            "trace": {
+              "id": "decision_6fe4de88-2b7f-4808-b090-def33f46a863",
+              "mode": "on",
+              "status": "complete",
+              "taskId": "feval_mvu0yx44_b4fcf1ab_out-of-range-900",
+              "clauses": [
+                "今天背部训练900分钟"
+              ],
+              "decisions": [
+                {
+                  "text": "今天背部训练900分钟",
+                  "route": "ext.example.fitness-log",
+                  "probability": 0.9887284745537561,
+                  "probabilities": {
+                    "chat": 0.0010250791672960177,
+                    "answer": 6.848221606715835e-05,
+                    "search": 5.9602341090981045e-05,
+                    "countdown": 0.00020895587705364069,
+                    "todo": 0.0001041483466835047,
+                    "note": 0.0006167957124882321,
+                    "generate": 5.341076636895848e-05,
+                    "focus": 0.0001290641131332096,
+                    "overview": 8.485844900249388e-05,
+                    "restore": 5.460383439540006e-05,
+                    "highlight": 7.90959764193353e-05,
+                    "edit": 0.008379810285869297,
+                    "arrange": 6.611658375765379e-05,
+                    "delete": 8.241553923573576e-05,
+                    "undo": 0.00016365712321429862,
+                    "unsupported": 9.542911416795307e-05,
+                    "ext.example.fitness-log": 0.9887284745537561
+                  },
+                  "none": false,
+                  "latencyMs": 1846,
+                  "failed": false
+                }
+              ],
+              "route": "ext.example.fitness-log",
+              "probability": 0.9887284745537561,
+              "latencyMs": 1846,
+              "routeLatencyMs": 1846,
+              "legacyElapsedMs": 24200,
+              "shadowWaitMs": 0,
+              "failedCount": 0,
+              "legacyKind": "clarify",
+              "legacyUsedProvider": "stepfun",
+              "legacyActionTypes": [],
+              "legacyCardTypes": [],
+              "plannerCalls": 1,
+              "directClauses": 0
+            },
+            "kind": "clarify",
+            "task": {
+              "protocolVersion": "vivic-decision-v2",
+              "id": "feval_mvu0yx44_b4fcf1ab_out-of-range-900",
+              "step": 0,
+              "status": "awaiting_clarification",
+              "canvasVersion": 770,
+              "decision": "legacy-fallback",
+              "reason": "v2_not_configured",
+              "clarification": {
+                "question": "训练时长请输入1-600分钟之间的数字",
+                "candidates": []
+              }
+            },
+            "message": "训练时长请输入1-600分钟之间的数字",
+            "usedProvider": "stepfun"
+          }
+        }
+      ],
+      "result": {
+        "trace": {
+          "id": "decision_6fe4de88-2b7f-4808-b090-def33f46a863",
+          "mode": "on",
+          "status": "complete",
+          "taskId": "feval_mvu0yx44_b4fcf1ab_out-of-range-900",
+          "clauses": [
+            "今天背部训练900分钟"
+          ],
+          "decisions": [
+            {
+              "text": "今天背部训练900分钟",
+              "route": "ext.example.fitness-log",
+              "probability": 0.9887284745537561,
+              "probabilities": {
+                "chat": 0.0010250791672960177,
+                "answer": 6.848221606715835e-05,
+                "search": 5.9602341090981045e-05,
+                "countdown": 0.00020895587705364069,
+                "todo": 0.0001041483466835047,
+                "note": 0.0006167957124882321,
+                "generate": 5.341076636895848e-05,
+                "focus": 0.0001290641131332096,
+                "overview": 8.485844900249388e-05,
+                "restore": 5.460383439540006e-05,
+                "highlight": 7.90959764193353e-05,
+                "edit": 0.008379810285869297,
+                "arrange": 6.611658375765379e-05,
+                "delete": 8.241553923573576e-05,
+                "undo": 0.00016365712321429862,
+                "unsupported": 9.542911416795307e-05,
+                "ext.example.fitness-log": 0.9887284745537561
+              },
+              "none": false,
+              "latencyMs": 1846,
+              "failed": false
+            }
+          ],
+          "route": "ext.example.fitness-log",
+          "probability": 0.9887284745537561,
+          "latencyMs": 1846,
+          "routeLatencyMs": 1846,
+          "legacyElapsedMs": 24200,
+          "shadowWaitMs": 0,
+          "failedCount": 0,
+          "legacyKind": "clarify",
+          "legacyUsedProvider": "stepfun",
+          "legacyActionTypes": [],
+          "legacyCardTypes": [],
+          "plannerCalls": 1,
+          "directClauses": 0
+        },
+        "kind": "clarify",
+        "task": {
+          "protocolVersion": "vivic-decision-v2",
+          "id": "feval_mvu0yx44_b4fcf1ab_out-of-range-900",
+          "step": 0,
+          "status": "awaiting_clarification",
+          "canvasVersion": 770,
+          "decision": "legacy-fallback",
+          "reason": "v2_not_configured",
+          "clarification": {
+            "question": "训练时长请输入1-600分钟之间的数字",
+            "candidates": []
+          }
+        },
+        "message": "训练时长请输入1-600分钟之间的数字",
+        "usedProvider": "stepfun"
+      },
+      "responseLatencyMs": 24210,
+      "todayShanghaiEnd": "2026-10-30",
+      "finishedResponseAt": "2026-10-29T20:58:37.625Z",
+      "cards": [],
+      "initialTrace": {
+        "id": "decision_6fe4de88-2b7f-4808-b090-def33f46a863",
+        "mode": "on",
+        "status": "complete",
+        "taskId": "feval_mvu0yx44_b4fcf1ab_out-of-range-900",
+        "clauses": [
+          "今天背部训练900分钟"
+        ],
+        "decisions": [
+          {
+            "text": "今天背部训练900分钟",
+            "route": "ext.example.fitness-log",
+            "probability": 0.9887284745537561,
+            "probabilities": {
+              "chat": 0.0010250791672960177,
+              "answer": 6.848221606715835e-05,
+              "search": 5.9602341090981045e-05,
+              "countdown": 0.00020895587705364069,
+              "todo": 0.0001041483466835047,
+              "note": 0.0006167957124882321,
+              "generate": 5.341076636895848e-05,
+              "focus": 0.0001290641131332096,
+              "overview": 8.485844900249388e-05,
+              "restore": 5.460383439540006e-05,
+              "highlight": 7.90959764193353e-05,
+              "edit": 0.008379810285869297,
+              "arrange": 6.611658375765379e-05,
+              "delete": 8.241553923573576e-05,
+              "undo": 0.00016365712321429862,
+              "unsupported": 9.542911416795307e-05,
+              "ext.example.fitness-log": 0.9887284745537561
+            },
+            "none": false,
+            "latencyMs": 1846,
+            "failed": false
+          }
+        ],
+        "route": "ext.example.fitness-log",
+        "probability": 0.9887284745537561,
+        "latencyMs": 1846,
+        "routeLatencyMs": 1846,
+        "legacyElapsedMs": 24200,
+        "shadowWaitMs": 0,
+        "failedCount": 0,
+        "legacyKind": "clarify",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [],
+        "legacyCardTypes": [],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "decisionLog": {
+        "id": 388,
+        "at": "2026-10-29T20:58:37.624Z",
+        "accountId": "account_a45eca6f-a56e-4899-89f6-0137b52d35d6",
+        "spaceId": "space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+        "path": "browser",
+        "text": "今天背部训练900分钟",
+        "trace": {
+          "id": "decision_6fe4de88-2b7f-4808-b090-def33f46a863",
+          "mode": "on",
+          "status": "complete",
+          "taskId": "feval_mvu0yx44_b4fcf1ab_out-of-range-900",
+          "clauses": [
+            "今天背部训练900分钟"
+          ],
+          "decisions": [
+            {
+              "text": "今天背部训练900分钟",
+              "route": "ext.example.fitness-log",
+              "probability": 0.9887284745537561,
+              "probabilities": {
+                "chat": 0.0010250791672960177,
+                "answer": 6.848221606715835e-05,
+                "search": 5.9602341090981045e-05,
+                "countdown": 0.00020895587705364069,
+                "todo": 0.0001041483466835047,
+                "note": 0.0006167957124882321,
+                "generate": 5.341076636895848e-05,
+                "focus": 0.0001290641131332096,
+                "overview": 8.485844900249388e-05,
+                "restore": 5.460383439540006e-05,
+                "highlight": 7.90959764193353e-05,
+                "edit": 0.008379810285869297,
+                "arrange": 6.611658375765379e-05,
+                "delete": 8.241553923573576e-05,
+                "undo": 0.00016365712321429862,
+                "unsupported": 9.542911416795307e-05,
+                "ext.example.fitness-log": 0.9887284745537561
+              },
+              "none": false,
+              "latencyMs": 1846,
+              "failed": false
+            }
+          ],
+          "route": "ext.example.fitness-log",
+          "probability": 0.9887284745537561,
+          "latencyMs": 1846,
+          "routeLatencyMs": 1846,
+          "legacyElapsedMs": 24200,
+          "shadowWaitMs": 0,
+          "failedCount": 0,
+          "legacyKind": "clarify",
+          "legacyUsedProvider": "stepfun",
+          "legacyActionTypes": [],
+          "legacyCardTypes": [],
+          "plannerCalls": 1,
+          "directClauses": 0
+        },
+        "outcome": "clarify",
+        "undone": false
+      },
+      "traceSource": "decision-log",
+      "trace": {
+        "id": "decision_6fe4de88-2b7f-4808-b090-def33f46a863",
+        "mode": "on",
+        "status": "complete",
+        "taskId": "feval_mvu0yx44_b4fcf1ab_out-of-range-900",
+        "clauses": [
+          "今天背部训练900分钟"
+        ],
+        "decisions": [
+          {
+            "text": "今天背部训练900分钟",
+            "route": "ext.example.fitness-log",
+            "probability": 0.9887284745537561,
+            "probabilities": {
+              "chat": 0.0010250791672960177,
+              "answer": 6.848221606715835e-05,
+              "search": 5.9602341090981045e-05,
+              "countdown": 0.00020895587705364069,
+              "todo": 0.0001041483466835047,
+              "note": 0.0006167957124882321,
+              "generate": 5.341076636895848e-05,
+              "focus": 0.0001290641131332096,
+              "overview": 8.485844900249388e-05,
+              "restore": 5.460383439540006e-05,
+              "highlight": 7.90959764193353e-05,
+              "edit": 0.008379810285869297,
+              "arrange": 6.611658375765379e-05,
+              "delete": 8.241553923573576e-05,
+              "undo": 0.00016365712321429862,
+              "unsupported": 9.542911416795307e-05,
+              "ext.example.fitness-log": 0.9887284745537561
+            },
+            "none": false,
+            "latencyMs": 1846,
+            "failed": false
+          }
+        ],
+        "route": "ext.example.fitness-log",
+        "probability": 0.9887284745537561,
+        "latencyMs": 1846,
+        "routeLatencyMs": 1846,
+        "legacyElapsedMs": 24200,
+        "shadowWaitMs": 0,
+        "failedCount": 0,
+        "legacyKind": "clarify",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [],
+        "legacyCardTypes": [],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "calls": {
+        "planner": 1,
+        "directClauses": 0,
+        "usedProvider": "stepfun"
+      },
+      "observedFacts": [],
+      "cancellation": {
+        "kind": "task",
+        "task": {
+          "protocolVersion": "vivic-decision-v2",
+          "id": "feval_mvu0yx44_b4fcf1ab_out-of-range-900",
+          "step": 0,
+          "status": "cancelled",
+          "canvasVersion": 770,
+          "decision": "legacy-fallback",
+          "reason": "v2_not_configured"
+        },
+        "message": "已取消尚未执行的步骤。"
+      },
+      "ownerAfter": {
+        "schemaVersion": 1,
+        "id": "space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+        "title": "路由评测专用（非用户空间）",
+        "version": 770,
+        "updatedAt": "2026-10-29T20:58:10.254Z",
+        "cardsById": {
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93": {
+            "id": "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+            "variant": "standard",
+            "sources": [],
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 360,
+              "height": 300,
+              "pinned": false,
+              "surface": "display"
+            },
+            "metadata": {
+              "createdAt": "2026-10-29T20:58:01.803Z",
+              "updatedAt": "2026-10-29T20:58:01.803Z",
+              "aliases": [
+                "健身记录"
+              ]
+            },
+            "type": "ExtensionCard",
+            "displayProps": {
+              "def": {
+                "id": "example.fitness-log",
+                "version": "1.0.0",
+                "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+              },
+              "config": {
+                "title": "训练记录"
+              },
+              "data": {
+                "trainingDate": "2026-10-30",
+                "bodyPart": "背",
+                "minutes": 40
+              },
+              "state": {
+                "note": ""
+              }
+            },
+            "sourceData": {}
+          },
+          "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd": {
+            "id": "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd",
+            "variant": "standard",
+            "sources": [],
+            "layout": {
+              "x": 408,
+              "y": 0,
+              "width": 360,
+              "height": 300,
+              "pinned": false,
+              "surface": "display"
+            },
+            "metadata": {
+              "createdAt": "2026-10-29T20:58:10.212Z",
+              "updatedAt": "2026-10-29T20:58:10.212Z",
+              "aliases": [
+                "健身记录"
+              ]
+            },
+            "type": "ExtensionCard",
+            "displayProps": {
+              "def": {
+                "id": "example.fitness-log",
+                "version": "1.0.0",
+                "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+              },
+              "config": {
+                "title": "训练记录"
+              },
+              "data": {
+                "trainingDate": "2026-10-30",
+                "bodyPart": "背",
+                "minutes": 35
+              },
+              "state": {
+                "note": ""
+              }
+            },
+            "sourceData": {}
+          }
+        },
+        "cardOrder": [
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+          "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd"
+        ],
+        "viewport": {
+          "x": 0,
+          "y": 0,
+          "zoom": 1
+        },
+        "focusHistory": [
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+          "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd"
+        ],
+        "processedRequestIds": [
+          "slots_df529e48-dedb-40a8-a73d-b59c555b80ab",
+          "slots_9c5bf77e-b65d-46fa-9768-623ab0f6aa8b"
+        ]
+      },
+      "totalLatencyMs": 24339
+    },
+    {
+      "id": "disabled-template",
+      "text": "今天练了40分钟背",
+      "expected": {
+        "kind": "disabled"
+      },
+      "checks": [
+        {
+          "name": "sse-accepted",
+          "pass": true,
+          "observed": null
+        },
+        {
+          "name": "trace-complete-on",
+          "pass": true,
+          "observed": {
+            "id": "decision_0a3f2bca-2c4c-459e-bf78-2ee24f5293fc",
+            "mode": "on",
+            "status": "complete",
+            "taskId": "feval_mvu0yx44_b4fcf1ab_disabled-template",
+            "clauses": [
+              "今天练了40分钟背"
+            ],
+            "decisions": [
+              {
+                "text": "今天练了40分钟背",
+                "route": "note",
+                "probability": 0.4771876983656319,
+                "probabilities": {
+                  "chat": 0.18879594238146058,
+                  "answer": 0.001722853102869233,
+                  "search": 0.0009958188780699302,
+                  "countdown": 0.0032302178215560377,
+                  "todo": 0.004644032920454379,
+                  "note": 0.4771876983656319,
+                  "generate": 0.001391442211585115,
+                  "focus": 0.005857615844091232,
+                  "overview": 0.0038643435739702577,
+                  "restore": 0.0021402611326683855,
+                  "highlight": 0.001034337723455899,
+                  "edit": 0.30107410032612597,
+                  "arrange": 0.004018786038323451,
+                  "delete": 0.0010618913091774015,
+                  "undo": 0.001372988253159526,
+                  "unsupported": 0.0016076701174006943
+                },
+                "none": false,
+                "latencyMs": 1630,
+                "failed": false
+              }
+            ],
+            "route": "note",
+            "probability": 0.4771876983656319,
+            "latencyMs": 1630,
+            "routeLatencyMs": 1630,
+            "legacyElapsedMs": 36259,
+            "shadowWaitMs": 0,
+            "failedCount": 0,
+            "legacyKind": "envelope",
+            "legacyUsedProvider": "stepfun",
+            "legacyActionTypes": [
+              "card.create",
+              "card.focus",
+              "subtitle.show"
+            ],
+            "legacyCardTypes": [
+              "NoteCard"
+            ],
+            "plannerCalls": 2,
+            "directClauses": 0
+          }
+        },
+        {
+          "name": "disabled-catalog-verified",
+          "pass": true,
+          "observed": null
+        },
+        {
+          "name": "disabled-template-not-classified",
+          "pass": true,
+          "observed": "note"
+        },
+        {
+          "name": "disabled-template-not-proposed",
+          "pass": true,
+          "observed": null
+        },
+        {
+          "name": "site-remains-usable",
+          "pass": true,
+          "observed": {
+            "kind": "envelope",
+            "message": null
+          }
+        },
+        {
+          "name": "space-unchanged-without-confirmed-execution",
+          "pass": true,
+          "observed": null
+        }
+      ],
+      "status": "passed",
+      "execution": {
+        "committed": false
+      },
+      "ownerBefore": {
+        "schemaVersion": 1,
+        "id": "space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+        "title": "路由评测专用（非用户空间）",
+        "version": 770,
+        "updatedAt": "2026-10-29T20:58:10.254Z",
+        "cardsById": {
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93": {
+            "id": "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+            "variant": "standard",
+            "sources": [],
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 360,
+              "height": 300,
+              "pinned": false,
+              "surface": "display"
+            },
+            "metadata": {
+              "createdAt": "2026-10-29T20:58:01.803Z",
+              "updatedAt": "2026-10-29T20:58:01.803Z",
+              "aliases": [
+                "健身记录"
+              ]
+            },
+            "type": "ExtensionCard",
+            "displayProps": {
+              "def": {
+                "id": "example.fitness-log",
+                "version": "1.0.0",
+                "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+              },
+              "config": {
+                "title": "训练记录"
+              },
+              "data": {
+                "trainingDate": "2026-10-30",
+                "bodyPart": "背",
+                "minutes": 40
+              },
+              "state": {
+                "note": ""
+              }
+            },
+            "sourceData": {}
+          },
+          "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd": {
+            "id": "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd",
+            "variant": "standard",
+            "sources": [],
+            "layout": {
+              "x": 408,
+              "y": 0,
+              "width": 360,
+              "height": 300,
+              "pinned": false,
+              "surface": "display"
+            },
+            "metadata": {
+              "createdAt": "2026-10-29T20:58:10.212Z",
+              "updatedAt": "2026-10-29T20:58:10.212Z",
+              "aliases": [
+                "健身记录"
+              ]
+            },
+            "type": "ExtensionCard",
+            "displayProps": {
+              "def": {
+                "id": "example.fitness-log",
+                "version": "1.0.0",
+                "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+              },
+              "config": {
+                "title": "训练记录"
+              },
+              "data": {
+                "trainingDate": "2026-10-30",
+                "bodyPart": "背",
+                "minutes": 35
+              },
+              "state": {
+                "note": ""
+              }
+            },
+            "sourceData": {}
+          }
+        },
+        "cardOrder": [
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+          "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd"
+        ],
+        "viewport": {
+          "x": 0,
+          "y": 0,
+          "zoom": 1
+        },
+        "focusHistory": [
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+          "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd"
+        ],
+        "processedRequestIds": [
+          "slots_df529e48-dedb-40a8-a73d-b59c555b80ab",
+          "slots_9c5bf77e-b65d-46fa-9768-623ab0f6aa8b"
+        ]
+      },
+      "taskId": "feval_mvu0yx44_b4fcf1ab_disabled-template",
+      "startedAt": "2026-10-29T20:58:37.780Z",
+      "todayShanghaiStart": "2026-10-30",
+      "events": [
+        {
+          "event": "accepted",
+          "elapsedMs": 10,
+          "data": {
+            "requestId": "ab873e62-9d11-4645-9e88-b21d067865ec"
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 1646,
+          "data": {
+            "requestId": "ab873e62-9d11-4645-9e88-b21d067865ec",
+            "stage": "rules",
+            "status": "started"
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 1646,
+          "data": {
+            "requestId": "ab873e62-9d11-4645-9e88-b21d067865ec",
+            "stage": "rules",
+            "status": "completed",
+            "elapsedMs": 0
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 1646,
+          "data": {
+            "requestId": "ab873e62-9d11-4645-9e88-b21d067865ec",
+            "stage": "data",
+            "status": "started"
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 1646,
+          "data": {
+            "requestId": "ab873e62-9d11-4645-9e88-b21d067865ec",
+            "stage": "data",
+            "status": "completed",
+            "elapsedMs": 0
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 1646,
+          "data": {
+            "requestId": "ab873e62-9d11-4645-9e88-b21d067865ec",
+            "stage": "planner",
+            "status": "started"
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 21886,
+          "data": {
+            "requestId": "ab873e62-9d11-4645-9e88-b21d067865ec",
+            "stage": "planner",
+            "status": "completed",
+            "elapsedMs": 20236
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 21886,
+          "data": {
+            "requestId": "ab873e62-9d11-4645-9e88-b21d067865ec",
+            "stage": "planner",
+            "status": "started"
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 36268,
+          "data": {
+            "requestId": "ab873e62-9d11-4645-9e88-b21d067865ec",
+            "stage": "planner",
+            "status": "completed",
+            "elapsedMs": 14381
+          }
+        },
+        {
+          "event": "progress",
+          "elapsedMs": 36268,
+          "data": {
+            "requestId": "ab873e62-9d11-4645-9e88-b21d067865ec",
+            "stage": "total",
+            "status": "completed",
+            "elapsedMs": 34628
+          }
+        },
+        {
+          "event": "result",
+          "elapsedMs": 36268,
+          "data": {
+            "trace": {
+              "id": "decision_0a3f2bca-2c4c-459e-bf78-2ee24f5293fc",
+              "mode": "on",
+              "status": "complete",
+              "taskId": "feval_mvu0yx44_b4fcf1ab_disabled-template",
+              "clauses": [
+                "今天练了40分钟背"
+              ],
+              "decisions": [
+                {
+                  "text": "今天练了40分钟背",
+                  "route": "note",
+                  "probability": 0.4771876983656319,
+                  "probabilities": {
+                    "chat": 0.18879594238146058,
+                    "answer": 0.001722853102869233,
+                    "search": 0.0009958188780699302,
+                    "countdown": 0.0032302178215560377,
+                    "todo": 0.004644032920454379,
+                    "note": 0.4771876983656319,
+                    "generate": 0.001391442211585115,
+                    "focus": 0.005857615844091232,
+                    "overview": 0.0038643435739702577,
+                    "restore": 0.0021402611326683855,
+                    "highlight": 0.001034337723455899,
+                    "edit": 0.30107410032612597,
+                    "arrange": 0.004018786038323451,
+                    "delete": 0.0010618913091774015,
+                    "undo": 0.001372988253159526,
+                    "unsupported": 0.0016076701174006943
+                  },
+                  "none": false,
+                  "latencyMs": 1630,
+                  "failed": false
+                }
+              ],
+              "route": "note",
+              "probability": 0.4771876983656319,
+              "latencyMs": 1630,
+              "routeLatencyMs": 1630,
+              "legacyElapsedMs": 36259,
+              "shadowWaitMs": 0,
+              "failedCount": 0,
+              "legacyKind": "envelope",
+              "legacyUsedProvider": "stepfun",
+              "legacyActionTypes": [
+                "card.create",
+                "card.focus",
+                "subtitle.show"
+              ],
+              "legacyCardTypes": [
+                "NoteCard"
+              ],
+              "plannerCalls": 2,
+              "directClauses": 0
+            },
+            "kind": "envelope",
+            "envelope": {
+              "schemaVersion": "0.6",
+              "requestId": "slots_43f5bc0b-adf0-4764-bae5-9a2204ab98ce",
+              "canvasId": "space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+              "spokenText": "已记录训练",
+              "actions": [
+                {
+                  "type": "card.create",
+                  "card": {
+                    "id": "note_9e8de85a-5367-4974-8391-46ba573a02cf",
+                    "variant": "minimal",
+                    "sources": [],
+                    "layout": {
+                      "x": 792,
+                      "y": 0,
+                      "width": 320,
+                      "height": 120,
+                      "pinned": false
+                    },
+                    "metadata": {
+                      "createdAt": "2026-10-29T20:59:14.044Z",
+                      "updatedAt": "2026-10-29T20:59:14.044Z"
+                    },
+                    "type": "NoteCard",
+                    "displayProps": {
+                      "text": "今天练了40分钟背"
+                    },
+                    "sourceData": {}
+                  }
+                },
+                {
+                  "type": "card.focus",
+                  "targetId": "note_9e8de85a-5367-4974-8391-46ba573a02cf"
+                },
+                {
+                  "type": "subtitle.show",
+                  "text": "已记录今天练了40分钟背"
+                }
+              ]
+            },
+            "task": {
+              "protocolVersion": "vivic-decision-v2",
+              "id": "feval_mvu0yx44_b4fcf1ab_disabled-template",
+              "step": 0,
+              "status": "awaiting_execution",
+              "executionId": "exec_deb44dc2-25a1-48a8-ac08-f752ee1a544f",
+              "canvasVersion": 770,
+              "decision": "legacy-fallback",
+              "reason": "v2_not_configured"
+            },
+            "usedProvider": "stepfun"
+          }
+        }
+      ],
+      "result": {
+        "trace": {
+          "id": "decision_0a3f2bca-2c4c-459e-bf78-2ee24f5293fc",
+          "mode": "on",
+          "status": "complete",
+          "taskId": "feval_mvu0yx44_b4fcf1ab_disabled-template",
+          "clauses": [
+            "今天练了40分钟背"
+          ],
+          "decisions": [
+            {
+              "text": "今天练了40分钟背",
+              "route": "note",
+              "probability": 0.4771876983656319,
+              "probabilities": {
+                "chat": 0.18879594238146058,
+                "answer": 0.001722853102869233,
+                "search": 0.0009958188780699302,
+                "countdown": 0.0032302178215560377,
+                "todo": 0.004644032920454379,
+                "note": 0.4771876983656319,
+                "generate": 0.001391442211585115,
+                "focus": 0.005857615844091232,
+                "overview": 0.0038643435739702577,
+                "restore": 0.0021402611326683855,
+                "highlight": 0.001034337723455899,
+                "edit": 0.30107410032612597,
+                "arrange": 0.004018786038323451,
+                "delete": 0.0010618913091774015,
+                "undo": 0.001372988253159526,
+                "unsupported": 0.0016076701174006943
+              },
+              "none": false,
+              "latencyMs": 1630,
+              "failed": false
+            }
+          ],
+          "route": "note",
+          "probability": 0.4771876983656319,
+          "latencyMs": 1630,
+          "routeLatencyMs": 1630,
+          "legacyElapsedMs": 36259,
+          "shadowWaitMs": 0,
+          "failedCount": 0,
+          "legacyKind": "envelope",
+          "legacyUsedProvider": "stepfun",
+          "legacyActionTypes": [
+            "card.create",
+            "card.focus",
+            "subtitle.show"
+          ],
+          "legacyCardTypes": [
+            "NoteCard"
+          ],
+          "plannerCalls": 2,
+          "directClauses": 0
+        },
+        "kind": "envelope",
+        "envelope": {
+          "schemaVersion": "0.6",
+          "requestId": "slots_43f5bc0b-adf0-4764-bae5-9a2204ab98ce",
+          "canvasId": "space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+          "spokenText": "已记录训练",
+          "actions": [
+            {
+              "type": "card.create",
+              "card": {
+                "id": "note_9e8de85a-5367-4974-8391-46ba573a02cf",
+                "variant": "minimal",
+                "sources": [],
+                "layout": {
+                  "x": 792,
+                  "y": 0,
+                  "width": 320,
+                  "height": 120,
+                  "pinned": false
+                },
+                "metadata": {
+                  "createdAt": "2026-10-29T20:59:14.044Z",
+                  "updatedAt": "2026-10-29T20:59:14.044Z"
+                },
+                "type": "NoteCard",
+                "displayProps": {
+                  "text": "今天练了40分钟背"
+                },
+                "sourceData": {}
+              }
+            },
+            {
+              "type": "card.focus",
+              "targetId": "note_9e8de85a-5367-4974-8391-46ba573a02cf"
+            },
+            {
+              "type": "subtitle.show",
+              "text": "已记录今天练了40分钟背"
+            }
+          ]
+        },
+        "task": {
+          "protocolVersion": "vivic-decision-v2",
+          "id": "feval_mvu0yx44_b4fcf1ab_disabled-template",
+          "step": 0,
+          "status": "awaiting_execution",
+          "executionId": "exec_deb44dc2-25a1-48a8-ac08-f752ee1a544f",
+          "canvasVersion": 770,
+          "decision": "legacy-fallback",
+          "reason": "v2_not_configured"
+        },
+        "usedProvider": "stepfun"
+      },
+      "responseLatencyMs": 36270,
+      "todayShanghaiEnd": "2026-10-30",
+      "finishedResponseAt": "2026-10-29T20:59:14.051Z",
+      "cards": [
+        {
+          "id": "note_9e8de85a-5367-4974-8391-46ba573a02cf",
+          "variant": "minimal",
+          "sources": [],
+          "layout": {
+            "x": 792,
+            "y": 0,
+            "width": 320,
+            "height": 120,
+            "pinned": false
+          },
+          "metadata": {
+            "createdAt": "2026-10-29T20:59:14.044Z",
+            "updatedAt": "2026-10-29T20:59:14.044Z"
+          },
+          "type": "NoteCard",
+          "displayProps": {
+            "text": "今天练了40分钟背"
+          },
+          "sourceData": {}
+        }
+      ],
+      "initialTrace": {
+        "id": "decision_0a3f2bca-2c4c-459e-bf78-2ee24f5293fc",
+        "mode": "on",
+        "status": "complete",
+        "taskId": "feval_mvu0yx44_b4fcf1ab_disabled-template",
+        "clauses": [
+          "今天练了40分钟背"
+        ],
+        "decisions": [
+          {
+            "text": "今天练了40分钟背",
+            "route": "note",
+            "probability": 0.4771876983656319,
+            "probabilities": {
+              "chat": 0.18879594238146058,
+              "answer": 0.001722853102869233,
+              "search": 0.0009958188780699302,
+              "countdown": 0.0032302178215560377,
+              "todo": 0.004644032920454379,
+              "note": 0.4771876983656319,
+              "generate": 0.001391442211585115,
+              "focus": 0.005857615844091232,
+              "overview": 0.0038643435739702577,
+              "restore": 0.0021402611326683855,
+              "highlight": 0.001034337723455899,
+              "edit": 0.30107410032612597,
+              "arrange": 0.004018786038323451,
+              "delete": 0.0010618913091774015,
+              "undo": 0.001372988253159526,
+              "unsupported": 0.0016076701174006943
+            },
+            "none": false,
+            "latencyMs": 1630,
+            "failed": false
+          }
+        ],
+        "route": "note",
+        "probability": 0.4771876983656319,
+        "latencyMs": 1630,
+        "routeLatencyMs": 1630,
+        "legacyElapsedMs": 36259,
+        "shadowWaitMs": 0,
+        "failedCount": 0,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "card.create",
+          "card.focus",
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [
+          "NoteCard"
+        ],
+        "plannerCalls": 2,
+        "directClauses": 0
+      },
+      "decisionLog": {
+        "id": 389,
+        "at": "2026-10-29T20:59:14.047Z",
+        "accountId": "account_a45eca6f-a56e-4899-89f6-0137b52d35d6",
+        "spaceId": "space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+        "path": "browser",
+        "text": "今天练了40分钟背",
+        "trace": {
+          "id": "decision_0a3f2bca-2c4c-459e-bf78-2ee24f5293fc",
+          "mode": "on",
+          "status": "complete",
+          "taskId": "feval_mvu0yx44_b4fcf1ab_disabled-template",
+          "clauses": [
+            "今天练了40分钟背"
+          ],
+          "decisions": [
+            {
+              "text": "今天练了40分钟背",
+              "route": "note",
+              "probability": 0.4771876983656319,
+              "probabilities": {
+                "chat": 0.18879594238146058,
+                "answer": 0.001722853102869233,
+                "search": 0.0009958188780699302,
+                "countdown": 0.0032302178215560377,
+                "todo": 0.004644032920454379,
+                "note": 0.4771876983656319,
+                "generate": 0.001391442211585115,
+                "focus": 0.005857615844091232,
+                "overview": 0.0038643435739702577,
+                "restore": 0.0021402611326683855,
+                "highlight": 0.001034337723455899,
+                "edit": 0.30107410032612597,
+                "arrange": 0.004018786038323451,
+                "delete": 0.0010618913091774015,
+                "undo": 0.001372988253159526,
+                "unsupported": 0.0016076701174006943
+              },
+              "none": false,
+              "latencyMs": 1630,
+              "failed": false
+            }
+          ],
+          "route": "note",
+          "probability": 0.4771876983656319,
+          "latencyMs": 1630,
+          "routeLatencyMs": 1630,
+          "legacyElapsedMs": 36259,
+          "shadowWaitMs": 0,
+          "failedCount": 0,
+          "legacyKind": "envelope",
+          "legacyUsedProvider": "stepfun",
+          "legacyActionTypes": [
+            "card.create",
+            "card.focus",
+            "subtitle.show"
+          ],
+          "legacyCardTypes": [
+            "NoteCard"
+          ],
+          "plannerCalls": 2,
+          "directClauses": 0
+        },
+        "outcome": "failed",
+        "undone": false
+      },
+      "traceSource": "decision-log",
+      "trace": {
+        "id": "decision_0a3f2bca-2c4c-459e-bf78-2ee24f5293fc",
+        "mode": "on",
+        "status": "complete",
+        "taskId": "feval_mvu0yx44_b4fcf1ab_disabled-template",
+        "clauses": [
+          "今天练了40分钟背"
+        ],
+        "decisions": [
+          {
+            "text": "今天练了40分钟背",
+            "route": "note",
+            "probability": 0.4771876983656319,
+            "probabilities": {
+              "chat": 0.18879594238146058,
+              "answer": 0.001722853102869233,
+              "search": 0.0009958188780699302,
+              "countdown": 0.0032302178215560377,
+              "todo": 0.004644032920454379,
+              "note": 0.4771876983656319,
+              "generate": 0.001391442211585115,
+              "focus": 0.005857615844091232,
+              "overview": 0.0038643435739702577,
+              "restore": 0.0021402611326683855,
+              "highlight": 0.001034337723455899,
+              "edit": 0.30107410032612597,
+              "arrange": 0.004018786038323451,
+              "delete": 0.0010618913091774015,
+              "undo": 0.001372988253159526,
+              "unsupported": 0.0016076701174006943
+            },
+            "none": false,
+            "latencyMs": 1630,
+            "failed": false
+          }
+        ],
+        "route": "note",
+        "probability": 0.4771876983656319,
+        "latencyMs": 1630,
+        "routeLatencyMs": 1630,
+        "legacyElapsedMs": 36259,
+        "shadowWaitMs": 0,
+        "failedCount": 0,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "card.create",
+          "card.focus",
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [
+          "NoteCard"
+        ],
+        "plannerCalls": 2,
+        "directClauses": 0
+      },
+      "calls": {
+        "planner": 2,
+        "directClauses": 0,
+        "usedProvider": "stepfun"
+      },
+      "cancellation": {
+        "kind": "task",
+        "task": {
+          "protocolVersion": "vivic-decision-v2",
+          "id": "feval_mvu0yx44_b4fcf1ab_disabled-template",
+          "step": 0,
+          "status": "cancelled",
+          "canvasVersion": 770,
+          "decision": "legacy-fallback",
+          "reason": "v2_not_configured"
+        },
+        "message": "已取消尚未执行的步骤。"
+      },
+      "ownerAfter": {
+        "schemaVersion": 1,
+        "id": "space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+        "title": "路由评测专用（非用户空间）",
+        "version": 770,
+        "updatedAt": "2026-10-29T20:58:10.254Z",
+        "cardsById": {
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93": {
+            "id": "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+            "variant": "standard",
+            "sources": [],
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 360,
+              "height": 300,
+              "pinned": false,
+              "surface": "display"
+            },
+            "metadata": {
+              "createdAt": "2026-10-29T20:58:01.803Z",
+              "updatedAt": "2026-10-29T20:58:01.803Z",
+              "aliases": [
+                "健身记录"
+              ]
+            },
+            "type": "ExtensionCard",
+            "displayProps": {
+              "def": {
+                "id": "example.fitness-log",
+                "version": "1.0.0",
+                "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+              },
+              "config": {
+                "title": "训练记录"
+              },
+              "data": {
+                "trainingDate": "2026-10-30",
+                "bodyPart": "背",
+                "minutes": 40
+              },
+              "state": {
+                "note": ""
+              }
+            },
+            "sourceData": {}
+          },
+          "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd": {
+            "id": "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd",
+            "variant": "standard",
+            "sources": [],
+            "layout": {
+              "x": 408,
+              "y": 0,
+              "width": 360,
+              "height": 300,
+              "pinned": false,
+              "surface": "display"
+            },
+            "metadata": {
+              "createdAt": "2026-10-29T20:58:10.212Z",
+              "updatedAt": "2026-10-29T20:58:10.212Z",
+              "aliases": [
+                "健身记录"
+              ]
+            },
+            "type": "ExtensionCard",
+            "displayProps": {
+              "def": {
+                "id": "example.fitness-log",
+                "version": "1.0.0",
+                "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+              },
+              "config": {
+                "title": "训练记录"
+              },
+              "data": {
+                "trainingDate": "2026-10-30",
+                "bodyPart": "背",
+                "minutes": 35
+              },
+              "state": {
+                "note": ""
+              }
+            },
+            "sourceData": {}
+          }
+        },
+        "cardOrder": [
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+          "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd"
+        ],
+        "viewport": {
+          "x": 0,
+          "y": 0,
+          "zoom": 1
+        },
+        "focusHistory": [
+          "ext_ddf2586b-147a-4687-9ab7-e07f09c24e93",
+          "ext_ce58e3fd-4e08-4df7-874f-2ecb65f012bd"
+        ],
+        "processedRequestIds": [
+          "slots_df529e48-dedb-40a8-a73d-b59c555b80ab",
+          "slots_9c5bf77e-b65d-46fa-9768-623ab0f6aa8b"
+        ]
+      },
+      "totalLatencyMs": 36353
+    }
+  ],
+  "http": [
+    {
+      "phase": "preflight-identity",
+      "method": "GET",
+      "route": "/api/space/session",
+      "status": 200,
+      "responseBytes": 207,
+      "latencyMs": 52,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "preflight-owner",
+      "method": "GET",
+      "route": "/api/space/owner/canvases/space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+      "status": 200,
+      "responseBytes": 310,
+      "latencyMs": 38,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "preflight-assets",
+      "method": "GET",
+      "route": "/api/space/spaces/space_7d314eb1-e808-4d9c-9659-d760b2968efa/assets",
+      "status": 200,
+      "responseBytes": 13,
+      "latencyMs": 10,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "preflight-provider",
+      "method": "GET",
+      "route": "/api/providers/status",
+      "status": 200,
+      "responseBytes": 949,
+      "latencyMs": 8,
+      "contentType": "application/json"
+    },
+    {
+      "phase": "preflight-catalog",
+      "method": "GET",
+      "route": "/api/space/cards",
+      "status": 200,
+      "responseBytes": 18,
+      "latencyMs": 13,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "package-install",
+      "method": "POST",
+      "route": "/api/space/cards",
+      "status": 200,
+      "responseBytes": 7380,
+      "latencyMs": 34,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "package-list",
+      "method": "GET",
+      "route": "/api/space/cards",
+      "status": 200,
+      "responseBytes": 7377,
+      "latencyMs": 6,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "catalog-read",
+      "method": "GET",
+      "route": "/api/space/cards",
+      "status": 200,
+      "responseBytes": 7377,
+      "latencyMs": 5,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "package-export",
+      "method": "GET",
+      "route": "/api/space/cards/example.fitness-log/package?hash=094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2",
+      "status": 200,
+      "responseBytes": 2827,
+      "latencyMs": 27,
+      "contentType": "application/zip"
+    },
+    {
+      "phase": "record-40-before",
+      "method": "GET",
+      "route": "/api/space/owner/canvases/space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+      "status": 200,
+      "responseBytes": 310,
+      "latencyMs": 7,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "record-40",
+      "method": "POST",
+      "route": "/api/intent/stream",
+      "status": 200,
+      "responseBytes": 3493,
+      "latencyMs": 4328,
+      "contentType": "text/event-stream"
+    },
+    {
+      "phase": "record-40-trace",
+      "method": "GET",
+      "route": "/api/space/decision-log?limit=200",
+      "status": 200,
+      "responseBytes": 289019,
+      "latencyMs": 27,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "record-40-commit",
+      "method": "PUT",
+      "route": "/api/space/owner/canvases/space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+      "status": 200,
+      "responseBytes": 1069,
+      "latencyMs": 15,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "record-40-commit-storage-receipt",
+      "method": "GET",
+      "route": "/api/space/spaces/space_7d314eb1-e808-4d9c-9659-d760b2968efa/commands/feval_mvu0yx44_b4fcf1ab_1_record-40-commit",
+      "status": 200,
+      "responseBytes": 1104,
+      "latencyMs": 6,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "record-40-commit-readback",
+      "method": "GET",
+      "route": "/api/space/owner/canvases/space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+      "status": 200,
+      "responseBytes": 1069,
+      "latencyMs": 5,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "record-40-execution-receipt",
+      "method": "POST",
+      "route": "/api/intent",
+      "status": 200,
+      "responseBytes": 236,
+      "latencyMs": 13,
+      "contentType": "application/json"
+    },
+    {
+      "phase": "record-40-after",
+      "method": "GET",
+      "route": "/api/space/owner/canvases/space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+      "status": 200,
+      "responseBytes": 1069,
+      "latencyMs": 5,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "record-40-trace",
+      "method": "GET",
+      "route": "/api/space/decision-log?limit=200",
+      "status": 200,
+      "responseBytes": 289020,
+      "latencyMs": 17,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "generalize-35-before",
+      "method": "GET",
+      "route": "/api/space/owner/canvases/space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+      "status": 200,
+      "responseBytes": 1069,
+      "latencyMs": 6,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "generalize-35",
+      "method": "POST",
+      "route": "/api/intent/stream",
+      "status": 200,
+      "responseBytes": 3570,
+      "latencyMs": 8280,
+      "contentType": "text/event-stream"
+    },
+    {
+      "phase": "generalize-35-trace",
+      "method": "GET",
+      "route": "/api/space/decision-log?limit=200",
+      "status": 200,
+      "responseBytes": 289207,
+      "latencyMs": 30,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "generalize-35-commit",
+      "method": "PUT",
+      "route": "/api/space/owner/canvases/space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+      "status": 200,
+      "responseBytes": 1834,
+      "latencyMs": 12,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "generalize-35-commit-storage-receipt",
+      "method": "GET",
+      "route": "/api/space/spaces/space_7d314eb1-e808-4d9c-9659-d760b2968efa/commands/feval_mvu0yx44_b4fcf1ab_2_generalize-35-commit",
+      "status": 200,
+      "responseBytes": 1699,
+      "latencyMs": 6,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "generalize-35-commit-readback",
+      "method": "GET",
+      "route": "/api/space/owner/canvases/space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+      "status": 200,
+      "responseBytes": 1834,
+      "latencyMs": 5,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "generalize-35-execution-receipt",
+      "method": "POST",
+      "route": "/api/intent",
+      "status": 200,
+      "responseBytes": 240,
+      "latencyMs": 13,
+      "contentType": "application/json"
+    },
+    {
+      "phase": "generalize-35-after",
+      "method": "GET",
+      "route": "/api/space/owner/canvases/space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+      "status": 200,
+      "responseBytes": 1834,
+      "latencyMs": 7,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "generalize-35-trace",
+      "method": "GET",
+      "route": "/api/space/decision-log?limit=200",
+      "status": 200,
+      "responseBytes": 289208,
+      "latencyMs": 18,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "referenced-delete",
+      "method": "DELETE",
+      "route": "/api/space/cards/example.fitness-log?hash=094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2",
+      "status": 409,
+      "responseBytes": 144,
+      "latencyMs": 7,
+      "contentType": "application/json; charset=utf-8",
+      "response": {
+        "ok": false,
+        "code": "definition-in-use",
+        "message": "当前Space仍有卡片引用此版本，请先删除引用卡片，或仅停用卡片包。"
+      }
+    },
+    {
+      "phase": "missing-minutes-before",
+      "method": "GET",
+      "route": "/api/space/owner/canvases/space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+      "status": 200,
+      "responseBytes": 1834,
+      "latencyMs": 6,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "missing-minutes",
+      "method": "POST",
+      "route": "/api/intent/stream",
+      "status": 200,
+      "responseBytes": 2512,
+      "latencyMs": 3011,
+      "contentType": "text/event-stream"
+    },
+    {
+      "phase": "missing-minutes-trace",
+      "method": "GET",
+      "route": "/api/space/decision-log?limit=200",
+      "status": 200,
+      "responseBytes": 289168,
+      "latencyMs": 21,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "missing-minutes-discard-unexecuted-proposal-owner",
+      "method": "GET",
+      "route": "/api/space/owner/canvases/space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+      "status": 200,
+      "responseBytes": 1834,
+      "latencyMs": 5,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "missing-minutes-discard-unexecuted-proposal",
+      "method": "POST",
+      "route": "/api/intent",
+      "status": 200,
+      "responseBytes": 263,
+      "latencyMs": 11,
+      "contentType": "application/json"
+    },
+    {
+      "phase": "missing-minutes-after",
+      "method": "GET",
+      "route": "/api/space/owner/canvases/space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+      "status": 200,
+      "responseBytes": 1834,
+      "latencyMs": 4,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "missing-minutes-trace",
+      "method": "GET",
+      "route": "/api/space/decision-log?limit=200",
+      "status": 200,
+      "responseBytes": 289168,
+      "latencyMs": 17,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "out-of-range-900-before",
+      "method": "GET",
+      "route": "/api/space/owner/canvases/space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+      "status": 200,
+      "responseBytes": 1834,
+      "latencyMs": 6,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "out-of-range-900",
+      "method": "POST",
+      "route": "/api/intent/stream",
+      "status": 200,
+      "responseBytes": 2588,
+      "latencyMs": 24210,
+      "contentType": "text/event-stream"
+    },
+    {
+      "phase": "out-of-range-900-trace",
+      "method": "GET",
+      "route": "/api/space/decision-log?limit=200",
+      "status": 200,
+      "responseBytes": 289218,
+      "latencyMs": 29,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "out-of-range-900-discard-unexecuted-proposal-owner",
+      "method": "GET",
+      "route": "/api/space/owner/canvases/space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+      "status": 200,
+      "responseBytes": 1834,
+      "latencyMs": 6,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "out-of-range-900-discard-unexecuted-proposal",
+      "method": "POST",
+      "route": "/api/intent",
+      "status": 200,
+      "responseBytes": 264,
+      "latencyMs": 11,
+      "contentType": "application/json"
+    },
+    {
+      "phase": "out-of-range-900-after",
+      "method": "GET",
+      "route": "/api/space/owner/canvases/space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+      "status": 200,
+      "responseBytes": 1834,
+      "latencyMs": 35,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "out-of-range-900-trace",
+      "method": "GET",
+      "route": "/api/space/decision-log?limit=200",
+      "status": 200,
+      "responseBytes": 289218,
+      "latencyMs": 40,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "disable-package",
+      "method": "PATCH",
+      "route": "/api/space/cards/example.fitness-log",
+      "status": 200,
+      "responseBytes": 7381,
+      "latencyMs": 8,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "catalog-read",
+      "method": "GET",
+      "route": "/api/space/cards",
+      "status": 200,
+      "responseBytes": 7378,
+      "latencyMs": 5,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "disabled-template-before",
+      "method": "GET",
+      "route": "/api/space/owner/canvases/space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+      "status": 200,
+      "responseBytes": 1834,
+      "latencyMs": 7,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "disabled-template",
+      "method": "POST",
+      "route": "/api/intent/stream",
+      "status": 200,
+      "responseBytes": 3363,
+      "latencyMs": 36270,
+      "contentType": "text/event-stream"
+    },
+    {
+      "phase": "disabled-template-trace",
+      "method": "GET",
+      "route": "/api/space/decision-log?limit=200",
+      "status": 200,
+      "responseBytes": 289199,
+      "latencyMs": 27,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "disabled-template-catalog",
+      "method": "GET",
+      "route": "/api/space/cards",
+      "status": 200,
+      "responseBytes": 7378,
+      "latencyMs": 5,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "disabled-template-discard-unexecuted-proposal-owner",
+      "method": "GET",
+      "route": "/api/space/owner/canvases/space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+      "status": 200,
+      "responseBytes": 1834,
+      "latencyMs": 6,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "disabled-template-discard-unexecuted-proposal",
+      "method": "POST",
+      "route": "/api/intent",
+      "status": 200,
+      "responseBytes": 265,
+      "latencyMs": 11,
+      "contentType": "application/json"
+    },
+    {
+      "phase": "disabled-template-after",
+      "method": "GET",
+      "route": "/api/space/owner/canvases/space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+      "status": 200,
+      "responseBytes": 1834,
+      "latencyMs": 6,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "disabled-template-trace",
+      "method": "GET",
+      "route": "/api/space/decision-log?limit=200",
+      "status": 200,
+      "responseBytes": 289197,
+      "latencyMs": 20,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "re-enable-package",
+      "method": "PATCH",
+      "route": "/api/space/cards/example.fitness-log",
+      "status": 200,
+      "responseBytes": 7380,
+      "latencyMs": 10,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "catalog-read",
+      "method": "GET",
+      "route": "/api/space/cards",
+      "status": 200,
+      "responseBytes": 7377,
+      "latencyMs": 5,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "cleanup-owner",
+      "method": "GET",
+      "route": "/api/space/owner/canvases/space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+      "status": 200,
+      "responseBytes": 1834,
+      "latencyMs": 6,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "restore-original-space",
+      "method": "PUT",
+      "route": "/api/space/owner/canvases/space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+      "status": 200,
+      "responseBytes": 310,
+      "latencyMs": 8,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "restore-original-space-storage-receipt",
+      "method": "GET",
+      "route": "/api/space/spaces/space_7d314eb1-e808-4d9c-9659-d760b2968efa/commands/feval_mvu0yx44_b4fcf1ab_3_restore-original-space",
+      "status": 200,
+      "responseBytes": 522,
+      "latencyMs": 5,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "restore-original-space-readback",
+      "method": "GET",
+      "route": "/api/space/owner/canvases/space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+      "status": 200,
+      "responseBytes": 310,
+      "latencyMs": 4,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "cleanup-owner-verify",
+      "method": "GET",
+      "route": "/api/space/owner/canvases/space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+      "status": 200,
+      "responseBytes": 310,
+      "latencyMs": 4,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "cleanup-assets",
+      "method": "GET",
+      "route": "/api/space/spaces/space_7d314eb1-e808-4d9c-9659-d760b2968efa/assets",
+      "status": 200,
+      "responseBytes": 13,
+      "latencyMs": 4,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "cleanup-assets-verify",
+      "method": "GET",
+      "route": "/api/space/spaces/space_7d314eb1-e808-4d9c-9659-d760b2968efa/assets",
+      "status": 200,
+      "responseBytes": 13,
+      "latencyMs": 4,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "cleanup-catalog",
+      "method": "GET",
+      "route": "/api/space/cards",
+      "status": 200,
+      "responseBytes": 7377,
+      "latencyMs": 4,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "cleanup-remove-new-package",
+      "method": "DELETE",
+      "route": "/api/space/cards/example.fitness-log?hash=094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2",
+      "status": 200,
+      "responseBytes": 11,
+      "latencyMs": 5,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "phase": "cleanup-catalog-verify",
+      "method": "GET",
+      "route": "/api/space/cards",
+      "status": 200,
+      "responseBytes": 18,
+      "latencyMs": 3,
+      "contentType": "application/json; charset=utf-8"
+    }
+  ],
+  "cleanup": {
+    "attempted": true,
+    "verified": true,
+    "errors": [],
+    "restore": {
+      "requestId": "feval_mvu0yx44_b4fcf1ab_3_restore-original-space",
+      "storageReceipt": {
+        "requestId": "feval_mvu0yx44_b4fcf1ab_3_restore-original-space",
+        "status": "succeeded",
+        "version": 771
+      },
+      "owner": {
+        "serverVersion": 771,
+        "record": {
+          "schemaVersion": 1,
+          "id": "space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+          "title": "路由评测专用（非用户空间）",
+          "version": 771,
+          "updatedAt": "2026-10-29T20:59:14.164Z",
+          "cardsById": {},
+          "cardOrder": [],
+          "viewport": {
+            "x": 0,
+            "y": 0,
+            "zoom": 1
+          },
+          "focusHistory": [],
+          "processedRequestIds": []
+        }
+      },
+      "recoveredAfterWriteError": null,
+      "returned": {
+        "serverVersion": 771,
+        "record": {
+          "schemaVersion": 1,
+          "id": "space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+          "title": "路由评测专用（非用户空间）",
+          "version": 771,
+          "updatedAt": "2026-10-29T20:59:14.164Z",
+          "cardsById": {},
+          "cardOrder": [],
+          "viewport": {
+            "x": 0,
+            "y": 0,
+            "zoom": 1
+          },
+          "focusHistory": [],
+          "processedRequestIds": []
+        }
+      }
+    },
+    "spaceRestored": true,
+    "noAssets": true,
+    "catalogRestored": true,
+    "pendingTasks": []
+  },
+  "provider": {
+    "active": "stepfun",
+    "connected": true,
+    "defaultModel": "step-3.7-flash"
+  },
+  "initialOwner": {
+    "schemaVersion": 1,
+    "id": "space_7d314eb1-e808-4d9c-9659-d760b2968efa",
+    "title": "路由评测专用（非用户空间）",
+    "version": 768,
+    "updatedAt": "2026-10-29T18:59:42.654Z",
+    "cardsById": {},
+    "cardOrder": [],
+    "viewport": {
+      "x": 0,
+      "y": 0,
+      "zoom": 1
+    },
+    "focusHistory": [],
+    "processedRequestIds": []
+  },
+  "summary": {
+    "cases": 5,
+    "passed": 5,
+    "failed": 0,
+    "skipped": 0,
+    "httpRequests": 64,
+    "intentStreams": 5,
+    "plannerCallsKnown": 6,
+    "plannerCallTelemetryComplete": true,
+    "responseP50Ms": 8280,
+    "responseP95Ms": 36270,
+    "routeP50Ms": 1716,
+    "routeP95Ms": 1961,
+    "committedRecords": 2,
+    "verifiedFactRecords": 2,
+    "confirmedExecutionReceipts": 2
+  },
+  "finishedAt": "2026-10-29T20:59:14.202Z",
+  "restoreSemantics": "Normal owner API restores logical Space content/settings; server versions/timestamps and synthetic audit/receipt history remain monotonic."
+}

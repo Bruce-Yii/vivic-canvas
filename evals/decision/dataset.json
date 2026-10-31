@@ -1,0 +1,1062 @@
+{
+  "version": "vivic-route-v1-20261029",
+  "note": "Hand-written by Claude for model selection; independent of 马泽瑜's training data. Frozen before any inference.",
+  "routes": {
+    "chat": "闲聊、打招呼、感谢、情绪表达，不需要做任何事",
+    "answer": "知识问答、解释、介绍，或解释某句话、某张卡的意思（被解释的命令不执行）",
+    "search": "需要联网查询的实时信息，如天气、新闻、价格、最新资料",
+    "countdown": "新建一个倒计时、计时器，或在一段时间后提醒（不是暂停或修改已有的）",
+    "todo": "新建待办事项或任务清单",
+    "note": "把用户说的内容记下来、记笔记、做便签",
+    "generate": "帮用户写作、整理、规划、总结、改写，或生成表格图表",
+    "focus": "聚焦、放大、打开查看某一张已有卡片",
+    "overview": "显示全部卡片，把所有卡片放进一屏的全局视图",
+    "restore": "退出聚焦，恢复之前的视图",
+    "highlight": "让某张卡片或卡片里的某一条闪烁高亮，方便找到",
+    "edit": "修改已有卡片：勾选完成、增删条目、改标题、展开收起、暂停或继续倒计时",
+    "arrange": "移动、固定或取消固定、整理卡片布局，或把卡片传送到用户页/展示页",
+    "delete": "删除卡片或清空画布",
+    "undo": "撤销或重做刚才的操作",
+    "unsupported": "系统做不到的事，如下单购物、打电话、转账、控制家电"
+  },
+  "canvas": {
+    "focused": "note_meeting",
+    "cards": [
+      {
+        "id": "todo_week",
+        "type": "TodoCard",
+        "title": "本周待办",
+        "items": [
+          "交周报",
+          "买牛奶",
+          "预约牙医"
+        ],
+        "x": 0,
+        "y": 0
+      },
+      {
+        "id": "todo_shop",
+        "type": "TodoCard",
+        "title": "购物清单",
+        "items": [
+          "鸡蛋",
+          "洗衣液"
+        ],
+        "x": 900,
+        "y": 0
+      },
+      {
+        "id": "note_meeting",
+        "type": "NoteCard",
+        "title": "会议记录",
+        "text": "周三和设计讨论首页改版",
+        "x": 300,
+        "y": 0
+      },
+      {
+        "id": "note_book",
+        "type": "NoteCard",
+        "title": "读书笔记",
+        "text": "《原子习惯》第三章摘录",
+        "x": 600,
+        "y": 300
+      },
+      {
+        "id": "cd_water",
+        "type": "CountdownCard",
+        "title": "喝水提醒",
+        "remaining": "18分钟",
+        "x": 0,
+        "y": 300
+      },
+      {
+        "id": "weather_sh",
+        "type": "WeatherCard",
+        "title": "上海天气",
+        "x": 300,
+        "y": 300
+      },
+      {
+        "id": "answer_google",
+        "type": "AnswerCard",
+        "title": "Google 公司介绍",
+        "points": [
+          "1998年成立",
+          "总部在山景城",
+          "核心业务是搜索和广告"
+        ],
+        "x": 900,
+        "y": 300
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "chat-01",
+      "text": "你好呀",
+      "route": "chat"
+    },
+    {
+      "id": "chat-02",
+      "text": "早上好，今天心情不错",
+      "route": "chat"
+    },
+    {
+      "id": "chat-03",
+      "text": "谢谢你，帮大忙了",
+      "route": "chat"
+    },
+    {
+      "id": "chat-04",
+      "text": "哈哈哈你好可爱",
+      "route": "chat"
+    },
+    {
+      "id": "chat-05",
+      "text": "我今天好累啊",
+      "route": "chat"
+    },
+    {
+      "id": "chat-06",
+      "text": "嗯嗯好的",
+      "route": "chat"
+    },
+    {
+      "id": "chat-07",
+      "text": "晚安，明天见",
+      "route": "chat"
+    },
+    {
+      "id": "chat-08",
+      "text": "你叫什么名字",
+      "route": "chat"
+    },
+    {
+      "id": "chat-09",
+      "text": "hello there",
+      "route": "chat"
+    },
+    {
+      "id": "chat-10",
+      "text": "陪我聊会儿天吧",
+      "route": "chat"
+    },
+    {
+      "id": "answer-01",
+      "text": "给我介绍一下谷歌这家公司",
+      "route": "answer"
+    },
+    {
+      "id": "answer-02",
+      "text": "量子计算是什么原理",
+      "route": "answer"
+    },
+    {
+      "id": "answer-03",
+      "text": "为什么天空是蓝色的",
+      "route": "answer"
+    },
+    {
+      "id": "answer-04",
+      "text": "MBTI里INTJ和INTP有什么区别",
+      "route": "answer"
+    },
+    {
+      "id": "answer-05",
+      "text": "失眠的话有什么改善方法吗",
+      "route": "answer"
+    },
+    {
+      "id": "answer-06",
+      "text": "这句话里的删除所有卡片是什么意思",
+      "route": "answer",
+      "tags": [
+        "quote"
+      ]
+    },
+    {
+      "id": "answer-07",
+      "text": "解释一下什么叫倒计时提醒",
+      "route": "answer",
+      "tags": [
+        "quote"
+      ]
+    },
+    {
+      "id": "answer-08",
+      "text": "帮我讲讲罗马帝国为什么衰落",
+      "route": "answer"
+    },
+    {
+      "id": "answer-09",
+      "text": "如果我想学吉他应该从哪里开始",
+      "route": "answer"
+    },
+    {
+      "id": "answer-10",
+      "text": "第一次去日本旅游要注意什么",
+      "route": "answer"
+    },
+    {
+      "id": "answer-11",
+      "text": "react 和 vue 选哪个好",
+      "route": "answer"
+    },
+    {
+      "id": "answer-12",
+      "text": "这张谷歌的卡片讲了什么",
+      "route": "answer",
+      "tags": [
+        "about_card"
+      ]
+    },
+    {
+      "id": "search-01",
+      "text": "今天有什么科技新闻",
+      "route": "search"
+    },
+    {
+      "id": "search-02",
+      "text": "查一下现在黄金多少钱一克",
+      "route": "search"
+    },
+    {
+      "id": "search-03",
+      "text": "最新的iPhone发布了什么新功能",
+      "route": "search"
+    },
+    {
+      "id": "search-04",
+      "text": "帮我搜一下周杰伦最近的演唱会",
+      "route": "search"
+    },
+    {
+      "id": "search-05",
+      "text": "比特币现在什么价格",
+      "route": "search"
+    },
+    {
+      "id": "search-06",
+      "text": "上网查查OpenAI这周有什么动态",
+      "route": "search"
+    },
+    {
+      "id": "search-07",
+      "text": "昨晚湖人赢了吗",
+      "route": "search"
+    },
+    {
+      "id": "search-08",
+      "text": "推荐三款最近口碑好的降噪耳机",
+      "route": "search"
+    },
+    {
+      "id": "search-09",
+      "text": "搜索一下南京明天有什么展览",
+      "route": "search"
+    },
+    {
+      "id": "search-10",
+      "text": "人民币兑美元汇率是多少",
+      "route": "search"
+    },
+    {
+      "id": "weather-01",
+      "text": "今天天气怎么样",
+      "route": "search",
+      "tags": [
+        "weather"
+      ]
+    },
+    {
+      "id": "weather-02",
+      "text": "北京现在多少度",
+      "route": "search",
+      "tags": [
+        "weather"
+      ]
+    },
+    {
+      "id": "weather-03",
+      "text": "外面下雨了吗",
+      "route": "search",
+      "tags": [
+        "weather"
+      ]
+    },
+    {
+      "id": "weather-04",
+      "text": "明天要不要带伞",
+      "route": "search",
+      "tags": [
+        "weather"
+      ]
+    },
+    {
+      "id": "weather-05",
+      "text": "看下杭州的天气",
+      "route": "search",
+      "tags": [
+        "weather"
+      ]
+    },
+    {
+      "id": "weather-06",
+      "text": "这周末天气好不好",
+      "route": "search",
+      "tags": [
+        "weather"
+      ]
+    },
+    {
+      "id": "weather-07",
+      "text": "深圳空气质量怎么样",
+      "route": "search",
+      "tags": [
+        "weather"
+      ]
+    },
+    {
+      "id": "weather-08",
+      "text": "冷不冷啊今天",
+      "route": "search",
+      "tags": [
+        "weather"
+      ]
+    },
+    {
+      "id": "countdown-01",
+      "text": "倒计时50分钟",
+      "route": "countdown"
+    },
+    {
+      "id": "countdown-02",
+      "text": "十分钟后提醒我喝水",
+      "route": "countdown"
+    },
+    {
+      "id": "countdown-03",
+      "text": "帮我计时25分钟番茄钟",
+      "route": "countdown"
+    },
+    {
+      "id": "countdown-04",
+      "text": "半小时以后叫我起来",
+      "route": "countdown"
+    },
+    {
+      "id": "countdown-05",
+      "text": "三分钟后提醒我关火",
+      "route": "countdown"
+    },
+    {
+      "id": "countdown-06",
+      "text": "定个一个小时的闹钟",
+      "route": "countdown"
+    },
+    {
+      "id": "countdown-07",
+      "text": "倒计时20s",
+      "route": "countdown"
+    },
+    {
+      "id": "countdown-08",
+      "text": "四十五分钟之后提醒我去开会",
+      "route": "countdown"
+    },
+    {
+      "id": "countdown-09",
+      "text": "离高考还有多少天，做个倒数",
+      "route": "countdown"
+    },
+    {
+      "id": "countdown-10",
+      "text": "到点了叫我，大概15分钟",
+      "route": "countdown"
+    },
+    {
+      "id": "countdown-11",
+      "text": "set a timer for 5 minutes",
+      "route": "countdown"
+    },
+    {
+      "id": "countdown-12",
+      "text": "到计时十分钟",
+      "route": "countdown",
+      "tags": [
+        "asr"
+      ]
+    },
+    {
+      "id": "todo-01",
+      "text": "加个待办，明天交周报",
+      "route": "todo"
+    },
+    {
+      "id": "todo-02",
+      "text": "帮我列个今天要做的事：洗衣服、拿快递、回邮件",
+      "route": "todo"
+    },
+    {
+      "id": "todo-03",
+      "text": "新建一个任务清单，准备搬家",
+      "route": "todo"
+    },
+    {
+      "id": "todo-04",
+      "text": "我要记得周五之前缴电费，加到待办里",
+      "route": "todo"
+    },
+    {
+      "id": "todo-05",
+      "text": "创建待办：买菜、做饭、洗碗",
+      "route": "todo"
+    },
+    {
+      "id": "todo-06",
+      "text": "添加一个任务，给妈妈打电话",
+      "route": "todo"
+    },
+    {
+      "id": "todo-07",
+      "text": "下周要做的事情帮我建个清单",
+      "route": "todo"
+    },
+    {
+      "id": "todo-08",
+      "text": "to do 里加上健身",
+      "route": "todo"
+    },
+    {
+      "id": "todo-09",
+      "text": "代办：整理照片",
+      "route": "todo",
+      "tags": [
+        "asr"
+      ]
+    },
+    {
+      "id": "todo-10",
+      "text": "开个新清单，出差要带的东西",
+      "route": "todo"
+    },
+    {
+      "id": "note-01",
+      "text": "帮我记一下，客户说预算是十万",
+      "route": "note"
+    },
+    {
+      "id": "note-02",
+      "text": "记下来：wifi密码是abc12345",
+      "route": "note"
+    },
+    {
+      "id": "note-03",
+      "text": "做个便签，周三下午三点牙医",
+      "route": "note"
+    },
+    {
+      "id": "note-04",
+      "text": "把这句话记住：好的设计是看不见的",
+      "route": "note"
+    },
+    {
+      "id": "note-05",
+      "text": "我突然有个想法，做一个给猫用的日历app，先记着",
+      "route": "note"
+    },
+    {
+      "id": "note-06",
+      "text": "存一下这个地址，鼓楼区中山路100号",
+      "route": "note"
+    },
+    {
+      "id": "note-07",
+      "text": "新建便笺，内容是手机控制测试",
+      "route": "note"
+    },
+    {
+      "id": "note-08",
+      "text": "记录一下今天跑了五公里",
+      "route": "note"
+    },
+    {
+      "id": "note-09",
+      "text": "便签：车停在B2层34号",
+      "route": "note"
+    },
+    {
+      "id": "note-10",
+      "text": "take a note, call Alex back",
+      "route": "note"
+    },
+    {
+      "id": "generate-01",
+      "text": "帮我写一封请假邮件",
+      "route": "generate"
+    },
+    {
+      "id": "generate-02",
+      "text": "给我规划一个三天的成都旅行行程",
+      "route": "generate"
+    },
+    {
+      "id": "generate-03",
+      "text": "把会议记录总结成三个要点",
+      "route": "generate"
+    },
+    {
+      "id": "generate-04",
+      "text": "做一个表格对比iPhone和华为的参数，用我给的数据：iPhone 6.1寸 华为6.7寸",
+      "route": "generate"
+    },
+    {
+      "id": "generate-05",
+      "text": "帮我想五个咖啡店的名字",
+      "route": "generate"
+    },
+    {
+      "id": "generate-06",
+      "text": "把这段话改写得简短一点：我们团队在过去的一个季度中取得了非常显著的进步",
+      "route": "generate"
+    },
+    {
+      "id": "generate-07",
+      "text": "帮我做一个下周的健身计划",
+      "route": "generate"
+    },
+    {
+      "id": "generate-08",
+      "text": "根据读书笔记出几道复习题",
+      "route": "generate"
+    },
+    {
+      "id": "generate-09",
+      "text": "用这些数字画个柱状图：一月10 二月20 三月15",
+      "route": "generate"
+    },
+    {
+      "id": "generate-10",
+      "text": "给产品发布会写个开场白",
+      "route": "generate"
+    },
+    {
+      "id": "generate-11",
+      "text": "整理一下我这周的待办，按优先级排个序给我建议",
+      "route": "generate"
+    },
+    {
+      "id": "focus-01",
+      "text": "聚焦会议记录",
+      "route": "focus",
+      "target": "note_meeting"
+    },
+    {
+      "id": "focus-02",
+      "text": "放大看看读书笔记",
+      "route": "focus",
+      "target": "note_book"
+    },
+    {
+      "id": "focus-03",
+      "text": "我想看一下天气那张卡",
+      "route": "focus",
+      "target": "weather_sh"
+    },
+    {
+      "id": "focus-04",
+      "text": "打开购物清单",
+      "route": "focus",
+      "target": "todo_shop"
+    },
+    {
+      "id": "focus-05",
+      "text": "把谷歌那张卡拉近一点",
+      "route": "focus",
+      "target": "answer_google"
+    },
+    {
+      "id": "focus-06",
+      "text": "看看最左边那张",
+      "route": "focus",
+      "target": "todo_week",
+      "tags": [
+        "spatial"
+      ]
+    },
+    {
+      "id": "focus-07",
+      "text": "聚焦待办",
+      "route": "focus",
+      "target": "ambiguous",
+      "tags": [
+        "ambiguous"
+      ]
+    },
+    {
+      "id": "focus-08",
+      "text": "别删，先聚焦它",
+      "route": "focus",
+      "target": "note_meeting",
+      "tags": [
+        "negation",
+        "deixis"
+      ]
+    },
+    {
+      "id": "focus-09",
+      "text": "放大喝水那个倒计时",
+      "route": "focus",
+      "target": "cd_water"
+    },
+    {
+      "id": "focus-10",
+      "text": "聚焦一下日程卡",
+      "route": "focus",
+      "target": "missing",
+      "tags": [
+        "missing"
+      ]
+    },
+    {
+      "id": "overview-01",
+      "text": "显示全部卡片",
+      "route": "overview"
+    },
+    {
+      "id": "overview-02",
+      "text": "让我看到所有的卡",
+      "route": "overview"
+    },
+    {
+      "id": "overview-03",
+      "text": "把所有卡片放到一屏里",
+      "route": "overview"
+    },
+    {
+      "id": "overview-04",
+      "text": "缩小看全局",
+      "route": "overview"
+    },
+    {
+      "id": "overview-05",
+      "text": "我想看看整个空间都有啥",
+      "route": "overview"
+    },
+    {
+      "id": "overview-06",
+      "text": "show everything",
+      "route": "overview"
+    },
+    {
+      "id": "restore-01",
+      "text": "恢复原来的视图",
+      "route": "restore"
+    },
+    {
+      "id": "restore-02",
+      "text": "退出聚焦",
+      "route": "restore"
+    },
+    {
+      "id": "restore-03",
+      "text": "回到刚才的画面",
+      "route": "restore"
+    },
+    {
+      "id": "restore-04",
+      "text": "不用放大了，还原吧",
+      "route": "restore",
+      "tags": [
+        "negation"
+      ]
+    },
+    {
+      "id": "restore-05",
+      "text": "返回之前那个视角",
+      "route": "restore"
+    },
+    {
+      "id": "restore-06",
+      "text": "取消聚焦",
+      "route": "restore"
+    },
+    {
+      "id": "highlight-01",
+      "text": "高亮一下买牛奶那条",
+      "route": "highlight",
+      "target": "todo_week"
+    },
+    {
+      "id": "highlight-02",
+      "text": "把本周待办的第二条标亮",
+      "route": "highlight",
+      "target": "todo_week"
+    },
+    {
+      "id": "highlight-03",
+      "text": "突出显示谷歌卡片里总部那一点",
+      "route": "highlight",
+      "target": "answer_google"
+    },
+    {
+      "id": "highlight-04",
+      "text": "闪一下喝水提醒",
+      "route": "highlight",
+      "target": "cd_water"
+    },
+    {
+      "id": "highlight-05",
+      "text": "让会议记录亮一下我好找到它",
+      "route": "highlight",
+      "target": "note_meeting"
+    },
+    {
+      "id": "highlight-06",
+      "text": "把洗衣液那条闪一下",
+      "route": "highlight",
+      "target": "todo_shop"
+    },
+    {
+      "id": "highlight-07",
+      "text": "高亮第一条",
+      "route": "highlight",
+      "target": "ambiguous",
+      "tags": [
+        "ambiguous"
+      ]
+    },
+    {
+      "id": "highlight-08",
+      "text": "这个卡片里预约牙医那项给我高亮",
+      "route": "highlight",
+      "target": "todo_week"
+    },
+    {
+      "id": "edit-01",
+      "text": "买牛奶已经完成了，勾掉",
+      "route": "edit",
+      "target": "todo_week"
+    },
+    {
+      "id": "edit-02",
+      "text": "购物清单里加上酱油",
+      "route": "edit",
+      "target": "todo_shop"
+    },
+    {
+      "id": "edit-03",
+      "text": "把会议记录的标题改成首页改版讨论",
+      "route": "edit",
+      "target": "note_meeting"
+    },
+    {
+      "id": "edit-04",
+      "text": "展开读书笔记",
+      "route": "edit",
+      "target": "note_book"
+    },
+    {
+      "id": "edit-05",
+      "text": "收起会议记录，只看摘要",
+      "route": "edit",
+      "target": "note_meeting"
+    },
+    {
+      "id": "edit-06",
+      "text": "交周报那个我做完了",
+      "route": "edit",
+      "target": "todo_week"
+    },
+    {
+      "id": "edit-07",
+      "text": "在这张便签后面补一句：下周再约",
+      "route": "edit",
+      "target": "note_meeting",
+      "tags": [
+        "deixis"
+      ]
+    },
+    {
+      "id": "edit-08",
+      "text": "暂停喝水倒计时",
+      "route": "edit",
+      "target": "cd_water"
+    },
+    {
+      "id": "edit-09",
+      "text": "洗衣液不用买了，划掉",
+      "route": "edit",
+      "target": "todo_shop",
+      "tags": [
+        "negation"
+      ]
+    },
+    {
+      "id": "edit-10",
+      "text": "把预约牙医改成预约体检",
+      "route": "edit",
+      "target": "todo_week"
+    },
+    {
+      "id": "arrange-01",
+      "text": "把天气卡移到左边",
+      "route": "arrange",
+      "target": "weather_sh"
+    },
+    {
+      "id": "arrange-02",
+      "text": "整理一下画布布局",
+      "route": "arrange"
+    },
+    {
+      "id": "arrange-03",
+      "text": "把会议记录固定住别动",
+      "route": "arrange",
+      "target": "note_meeting"
+    },
+    {
+      "id": "arrange-04",
+      "text": "读书笔记挪到购物清单下面",
+      "route": "arrange",
+      "target": "note_book"
+    },
+    {
+      "id": "arrange-05",
+      "text": "卡片太乱了排整齐",
+      "route": "arrange"
+    },
+    {
+      "id": "arrange-06",
+      "text": "取消固定喝水提醒",
+      "route": "arrange",
+      "target": "cd_water"
+    },
+    {
+      "id": "arrange-07",
+      "text": "把谷歌卡往上挪一点",
+      "route": "arrange",
+      "target": "answer_google"
+    },
+    {
+      "id": "arrange-08",
+      "text": "把待办传到用户页我要编辑",
+      "route": "arrange",
+      "target": "ambiguous",
+      "tags": [
+        "ambiguous"
+      ]
+    },
+    {
+      "id": "delete-01",
+      "text": "删除读书笔记",
+      "route": "delete",
+      "target": "note_book"
+    },
+    {
+      "id": "delete-02",
+      "text": "把天气卡去掉",
+      "route": "delete",
+      "target": "weather_sh"
+    },
+    {
+      "id": "delete-03",
+      "text": "清空画布",
+      "route": "delete"
+    },
+    {
+      "id": "delete-04",
+      "text": "喝水提醒不需要了，删了吧",
+      "route": "delete",
+      "target": "cd_water"
+    },
+    {
+      "id": "delete-05",
+      "text": "这张卡没用了，扔掉",
+      "route": "delete",
+      "target": "note_meeting",
+      "tags": [
+        "deixis"
+      ]
+    },
+    {
+      "id": "delete-06",
+      "text": "删掉所有卡片",
+      "route": "delete"
+    },
+    {
+      "id": "delete-07",
+      "text": "删除待办",
+      "route": "delete",
+      "target": "ambiguous",
+      "tags": [
+        "ambiguous"
+      ]
+    },
+    {
+      "id": "delete-08",
+      "text": "把谷歌那张移除",
+      "route": "delete",
+      "target": "answer_google"
+    },
+    {
+      "id": "undo-01",
+      "text": "撤销",
+      "route": "undo"
+    },
+    {
+      "id": "undo-02",
+      "text": "刚才那步不对，退回去",
+      "route": "undo"
+    },
+    {
+      "id": "undo-03",
+      "text": "撤回上一步操作",
+      "route": "undo"
+    },
+    {
+      "id": "undo-04",
+      "text": "重做",
+      "route": "undo"
+    },
+    {
+      "id": "undo-05",
+      "text": "哎呀删错了，恢复回来",
+      "route": "undo"
+    },
+    {
+      "id": "undo-06",
+      "text": "undo that",
+      "route": "undo"
+    },
+    {
+      "id": "unsupported-01",
+      "text": "帮我点一份麦当劳外卖",
+      "route": "unsupported"
+    },
+    {
+      "id": "unsupported-02",
+      "text": "给张三打个电话",
+      "route": "unsupported"
+    },
+    {
+      "id": "unsupported-03",
+      "text": "把客厅的灯关了",
+      "route": "unsupported"
+    },
+    {
+      "id": "unsupported-04",
+      "text": "帮我在淘宝下单这双鞋",
+      "route": "unsupported"
+    },
+    {
+      "id": "unsupported-05",
+      "text": "转账给我妈两百块",
+      "route": "unsupported"
+    },
+    {
+      "id": "unsupported-06",
+      "text": "订一张明天去北京的高铁票",
+      "route": "unsupported"
+    },
+    {
+      "id": "multi-01",
+      "text": "帮我记个便签明天交周报，再设个50分钟倒计时",
+      "route": "note",
+      "multi": true,
+      "routes": [
+        "note",
+        "countdown"
+      ]
+    },
+    {
+      "id": "multi-02",
+      "text": "看下天气然后提醒我十分钟后出门",
+      "route": "search",
+      "multi": true,
+      "routes": [
+        "search",
+        "countdown"
+      ],
+      "tags": [
+        "weather"
+      ]
+    },
+    {
+      "id": "multi-03",
+      "text": "聚焦左边的待办，高亮第二条",
+      "route": "focus",
+      "target": "todo_week",
+      "multi": true,
+      "routes": [
+        "focus",
+        "highlight"
+      ]
+    },
+    {
+      "id": "multi-04",
+      "text": "把买牛奶勾掉，顺便删了天气卡",
+      "route": "edit",
+      "multi": true,
+      "routes": [
+        "edit",
+        "delete"
+      ]
+    },
+    {
+      "id": "multi-05",
+      "text": "介绍一下特斯拉，并且加个待办研究它的财报",
+      "route": "answer",
+      "multi": true,
+      "routes": [
+        "answer",
+        "todo"
+      ]
+    },
+    {
+      "id": "multi-06",
+      "text": "先显示全部卡片，然后整理一下布局",
+      "route": "overview",
+      "multi": true,
+      "routes": [
+        "overview",
+        "arrange"
+      ]
+    },
+    {
+      "id": "multi-07",
+      "text": "五分钟后提醒我喝水和吃药",
+      "route": "countdown",
+      "multi": false
+    },
+    {
+      "id": "multi-08",
+      "text": "列个待办：买菜和做饭",
+      "route": "todo",
+      "multi": false
+    },
+    {
+      "id": "multi-09",
+      "text": "不要删除，聚焦它",
+      "route": "focus",
+      "target": "note_meeting",
+      "multi": false,
+      "tags": [
+        "negation"
+      ]
+    },
+    {
+      "id": "multi-10",
+      "text": "查一下明天上海天气，要是下雨就提醒我带伞",
+      "route": "search",
+      "multi": true,
+      "routes": [
+        "search",
+        "countdown"
+      ],
+      "tags": [
+        "weather"
+      ]
+    }
+  ]
+}

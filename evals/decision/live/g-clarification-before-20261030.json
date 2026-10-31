@@ -1,0 +1,14 @@
+{
+  "pageErrors": [],
+  "results": [],
+  "checks": [
+    "ambiguous deletion asks before mutation"
+  ],
+  "complete": false,
+  "cleanup": true,
+  "candidateButtons": 2,
+  "usedCandidateClick": true,
+  "deletedBeforeConfirmation": true,
+  "error": "Selecting a candidate deleted a card before confirmation",
+  "failureText": "Space\nSpace 存档\n路由评测专用（非用户空间）\n\n已删除左边的便签「会议记录」，可撤销\n\n添加图片\n上传文件\nPDF / MD · 最多 5 个 · 合计 10 MB\n选择已连接\n语音自动发送"
+}

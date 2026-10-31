@@ -1,0 +1,79 @@
+{
+  "date": "2026-10-15",
+  "branch": "agent/next-iteration",
+  "scope": [
+    "weather/table clarification and visible feedback",
+    "unified owner-controlled local data reset"
+  ],
+  "unit": {
+    "web": {
+      "passed": 323
+    },
+    "localApi": {
+      "passed": 802,
+      "skipped": 3
+    },
+    "note": "Backend guard was tested with a later API-only run; frontend code did not change."
+  },
+  "typecheck": "passed",
+  "build": "passed",
+  "browserRuns": [
+    {
+      "command": "pnpm --filter @vivic/web exec playwright test tests/e2e/local-data-reset.spec.ts tests/e2e/data-input.spec.ts tests/e2e/thinking.spec.ts tests/e2e/control.spec.ts tests/e2e/phase3-settings.spec.ts",
+      "engine": "chromium",
+      "passed": 16,
+      "failed": 0
+    },
+    {
+      "command": "pnpm --filter @vivic/web exec playwright test --config playwright.compat.config.ts tests/e2e/local-data-reset.spec.ts tests/e2e/data-input.spec.ts",
+      "passed": 7,
+      "failed": 1,
+      "detail": "Firefox data 3/3 and reset 1/1; WebKit data 3/3; WebKit reset could not seed a Blob/File cache fixture."
+    },
+    {
+      "command": "pnpm --filter @vivic/web exec playwright test tests/e2e/local-data-reset.spec.ts --config=playwright.compat.config.ts --project=webkit",
+      "passed": 1,
+      "failed": 0,
+      "detail": "Clear corrupt/legacy Uint8Array fixture records; not proof of real WebKit model Blob caching."
+    },
+    {
+      "command": "pnpm --filter @vivic/web exec playwright test tests/e2e/local-data-reset.spec.ts --config=playwright.compat.config.ts",
+      "engines": [
+        "firefox",
+        "webkit"
+      ],
+      "passed": 2,
+      "failed": 0,
+      "detail": "Final reset persistence/queue guards."
+    }
+  ],
+  "live": {
+    "weatherHomonyms": "clarified with four real location choices",
+    "qualifiedWeatherReply": "sourced WeatherCard",
+    "tableWithoutValues": "clarified",
+    "numericReply": "TableCard rows 3/5/4",
+    "canvasPersisted": false,
+    "modelCalls": 0
+  },
+  "constraints": {
+    "audioPlayback": false,
+    "physicalMicrophone": false,
+    "realUserCanvasTouched": false,
+    "testPorts": [
+      5174,
+      8788
+    ],
+    "newOAuthLoginTested": false
+  },
+  "localEvidence": [
+    "evidence/next-iteration-data-input/",
+    "evidence/next-iteration-local-data/"
+  ],
+  "knownLimits": [
+    "Separate browser runs, not one final full-suite run.",
+    "WebKit Blob/File fixture setup failed; failure videos retained; real model caching remains unverified.",
+    "Model cache and canvas reset span separate databases; cache may already be cleared if canvas transaction fails.",
+    "Existing dependency build and React Flow attribution warnings remain.",
+    "Prerecorded voice, word timing, amplitude feedback and physical/long-term acceptance remain."
+  ]
+}

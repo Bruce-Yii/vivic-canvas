@@ -1,0 +1,10 @@
+{
+  "release": "clarification-guard-20261030-1",
+  "base_files_verified": 1868,
+  "overlay_files_verified": 5,
+  "backend_restarted": false,
+  "health_ok": true,
+  "free_bytes": 8410611712,
+  "previous_frontend": "/opt/vivic-preview-20261025/releases/display-contrast-20261030-1/web",
+  "current_frontend": "/opt/vivic-preview-20261025/releases/clarification-guard-20261030-1/web"
+}

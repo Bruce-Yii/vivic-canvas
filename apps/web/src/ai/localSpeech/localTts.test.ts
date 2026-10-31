@@ -1,0 +1,10 @@
+// @vitest-environment jsdom
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { synthesizeLocalSpeech, validateLocalSpeechWav } from "./localTts";
+function wav(){const b=new Uint8Array(4844),v=new DataView(b.buffer),write=(i:number,s:string)=>b.set(new TextEncoder().encode(s),i);write(0,"RIFF");v.setUint32(4,4836,true);write(8,"WAVEfmt ");v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,24000,true);v.setUint32(28,48000,true);v.setUint16(32,2,true);v.setUint16(34,16,true);write(36,"data");v.setUint32(40,4800,true);return b;}
+afterEach(()=>vi.unstubAllGlobals());
+describe("local speech transport",()=>{
+ it("accepts only the host's mono PCM16 WAV, rejects malformed RIFF length",()=>{const b=wav();expect(()=>validateLocalSpeechWav(b)).not.toThrow();new DataView(b.buffer).setUint32(4,40,true);expect(()=>validateLocalSpeechWav(b)).toThrow();expect(()=>validateLocalSpeechWav(new Uint8Array(0))).toThrow();});
+ it("preserves a local failure without a cloud fallback",async()=>{const fetch=vi.fn<typeof globalThis.fetch>(async()=>new Response(JSON.stringify({error:"请先准备音色。"}),{status:409,headers:{"content-type":"application/json"}}));vi.stubGlobal("fetch",fetch);await expect(synthesizeLocalSpeech("test",1,new AbortController().signal)).rejects.toThrow("请先准备音色");expect(fetch).toHaveBeenCalledTimes(1);expect(fetch.mock.calls[0]?.[0]).toBe("/api/local-tts/synthesize");});
+ it("rejects an incorrect native content type and accepts bounded WAV",async()=>{vi.stubGlobal("fetch",vi.fn(async()=>new Response(wav(),{headers:{"content-type":"audio/mpeg"}})));await expect(synthesizeLocalSpeech("test",1,new AbortController().signal)).rejects.toThrow("格式无效");vi.stubGlobal("fetch",vi.fn(async()=>new Response(wav(),{headers:{"content-type":"audio/wav"}})));const result=await synthesizeLocalSpeech("test",1,new AbortController().signal);expect(result.headers.get("content-type")).toBe("audio/wav");expect((await result.arrayBuffer()).byteLength).toBe(4844);});
+});

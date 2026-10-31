@@ -1,0 +1,27 @@
+{
+  "source": "Current public frontend; genuine G model samples restored through the normal owner API without changing facts.",
+  "cases": [
+    {
+      "id": "vision",
+      "surface": "user",
+      "pageErrors": 0,
+      "imageDecoded": true,
+      "screenshot": "g-contrast-vision-user.png"
+    },
+    {
+      "id": "vision",
+      "surface": "display",
+      "pageErrors": 0,
+      "imageDecoded": true,
+      "screenshot": "g-contrast-vision-display.png"
+    }
+  ],
+  "pageErrors": [],
+  "cleanup": {
+    "emptySpace": true,
+    "emptyCatalog": true,
+    "emptyAssets": true
+  },
+  "reuploadedOriginal": "media:image_ed73ec8ad240ff7049936e3d9e3a469a73abc7807506b149e8bdd643fffc903f",
+  "complete": true
+}

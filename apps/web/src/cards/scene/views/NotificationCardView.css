@@ -1,0 +1,66 @@
+/* Notification card: level tile + message column; unread gets a quiet accent bar. */
+.vivic-notice { display: flex; flex-direction: column; min-width: 0; }
+.vivic-scene[data-fixed] .vivic-notice { flex: 1 1 0; min-height: 0; contain: size; overflow: hidden; }
+.vivic-notice-row { position: relative; display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
+.vivic-notice-row[data-unread] { padding-left: 11px; }
+.vivic-notice-row[data-unread]::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 0;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--vivic-accent);
+  opacity: 0.85;
+}
+.vivic-notice-icon {
+  --notice-tone: var(--vivic-accent);
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  color: var(--notice-tone);
+  background: color-mix(in oklab, var(--notice-tone) 14%, transparent);
+}
+.vivic-notice[data-level="success"] .vivic-notice-icon { --notice-tone: var(--vivic-positive); }
+.vivic-notice[data-level="warning"] .vivic-notice-icon { --notice-tone: var(--vivic-caution); }
+.vivic-notice[data-level="error"] .vivic-notice-icon { --notice-tone: var(--vivic-danger); }
+
+.vivic-notice-main { display: flex; flex: 1 1 0; flex-direction: column; gap: 4px; min-width: 0; transition: opacity 160ms; }
+.vivic-notice[data-status="done"] .vivic-notice-main { opacity: 0.68; }
+.vivic-notice-title {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 20px;
+  font-weight: 620;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.vivic-notice-body {
+  margin: 0;
+  font-size: 13px;
+  line-height: 19px;
+  color: color-mix(in oklab, var(--card-foreground) 82%, var(--vivic-muted-ink));
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.vivic-notice-meta {
+  margin: 0;
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--vivic-muted-ink);
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.vivic-notice-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.vivic-notice-tools [data-notice-remove]:hover { color: var(--vivic-danger); border-color: color-mix(in oklab, var(--vivic-danger) 45%, var(--border)); }

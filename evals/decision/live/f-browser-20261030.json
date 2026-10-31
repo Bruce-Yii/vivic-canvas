@@ -1,0 +1,70 @@
+{
+  "scope": "Current production page and renderer compatibility; v0.2 card comes from the real F model test. v0.1 reuses those facts only for a renderer check.",
+  "frontendChanged": false,
+  "cases": [
+    {
+      "formatVersion": "0.2",
+      "checks": {
+        "placeholder": true,
+        "realFactsVisible": false,
+        "noDemoFacts": true
+      },
+      "networkRuntime": [
+        {
+          "url": "https://vivic.edsionc.top/assets/unified-background-20261029-1/src-BByP9_62.js",
+          "sha256": "624a638c8815df2758d2b195958be3f6a53c48ab06d9ef3bce55bad6100bbdfb",
+          "onlyV01": true
+        },
+        {
+          "url": "https://vivic.edsionc.top/assets/light-default-20261029-1/src-BByP9_62.js",
+          "sha256": "624a638c8815df2758d2b195958be3f6a53c48ab06d9ef3bce55bad6100bbdfb",
+          "onlyV01": true
+        }
+      ],
+      "pageErrors": [],
+      "definition": {
+        "id": "example.fitness-log",
+        "version": "1.0.0",
+        "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+      },
+      "modelRecordReusedWithoutFactChanges": true,
+      "displayText": "example.fitness-log\n扩展卡片\n暂不可用\n部分空间卡片定义未通过校验，原始卡片数据已保留。\n查看全部卡片\n点击隐藏顶部栏\n正在加载",
+      "screenshot": "f-display-v02.png"
+    },
+    {
+      "formatVersion": "0.1",
+      "checks": {
+        "placeholder": false,
+        "realFactsVisible": true,
+        "noDemoFacts": true
+      },
+      "networkRuntime": [
+        {
+          "url": "https://vivic.edsionc.top/assets/unified-background-20261029-1/src-BByP9_62.js",
+          "sha256": "624a638c8815df2758d2b195958be3f6a53c48ab06d9ef3bce55bad6100bbdfb",
+          "onlyV01": true
+        },
+        {
+          "url": "https://vivic.edsionc.top/assets/light-default-20261029-1/src-BByP9_62.js",
+          "sha256": "624a638c8815df2758d2b195958be3f6a53c48ab06d9ef3bce55bad6100bbdfb",
+          "onlyV01": true
+        }
+      ],
+      "pageErrors": [],
+      "definition": {
+        "id": "example.fitness-log-v01",
+        "version": "1.0.0",
+        "hash": "53bb1bf73ff9dedcc45204b6fbd83b1501e0e1a871c2880363c319464df6b8ff"
+      },
+      "modelRecordReusedWithoutFactChanges": true,
+      "displayText": "健身记录（0.1兼容）\n扩展卡片\nv1.0.0\n训练记录\n训练日期\n2026-10-30\n训练部位 · 背\n\n训练时长（分钟）\n\n40\n备注\n空间卡片包\n查看全部卡片\n点击隐藏顶部栏\n正在加载",
+      "screenshot": "f-display-v01.png"
+    }
+  ],
+  "cleanup": {
+    "emptySpace": true,
+    "emptyCatalog": true
+  },
+  "settingsText": "设置\n重新查看新手引导\n连接\n设备\n偏好\n语音\n数据\nStepFun\n已连接\n连接\n断开\n本地 API 平台\n未连接\n连接\n应用与生活服务",
+  "hostedPackageImportInputCount": 0
+}

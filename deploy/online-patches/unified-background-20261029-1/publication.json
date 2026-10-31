@@ -1,0 +1,9 @@
+{
+  "release": "unified-background-20261029-1",
+  "previous": "/opt/vivic-preview-20261025/releases/space-entry-20261029-1/web",
+  "rewritten": 42,
+  "accountWideBackground": true,
+  "magneticButtons": true,
+  "backendUnchanged": true,
+  "runtimeSha256": "a189a4301524ef63730af5e9bc8fb09c742917b91db35f5c2692e4e41fc5ddfc"
+}

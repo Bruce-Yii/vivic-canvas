@@ -1,0 +1,82 @@
+{
+  "type": "object",
+  "properties": {
+    "items": {
+      "type": "array",
+      "title": "行动项",
+      "description": "可编辑的本地行动，不会发送给其他人或同步外部服务。",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "条目标识",
+            "maxLength": 64,
+            "description": "条目内稳定标识；编辑时保留。",
+            "minLength": 1
+          },
+          "title": {
+            "type": "string",
+            "title": "行动内容",
+            "maxLength": 160,
+            "description": "用户给出的事项，不添加未经提供的承诺。",
+            "minLength": 1
+          },
+          "owner": {
+            "type": "string",
+            "title": "负责人",
+            "maxLength": 80,
+            "description": "未给出时留空。",
+            "default": ""
+          },
+          "due": {
+            "type": "string",
+            "title": "截止说明",
+            "maxLength": 100,
+            "description": "保留原文；不是外部日历事实。",
+            "default": ""
+          },
+          "status": {
+            "type": "string",
+            "title": "状态",
+            "maxLength": 10,
+            "description": "新行动默认为待办，除非用户明确给出其他状态。",
+            "enum": [
+              "待办",
+              "进行中",
+              "受阻",
+              "完成"
+            ],
+            "default": "待办"
+          },
+          "note": {
+            "type": "string",
+            "title": "备注",
+            "maxLength": 500,
+            "description": "用户备注；缺失时留空。",
+            "default": ""
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 40,
+      "default": []
+    },
+    "note": {
+      "type": "string",
+      "title": "整体备注",
+      "maxLength": 1000,
+      "description": "用户个人备注。",
+      "default": ""
+    }
+  },
+  "required": [
+    "items"
+  ],
+  "additionalProperties": false
+}

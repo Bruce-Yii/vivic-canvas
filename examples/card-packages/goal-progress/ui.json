@@ -1,0 +1,1 @@
+{"components":[{"component":"Header","bind":"/config/title"},{"component":"Metric","label":"已完成","bind":"/state/current"},{"component":"KeyValue","label":"目标","bind":"/data/target"},{"component":"Badge","bind":"/config/unit"},{"component":"Progress","label":"个人进度","bind":"/state/percent"},{"component":"KeyValue","label":"备注","bind":"/state/note"}]}

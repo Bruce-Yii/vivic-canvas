@@ -1,0 +1,69 @@
+/* Month calendar: toolbar, Monday-first grid, and the selected day's agenda. */
+.vivic-month { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.vivic-scene[data-fixed] .vivic-month { flex: 1 1 0; min-height: 0; }
+
+.vivic-month-toolbar { display: flex; align-items: center; gap: 8px; min-width: 0; height: 28px; }
+.vivic-month-label { overflow: hidden; font-size: 13px; font-weight: 650; white-space: nowrap; text-overflow: ellipsis; }
+.vivic-month-reset { flex-shrink: 0; padding: 0; border: 0; background: none; font-family: inherit; font-size: 12px; cursor: pointer; }
+.vivic-month-nav { display: inline-flex; gap: 2px; margin-left: auto; }
+.vivic-month-nav .vivic-scene-icon-button { width: 26px; height: 26px; }
+
+.vivic-month-weekdays,
+.vivic-month-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); column-gap: 2px; }
+.vivic-month-weekdays { font-size: 10.5px; line-height: 12px; text-align: center; color: var(--vivic-muted-ink); }
+.vivic-month-grid { grid-auto-rows: var(--month-cell); row-gap: 2px; }
+.vivic-month-day {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--card-foreground);
+  font: inherit;
+  cursor: pointer;
+  transition: background 120ms;
+}
+.vivic-month-day:hover { background: var(--vivic-subtle); }
+.vivic-month-day:focus-visible { outline: 2px solid var(--ring); outline-offset: -1px; }
+.vivic-month-day[data-out] { color: var(--vivic-muted-ink); opacity: 0.5; }
+.vivic-month-day[data-selected] { background: var(--vivic-accent-soft); }
+.vivic-month-num {
+  display: grid;
+  place-items: center;
+  min-width: min(20px, calc(var(--month-cell) - 6px));
+  height: min(20px, calc(var(--month-cell) - 6px));
+  padding: 0 3px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 550;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.vivic-month-day[data-today] .vivic-month-num { box-shadow: 0 0 0 1.5px var(--vivic-accent-2); color: color-mix(in oklab, var(--vivic-accent-2) 70%, var(--foreground)); font-weight: 700; }
+.vivic-month-day[data-selected] .vivic-month-num { color: color-mix(in oklab, var(--vivic-accent) 85%, var(--foreground)); font-weight: 700; }
+.vivic-month-dots { display: flex; gap: 2px; height: 4px; }
+.vivic-month-dots > i { display: block; width: 4px; height: 4px; border-radius: 50%; background: var(--vivic-accent); }
+
+.vivic-month-agenda { display: flex; flex-direction: column; gap: 2px; min-width: 0; margin-top: 4px; padding-top: 6px; border-top: 1px solid var(--vivic-line); }
+.vivic-scene[data-fixed] .vivic-month-agenda { flex: 1 1 0; min-height: 0; }
+.vivic-month-agenda-head { display: flex; justify-content: space-between; gap: 8px; font-size: 11.5px; line-height: 16px; color: var(--vivic-muted-ink); }
+.vivic-month-list { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; min-width: 0; }
+.vivic-scene[data-fixed] .vivic-month-list { flex: 1 1 0; min-height: 0; }
+.vivic-month-list > li { display: flex; align-items: center; gap: 8px; min-width: 0; min-height: 22px; font-size: 13px; line-height: 1.4; }
+.vivic-month-time { flex: 0 0 38px; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; color: color-mix(in oklab, var(--vivic-accent) 80%, var(--foreground)); }
+.vivic-month-list > li > span:nth-child(2) { flex: 1 1 auto; min-width: 0; }
+.vivic-month-list .vivic-month-delete { flex-shrink: 0; width: 24px; height: 24px; }
+.vivic-month-none { margin: 0; font-size: 12.5px; line-height: 22px; color: var(--vivic-muted-ink); }
+.vivic-month-form { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; }
+.vivic-month-form-title { flex: 1 1 140px; }
+.vivic-month-form-time { width: 104px; }
+.vivic-month-list[data-more] {
+  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 14px), transparent);
+  mask-image: linear-gradient(to bottom, black calc(100% - 14px), transparent);
+}

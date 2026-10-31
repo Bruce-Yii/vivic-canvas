@@ -1,0 +1,574 @@
+{
+  "mode": "candidate",
+  "accountApis": "isolated simulated account; no production account created",
+  "staticAssets": "public live resources plus candidate HTML and stylesheet",
+  "checks": [
+    {
+      "label": "desktop-light",
+      "reference": {
+        "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "lineHeight": "19px",
+        "color": "rgb(29, 29, 31)"
+      },
+      "labels": [
+        {
+          "text": "\u6d45\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        },
+        {
+          "text": "\u6df1\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        },
+        {
+          "text": "\u6d45\u8272\u81ea\u9009\u914d\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        },
+        {
+          "text": "\u80cc\u666f\u5e95\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        },
+        {
+          "text": "\u5149\u6655\u4e00",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        },
+        {
+          "text": "\u5149\u6655\u4e8c",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        },
+        {
+          "text": "\u70b9\u7f00\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        }
+      ],
+      "theme": "light",
+      "paletteCount": 13,
+      "fitsViewport": true,
+      "release": "background-typography-20261030-1",
+      "stylesheets": [
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/app-shell.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/siri-orb-DhmJ8ZQk.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/HarkPrimitives-AuthLayout20261027-noring.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/main-BxvZcBKO-v57.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/assets-CvC5Gp3C.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/atelier-background-v50.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/card-actions-removed.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/app-shell.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/card-packages.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/display-contrast-20261030-2.css",
+        "https://vivic.edsionc.top/assets/background-typography-20261030-1/background-typography.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/HarkPrimitives-BUKrYnk4.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/main-BxvZcBKO-v14.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/files-BLiNamtF.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/ControlDialogContent-sWciXCUY.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/CardDropOrbs-i1qD9OGC.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/filePresentation-CUVMd9pP.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/VivicCard-Df8Pe3dV.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/ControlApp-BOAPuoho-v43.css"
+      ]
+    },
+    {
+      "label": "after-preference-save-and-reload",
+      "reference": {
+        "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "lineHeight": "19px",
+        "color": "rgb(29, 29, 31)"
+      },
+      "labels": [
+        {
+          "text": "\u6d45\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        },
+        {
+          "text": "\u6df1\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        },
+        {
+          "text": "\u6d45\u8272\u81ea\u9009\u914d\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        },
+        {
+          "text": "\u80cc\u666f\u5e95\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        },
+        {
+          "text": "\u5149\u6655\u4e00",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        },
+        {
+          "text": "\u5149\u6655\u4e8c",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        },
+        {
+          "text": "\u70b9\u7f00\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        }
+      ],
+      "theme": "light",
+      "paletteCount": 13,
+      "fitsViewport": true,
+      "release": "background-typography-20261030-1",
+      "stylesheets": [
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/app-shell.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/siri-orb-DhmJ8ZQk.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/HarkPrimitives-AuthLayout20261027-noring.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/main-BxvZcBKO-v57.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/assets-CvC5Gp3C.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/atelier-background-v50.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/card-actions-removed.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/app-shell.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/card-packages.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/display-contrast-20261030-2.css",
+        "https://vivic.edsionc.top/assets/background-typography-20261030-1/background-typography.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/HarkPrimitives-BUKrYnk4.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/main-BxvZcBKO-v14.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/files-BLiNamtF.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/ControlDialogContent-sWciXCUY.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/CardDropOrbs-i1qD9OGC.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/filePresentation-CUVMd9pP.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/VivicCard-Df8Pe3dV.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/ControlApp-BOAPuoho-v43.css"
+      ]
+    },
+    {
+      "label": "desktop-dark",
+      "reference": {
+        "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "lineHeight": "19px",
+        "color": "rgb(245, 245, 247)"
+      },
+      "labels": [
+        {
+          "text": "\u6d45\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(245, 245, 247)"
+        },
+        {
+          "text": "\u6df1\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(245, 245, 247)"
+        },
+        {
+          "text": "\u6df1\u8272\u81ea\u9009\u914d\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(245, 245, 247)"
+        },
+        {
+          "text": "\u80cc\u666f\u5e95\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(245, 245, 247)"
+        },
+        {
+          "text": "\u5149\u6655\u4e00",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(245, 245, 247)"
+        },
+        {
+          "text": "\u5149\u6655\u4e8c",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(245, 245, 247)"
+        },
+        {
+          "text": "\u70b9\u7f00\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(245, 245, 247)"
+        }
+      ],
+      "theme": "dark",
+      "paletteCount": 13,
+      "fitsViewport": true,
+      "release": "background-typography-20261030-1",
+      "stylesheets": [
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/app-shell.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/siri-orb-DhmJ8ZQk.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/HarkPrimitives-AuthLayout20261027-noring.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/main-BxvZcBKO-v57.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/assets-CvC5Gp3C.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/atelier-background-v50.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/card-actions-removed.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/app-shell.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/card-packages.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/display-contrast-20261030-2.css",
+        "https://vivic.edsionc.top/assets/background-typography-20261030-1/background-typography.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/HarkPrimitives-BUKrYnk4.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/main-BxvZcBKO-v14.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/files-BLiNamtF.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/ControlDialogContent-sWciXCUY.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/CardDropOrbs-i1qD9OGC.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/filePresentation-CUVMd9pP.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/VivicCard-Df8Pe3dV.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/ControlApp-BOAPuoho-v43.css"
+      ]
+    },
+    {
+      "label": "mobile-dark",
+      "reference": {
+        "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "lineHeight": "19px",
+        "color": "rgb(245, 245, 247)"
+      },
+      "labels": [
+        {
+          "text": "\u6d45\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(245, 245, 247)"
+        },
+        {
+          "text": "\u6df1\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(245, 245, 247)"
+        },
+        {
+          "text": "\u6df1\u8272\u81ea\u9009\u914d\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(245, 245, 247)"
+        },
+        {
+          "text": "\u80cc\u666f\u5e95\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(245, 245, 247)"
+        },
+        {
+          "text": "\u5149\u6655\u4e00",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(245, 245, 247)"
+        },
+        {
+          "text": "\u5149\u6655\u4e8c",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(245, 245, 247)"
+        },
+        {
+          "text": "\u70b9\u7f00\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(245, 245, 247)"
+        }
+      ],
+      "theme": "dark",
+      "paletteCount": 13,
+      "fitsViewport": true,
+      "release": "background-typography-20261030-1",
+      "stylesheets": [
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/app-shell.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/siri-orb-DhmJ8ZQk.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/HarkPrimitives-AuthLayout20261027-noring.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/main-BxvZcBKO-v57.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/assets-CvC5Gp3C.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/atelier-background-v50.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/card-actions-removed.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/app-shell.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/card-packages.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/display-contrast-20261030-2.css",
+        "https://vivic.edsionc.top/assets/background-typography-20261030-1/background-typography.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/HarkPrimitives-BUKrYnk4.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/main-BxvZcBKO-v14.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/files-BLiNamtF.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/ControlDialogContent-sWciXCUY.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/CardDropOrbs-i1qD9OGC.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/filePresentation-CUVMd9pP.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/VivicCard-Df8Pe3dV.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/ControlApp-BOAPuoho-v43.css"
+      ]
+    },
+    {
+      "label": "mobile-light",
+      "reference": {
+        "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "lineHeight": "19px",
+        "color": "rgb(29, 29, 31)"
+      },
+      "labels": [
+        {
+          "text": "\u6d45\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        },
+        {
+          "text": "\u6df1\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        },
+        {
+          "text": "\u6d45\u8272\u81ea\u9009\u914d\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        },
+        {
+          "text": "\u80cc\u666f\u5e95\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        },
+        {
+          "text": "\u5149\u6655\u4e00",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        },
+        {
+          "text": "\u5149\u6655\u4e8c",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        },
+        {
+          "text": "\u70b9\u7f00\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        }
+      ],
+      "theme": "light",
+      "paletteCount": 13,
+      "fitsViewport": true,
+      "release": "background-typography-20261030-1",
+      "stylesheets": [
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/app-shell.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/siri-orb-DhmJ8ZQk.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/HarkPrimitives-AuthLayout20261027-noring.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/main-BxvZcBKO-v57.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/assets-CvC5Gp3C.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/atelier-background-v50.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/card-actions-removed.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/app-shell.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/card-packages.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/display-contrast-20261030-2.css",
+        "https://vivic.edsionc.top/assets/background-typography-20261030-1/background-typography.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/HarkPrimitives-BUKrYnk4.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/main-BxvZcBKO-v14.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/files-BLiNamtF.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/ControlDialogContent-sWciXCUY.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/CardDropOrbs-i1qD9OGC.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/filePresentation-CUVMd9pP.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/VivicCard-Df8Pe3dV.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/ControlApp-BOAPuoho-v43.css"
+      ]
+    },
+    {
+      "label": "reopened-with-login-history",
+      "reference": {
+        "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "lineHeight": "19px",
+        "color": "rgb(29, 29, 31)"
+      },
+      "labels": [
+        {
+          "text": "\u6d45\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        },
+        {
+          "text": "\u6df1\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        },
+        {
+          "text": "\u6d45\u8272\u81ea\u9009\u914d\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        },
+        {
+          "text": "\u80cc\u666f\u5e95\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        },
+        {
+          "text": "\u5149\u6655\u4e00",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        },
+        {
+          "text": "\u5149\u6655\u4e8c",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        },
+        {
+          "text": "\u70b9\u7f00\u8272",
+          "fontFamily": "\"GT Standard L\", \"PingFang SC\", \"Microsoft YaHei UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Segoe UI\", system-ui, sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "lineHeight": "19px",
+          "color": "rgb(29, 29, 31)"
+        }
+      ],
+      "theme": "light",
+      "paletteCount": 13,
+      "fitsViewport": true,
+      "release": "background-typography-20261030-1",
+      "stylesheets": [
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/app-shell.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/siri-orb-DhmJ8ZQk.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/HarkPrimitives-AuthLayout20261027-noring.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/main-BxvZcBKO-v57.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/assets-CvC5Gp3C.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/atelier-background-v50.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/card-actions-removed.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/app-shell.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/card-packages.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/display-contrast-20261030-2.css",
+        "https://vivic.edsionc.top/assets/background-typography-20261030-1/background-typography.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/HarkPrimitives-BUKrYnk4.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/main-BxvZcBKO-v14.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/files-BLiNamtF.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/ControlDialogContent-sWciXCUY.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/CardDropOrbs-i1qD9OGC.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/filePresentation-CUVMd9pP.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/VivicCard-Df8Pe3dV.css",
+        "https://vivic.edsionc.top/assets/card-packages-20261030-1/ControlApp-BOAPuoho-v43.css"
+      ]
+    }
+  ],
+  "screenshots": [
+    "candidate-desktop-light.png",
+    "candidate-desktop-dark.png",
+    "candidate-mobile-dark.png",
+    "candidate-mobile-light.png"
+  ],
+  "errors": [],
+  "savedPreferenceKey": "displayPreferences_account-visual-v2",
+  "preferenceSaveReloadAndReopen": "passed against simulated account storage"
+}

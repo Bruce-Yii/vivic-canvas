@@ -1,0 +1,95 @@
+{
+  "at": "2026-10-30T03:11:58.023Z",
+  "mode": "on",
+  "scope": "Frozen synthetic API replay with the real connected main model; persistence and execution receipts. Transient browser visuals are verified separately.",
+  "datasetVersion": "vivic-route-v1-20261029",
+  "rows": [
+    {
+      "id": "countdown-01",
+      "text": "倒计时50分钟",
+      "expected": "countdown",
+      "expectedTarget": null,
+      "totalMs": 4056,
+      "kind": "envelope",
+      "message": "",
+      "plannerProgress": 0,
+      "trace": {
+        "id": "decision_bf7cdf56-2e6b-4136-8e52-08e258869d70",
+        "mode": "on",
+        "status": "failed",
+        "taskId": "g_a60b9c3561d0_countdown-01",
+        "clauses": [
+          "倒计时50分钟"
+        ],
+        "decisions": [
+          {
+            "text": "倒计时50分钟",
+            "route": null,
+            "probability": 0,
+            "probabilities": {},
+            "none": true,
+            "latencyMs": 4001,
+            "failed": true
+          }
+        ],
+        "route": null,
+        "probability": 0,
+        "latencyMs": 4001,
+        "routeLatencyMs": 4001,
+        "legacyElapsedMs": 4003,
+        "shadowWaitMs": 0,
+        "failedCount": 1,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "rules-offline",
+        "legacyActionTypes": [
+          "card.create",
+          "card.focus",
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [
+          "CountdownCard"
+        ],
+        "plannerCalls": 0,
+        "directClauses": 0
+      },
+      "createdTypes": [
+        "CountdownCard"
+      ],
+      "clarification": null,
+      "routeCorrect": false,
+      "observedTarget": null,
+      "targetCorrect": null,
+      "execution": {
+        "committed": true,
+        "createdCardIds": [
+          "countdown_fc735627-f433-4b15-a85c-96114e97f5a5"
+        ]
+      },
+      "receiptStatus": "completed"
+    }
+  ],
+  "complete": true,
+  "cleanup": true,
+  "modelConnected": true,
+  "datasetCaseCount": 161,
+  "summary": {
+    "cases": 1,
+    "routeCorrect": 0,
+    "routeAccuracy": 0,
+    "routeP50Ms": 4001,
+    "routeP95Ms": 4001,
+    "responseP50Ms": 4056,
+    "responseP95Ms": 4056,
+    "missingTraces": 0,
+    "pendingTraces": 0,
+    "serviceFailures": 1,
+    "directClauses": 0,
+    "plannerCalls": 0,
+    "persistedProposals": 1,
+    "rejectedCommits": 0,
+    "kindCounts": {
+      "envelope": 1
+    }
+  },
+  "datasetCasesSha256": "719aaf53f6468bec054cc5496c121a9a6898772443fbc462a0fa9695ab3666c0"
+}

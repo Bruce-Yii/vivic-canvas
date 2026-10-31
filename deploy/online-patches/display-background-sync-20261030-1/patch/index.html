@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta name="color-scheme" content="light"><style id="vivic-initial-light">html,body,#root{background:var(--vivic-initial-base,#f3f7fb);color-scheme:light}.vivic-theme-atmosphere{isolation:isolate}
+.atelier-glow-layer{position:absolute;inset:-8%;pointer-events:none;opacity:var(--atelier-strength,.28);filter:blur(48px);will-change:transform;background:radial-gradient(ellipse 50% 50% at 73% 20%,var(--atelier-glow-1),transparent 75%),radial-gradient(ellipse 45% 45% at 84% 76%,var(--atelier-glow-2),transparent 77%);animation:vivic-atelier-drift var(--atelier-duration,15s) ease-in-out infinite alternate}
+[data-space-effect=aurora]>.atelier-glow-layer{background:radial-gradient(ellipse 65% 33% at 63% 2%,var(--atelier-glow-1),transparent 80%),radial-gradient(ellipse 55% 35% at 99% 22%,var(--atelier-glow-2),transparent 80%),radial-gradient(ellipse 40% 24% at 18% 8%,var(--atelier-accent),transparent 85%);transform-origin:top center}
+[data-space-effect=silk]>.atelier-glow-layer{background:linear-gradient(115deg,transparent 24%,var(--atelier-glow-1) 53%,transparent 75%),radial-gradient(ellipse at 80% 90%,var(--atelier-glow-2),transparent 65%);filter:blur(40px)}
+[data-space-running=false]>.atelier-glow-layer{animation-play-state:paused;will-change:auto}
+.atelier-liquid-layer{position:absolute;inset:0;pointer-events:none}
+@keyframes vivic-atelier-drift{from{transform:translate(-3%,-3%) scale(1)}to{transform:translate(var(--atelier-travel,4%),var(--atelier-travel,4%)) scale(var(--atelier-scale,1.1))}}
+@media(prefers-reduced-motion:reduce){.atelier-glow-layer{animation:none!important;will-change:auto}}
+
+#root{position:relative;isolation:isolate;min-height:100dvh;background:var(--vivic-initial-base,#f3f7fb)}
+.vivic-shared-background{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+#vivic-background-seed{background:var(--vivic-initial-base,#f3f7fb)}
+#vivic-background-seed>.atelier-glow-layer{animation-delay:var(--vivic-background-offset,0ms);animation-play-state:paused}
+#vivic-background-seed[data-space-effect=none]>.atelier-glow-layer{display:none}
+.vivic-control-loading{display:none}
+</style>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="application-name" content="Vivic" />
+    <title>Vivic</title>
+    <script fetchpriority="high" src="/assets/card-packages-20261030-1/vivic-startup-confirmation-20261030.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/rolldown-runtime-Dd_uD5pT.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/react-CQOZoUwg.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/jsx-runtime-DREnUpxT.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/use-reduced-motion-Dl6x9R7S.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/react-DdN5SUqT.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/src-Dl5CdtQc.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/metrics-CVmPtUmp.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/id-Ck2KiIKf.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/mediaStore-Bb6jGldv.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/contracts-Cpxl3DEm.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/canvasRecord-C52pBrNW.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/preload-helper-BLdHbfdN.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/assetStore-CmQVDZeV.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/db-DwVrmwpG.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/palettes-y4eFPjSE.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/canvasStore-Kqevnh2f.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/src-BByP9_62.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/definitionStore-CIOvHtrM.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/displayStatus-CtZhyj0T.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/browserRuntime-CMMGoec6.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/dist-Bcow9Ss5.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/siri-orb-DLFUd4qh.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/AnimatePresence-DKL2Zc5d.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/HarkPrimitives-BXpmshXq.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/client-DPyQbKzT.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/HostedMediaScope-DbdKpUOa.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/storage-DDPBn6nA.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/client-M1ms_vrj.js">
+    <link rel="modulepreload" crossorigin href="/assets/card-packages-20261030-1/HostedDefinitionScope-DbdKpUOa.js">
+    <link rel="stylesheet" crossorigin href="/assets/card-packages-20261030-1/siri-orb-DhmJ8ZQk.css">
+    <link rel="stylesheet" crossorigin href="/assets/card-packages-20261030-1/HarkPrimitives-AuthLayout20261027-noring.css">
+    <link rel="stylesheet" crossorigin href="/assets/card-packages-20261030-1/main-BxvZcBKO-v57.css">
+    <link rel="stylesheet" crossorigin href="/assets/card-packages-20261030-1/assets-CvC5Gp3C.css">
+      <link rel="stylesheet" href="/assets/card-packages-20261030-1/atelier-background-v50.css">
+  <meta name="vivic-ui-version" content="display-background-sync-20261030-1">
+    <link rel="stylesheet" crossorigin href="/assets/card-packages-20261030-1/card-actions-removed.css">
+    <script type="module" src="/assets/card-packages-20261030-1/display-owner-fallback.js"></script>
+    <script defer src="/assets/card-packages-20261030-1/vivic-collision-guard.js"></script>
+<link rel="stylesheet" href="/assets/card-packages-20261030-1/app-shell.css"><link rel="stylesheet" href="/assets/card-packages-20261030-1/card-packages.css"><link rel="stylesheet" href="/assets/card-packages-20261030-1/display-contrast-20261030-2.css"><link rel="stylesheet" href="/assets/background-typography-20261030-1/background-typography.css">
+<link rel="stylesheet" href="/assets/display-background-sync-20261030-1/display-background-sync.css">
+</head>
+  <body>
+    <div id="root"><div id="vivic-background-seed" class="vivic-theme-atmosphere vivic-shared-background" aria-hidden="true" data-space-effect="glow" data-space-running="false"><div class="atelier-glow-layer"></div></div></div><noscript>请开启 JavaScript 后重新打开 Vivic。</noscript>
+  </body>
+</html>

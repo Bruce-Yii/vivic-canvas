@@ -1,0 +1,11 @@
+{
+  "ignorePatterns": [
+    "**/dist/**",
+    "**/dist-online/**",
+    "**/dist-online-android-full/**",
+    "**/dist-ui/**",
+    "**/dist-landing/**",
+    "**/dist-landing-single/**",
+    "**/.cache/**"
+  ]
+}

@@ -1,0 +1,2534 @@
+{
+ "model": "laya",
+ "load_s": 0.1,
+ "summary": {
+  "route_accuracy": 0.4534,
+  "n": 161,
+  "confident_coverage@0.8": 0.2857,
+  "confident_accuracy@0.8": 0.7826,
+  "target_accuracy": 0.4048,
+  "multi_accuracy": 0.7,
+  "route_ms_median": 104.1,
+  "route_ms_p95": 104.4,
+  "full_ms_median": 104.1,
+  "by_tag": {
+   "about_card": "0/1",
+   "ambiguous": "3/4",
+   "asr": "1/2",
+   "deixis": "2/3",
+   "missing": "1/1",
+   "negation": "3/4",
+   "quote": "0/2",
+   "spatial": "1/1",
+   "weather": "2/10"
+  },
+  "errors": [
+   "chat-02 早上好，今天心情不错 -> undo (0.2027)",
+   "chat-05 我今天好累啊 -> unsupported (0.3291)",
+   "chat-06 嗯嗯好的 -> undo (0.2994)",
+   "chat-08 你叫什么名字 -> unsupported (0.3957)",
+   "chat-09 hello there -> search (0.6328)",
+   "answer-01 给我介绍一下谷歌这家公司 -> generate (0.6663)",
+   "answer-03 为什么天空是蓝色的 -> unsupported (0.4666)",
+   "answer-04 MBTI里INTJ和INTP有什么区别 -> unsupported (0.5609)",
+   "answer-05 失眠的话有什么改善方法吗 -> unsupported (0.5253)",
+   "answer-06 这句话里的删除所有卡片是什么意思 -> delete (1.0)",
+   "answer-07 解释一下什么叫倒计时提醒 -> countdown (0.9996)",
+   "answer-08 帮我讲讲罗马帝国为什么衰落 -> unsupported (0.3105)",
+   "answer-09 如果我想学吉他应该从哪里开始 -> unsupported (0.2169)",
+   "answer-10 第一次去日本旅游要注意什么 -> unsupported (0.387)",
+   "answer-11 react 和 vue 选哪个好 -> unsupported (0.364)",
+   "answer-12 这张谷歌的卡片讲了什么 -> focus (0.7337)",
+   "search-01 今天有什么科技新闻 -> unsupported (0.4121)",
+   "search-03 最新的iPhone发布了什么新功能 -> unsupported (0.4639)",
+   "search-05 比特币现在什么价格 -> unsupported (0.5658)",
+   "search-07 昨晚湖人赢了吗 -> unsupported (0.2925)",
+   "search-08 推荐三款最近口碑好的降噪耳机 -> unsupported (0.3641)",
+   "search-10 人民币兑美元汇率是多少 -> unsupported (0.4789)",
+   "weather-01 今天天气怎么样 -> unsupported (0.2273)",
+   "weather-02 北京现在多少度 -> unsupported (0.5277)",
+   "weather-03 外面下雨了吗 -> unsupported (0.3918)",
+   "weather-04 明天要不要带伞 -> unsupported (0.6605)",
+   "weather-06 这周末天气好不好 -> unsupported (0.2987)",
+   "weather-07 深圳空气质量怎么样 -> unsupported (0.5411)",
+   "weather-08 冷不冷啊今天 -> unsupported (0.3849)",
+   "countdown-02 十分钟后提醒我喝水 -> unsupported (0.4939)",
+   "countdown-04 半小时以后叫我起来 -> unsupported (0.4059)",
+   "countdown-05 三分钟后提醒我关火 -> unsupported (0.5445)",
+   "countdown-08 四十五分钟之后提醒我去开会 -> unsupported (0.2379)",
+   "countdown-10 到点了叫我，大概15分钟 -> unsupported (0.3521)",
+   "todo-04 我要记得周五之前缴电费，加到待办里 -> undo (0.3614)",
+   "todo-05 创建待办：买菜、做饭、洗碗 -> unsupported (0.3712)",
+   "todo-06 添加一个任务，给妈妈打电话 -> unsupported (0.3538)",
+   "todo-08 to do 里加上健身 -> unsupported (0.4614)",
+   "todo-09 代办：整理照片 -> unsupported (0.3453)",
+   "todo-10 开个新清单，出差要带的东西 -> unsupported (0.2841)",
+   "note-01 帮我记一下，客户说预算是十万 -> unsupported (0.2771)",
+   "note-02 记下来：wifi密码是abc12345 -> unsupported (0.8215)",
+   "note-03 做个便签，周三下午三点牙医 -> unsupported (0.5414)",
+   "note-04 把这句话记住：好的设计是看不见的 -> arrange (0.3327)",
+   "note-06 存一下这个地址，鼓楼区中山路100号 -> restore (0.1683)",
+   "note-07 新建便笺，内容是手机控制测试 -> unsupported (0.8972)",
+   "note-08 记录一下今天跑了五公里 -> unsupported (0.4571)",
+   "note-09 便签：车停在B2层34号 -> unsupported (0.394)",
+   "generate-02 给我规划一个三天的成都旅行行程 -> unsupported (0.25)",
+   "generate-03 把会议记录总结成三个要点 -> note (0.9825)",
+   "generate-04 做一个表格对比iPhone和华为的参数，用我给的数据：iPhone 6.1寸 华为6.7寸 -> search (0.6192)",
+   "generate-05 帮我想五个咖啡店的名字 -> unsupported (0.2998)",
+   "generate-06 把这段话改写得简短一点：我们团队在过去的一个季度中取得了非常显著的进步 -> undo (0.7851)",
+   "generate-07 帮我做一个下周的健身计划 -> unsupported (0.3611)",
+   "generate-09 用这些数字画个柱状图：一月10 二月20 三月15 -> focus (0.2336)",
+   "generate-11 整理一下我这周的待办，按优先级排个序给我建议 -> todo (0.9947)",
+   "focus-04 打开购物清单 -> unsupported (0.4894)",
+   "focus-09 放大喝水那个倒计时 -> countdown (0.9993)",
+   "overview-03 把所有卡片放到一屏里 -> focus (0.6227)",
+   "overview-04 缩小看全局 -> unsupported (0.2588)",
+   "overview-05 我想看看整个空间都有啥 -> arrange (0.2696)",
+   "highlight-04 闪一下喝水提醒 -> restore (0.3377)",
+   "highlight-05 让会议记录亮一下我好找到它 -> unsupported (0.2776)",
+   "highlight-06 把洗衣液那条闪一下 -> restore (0.4774)",
+   "edit-01 买牛奶已经完成了，勾掉 -> delete (0.3)",
+   "edit-02 购物清单里加上酱油 -> unsupported (0.4359)",
+   "edit-03 把会议记录的标题改成首页改版讨论 -> unsupported (0.5235)",
+   "edit-04 展开读书笔记 -> overview (0.307)",
+   "edit-05 收起会议记录，只看摘要 -> focus (0.3074)",
+   "edit-06 交周报那个我做完了 -> unsupported (0.4603)",
+   "edit-07 在这张便签后面补一句：下周再约 -> undo (0.9167)",
+   "edit-08 暂停喝水倒计时 -> undo (0.4071)",
+   "edit-09 洗衣液不用买了，划掉 -> unsupported (0.5942)",
+   "edit-10 把预约牙医改成预约体检 -> unsupported (0.4282)",
+   "arrange-03 把会议记录固定住别动 -> restore (0.3177)",
+   "arrange-04 读书笔记挪到购物清单下面 -> unsupported (0.3008)",
+   "arrange-06 取消固定喝水提醒 -> undo (0.628)",
+   "arrange-07 把谷歌卡往上挪一点 -> unsupported (0.3639)",
+   "arrange-08 把待办传到用户页我要编辑 -> edit (0.6474)",
+   "undo-05 哎呀删错了，恢复回来 -> restore (0.5212)",
+   "unsupported-04 帮我在淘宝下单这双鞋 -> generate (0.5859)",
+   "multi-01 帮我记个便签明天交周报，再设个50分钟倒计时 -> countdown (0.9988)",
+   "multi-02 看下天气然后提醒我十分钟后出门 -> unsupported (0.3267)",
+   "multi-03 聚焦左边的待办，高亮第二条 -> highlight (0.5899)",
+   "multi-04 把买牛奶勾掉，顺便删了天气卡 -> delete (0.8618)",
+   "multi-05 介绍一下特斯拉，并且加个待办研究它的财报 -> unsupported (0.5132)",
+   "multi-06 先显示全部卡片，然后整理一下布局 -> undo (0.4373)",
+   "multi-07 五分钟后提醒我喝水和吃药 -> unsupported (0.2995)"
+  ]
+ },
+ "rows": [
+  {
+   "case": {
+    "id": "chat-01",
+    "text": "你好呀",
+    "route": "chat"
+   },
+   "route": "chat",
+   "route_p": 0.697,
+   "route_ok": true,
+   "route_ms": 105.0,
+   "full_ms": 104.5,
+   "target": null,
+   "multi_p": 0.5675
+  },
+  {
+   "case": {
+    "id": "chat-02",
+    "text": "早上好，今天心情不错",
+    "route": "chat"
+   },
+   "route": "undo",
+   "route_p": 0.2027,
+   "route_ok": false,
+   "route_ms": 104.9,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.4092
+  },
+  {
+   "case": {
+    "id": "chat-03",
+    "text": "谢谢你，帮大忙了",
+    "route": "chat"
+   },
+   "route": "chat",
+   "route_p": 0.8106,
+   "route_ok": true,
+   "route_ms": 104.3,
+   "full_ms": 104.2,
+   "target": null,
+   "multi_p": 0.3974
+  },
+  {
+   "case": {
+    "id": "chat-04",
+    "text": "哈哈哈你好可爱",
+    "route": "chat"
+   },
+   "route": "chat",
+   "route_p": 0.7942,
+   "route_ok": true,
+   "route_ms": 104.3,
+   "full_ms": 104.9,
+   "target": null,
+   "multi_p": 0.5492
+  },
+  {
+   "case": {
+    "id": "chat-05",
+    "text": "我今天好累啊",
+    "route": "chat"
+   },
+   "route": "unsupported",
+   "route_p": 0.3291,
+   "route_ok": false,
+   "route_ms": 105.1,
+   "full_ms": 103.0,
+   "target": null,
+   "multi_p": 0.2672
+  },
+  {
+   "case": {
+    "id": "chat-06",
+    "text": "嗯嗯好的",
+    "route": "chat"
+   },
+   "route": "undo",
+   "route_p": 0.2994,
+   "route_ok": false,
+   "route_ms": 102.4,
+   "full_ms": 102.9,
+   "target": null,
+   "multi_p": 0.4735
+  },
+  {
+   "case": {
+    "id": "chat-07",
+    "text": "晚安，明天见",
+    "route": "chat"
+   },
+   "route": "chat",
+   "route_p": 0.3162,
+   "route_ok": true,
+   "route_ms": 102.8,
+   "full_ms": 103.1,
+   "target": null,
+   "multi_p": 0.3164
+  },
+  {
+   "case": {
+    "id": "chat-08",
+    "text": "你叫什么名字",
+    "route": "chat"
+   },
+   "route": "unsupported",
+   "route_p": 0.3957,
+   "route_ok": false,
+   "route_ms": 102.8,
+   "full_ms": 103.2,
+   "target": null,
+   "multi_p": 0.3034
+  },
+  {
+   "case": {
+    "id": "chat-09",
+    "text": "hello there",
+    "route": "chat"
+   },
+   "route": "search",
+   "route_p": 0.6328,
+   "route_ok": false,
+   "route_ms": 104.1,
+   "full_ms": 104.3,
+   "target": null,
+   "multi_p": 0.4626
+  },
+  {
+   "case": {
+    "id": "chat-10",
+    "text": "陪我聊会儿天吧",
+    "route": "chat"
+   },
+   "route": "chat",
+   "route_p": 0.4591,
+   "route_ok": true,
+   "route_ms": 104.0,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.606
+  },
+  {
+   "case": {
+    "id": "answer-01",
+    "text": "给我介绍一下谷歌这家公司",
+    "route": "answer"
+   },
+   "route": "generate",
+   "route_p": 0.6663,
+   "route_ok": false,
+   "route_ms": 105.0,
+   "full_ms": 104.4,
+   "target": null,
+   "multi_p": 0.2971
+  },
+  {
+   "case": {
+    "id": "answer-02",
+    "text": "量子计算是什么原理",
+    "route": "answer"
+   },
+   "route": "answer",
+   "route_p": 0.5434,
+   "route_ok": true,
+   "route_ms": 104.1,
+   "full_ms": 104.0,
+   "target": null,
+   "multi_p": 0.3451
+  },
+  {
+   "case": {
+    "id": "answer-03",
+    "text": "为什么天空是蓝色的",
+    "route": "answer"
+   },
+   "route": "unsupported",
+   "route_p": 0.4666,
+   "route_ok": false,
+   "route_ms": 104.0,
+   "full_ms": 105.2,
+   "target": null,
+   "multi_p": 0.3379
+  },
+  {
+   "case": {
+    "id": "answer-04",
+    "text": "MBTI里INTJ和INTP有什么区别",
+    "route": "answer"
+   },
+   "route": "unsupported",
+   "route_p": 0.5609,
+   "route_ok": false,
+   "route_ms": 104.3,
+   "full_ms": 104.0,
+   "target": null,
+   "multi_p": 0.5983
+  },
+  {
+   "case": {
+    "id": "answer-05",
+    "text": "失眠的话有什么改善方法吗",
+    "route": "answer"
+   },
+   "route": "unsupported",
+   "route_p": 0.5253,
+   "route_ok": false,
+   "route_ms": 104.0,
+   "full_ms": 103.9,
+   "target": null,
+   "multi_p": 0.5445
+  },
+  {
+   "case": {
+    "id": "answer-06",
+    "text": "这句话里的删除所有卡片是什么意思",
+    "route": "answer",
+    "tags": [
+     "quote"
+    ]
+   },
+   "route": "delete",
+   "route_p": 1.0,
+   "route_ok": false,
+   "route_ms": 104.1,
+   "full_ms": 104.2,
+   "target": null,
+   "multi_p": 0.5478
+  },
+  {
+   "case": {
+    "id": "answer-07",
+    "text": "解释一下什么叫倒计时提醒",
+    "route": "answer",
+    "tags": [
+     "quote"
+    ]
+   },
+   "route": "countdown",
+   "route_p": 0.9996,
+   "route_ok": false,
+   "route_ms": 104.1,
+   "full_ms": 104.0,
+   "target": null,
+   "multi_p": 0.6899
+  },
+  {
+   "case": {
+    "id": "answer-08",
+    "text": "帮我讲讲罗马帝国为什么衰落",
+    "route": "answer"
+   },
+   "route": "unsupported",
+   "route_p": 0.3105,
+   "route_ok": false,
+   "route_ms": 104.1,
+   "full_ms": 104.0,
+   "target": null,
+   "multi_p": 0.5488
+  },
+  {
+   "case": {
+    "id": "answer-09",
+    "text": "如果我想学吉他应该从哪里开始",
+    "route": "answer"
+   },
+   "route": "unsupported",
+   "route_p": 0.2169,
+   "route_ok": false,
+   "route_ms": 104.3,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.187
+  },
+  {
+   "case": {
+    "id": "answer-10",
+    "text": "第一次去日本旅游要注意什么",
+    "route": "answer"
+   },
+   "route": "unsupported",
+   "route_p": 0.387,
+   "route_ok": false,
+   "route_ms": 104.0,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.5182
+  },
+  {
+   "case": {
+    "id": "answer-11",
+    "text": "react 和 vue 选哪个好",
+    "route": "answer"
+   },
+   "route": "unsupported",
+   "route_p": 0.364,
+   "route_ok": false,
+   "route_ms": 104.2,
+   "full_ms": 104.2,
+   "target": null,
+   "multi_p": 0.3079
+  },
+  {
+   "case": {
+    "id": "answer-12",
+    "text": "这张谷歌的卡片讲了什么",
+    "route": "answer",
+    "tags": [
+     "about_card"
+    ]
+   },
+   "route": "focus",
+   "route_p": 0.7337,
+   "route_ok": false,
+   "route_ms": 104.1,
+   "full_ms": 102.7,
+   "target": null,
+   "multi_p": 0.3846
+  },
+  {
+   "case": {
+    "id": "search-01",
+    "text": "今天有什么科技新闻",
+    "route": "search"
+   },
+   "route": "unsupported",
+   "route_p": 0.4121,
+   "route_ok": false,
+   "route_ms": 104.2,
+   "full_ms": 103.2,
+   "target": null,
+   "multi_p": 0.5463
+  },
+  {
+   "case": {
+    "id": "search-02",
+    "text": "查一下现在黄金多少钱一克",
+    "route": "search"
+   },
+   "route": "search",
+   "route_p": 0.4602,
+   "route_ok": true,
+   "route_ms": 104.2,
+   "full_ms": 104.0,
+   "target": null,
+   "multi_p": 0.3808
+  },
+  {
+   "case": {
+    "id": "search-03",
+    "text": "最新的iPhone发布了什么新功能",
+    "route": "search"
+   },
+   "route": "unsupported",
+   "route_p": 0.4639,
+   "route_ok": false,
+   "route_ms": 104.0,
+   "full_ms": 103.9,
+   "target": null,
+   "multi_p": 0.3967
+  },
+  {
+   "case": {
+    "id": "search-04",
+    "text": "帮我搜一下周杰伦最近的演唱会",
+    "route": "search"
+   },
+   "route": "search",
+   "route_p": 0.6458,
+   "route_ok": true,
+   "route_ms": 101.8,
+   "full_ms": 102.1,
+   "target": null,
+   "multi_p": 0.0322
+  },
+  {
+   "case": {
+    "id": "search-05",
+    "text": "比特币现在什么价格",
+    "route": "search"
+   },
+   "route": "unsupported",
+   "route_p": 0.5658,
+   "route_ok": false,
+   "route_ms": 102.1,
+   "full_ms": 102.3,
+   "target": null,
+   "multi_p": 0.2605
+  },
+  {
+   "case": {
+    "id": "search-06",
+    "text": "上网查查OpenAI这周有什么动态",
+    "route": "search"
+   },
+   "route": "search",
+   "route_p": 0.6801,
+   "route_ok": true,
+   "route_ms": 102.5,
+   "full_ms": 102.5,
+   "target": null,
+   "multi_p": 0.5234
+  },
+  {
+   "case": {
+    "id": "search-07",
+    "text": "昨晚湖人赢了吗",
+    "route": "search"
+   },
+   "route": "unsupported",
+   "route_p": 0.2925,
+   "route_ok": false,
+   "route_ms": 102.9,
+   "full_ms": 102.9,
+   "target": null,
+   "multi_p": 0.14
+  },
+  {
+   "case": {
+    "id": "search-08",
+    "text": "推荐三款最近口碑好的降噪耳机",
+    "route": "search"
+   },
+   "route": "unsupported",
+   "route_p": 0.3641,
+   "route_ok": false,
+   "route_ms": 103.2,
+   "full_ms": 103.7,
+   "target": null,
+   "multi_p": 0.3632
+  },
+  {
+   "case": {
+    "id": "search-09",
+    "text": "搜索一下南京明天有什么展览",
+    "route": "search"
+   },
+   "route": "search",
+   "route_p": 0.9786,
+   "route_ok": true,
+   "route_ms": 104.1,
+   "full_ms": 104.3,
+   "target": null,
+   "multi_p": 0.4122
+  },
+  {
+   "case": {
+    "id": "search-10",
+    "text": "人民币兑美元汇率是多少",
+    "route": "search"
+   },
+   "route": "unsupported",
+   "route_p": 0.4789,
+   "route_ok": false,
+   "route_ms": 104.4,
+   "full_ms": 104.2,
+   "target": null,
+   "multi_p": 0.3286
+  },
+  {
+   "case": {
+    "id": "weather-01",
+    "text": "今天天气怎么样",
+    "route": "search",
+    "tags": [
+     "weather"
+    ]
+   },
+   "route": "unsupported",
+   "route_p": 0.2273,
+   "route_ok": false,
+   "route_ms": 104.0,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.5008
+  },
+  {
+   "case": {
+    "id": "weather-02",
+    "text": "北京现在多少度",
+    "route": "search",
+    "tags": [
+     "weather"
+    ]
+   },
+   "route": "unsupported",
+   "route_p": 0.5277,
+   "route_ok": false,
+   "route_ms": 104.3,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.3081
+  },
+  {
+   "case": {
+    "id": "weather-03",
+    "text": "外面下雨了吗",
+    "route": "search",
+    "tags": [
+     "weather"
+    ]
+   },
+   "route": "unsupported",
+   "route_p": 0.3918,
+   "route_ok": false,
+   "route_ms": 104.0,
+   "full_ms": 104.0,
+   "target": null,
+   "multi_p": 0.5305
+  },
+  {
+   "case": {
+    "id": "weather-04",
+    "text": "明天要不要带伞",
+    "route": "search",
+    "tags": [
+     "weather"
+    ]
+   },
+   "route": "unsupported",
+   "route_p": 0.6605,
+   "route_ok": false,
+   "route_ms": 104.1,
+   "full_ms": 104.3,
+   "target": null,
+   "multi_p": 0.4119
+  },
+  {
+   "case": {
+    "id": "weather-05",
+    "text": "看下杭州的天气",
+    "route": "search",
+    "tags": [
+     "weather"
+    ]
+   },
+   "route": "search",
+   "route_p": 0.3764,
+   "route_ok": true,
+   "route_ms": 104.0,
+   "full_ms": 103.9,
+   "target": null,
+   "multi_p": 0.088
+  },
+  {
+   "case": {
+    "id": "weather-06",
+    "text": "这周末天气好不好",
+    "route": "search",
+    "tags": [
+     "weather"
+    ]
+   },
+   "route": "unsupported",
+   "route_p": 0.2987,
+   "route_ok": false,
+   "route_ms": 104.1,
+   "full_ms": 104.0,
+   "target": null,
+   "multi_p": 0.3535
+  },
+  {
+   "case": {
+    "id": "weather-07",
+    "text": "深圳空气质量怎么样",
+    "route": "search",
+    "tags": [
+     "weather"
+    ]
+   },
+   "route": "unsupported",
+   "route_p": 0.5411,
+   "route_ok": false,
+   "route_ms": 104.0,
+   "full_ms": 104.2,
+   "target": null,
+   "multi_p": 0.2916
+  },
+  {
+   "case": {
+    "id": "weather-08",
+    "text": "冷不冷啊今天",
+    "route": "search",
+    "tags": [
+     "weather"
+    ]
+   },
+   "route": "unsupported",
+   "route_p": 0.3849,
+   "route_ok": false,
+   "route_ms": 104.2,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.4079
+  },
+  {
+   "case": {
+    "id": "countdown-01",
+    "text": "倒计时50分钟",
+    "route": "countdown"
+   },
+   "route": "countdown",
+   "route_p": 1.0,
+   "route_ok": true,
+   "route_ms": 103.3,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.3417
+  },
+  {
+   "case": {
+    "id": "countdown-02",
+    "text": "十分钟后提醒我喝水",
+    "route": "countdown"
+   },
+   "route": "unsupported",
+   "route_p": 0.4939,
+   "route_ok": false,
+   "route_ms": 104.3,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.5083
+  },
+  {
+   "case": {
+    "id": "countdown-03",
+    "text": "帮我计时25分钟番茄钟",
+    "route": "countdown"
+   },
+   "route": "countdown",
+   "route_p": 0.9862,
+   "route_ok": true,
+   "route_ms": 104.1,
+   "full_ms": 104.0,
+   "target": null,
+   "multi_p": 0.57
+  },
+  {
+   "case": {
+    "id": "countdown-04",
+    "text": "半小时以后叫我起来",
+    "route": "countdown"
+   },
+   "route": "unsupported",
+   "route_p": 0.4059,
+   "route_ok": false,
+   "route_ms": 104.1,
+   "full_ms": 104.2,
+   "target": null,
+   "multi_p": 0.2748
+  },
+  {
+   "case": {
+    "id": "countdown-05",
+    "text": "三分钟后提醒我关火",
+    "route": "countdown"
+   },
+   "route": "unsupported",
+   "route_p": 0.5445,
+   "route_ok": false,
+   "route_ms": 104.2,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.3501
+  },
+  {
+   "case": {
+    "id": "countdown-06",
+    "text": "定个一个小时的闹钟",
+    "route": "countdown"
+   },
+   "route": "countdown",
+   "route_p": 0.5993,
+   "route_ok": true,
+   "route_ms": 103.9,
+   "full_ms": 104.0,
+   "target": null,
+   "multi_p": 0.2884
+  },
+  {
+   "case": {
+    "id": "countdown-07",
+    "text": "倒计时20s",
+    "route": "countdown"
+   },
+   "route": "countdown",
+   "route_p": 0.9999,
+   "route_ok": true,
+   "route_ms": 104.3,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.3348
+  },
+  {
+   "case": {
+    "id": "countdown-08",
+    "text": "四十五分钟之后提醒我去开会",
+    "route": "countdown"
+   },
+   "route": "unsupported",
+   "route_p": 0.2379,
+   "route_ok": false,
+   "route_ms": 104.1,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.4231
+  },
+  {
+   "case": {
+    "id": "countdown-09",
+    "text": "离高考还有多少天，做个倒数",
+    "route": "countdown"
+   },
+   "route": "countdown",
+   "route_p": 0.5499,
+   "route_ok": true,
+   "route_ms": 104.1,
+   "full_ms": 104.2,
+   "target": null,
+   "multi_p": 0.7087
+  },
+  {
+   "case": {
+    "id": "countdown-10",
+    "text": "到点了叫我，大概15分钟",
+    "route": "countdown"
+   },
+   "route": "unsupported",
+   "route_p": 0.3521,
+   "route_ok": false,
+   "route_ms": 102.2,
+   "full_ms": 102.1,
+   "target": null,
+   "multi_p": 0.3561
+  },
+  {
+   "case": {
+    "id": "countdown-11",
+    "text": "set a timer for 5 minutes",
+    "route": "countdown"
+   },
+   "route": "countdown",
+   "route_p": 0.9927,
+   "route_ok": true,
+   "route_ms": 102.3,
+   "full_ms": 102.2,
+   "target": null,
+   "multi_p": 0.3058
+  },
+  {
+   "case": {
+    "id": "countdown-12",
+    "text": "到计时十分钟",
+    "route": "countdown",
+    "tags": [
+     "asr"
+    ]
+   },
+   "route": "countdown",
+   "route_p": 0.9973,
+   "route_ok": true,
+   "route_ms": 103.4,
+   "full_ms": 103.6,
+   "target": null,
+   "multi_p": 0.426
+  },
+  {
+   "case": {
+    "id": "todo-01",
+    "text": "加个待办，明天交周报",
+    "route": "todo"
+   },
+   "route": "todo",
+   "route_p": 0.8832,
+   "route_ok": true,
+   "route_ms": 104.2,
+   "full_ms": 104.2,
+   "target": null,
+   "multi_p": 0.5019
+  },
+  {
+   "case": {
+    "id": "todo-02",
+    "text": "帮我列个今天要做的事：洗衣服、拿快递、回邮件",
+    "route": "todo"
+   },
+   "route": "todo",
+   "route_p": 0.7476,
+   "route_ok": true,
+   "route_ms": 104.1,
+   "full_ms": 104.3,
+   "target": null,
+   "multi_p": 0.5883
+  },
+  {
+   "case": {
+    "id": "todo-03",
+    "text": "新建一个任务清单，准备搬家",
+    "route": "todo"
+   },
+   "route": "todo",
+   "route_p": 0.973,
+   "route_ok": true,
+   "route_ms": 104.2,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.2951
+  },
+  {
+   "case": {
+    "id": "todo-04",
+    "text": "我要记得周五之前缴电费，加到待办里",
+    "route": "todo"
+   },
+   "route": "undo",
+   "route_p": 0.3614,
+   "route_ok": false,
+   "route_ms": 104.1,
+   "full_ms": 103.8,
+   "target": null,
+   "multi_p": 0.746
+  },
+  {
+   "case": {
+    "id": "todo-05",
+    "text": "创建待办：买菜、做饭、洗碗",
+    "route": "todo"
+   },
+   "route": "unsupported",
+   "route_p": 0.3712,
+   "route_ok": false,
+   "route_ms": 104.4,
+   "full_ms": 103.3,
+   "target": null,
+   "multi_p": 0.87
+  },
+  {
+   "case": {
+    "id": "todo-06",
+    "text": "添加一个任务，给妈妈打电话",
+    "route": "todo"
+   },
+   "route": "unsupported",
+   "route_p": 0.3538,
+   "route_ok": false,
+   "route_ms": 104.1,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.3803
+  },
+  {
+   "case": {
+    "id": "todo-07",
+    "text": "下周要做的事情帮我建个清单",
+    "route": "todo"
+   },
+   "route": "todo",
+   "route_p": 0.8754,
+   "route_ok": true,
+   "route_ms": 104.1,
+   "full_ms": 104.3,
+   "target": null,
+   "multi_p": 0.7115
+  },
+  {
+   "case": {
+    "id": "todo-08",
+    "text": "to do 里加上健身",
+    "route": "todo"
+   },
+   "route": "unsupported",
+   "route_p": 0.4614,
+   "route_ok": false,
+   "route_ms": 103.9,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.4231
+  },
+  {
+   "case": {
+    "id": "todo-09",
+    "text": "代办：整理照片",
+    "route": "todo",
+    "tags": [
+     "asr"
+    ]
+   },
+   "route": "unsupported",
+   "route_p": 0.3453,
+   "route_ok": false,
+   "route_ms": 104.1,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.561
+  },
+  {
+   "case": {
+    "id": "todo-10",
+    "text": "开个新清单，出差要带的东西",
+    "route": "todo"
+   },
+   "route": "unsupported",
+   "route_p": 0.2841,
+   "route_ok": false,
+   "route_ms": 104.4,
+   "full_ms": 104.2,
+   "target": null,
+   "multi_p": 0.3217
+  },
+  {
+   "case": {
+    "id": "note-01",
+    "text": "帮我记一下，客户说预算是十万",
+    "route": "note"
+   },
+   "route": "unsupported",
+   "route_p": 0.2771,
+   "route_ok": false,
+   "route_ms": 104.0,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.286
+  },
+  {
+   "case": {
+    "id": "note-02",
+    "text": "记下来：wifi密码是abc12345",
+    "route": "note"
+   },
+   "route": "unsupported",
+   "route_p": 0.8215,
+   "route_ok": false,
+   "route_ms": 104.2,
+   "full_ms": 104.4,
+   "target": null,
+   "multi_p": 0.1945
+  },
+  {
+   "case": {
+    "id": "note-03",
+    "text": "做个便签，周三下午三点牙医",
+    "route": "note"
+   },
+   "route": "unsupported",
+   "route_p": 0.5414,
+   "route_ok": false,
+   "route_ms": 104.1,
+   "full_ms": 103.9,
+   "target": null,
+   "multi_p": 0.4174
+  },
+  {
+   "case": {
+    "id": "note-04",
+    "text": "把这句话记住：好的设计是看不见的",
+    "route": "note"
+   },
+   "route": "arrange",
+   "route_p": 0.3327,
+   "route_ok": false,
+   "route_ms": 104.1,
+   "full_ms": 104.2,
+   "target": null,
+   "multi_p": 0.3844
+  },
+  {
+   "case": {
+    "id": "note-05",
+    "text": "我突然有个想法，做一个给猫用的日历app，先记着",
+    "route": "note"
+   },
+   "route": "note",
+   "route_p": 0.7254,
+   "route_ok": true,
+   "route_ms": 104.3,
+   "full_ms": 104.0,
+   "target": null,
+   "multi_p": 0.6047
+  },
+  {
+   "case": {
+    "id": "note-06",
+    "text": "存一下这个地址，鼓楼区中山路100号",
+    "route": "note"
+   },
+   "route": "restore",
+   "route_p": 0.1683,
+   "route_ok": false,
+   "route_ms": 104.1,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.395
+  },
+  {
+   "case": {
+    "id": "note-07",
+    "text": "新建便笺，内容是手机控制测试",
+    "route": "note"
+   },
+   "route": "unsupported",
+   "route_p": 0.8972,
+   "route_ok": false,
+   "route_ms": 104.1,
+   "full_ms": 104.3,
+   "target": null,
+   "multi_p": 0.4278
+  },
+  {
+   "case": {
+    "id": "note-08",
+    "text": "记录一下今天跑了五公里",
+    "route": "note"
+   },
+   "route": "unsupported",
+   "route_p": 0.4571,
+   "route_ok": false,
+   "route_ms": 104.3,
+   "full_ms": 104.3,
+   "target": null,
+   "multi_p": 0.0876
+  },
+  {
+   "case": {
+    "id": "note-09",
+    "text": "便签：车停在B2层34号",
+    "route": "note"
+   },
+   "route": "unsupported",
+   "route_p": 0.394,
+   "route_ok": false,
+   "route_ms": 103.8,
+   "full_ms": 102.4,
+   "target": null,
+   "multi_p": 0.2073
+  },
+  {
+   "case": {
+    "id": "note-10",
+    "text": "take a note, call Alex back",
+    "route": "note"
+   },
+   "route": "note",
+   "route_p": 0.9176,
+   "route_ok": true,
+   "route_ms": 103.1,
+   "full_ms": 103.2,
+   "target": null,
+   "multi_p": 0.2493
+  },
+  {
+   "case": {
+    "id": "generate-01",
+    "text": "帮我写一封请假邮件",
+    "route": "generate"
+   },
+   "route": "generate",
+   "route_p": 0.559,
+   "route_ok": true,
+   "route_ms": 103.8,
+   "full_ms": 104.0,
+   "target": null,
+   "multi_p": 0.5853
+  },
+  {
+   "case": {
+    "id": "generate-02",
+    "text": "给我规划一个三天的成都旅行行程",
+    "route": "generate"
+   },
+   "route": "unsupported",
+   "route_p": 0.25,
+   "route_ok": false,
+   "route_ms": 104.1,
+   "full_ms": 104.3,
+   "target": null,
+   "multi_p": 0.535
+  },
+  {
+   "case": {
+    "id": "generate-03",
+    "text": "把会议记录总结成三个要点",
+    "route": "generate"
+   },
+   "route": "note",
+   "route_p": 0.9825,
+   "route_ok": false,
+   "route_ms": 104.1,
+   "full_ms": 103.9,
+   "target": null,
+   "multi_p": 0.5748
+  },
+  {
+   "case": {
+    "id": "generate-04",
+    "text": "做一个表格对比iPhone和华为的参数，用我给的数据：iPhone 6.1寸 华为6.7寸",
+    "route": "generate"
+   },
+   "route": "search",
+   "route_p": 0.6192,
+   "route_ok": false,
+   "route_ms": 104.0,
+   "full_ms": 104.2,
+   "target": null,
+   "multi_p": 0.652
+  },
+  {
+   "case": {
+    "id": "generate-05",
+    "text": "帮我想五个咖啡店的名字",
+    "route": "generate"
+   },
+   "route": "unsupported",
+   "route_p": 0.2998,
+   "route_ok": false,
+   "route_ms": 103.6,
+   "full_ms": 104.2,
+   "target": null,
+   "multi_p": 0.3841
+  },
+  {
+   "case": {
+    "id": "generate-06",
+    "text": "把这段话改写得简短一点：我们团队在过去的一个季度中取得了非常显著的进步",
+    "route": "generate"
+   },
+   "route": "undo",
+   "route_p": 0.7851,
+   "route_ok": false,
+   "route_ms": 104.1,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.1097
+  },
+  {
+   "case": {
+    "id": "generate-07",
+    "text": "帮我做一个下周的健身计划",
+    "route": "generate"
+   },
+   "route": "unsupported",
+   "route_p": 0.3611,
+   "route_ok": false,
+   "route_ms": 104.0,
+   "full_ms": 104.2,
+   "target": null,
+   "multi_p": 0.5773
+  },
+  {
+   "case": {
+    "id": "generate-08",
+    "text": "根据读书笔记出几道复习题",
+    "route": "generate"
+   },
+   "route": "generate",
+   "route_p": 0.4179,
+   "route_ok": true,
+   "route_ms": 104.1,
+   "full_ms": 104.2,
+   "target": null,
+   "multi_p": 0.5493
+  },
+  {
+   "case": {
+    "id": "generate-09",
+    "text": "用这些数字画个柱状图：一月10 二月20 三月15",
+    "route": "generate"
+   },
+   "route": "focus",
+   "route_p": 0.2336,
+   "route_ok": false,
+   "route_ms": 104.1,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.252
+  },
+  {
+   "case": {
+    "id": "generate-10",
+    "text": "给产品发布会写个开场白",
+    "route": "generate"
+   },
+   "route": "generate",
+   "route_p": 0.3129,
+   "route_ok": true,
+   "route_ms": 104.3,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.4022
+  },
+  {
+   "case": {
+    "id": "generate-11",
+    "text": "整理一下我这周的待办，按优先级排个序给我建议",
+    "route": "generate"
+   },
+   "route": "todo",
+   "route_p": 0.9947,
+   "route_ok": false,
+   "route_ms": 104.0,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.8394
+  },
+  {
+   "case": {
+    "id": "focus-01",
+    "text": "聚焦会议记录",
+    "route": "focus",
+    "target": "note_meeting"
+   },
+   "route": "focus",
+   "route_p": 0.9631,
+   "route_ok": true,
+   "route_ms": 104.2,
+   "full_ms": 104.0,
+   "target": "note_meeting",
+   "multi_p": 0.136
+  },
+  {
+   "case": {
+    "id": "focus-02",
+    "text": "放大看看读书笔记",
+    "route": "focus",
+    "target": "note_book"
+   },
+   "route": "focus",
+   "route_p": 0.7725,
+   "route_ok": true,
+   "route_ms": 104.1,
+   "full_ms": 103.9,
+   "target": "note_book",
+   "multi_p": 0.5385
+  },
+  {
+   "case": {
+    "id": "focus-03",
+    "text": "我想看一下天气那张卡",
+    "route": "focus",
+    "target": "weather_sh"
+   },
+   "route": "focus",
+   "route_p": 0.5533,
+   "route_ok": true,
+   "route_ms": 104.1,
+   "full_ms": 104.1,
+   "target": "note_meeting",
+   "multi_p": 0.5717
+  },
+  {
+   "case": {
+    "id": "focus-04",
+    "text": "打开购物清单",
+    "route": "focus",
+    "target": "todo_shop"
+   },
+   "route": "unsupported",
+   "route_p": 0.4894,
+   "route_ok": false,
+   "route_ms": 104.0,
+   "full_ms": 104.2,
+   "target": "todo_shop",
+   "multi_p": 0.5011
+  },
+  {
+   "case": {
+    "id": "focus-05",
+    "text": "把谷歌那张卡拉近一点",
+    "route": "focus",
+    "target": "answer_google"
+   },
+   "route": "focus",
+   "route_p": 0.5582,
+   "route_ok": true,
+   "route_ms": 104.2,
+   "full_ms": 104.1,
+   "target": "note_meeting",
+   "multi_p": 0.3758
+  },
+  {
+   "case": {
+    "id": "focus-06",
+    "text": "看看最左边那张",
+    "route": "focus",
+    "target": "todo_week",
+    "tags": [
+     "spatial"
+    ]
+   },
+   "route": "focus",
+   "route_p": 0.7199,
+   "route_ok": true,
+   "route_ms": 102.4,
+   "full_ms": 102.6,
+   "target": "note_meeting",
+   "multi_p": 0.4488
+  },
+  {
+   "case": {
+    "id": "focus-07",
+    "text": "聚焦待办",
+    "route": "focus",
+    "target": "ambiguous",
+    "tags": [
+     "ambiguous"
+    ]
+   },
+   "route": "focus",
+   "route_p": 0.8529,
+   "route_ok": true,
+   "route_ms": 102.5,
+   "full_ms": 103.3,
+   "target": "note_meeting",
+   "multi_p": 0.3081
+  },
+  {
+   "case": {
+    "id": "focus-08",
+    "text": "别删，先聚焦它",
+    "route": "focus",
+    "target": "note_meeting",
+    "tags": [
+     "negation",
+     "deixis"
+    ]
+   },
+   "route": "focus",
+   "route_p": 0.7929,
+   "route_ok": true,
+   "route_ms": 103.9,
+   "full_ms": 104.1,
+   "target": "note_meeting",
+   "multi_p": 0.5259
+  },
+  {
+   "case": {
+    "id": "focus-09",
+    "text": "放大喝水那个倒计时",
+    "route": "focus",
+    "target": "cd_water"
+   },
+   "route": "countdown",
+   "route_p": 0.9993,
+   "route_ok": false,
+   "route_ms": 103.9,
+   "full_ms": 104.3,
+   "target": "note_meeting",
+   "multi_p": 0.235
+  },
+  {
+   "case": {
+    "id": "focus-10",
+    "text": "聚焦一下日程卡",
+    "route": "focus",
+    "target": "missing",
+    "tags": [
+     "missing"
+    ]
+   },
+   "route": "focus",
+   "route_p": 0.8528,
+   "route_ok": true,
+   "route_ms": 104.2,
+   "full_ms": 104.2,
+   "target": "note_meeting",
+   "multi_p": 0.3543
+  },
+  {
+   "case": {
+    "id": "overview-01",
+    "text": "显示全部卡片",
+    "route": "overview"
+   },
+   "route": "overview",
+   "route_p": 0.9918,
+   "route_ok": true,
+   "route_ms": 104.3,
+   "full_ms": 104.3,
+   "target": null,
+   "multi_p": 0.0272
+  },
+  {
+   "case": {
+    "id": "overview-02",
+    "text": "让我看到所有的卡",
+    "route": "overview"
+   },
+   "route": "overview",
+   "route_p": 0.6592,
+   "route_ok": true,
+   "route_ms": 104.2,
+   "full_ms": 104.0,
+   "target": null,
+   "multi_p": 0.1576
+  },
+  {
+   "case": {
+    "id": "overview-03",
+    "text": "把所有卡片放到一屏里",
+    "route": "overview"
+   },
+   "route": "focus",
+   "route_p": 0.6227,
+   "route_ok": false,
+   "route_ms": 103.9,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.1966
+  },
+  {
+   "case": {
+    "id": "overview-04",
+    "text": "缩小看全局",
+    "route": "overview"
+   },
+   "route": "unsupported",
+   "route_p": 0.2588,
+   "route_ok": false,
+   "route_ms": 104.3,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.4113
+  },
+  {
+   "case": {
+    "id": "overview-05",
+    "text": "我想看看整个空间都有啥",
+    "route": "overview"
+   },
+   "route": "arrange",
+   "route_p": 0.2696,
+   "route_ok": false,
+   "route_ms": 103.4,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.4982
+  },
+  {
+   "case": {
+    "id": "overview-06",
+    "text": "show everything",
+    "route": "overview"
+   },
+   "route": "overview",
+   "route_p": 0.2333,
+   "route_ok": true,
+   "route_ms": 103.1,
+   "full_ms": 104.2,
+   "target": null,
+   "multi_p": 0.2407
+  },
+  {
+   "case": {
+    "id": "restore-01",
+    "text": "恢复原来的视图",
+    "route": "restore"
+   },
+   "route": "restore",
+   "route_p": 0.8839,
+   "route_ok": true,
+   "route_ms": 104.3,
+   "full_ms": 104.2,
+   "target": null,
+   "multi_p": 0.2081
+  },
+  {
+   "case": {
+    "id": "restore-02",
+    "text": "退出聚焦",
+    "route": "restore"
+   },
+   "route": "restore",
+   "route_p": 0.8964,
+   "route_ok": true,
+   "route_ms": 104.2,
+   "full_ms": 104.2,
+   "target": null,
+   "multi_p": 0.2268
+  },
+  {
+   "case": {
+    "id": "restore-03",
+    "text": "回到刚才的画面",
+    "route": "restore"
+   },
+   "route": "restore",
+   "route_p": 0.8075,
+   "route_ok": true,
+   "route_ms": 104.3,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.3877
+  },
+  {
+   "case": {
+    "id": "restore-04",
+    "text": "不用放大了，还原吧",
+    "route": "restore",
+    "tags": [
+     "negation"
+    ]
+   },
+   "route": "restore",
+   "route_p": 0.8945,
+   "route_ok": true,
+   "route_ms": 104.1,
+   "full_ms": 104.4,
+   "target": null,
+   "multi_p": 0.2529
+  },
+  {
+   "case": {
+    "id": "restore-05",
+    "text": "返回之前那个视角",
+    "route": "restore"
+   },
+   "route": "restore",
+   "route_p": 0.8683,
+   "route_ok": true,
+   "route_ms": 104.1,
+   "full_ms": 104.2,
+   "target": null,
+   "multi_p": 0.3729
+  },
+  {
+   "case": {
+    "id": "restore-06",
+    "text": "取消聚焦",
+    "route": "restore"
+   },
+   "route": "restore",
+   "route_p": 0.9274,
+   "route_ok": true,
+   "route_ms": 104.1,
+   "full_ms": 104.2,
+   "target": null,
+   "multi_p": 0.3335
+  },
+  {
+   "case": {
+    "id": "highlight-01",
+    "text": "高亮一下买牛奶那条",
+    "route": "highlight",
+    "target": "todo_week"
+   },
+   "route": "highlight",
+   "route_p": 1.0,
+   "route_ok": true,
+   "route_ms": 104.2,
+   "full_ms": 105.0,
+   "target": "note_meeting",
+   "multi_p": 0.6086
+  },
+  {
+   "case": {
+    "id": "highlight-02",
+    "text": "把本周待办的第二条标亮",
+    "route": "highlight",
+    "target": "todo_week"
+   },
+   "route": "highlight",
+   "route_p": 0.9633,
+   "route_ok": true,
+   "route_ms": 104.6,
+   "full_ms": 102.1,
+   "target": "note_meeting",
+   "multi_p": 0.6173
+  },
+  {
+   "case": {
+    "id": "highlight-03",
+    "text": "突出显示谷歌卡片里总部那一点",
+    "route": "highlight",
+    "target": "answer_google"
+   },
+   "route": "highlight",
+   "route_p": 0.6894,
+   "route_ok": true,
+   "route_ms": 102.0,
+   "full_ms": 102.6,
+   "target": "note_meeting",
+   "multi_p": 0.1678
+  },
+  {
+   "case": {
+    "id": "highlight-04",
+    "text": "闪一下喝水提醒",
+    "route": "highlight",
+    "target": "cd_water"
+   },
+   "route": "restore",
+   "route_p": 0.3377,
+   "route_ok": false,
+   "route_ms": 102.7,
+   "full_ms": 103.4,
+   "target": "cd_water",
+   "multi_p": 0.2298
+  },
+  {
+   "case": {
+    "id": "highlight-05",
+    "text": "让会议记录亮一下我好找到它",
+    "route": "highlight",
+    "target": "note_meeting"
+   },
+   "route": "unsupported",
+   "route_p": 0.2776,
+   "route_ok": false,
+   "route_ms": 104.1,
+   "full_ms": 104.0,
+   "target": "note_meeting",
+   "multi_p": 0.5721
+  },
+  {
+   "case": {
+    "id": "highlight-06",
+    "text": "把洗衣液那条闪一下",
+    "route": "highlight",
+    "target": "todo_shop"
+   },
+   "route": "restore",
+   "route_p": 0.4774,
+   "route_ok": false,
+   "route_ms": 104.0,
+   "full_ms": 102.7,
+   "target": "note_meeting",
+   "multi_p": 0.3159
+  },
+  {
+   "case": {
+    "id": "highlight-07",
+    "text": "高亮第一条",
+    "route": "highlight",
+    "target": "ambiguous",
+    "tags": [
+     "ambiguous"
+    ]
+   },
+   "route": "highlight",
+   "route_p": 0.9985,
+   "route_ok": true,
+   "route_ms": 104.1,
+   "full_ms": 104.3,
+   "target": "note_meeting",
+   "multi_p": 0.2336
+  },
+  {
+   "case": {
+    "id": "highlight-08",
+    "text": "这个卡片里预约牙医那项给我高亮",
+    "route": "highlight",
+    "target": "todo_week"
+   },
+   "route": "highlight",
+   "route_p": 0.9996,
+   "route_ok": true,
+   "route_ms": 104.0,
+   "full_ms": 104.1,
+   "target": "note_meeting",
+   "multi_p": 0.312
+  },
+  {
+   "case": {
+    "id": "edit-01",
+    "text": "买牛奶已经完成了，勾掉",
+    "route": "edit",
+    "target": "todo_week"
+   },
+   "route": "delete",
+   "route_p": 0.3,
+   "route_ok": false,
+   "route_ms": 104.1,
+   "full_ms": 103.9,
+   "target": "note_meeting",
+   "multi_p": 0.1956
+  },
+  {
+   "case": {
+    "id": "edit-02",
+    "text": "购物清单里加上酱油",
+    "route": "edit",
+    "target": "todo_shop"
+   },
+   "route": "unsupported",
+   "route_p": 0.4359,
+   "route_ok": false,
+   "route_ms": 104.2,
+   "full_ms": 104.2,
+   "target": "todo_shop",
+   "multi_p": 0.4371
+  },
+  {
+   "case": {
+    "id": "edit-03",
+    "text": "把会议记录的标题改成首页改版讨论",
+    "route": "edit",
+    "target": "note_meeting"
+   },
+   "route": "unsupported",
+   "route_p": 0.5235,
+   "route_ok": false,
+   "route_ms": 103.8,
+   "full_ms": 103.9,
+   "target": "note_meeting",
+   "multi_p": 0.3819
+  },
+  {
+   "case": {
+    "id": "edit-04",
+    "text": "展开读书笔记",
+    "route": "edit",
+    "target": "note_book"
+   },
+   "route": "overview",
+   "route_p": 0.307,
+   "route_ok": false,
+   "route_ms": 104.3,
+   "full_ms": 104.1,
+   "target": "note_book",
+   "multi_p": 0.4539
+  },
+  {
+   "case": {
+    "id": "edit-05",
+    "text": "收起会议记录，只看摘要",
+    "route": "edit",
+    "target": "note_meeting"
+   },
+   "route": "focus",
+   "route_p": 0.3074,
+   "route_ok": false,
+   "route_ms": 104.0,
+   "full_ms": 104.2,
+   "target": "note_meeting",
+   "multi_p": 0.1791
+  },
+  {
+   "case": {
+    "id": "edit-06",
+    "text": "交周报那个我做完了",
+    "route": "edit",
+    "target": "todo_week"
+   },
+   "route": "unsupported",
+   "route_p": 0.4603,
+   "route_ok": false,
+   "route_ms": 104.2,
+   "full_ms": 104.3,
+   "target": "note_meeting",
+   "multi_p": 0.3008
+  },
+  {
+   "case": {
+    "id": "edit-07",
+    "text": "在这张便签后面补一句：下周再约",
+    "route": "edit",
+    "target": "note_meeting",
+    "tags": [
+     "deixis"
+    ]
+   },
+   "route": "undo",
+   "route_p": 0.9167,
+   "route_ok": false,
+   "route_ms": 104.2,
+   "full_ms": 104.0,
+   "target": "note_meeting",
+   "multi_p": 0.235
+  },
+  {
+   "case": {
+    "id": "edit-08",
+    "text": "暂停喝水倒计时",
+    "route": "edit",
+    "target": "cd_water"
+   },
+   "route": "undo",
+   "route_p": 0.4071,
+   "route_ok": false,
+   "route_ms": 104.1,
+   "full_ms": 104.2,
+   "target": "note_meeting",
+   "multi_p": 0.3198
+  },
+  {
+   "case": {
+    "id": "edit-09",
+    "text": "洗衣液不用买了，划掉",
+    "route": "edit",
+    "target": "todo_shop",
+    "tags": [
+     "negation"
+    ]
+   },
+   "route": "unsupported",
+   "route_p": 0.5942,
+   "route_ok": false,
+   "route_ms": 102.2,
+   "full_ms": 102.5,
+   "target": "note_meeting",
+   "multi_p": 0.3494
+  },
+  {
+   "case": {
+    "id": "edit-10",
+    "text": "把预约牙医改成预约体检",
+    "route": "edit",
+    "target": "todo_week"
+   },
+   "route": "unsupported",
+   "route_p": 0.4282,
+   "route_ok": false,
+   "route_ms": 102.9,
+   "full_ms": 104.1,
+   "target": "note_meeting",
+   "multi_p": 0.3584
+  },
+  {
+   "case": {
+    "id": "arrange-01",
+    "text": "把天气卡移到左边",
+    "route": "arrange",
+    "target": "weather_sh"
+   },
+   "route": "arrange",
+   "route_p": 0.2855,
+   "route_ok": true,
+   "route_ms": 104.2,
+   "full_ms": 104.3,
+   "target": "weather_sh",
+   "multi_p": 0.3419
+  },
+  {
+   "case": {
+    "id": "arrange-02",
+    "text": "整理一下画布布局",
+    "route": "arrange"
+   },
+   "route": "arrange",
+   "route_p": 0.6358,
+   "route_ok": true,
+   "route_ms": 104.1,
+   "full_ms": 104.4,
+   "target": null,
+   "multi_p": 0.4619
+  },
+  {
+   "case": {
+    "id": "arrange-03",
+    "text": "把会议记录固定住别动",
+    "route": "arrange",
+    "target": "note_meeting"
+   },
+   "route": "restore",
+   "route_p": 0.3177,
+   "route_ok": false,
+   "route_ms": 104.2,
+   "full_ms": 103.8,
+   "target": "note_meeting",
+   "multi_p": 0.2342
+  },
+  {
+   "case": {
+    "id": "arrange-04",
+    "text": "读书笔记挪到购物清单下面",
+    "route": "arrange",
+    "target": "note_book"
+   },
+   "route": "unsupported",
+   "route_p": 0.3008,
+   "route_ok": false,
+   "route_ms": 103.9,
+   "full_ms": 103.7,
+   "target": "note_book",
+   "multi_p": 0.4718
+  },
+  {
+   "case": {
+    "id": "arrange-05",
+    "text": "卡片太乱了排整齐",
+    "route": "arrange"
+   },
+   "route": "arrange",
+   "route_p": 0.9592,
+   "route_ok": true,
+   "route_ms": 104.0,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.4664
+  },
+  {
+   "case": {
+    "id": "arrange-06",
+    "text": "取消固定喝水提醒",
+    "route": "arrange",
+    "target": "cd_water"
+   },
+   "route": "undo",
+   "route_p": 0.628,
+   "route_ok": false,
+   "route_ms": 104.0,
+   "full_ms": 104.1,
+   "target": "note_meeting",
+   "multi_p": 0.3311
+  },
+  {
+   "case": {
+    "id": "arrange-07",
+    "text": "把谷歌卡往上挪一点",
+    "route": "arrange",
+    "target": "answer_google"
+   },
+   "route": "unsupported",
+   "route_p": 0.3639,
+   "route_ok": false,
+   "route_ms": 104.4,
+   "full_ms": 104.1,
+   "target": "note_meeting",
+   "multi_p": 0.2675
+  },
+  {
+   "case": {
+    "id": "arrange-08",
+    "text": "把待办传到用户页我要编辑",
+    "route": "arrange",
+    "target": "ambiguous",
+    "tags": [
+     "ambiguous"
+    ]
+   },
+   "route": "edit",
+   "route_p": 0.6474,
+   "route_ok": false,
+   "route_ms": 104.2,
+   "full_ms": 104.0,
+   "target": "note_meeting",
+   "multi_p": 0.6416
+  },
+  {
+   "case": {
+    "id": "delete-01",
+    "text": "删除读书笔记",
+    "route": "delete",
+    "target": "note_book"
+   },
+   "route": "delete",
+   "route_p": 0.9999,
+   "route_ok": true,
+   "route_ms": 104.1,
+   "full_ms": 105.3,
+   "target": "note_book",
+   "multi_p": 0.3108
+  },
+  {
+   "case": {
+    "id": "delete-02",
+    "text": "把天气卡去掉",
+    "route": "delete",
+    "target": "weather_sh"
+   },
+   "route": "delete",
+   "route_p": 0.9439,
+   "route_ok": true,
+   "route_ms": 104.0,
+   "full_ms": 102.6,
+   "target": "note_meeting",
+   "multi_p": 0.3112
+  },
+  {
+   "case": {
+    "id": "delete-03",
+    "text": "清空画布",
+    "route": "delete"
+   },
+   "route": "delete",
+   "route_p": 0.2912,
+   "route_ok": true,
+   "route_ms": 104.0,
+   "full_ms": 104.4,
+   "target": null,
+   "multi_p": 0.363
+  },
+  {
+   "case": {
+    "id": "delete-04",
+    "text": "喝水提醒不需要了，删了吧",
+    "route": "delete",
+    "target": "cd_water"
+   },
+   "route": "delete",
+   "route_p": 0.989,
+   "route_ok": true,
+   "route_ms": 103.6,
+   "full_ms": 104.0,
+   "target": "note_meeting",
+   "multi_p": 0.1702
+  },
+  {
+   "case": {
+    "id": "delete-05",
+    "text": "这张卡没用了，扔掉",
+    "route": "delete",
+    "target": "note_meeting",
+    "tags": [
+     "deixis"
+    ]
+   },
+   "route": "delete",
+   "route_p": 0.982,
+   "route_ok": true,
+   "route_ms": 104.2,
+   "full_ms": 104.1,
+   "target": "note_meeting",
+   "multi_p": 0.2336
+  },
+  {
+   "case": {
+    "id": "delete-06",
+    "text": "删掉所有卡片",
+    "route": "delete"
+   },
+   "route": "delete",
+   "route_p": 0.9968,
+   "route_ok": true,
+   "route_ms": 104.1,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.2948
+  },
+  {
+   "case": {
+    "id": "delete-07",
+    "text": "删除待办",
+    "route": "delete",
+    "target": "ambiguous",
+    "tags": [
+     "ambiguous"
+    ]
+   },
+   "route": "delete",
+   "route_p": 0.9358,
+   "route_ok": true,
+   "route_ms": 104.1,
+   "full_ms": 102.1,
+   "target": "note_meeting",
+   "multi_p": 0.6216
+  },
+  {
+   "case": {
+    "id": "delete-08",
+    "text": "把谷歌那张移除",
+    "route": "delete",
+    "target": "answer_google"
+   },
+   "route": "delete",
+   "route_p": 0.9198,
+   "route_ok": true,
+   "route_ms": 102.6,
+   "full_ms": 102.7,
+   "target": "note_meeting",
+   "multi_p": 0.3178
+  },
+  {
+   "case": {
+    "id": "undo-01",
+    "text": "撤销",
+    "route": "undo"
+   },
+   "route": "undo",
+   "route_p": 0.4188,
+   "route_ok": true,
+   "route_ms": 103.1,
+   "full_ms": 103.2,
+   "target": null,
+   "multi_p": 0.2994
+  },
+  {
+   "case": {
+    "id": "undo-02",
+    "text": "刚才那步不对，退回去",
+    "route": "undo"
+   },
+   "route": "undo",
+   "route_p": 0.6726,
+   "route_ok": true,
+   "route_ms": 103.6,
+   "full_ms": 103.8,
+   "target": null,
+   "multi_p": 0.36
+  },
+  {
+   "case": {
+    "id": "undo-03",
+    "text": "撤回上一步操作",
+    "route": "undo"
+   },
+   "route": "undo",
+   "route_p": 0.8741,
+   "route_ok": true,
+   "route_ms": 103.8,
+   "full_ms": 104.0,
+   "target": null,
+   "multi_p": 0.3242
+  },
+  {
+   "case": {
+    "id": "undo-04",
+    "text": "重做",
+    "route": "undo"
+   },
+   "route": "undo",
+   "route_p": 0.8217,
+   "route_ok": true,
+   "route_ms": 104.2,
+   "full_ms": 104.0,
+   "target": null,
+   "multi_p": 0.4043
+  },
+  {
+   "case": {
+    "id": "undo-05",
+    "text": "哎呀删错了，恢复回来",
+    "route": "undo"
+   },
+   "route": "restore",
+   "route_p": 0.5212,
+   "route_ok": false,
+   "route_ms": 104.0,
+   "full_ms": 104.0,
+   "target": null,
+   "multi_p": 0.2435
+  },
+  {
+   "case": {
+    "id": "undo-06",
+    "text": "undo that",
+    "route": "undo"
+   },
+   "route": "undo",
+   "route_p": 0.8492,
+   "route_ok": true,
+   "route_ms": 104.4,
+   "full_ms": 104.0,
+   "target": null,
+   "multi_p": 0.2569
+  },
+  {
+   "case": {
+    "id": "unsupported-01",
+    "text": "帮我点一份麦当劳外卖",
+    "route": "unsupported"
+   },
+   "route": "unsupported",
+   "route_p": 0.401,
+   "route_ok": true,
+   "route_ms": 103.8,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.5481
+  },
+  {
+   "case": {
+    "id": "unsupported-02",
+    "text": "给张三打个电话",
+    "route": "unsupported"
+   },
+   "route": "unsupported",
+   "route_p": 0.4613,
+   "route_ok": true,
+   "route_ms": 104.2,
+   "full_ms": 104.3,
+   "target": null,
+   "multi_p": 0.3644
+  },
+  {
+   "case": {
+    "id": "unsupported-03",
+    "text": "把客厅的灯关了",
+    "route": "unsupported"
+   },
+   "route": "unsupported",
+   "route_p": 0.3363,
+   "route_ok": true,
+   "route_ms": 102.5,
+   "full_ms": 104.0,
+   "target": null,
+   "multi_p": 0.2342
+  },
+  {
+   "case": {
+    "id": "unsupported-04",
+    "text": "帮我在淘宝下单这双鞋",
+    "route": "unsupported"
+   },
+   "route": "generate",
+   "route_p": 0.5859,
+   "route_ok": false,
+   "route_ms": 103.8,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.2646
+  },
+  {
+   "case": {
+    "id": "unsupported-05",
+    "text": "转账给我妈两百块",
+    "route": "unsupported"
+   },
+   "route": "unsupported",
+   "route_p": 0.5372,
+   "route_ok": true,
+   "route_ms": 104.2,
+   "full_ms": 104.0,
+   "target": null,
+   "multi_p": 0.2565
+  },
+  {
+   "case": {
+    "id": "unsupported-06",
+    "text": "订一张明天去北京的高铁票",
+    "route": "unsupported"
+   },
+   "route": "unsupported",
+   "route_p": 0.4762,
+   "route_ok": true,
+   "route_ms": 104.4,
+   "full_ms": 104.0,
+   "target": null,
+   "multi_p": 0.3457
+  },
+  {
+   "case": {
+    "id": "multi-01",
+    "text": "帮我记个便签明天交周报，再设个50分钟倒计时",
+    "route": "note",
+    "multi": true,
+    "routes": [
+     "note",
+     "countdown"
+    ]
+   },
+   "route": "countdown",
+   "route_p": 0.9988,
+   "route_ok": false,
+   "route_ms": 104.0,
+   "full_ms": 104.3,
+   "target": null,
+   "multi_p": 0.5002
+  },
+  {
+   "case": {
+    "id": "multi-02",
+    "text": "看下天气然后提醒我十分钟后出门",
+    "route": "search",
+    "multi": true,
+    "routes": [
+     "search",
+     "countdown"
+    ],
+    "tags": [
+     "weather"
+    ]
+   },
+   "route": "unsupported",
+   "route_p": 0.3267,
+   "route_ok": false,
+   "route_ms": 104.1,
+   "full_ms": 104.0,
+   "target": null,
+   "multi_p": 0.5077
+  },
+  {
+   "case": {
+    "id": "multi-03",
+    "text": "聚焦左边的待办，高亮第二条",
+    "route": "focus",
+    "target": "todo_week",
+    "multi": true,
+    "routes": [
+     "focus",
+     "highlight"
+    ]
+   },
+   "route": "highlight",
+   "route_p": 0.5899,
+   "route_ok": false,
+   "route_ms": 104.0,
+   "full_ms": 104.2,
+   "target": "note_meeting",
+   "multi_p": 0.5907
+  },
+  {
+   "case": {
+    "id": "multi-04",
+    "text": "把买牛奶勾掉，顺便删了天气卡",
+    "route": "edit",
+    "multi": true,
+    "routes": [
+     "edit",
+     "delete"
+    ]
+   },
+   "route": "delete",
+   "route_p": 0.8618,
+   "route_ok": false,
+   "route_ms": 104.1,
+   "full_ms": 104.0,
+   "target": null,
+   "multi_p": 0.1995
+  },
+  {
+   "case": {
+    "id": "multi-05",
+    "text": "介绍一下特斯拉，并且加个待办研究它的财报",
+    "route": "answer",
+    "multi": true,
+    "routes": [
+     "answer",
+     "todo"
+    ]
+   },
+   "route": "unsupported",
+   "route_p": 0.5132,
+   "route_ok": false,
+   "route_ms": 104.0,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.7211
+  },
+  {
+   "case": {
+    "id": "multi-06",
+    "text": "先显示全部卡片，然后整理一下布局",
+    "route": "overview",
+    "multi": true,
+    "routes": [
+     "overview",
+     "arrange"
+    ]
+   },
+   "route": "undo",
+   "route_p": 0.4373,
+   "route_ok": false,
+   "route_ms": 104.2,
+   "full_ms": 104.1,
+   "target": null,
+   "multi_p": 0.3605
+  },
+  {
+   "case": {
+    "id": "multi-07",
+    "text": "五分钟后提醒我喝水和吃药",
+    "route": "countdown",
+    "multi": false
+   },
+   "route": "unsupported",
+   "route_p": 0.2995,
+   "route_ok": false,
+   "route_ms": 103.7,
+   "full_ms": 104.4,
+   "target": null,
+   "multi_p": 0.393
+  },
+  {
+   "case": {
+    "id": "multi-08",
+    "text": "列个待办：买菜和做饭",
+    "route": "todo",
+    "multi": false
+   },
+   "route": "todo",
+   "route_p": 0.6172,
+   "route_ok": true,
+   "route_ms": 104.2,
+   "full_ms": 104.4,
+   "target": null,
+   "multi_p": 0.4597
+  },
+  {
+   "case": {
+    "id": "multi-09",
+    "text": "不要删除，聚焦它",
+    "route": "focus",
+    "target": "note_meeting",
+    "multi": false,
+    "tags": [
+     "negation"
+    ]
+   },
+   "route": "focus",
+   "route_p": 0.7823,
+   "route_ok": true,
+   "route_ms": 104.4,
+   "full_ms": 102.2,
+   "target": "note_meeting",
+   "multi_p": 0.2846
+  },
+  {
+   "case": {
+    "id": "multi-10",
+    "text": "查一下明天上海天气，要是下雨就提醒我带伞",
+    "route": "search",
+    "multi": true,
+    "routes": [
+     "search",
+     "countdown"
+    ],
+    "tags": [
+     "weather"
+    ]
+   },
+   "route": "search",
+   "route_p": 0.5161,
+   "route_ok": true,
+   "route_ms": 102.2,
+   "full_ms": 102.6,
+   "target": null,
+   "multi_p": 0.4811
+  }
+ ]
+}

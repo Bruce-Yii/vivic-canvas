@@ -1,0 +1,2128 @@
+{
+  "at": "2026-10-29T16:48:32.910Z",
+  "model": "step-3.7-flash",
+  "mode": "shadow",
+  "scope": "Frozen creation/answer subset plus one real vision case. Synthetic inputs, actual hosted HTTP and upstream model.",
+  "originalCaseCount": 59,
+  "rows": [
+    {
+      "id": "answer-01",
+      "route": "answer",
+      "text": "给我介绍一下谷歌这家公司",
+      "totalMs": 6648,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NewsCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NewsCard",
+          "displayProps": {
+            "headline": "Google公司介绍",
+            "summary": "Google（谷歌）是一家美国跨国科技公司，由拉里·佩奇和谢尔盖·布林于1998年创立，总部位于加利福尼亚州山景城。作为全球最大的搜索引擎提供商，公司核心业务包括搜索、在线广告、云计算、硬件和人工智能等。",
+            "keyPoints": [
+              "1998年由拉里·佩奇和谢尔盖·布林创立",
+              "总部位于美国加利福尼亚州山景城",
+              "核心业务为搜索引擎和在线广告",
+              "业务涵盖云计算、硬件和人工智能",
+              "母公司为Alphabet Inc."
+            ],
+            "summaryBy": "ai"
+          },
+          "sourceData": {
+            "contract": "answer"
+          }
+        }
+      ],
+      "trace": {
+        "route": "answer",
+        "probability": 0.7765598578250797,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "answer-02",
+      "route": "answer",
+      "text": "量子计算是什么原理",
+      "totalMs": 6655,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NewsCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NewsCard",
+          "displayProps": {
+            "headline": "量子计算原理",
+            "summary": "量子计算利用量子力学原理，通过量子比特的叠加态和纠缠特性，实现并行计算。",
+            "keyPoints": [
+              "基于量子力学",
+              "量子比特可叠加",
+              "量子纠缠关联",
+              "量子干涉增强正确概率",
+              "指数级并行能力"
+            ],
+            "summaryBy": "ai"
+          },
+          "sourceData": {
+            "contract": "answer"
+          }
+        }
+      ],
+      "trace": {
+        "route": "answer",
+        "probability": 0.8536321751939121,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "answer-03",
+      "route": "answer",
+      "text": "为什么天空是蓝色的",
+      "totalMs": 3559,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NewsCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NewsCard",
+          "displayProps": {
+            "headline": "为什么天空是蓝色的",
+            "summary": "太阳光进入大气层后，波长较短的蓝光比红光更容易被空气分子散射，因此我们看到的天空呈现蓝色。",
+            "keyPoints": [
+              "瑞利散射原理",
+              "蓝光波长短易被散射",
+              "红光波长长穿透力强"
+            ],
+            "summaryBy": "ai"
+          },
+          "sourceData": {
+            "contract": "answer"
+          }
+        }
+      ],
+      "trace": {
+        "route": null,
+        "probability": 0,
+        "status": "failed",
+        "failedCount": 1
+      }
+    },
+    {
+      "id": "answer-04",
+      "route": "answer",
+      "text": "MBTI里INTJ和INTP有什么区别",
+      "totalMs": 13651,
+      "plannerCalls": 2,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NewsCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NewsCard",
+          "displayProps": {
+            "headline": "INTJ与INTP的核心区别",
+            "summary": "INTJ和INTP虽同属理性分析型，但主导功能不同。INTJ以直觉导向战略执行，INTP以逻辑驱动理论探索。",
+            "keyPoints": [
+              "INTJ主导功能为内倾直觉(Ni)，INTP主导功能为内倾思维(Ti)",
+              "INTJ注重效率与结果，擅长制定并执行长期计划",
+              "INTP追求知识本身，喜欢探索理论可能性和逻辑体系",
+              "INTJ被称为'战略家'，INTP被称为'逻辑学家'",
+              "INTJ更果断目标导向，INTP更开放灵活"
+            ],
+            "summaryBy": "ai"
+          },
+          "sourceData": {
+            "contract": "answer"
+          }
+        }
+      ],
+      "trace": {
+        "route": "answer",
+        "probability": 0.9154657694587428,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "answer-05",
+      "route": "answer",
+      "text": "失眠的话有什么改善方法吗",
+      "totalMs": 16627,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NewsCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NewsCard",
+          "displayProps": {
+            "headline": "失眠改善方法",
+            "summary": "失眠可通过调整生活习惯和环境来改善，包括规律作息、放松身心等。",
+            "keyPoints": [
+              "保持规律作息，固定睡觉和起床时间",
+              "睡前避免咖啡因、酒精和电子设备",
+              "创造黑暗、安静、凉爽的睡眠环境",
+              "白天适度运动，但睡前避免剧烈运动",
+              "尝试冥想、深呼吸等放松技巧"
+            ],
+            "summaryBy": "ai"
+          },
+          "sourceData": {
+            "contract": "answer"
+          }
+        }
+      ],
+      "trace": {
+        "route": "answer",
+        "probability": 0.7618624612797897,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "answer-06",
+      "route": "answer",
+      "text": "这句话里的删除所有卡片是什么意思",
+      "totalMs": 11131,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NewsCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NewsCard",
+          "displayProps": {
+            "headline": "'删除所有卡片'的含义",
+            "summary": "在当前工作空间上下文中，'删除所有卡片'指一次性清除画布上所有显示的卡片，包括待办、笔记、天气、新闻等各类卡片，属于批量删除操作。",
+            "keyPoints": [
+              "清除工作空间所有卡片",
+              "包括待办、笔记、天气等",
+              "批量不可逆操作",
+              "执行前通常需确认"
+            ],
+            "summaryBy": "ai"
+          },
+          "sourceData": {
+            "contract": "answer"
+          }
+        }
+      ],
+      "trace": {
+        "route": "answer",
+        "probability": 0.806599295331047,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "answer-07",
+      "route": "answer",
+      "text": "解释一下什么叫倒计时提醒",
+      "totalMs": 9207,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NewsCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NewsCard",
+          "displayProps": {
+            "headline": "倒计时提醒",
+            "summary": "倒计时提醒是一种从设定时间点开始逆向计算并提醒用户的功能，常用于提醒即将发生的事件或任务截止时间，帮助用户有效管理时间。",
+            "keyPoints": [
+              "从目标时间点开始倒数计时",
+              "用于提醒即将发生的事件或任务截止",
+              "可设置提醒时间和重复周期",
+              "常见于闹钟、日历和待办应用",
+              "帮助用户管理时间和提高效率"
+            ],
+            "summaryBy": "ai"
+          },
+          "sourceData": {
+            "contract": "answer"
+          }
+        }
+      ],
+      "trace": {
+        "route": "answer",
+        "probability": 0.9744139057008149,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "answer-08",
+      "route": "answer",
+      "text": "帮我讲讲罗马帝国为什么衰落",
+      "totalMs": 8911,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NewsCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NewsCard",
+          "displayProps": {
+            "headline": "罗马帝国衰落的主要原因",
+            "summary": "罗马帝国衰落是多种因素长期作用的结果，包括政治腐败、经济危机、军事过度扩张、外族入侵以及社会道德滑坡等。公元476年西罗马帝国灭亡标志着古代罗马的终结。",
+            "keyPoints": [
+              "政治腐败与频繁政变导致中央集权瓦解",
+              "经济危机：通货膨胀、税负沉重、奴隶制经济停滞",
+              "军事过度扩张，边境防守薄弱",
+              "日耳曼等外族持续入侵",
+              "社会结构松动，传统价值观衰退"
+            ],
+            "summaryBy": "ai"
+          },
+          "sourceData": {
+            "contract": "answer"
+          }
+        }
+      ],
+      "trace": {
+        "route": "answer",
+        "probability": 0.9089459117619226,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "answer-09",
+      "route": "answer",
+      "text": "如果我想学吉他应该从哪里开始",
+      "totalMs": 10656,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NewsCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NewsCard",
+          "displayProps": {
+            "headline": "吉他入门学习指南",
+            "summary": "从零开始学吉他，建议从了解吉他构造、掌握基本持琴姿势和简单和弦开始，逐步练习节奏与指法。",
+            "keyPoints": [
+              "选择一把合适的入门吉他",
+              "学习持琴姿势与右手拨弦",
+              "从C、G、Am等基础和弦入手",
+              "配合节拍器练习简单节奏型",
+              "坚持每日短时练习"
+            ],
+            "summaryBy": "ai"
+          },
+          "sourceData": {
+            "contract": "answer"
+          }
+        }
+      ],
+      "trace": {
+        "route": "answer",
+        "probability": 0.7060314158353379,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "answer-10",
+      "route": "answer",
+      "text": "第一次去日本旅游要注意什么",
+      "totalMs": 8804,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NewsCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NewsCard",
+          "displayProps": {
+            "headline": "第一次去日本旅游注意事项",
+            "summary": "日本旅游需提前准备签证、交通卡，注意当地礼仪和支付习惯，尊重文化习俗。",
+            "keyPoints": [
+              "提前办理签证，建议购买旅行保险",
+              "购买Suica/Pasmo交通卡，方便地铁公交出行",
+              "公共场所保持安静，严格遵守排队秩序",
+              "多备日元现金，部分小店和餐馆不支持刷卡",
+              "脱鞋、泡温泉需遵守当地礼仪规范"
+            ],
+            "summaryBy": "ai"
+          },
+          "sourceData": {
+            "contract": "answer"
+          }
+        }
+      ],
+      "trace": {
+        "route": "answer",
+        "probability": 0.6289006994428626,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "answer-11",
+      "route": "answer",
+      "text": "react 和 vue 选哪个好",
+      "totalMs": 14293,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NewsCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NewsCard",
+          "displayProps": {
+            "headline": "React vs Vue 选择建议",
+            "summary": "两者都是优秀的前端框架，选择取决于项目规模、团队经验和生态需求。React生态丰富、灵活性高，适合大型复杂应用；Vue易上手、文档友好，适合快速开发和中小型项目。",
+            "keyPoints": [
+              "React：生态丰富，灵活性高，适合大型团队和复杂应用",
+              "Vue：易上手，文档友好，适合快速迭代和中小型项目",
+              "性能：两者都很快，Vue在更新机制上略有优势",
+              "学习曲线：Vue更平缓，React需要理解JSX和函数式编程",
+              "就业市场：React需求略多，但Vue在国内也很流行"
+            ],
+            "summaryBy": "ai"
+          },
+          "sourceData": {
+            "contract": "answer"
+          }
+        }
+      ],
+      "trace": {
+        "route": "answer",
+        "probability": 0.833954733533933,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "answer-12",
+      "route": "answer",
+      "text": "这张谷歌的卡片讲了什么",
+      "totalMs": 5998,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NewsCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NewsCard",
+          "displayProps": {
+            "headline": "Google 公司介绍",
+            "summary": "1998年成立；总部在山景城；核心业务是搜索和广告",
+            "keyPoints": [
+              "1998年成立",
+              "总部在山景城",
+              "核心业务是搜索和广告"
+            ],
+            "summaryBy": "ai"
+          },
+          "sourceData": {
+            "contract": "answer"
+          }
+        }
+      ],
+      "trace": {
+        "route": "answer",
+        "probability": 0.8263985756848564,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "countdown-01",
+      "route": "countdown",
+      "text": "倒计时50分钟",
+      "totalMs": 259,
+      "plannerCalls": 0,
+      "usedProvider": "rules",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "CountdownCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "CountdownCard",
+          "displayProps": {},
+          "sourceData": {
+            "targetAt": "2026-10-29T17:40:33.061Z",
+            "startedAt": "2026-10-29T16:50:33.061Z"
+          }
+        }
+      ],
+      "trace": {
+        "route": null,
+        "probability": 0,
+        "status": "pending",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "countdown-02",
+      "route": "countdown",
+      "text": "十分钟后提醒我喝水",
+      "totalMs": 259,
+      "plannerCalls": 0,
+      "usedProvider": "rules",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "CountdownCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "CountdownCard",
+          "displayProps": {},
+          "sourceData": {
+            "targetAt": "2026-10-29T17:00:33.359Z",
+            "startedAt": "2026-10-29T16:50:33.359Z",
+            "reminderText": "喝水"
+          }
+        }
+      ],
+      "trace": {
+        "route": null,
+        "probability": 0,
+        "status": "pending",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "countdown-03",
+      "route": "countdown",
+      "text": "帮我计时25分钟番茄钟",
+      "totalMs": 36753,
+      "plannerCalls": 3,
+      "usedProvider": "stepfun",
+      "kind": "clarify",
+      "message": "这句话没能形成可靠参数，请补充内容或换一种说法。",
+      "cardTypes": [],
+      "committed": false,
+      "receiptStatus": null,
+      "channelsValid": null,
+      "cards": [],
+      "trace": {
+        "route": null,
+        "probability": 0,
+        "status": "failed",
+        "failedCount": 1
+      }
+    },
+    {
+      "id": "countdown-04",
+      "route": "countdown",
+      "text": "半小时以后叫我起来",
+      "totalMs": 5102,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "CountdownCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "CountdownCard",
+          "displayProps": {},
+          "sourceData": {
+            "targetAt": "2026-10-29T17:21:15.510Z",
+            "startedAt": "2026-10-29T16:51:15.510Z",
+            "reminderText": "叫我起来"
+          }
+        }
+      ],
+      "trace": {
+        "route": "countdown",
+        "probability": 0.9072926271252942,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "countdown-05",
+      "route": "countdown",
+      "text": "三分钟后提醒我关火",
+      "totalMs": 294,
+      "plannerCalls": 0,
+      "usedProvider": "rules",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "CountdownCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "CountdownCard",
+          "displayProps": {},
+          "sourceData": {
+            "targetAt": "2026-10-29T16:54:15.593Z",
+            "startedAt": "2026-10-29T16:51:15.593Z",
+            "reminderText": "关火"
+          }
+        }
+      ],
+      "trace": {
+        "route": null,
+        "probability": 0,
+        "status": "pending",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "countdown-06",
+      "route": "countdown",
+      "text": "定个一个小时的闹钟",
+      "totalMs": 6429,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "CountdownCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "CountdownCard",
+          "displayProps": {},
+          "sourceData": {
+            "targetAt": "2026-10-29T17:51:22.306Z",
+            "startedAt": "2026-10-29T16:51:22.306Z",
+            "reminderText": "闹钟"
+          }
+        }
+      ],
+      "trace": {
+        "route": "countdown",
+        "probability": 0.8291404066598015,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "countdown-07",
+      "route": "countdown",
+      "text": "倒计时20s",
+      "totalMs": 5168,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "CountdownCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "CountdownCard",
+          "displayProps": {},
+          "sourceData": {
+            "targetAt": "2026-10-29T16:51:47.506Z",
+            "startedAt": "2026-10-29T16:51:27.506Z"
+          }
+        }
+      ],
+      "trace": {
+        "route": "countdown",
+        "probability": 0.9945282273804666,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "countdown-08",
+      "route": "countdown",
+      "text": "四十五分钟之后提醒我去开会",
+      "totalMs": 260,
+      "plannerCalls": 0,
+      "usedProvider": "rules",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "CountdownCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "CountdownCard",
+          "displayProps": {},
+          "sourceData": {
+            "targetAt": "2026-10-29T17:36:27.548Z",
+            "startedAt": "2026-10-29T16:51:27.548Z",
+            "reminderText": "去开会"
+          }
+        }
+      ],
+      "trace": {
+        "route": null,
+        "probability": 0,
+        "status": "pending",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "countdown-09",
+      "route": "countdown",
+      "text": "离高考还有多少天，做个倒数",
+      "totalMs": 12739,
+      "plannerCalls": 2,
+      "usedProvider": "stepfun",
+      "kind": "clarify",
+      "message": "这句话没能形成可靠参数，请补充内容或换一种说法。",
+      "cardTypes": [],
+      "committed": false,
+      "receiptStatus": null,
+      "channelsValid": null,
+      "cards": [],
+      "trace": {
+        "route": "countdown",
+        "probability": 0.9352653737792263,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "countdown-10",
+      "route": "countdown",
+      "text": "到点了叫我，大概15分钟",
+      "totalMs": 6837,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "CountdownCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "CountdownCard",
+          "displayProps": {},
+          "sourceData": {
+            "targetAt": "2026-10-29T17:06:47.428Z",
+            "startedAt": "2026-10-29T16:51:47.428Z",
+            "reminderText": "到点了叫我"
+          }
+        }
+      ],
+      "trace": {
+        "route": "countdown",
+        "probability": 0.9269450258307764,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "countdown-11",
+      "route": "countdown",
+      "text": "set a timer for 5 minutes",
+      "totalMs": 19161,
+      "plannerCalls": 2,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "CountdownCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "CountdownCard",
+          "displayProps": {},
+          "sourceData": {
+            "targetAt": "2026-10-29T16:57:06.628Z",
+            "startedAt": "2026-10-29T16:52:06.628Z",
+            "reminderText": "set a timer for 5 minutes"
+          }
+        }
+      ],
+      "trace": {
+        "route": "countdown",
+        "probability": 0.9975460383202727,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "countdown-12",
+      "route": "countdown",
+      "text": "到计时十分钟",
+      "totalMs": 7714,
+      "plannerCalls": 2,
+      "usedProvider": "stepfun",
+      "kind": "clarify",
+      "message": "请提供倒计时事项，例如'休息'或'会议'。",
+      "cardTypes": [],
+      "committed": false,
+      "receiptStatus": null,
+      "channelsValid": null,
+      "cards": [],
+      "trace": {
+        "route": "countdown",
+        "probability": 0.9913975672925419,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "todo-01",
+      "route": "todo",
+      "text": "加个待办，明天交周报",
+      "totalMs": 258,
+      "plannerCalls": 0,
+      "usedProvider": "rules",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "TodoCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "TodoCard",
+          "displayProps": {
+            "items": [
+              {
+                "id": "item-1",
+                "text": "明天交周报",
+                "done": false
+              }
+            ]
+          },
+          "sourceData": {}
+        }
+      ],
+      "trace": {
+        "route": null,
+        "probability": 0,
+        "status": "pending",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "todo-02",
+      "route": "todo",
+      "text": "帮我列个今天要做的事：洗衣服、拿快递、回邮件",
+      "totalMs": 7307,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "TodoCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "TodoCard",
+          "displayProps": {
+            "title": "今日待办",
+            "items": [
+              {
+                "id": "item-1",
+                "text": "洗衣服",
+                "done": false
+              },
+              {
+                "id": "item-2",
+                "text": "拿快递",
+                "done": false
+              },
+              {
+                "id": "item-3",
+                "text": "回邮件",
+                "done": false
+              }
+            ]
+          },
+          "sourceData": {}
+        }
+      ],
+      "trace": {
+        "route": "todo",
+        "probability": 0.9705558179395667,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "todo-03",
+      "route": "todo",
+      "text": "新建一个任务清单，准备搬家",
+      "totalMs": 14712,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "TodoCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "TodoCard",
+          "displayProps": {
+            "title": "准备搬家",
+            "items": [
+              {
+                "id": "item-1",
+                "text": "整理打包物品",
+                "done": false
+              },
+              {
+                "id": "item-2",
+                "text": "联系搬家公司",
+                "done": false
+              },
+              {
+                "id": "item-3",
+                "text": "更改邮寄地址",
+                "done": false
+              },
+              {
+                "id": "item-4",
+                "text": "办理水电煤过户",
+                "done": false
+              },
+              {
+                "id": "item-5",
+                "text": "购买打包材料",
+                "done": false
+              },
+              {
+                "id": "item-6",
+                "text": "清理不需要的物品",
+                "done": false
+              },
+              {
+                "id": "item-7",
+                "text": "确认新家钥匙",
+                "done": false
+              },
+              {
+                "id": "item-8",
+                "text": "安排网络迁移",
+                "done": false
+              }
+            ]
+          },
+          "sourceData": {}
+        }
+      ],
+      "trace": {
+        "route": "todo",
+        "probability": 0.9913699621758716,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "todo-04",
+      "route": "todo",
+      "text": "我要记得周五之前缴电费，加到待办里",
+      "totalMs": 17656,
+      "plannerCalls": 2,
+      "usedProvider": "stepfun",
+      "kind": "clarify",
+      "message": "这句话没能形成可靠参数，请补充内容或换一种说法。",
+      "cardTypes": [],
+      "committed": false,
+      "receiptStatus": null,
+      "channelsValid": null,
+      "cards": [],
+      "trace": {
+        "route": "todo",
+        "probability": 0.6719928233294424,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "todo-05",
+      "route": "todo",
+      "text": "创建待办：买菜、做饭、洗碗",
+      "totalMs": 259,
+      "plannerCalls": 0,
+      "usedProvider": "rules",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "TodoCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "TodoCard",
+          "displayProps": {
+            "items": [
+              {
+                "id": "item-1",
+                "text": "买菜",
+                "done": false
+              },
+              {
+                "id": "item-2",
+                "text": "做饭",
+                "done": false
+              },
+              {
+                "id": "item-3",
+                "text": "洗碗",
+                "done": false
+              }
+            ]
+          },
+          "sourceData": {}
+        }
+      ],
+      "trace": {
+        "route": null,
+        "probability": 0,
+        "status": "pending",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "todo-06",
+      "route": "todo",
+      "text": "添加一个任务，给妈妈打电话",
+      "totalMs": 10911,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "TodoCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "TodoCard",
+          "displayProps": {
+            "title": "待办",
+            "items": [
+              {
+                "id": "item-1",
+                "text": "给妈妈打电话",
+                "done": false
+              }
+            ]
+          },
+          "sourceData": {}
+        }
+      ],
+      "trace": {
+        "route": "todo",
+        "probability": 0.7936835998057953,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "todo-07",
+      "route": "todo",
+      "text": "下周要做的事情帮我建个清单",
+      "totalMs": 7128,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "clarify",
+      "message": "请告诉我下周要做的具体事项有哪些？",
+      "cardTypes": [],
+      "committed": false,
+      "receiptStatus": null,
+      "channelsValid": null,
+      "cards": [],
+      "trace": {
+        "route": "todo",
+        "probability": 0.9578301129681298,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "todo-08",
+      "route": "todo",
+      "text": "to do 里加上健身",
+      "totalMs": 8895,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "TodoCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "TodoCard",
+          "displayProps": {
+            "title": "本周待办",
+            "items": [
+              {
+                "id": "item-1",
+                "text": "交周报",
+                "done": false
+              },
+              {
+                "id": "item-2",
+                "text": "买牛奶",
+                "done": false
+              },
+              {
+                "id": "item-3",
+                "text": "预约牙医",
+                "done": false
+              },
+              {
+                "id": "item-4",
+                "text": "健身",
+                "done": false
+              }
+            ]
+          },
+          "sourceData": {}
+        }
+      ],
+      "trace": {
+        "route": "todo",
+        "probability": 0.7345747540744071,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "todo-09",
+      "route": "todo",
+      "text": "代办：整理照片",
+      "totalMs": 5763,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "TodoCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "TodoCard",
+          "displayProps": {
+            "title": "待办",
+            "items": [
+              {
+                "id": "item-1",
+                "text": "整理照片",
+                "done": false
+              }
+            ]
+          },
+          "sourceData": {}
+        }
+      ],
+      "trace": {
+        "route": "todo",
+        "probability": 0.8518382866446387,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "todo-10",
+      "route": "todo",
+      "text": "开个新清单，出差要带的东西",
+      "totalMs": 5320,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "clarify",
+      "message": "请提供出差要带的具体物品清单条目",
+      "cardTypes": [],
+      "committed": false,
+      "receiptStatus": null,
+      "channelsValid": null,
+      "cards": [],
+      "trace": {
+        "route": "todo",
+        "probability": 0.9898967044081327,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "note-01",
+      "route": "note",
+      "text": "帮我记一下，客户说预算是十万",
+      "totalMs": 5717,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NoteCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NoteCard",
+          "displayProps": {
+            "text": "客户说预算是十万"
+          },
+          "sourceData": {}
+        }
+      ],
+      "trace": {
+        "route": "note",
+        "probability": 0.9877142304898326,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "note-02",
+      "route": "note",
+      "text": "记下来：wifi密码是abc12345",
+      "totalMs": 8410,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NoteCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NoteCard",
+          "displayProps": {
+            "text": "wifi密码是abc12345"
+          },
+          "sourceData": {}
+        }
+      ],
+      "trace": {
+        "route": "note",
+        "probability": 0.9955937379523736,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "note-03",
+      "route": "note",
+      "text": "做个便签，周三下午三点牙医",
+      "totalMs": 6139,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NoteCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NoteCard",
+          "displayProps": {
+            "text": "周三下午三点牙医"
+          },
+          "sourceData": {}
+        }
+      ],
+      "trace": {
+        "route": "note",
+        "probability": 0.9695152890097978,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "note-04",
+      "route": "note",
+      "text": "把这句话记住：好的设计是看不见的",
+      "totalMs": 11662,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NoteCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NoteCard",
+          "displayProps": {
+            "text": "好的设计是看不见的"
+          },
+          "sourceData": {}
+        }
+      ],
+      "trace": {
+        "route": "note",
+        "probability": 0.993575224116777,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "note-05",
+      "route": "note",
+      "text": "我突然有个想法，做一个给猫用的日历app，先记着",
+      "totalMs": 14938,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NoteCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NoteCard",
+          "displayProps": {
+            "text": "我突然有个想法，做一个给猫用的日历app，先记着"
+          },
+          "sourceData": {}
+        }
+      ],
+      "trace": {
+        "route": "note",
+        "probability": 0.9411092851709837,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "note-06",
+      "route": "note",
+      "text": "存一下这个地址，鼓楼区中山路100号",
+      "totalMs": 15571,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NoteCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NoteCard",
+          "displayProps": {
+            "text": "鼓楼区中山路100号"
+          },
+          "sourceData": {}
+        }
+      ],
+      "trace": {
+        "route": "note",
+        "probability": 0.9470034587302388,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "note-07",
+      "route": "note",
+      "text": "新建便笺，内容是手机控制测试",
+      "totalMs": 8307,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NoteCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NoteCard",
+          "displayProps": {
+            "text": "手机控制测试"
+          },
+          "sourceData": {}
+        }
+      ],
+      "trace": {
+        "route": "note",
+        "probability": 0.9961499917167631,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "note-08",
+      "route": "note",
+      "text": "记录一下今天跑了五公里",
+      "totalMs": 12617,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NoteCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NoteCard",
+          "displayProps": {
+            "text": "记录一下今天跑了五公里"
+          },
+          "sourceData": {}
+        }
+      ],
+      "trace": {
+        "route": "note",
+        "probability": 0.9834220920784936,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "note-09",
+      "route": "note",
+      "text": "便签：车停在B2层34号",
+      "totalMs": 9460,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NoteCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NoteCard",
+          "displayProps": {
+            "text": "车停在B2层34号"
+          },
+          "sourceData": {}
+        }
+      ],
+      "trace": {
+        "route": "note",
+        "probability": 0.9883791861575209,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "note-10",
+      "route": "note",
+      "text": "take a note, call Alex back",
+      "totalMs": 24161,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NoteCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NoteCard",
+          "displayProps": {
+            "text": "call Alex back"
+          },
+          "sourceData": {}
+        }
+      ],
+      "trace": {
+        "route": "note",
+        "probability": 0.5399165126790725,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "generate-01",
+      "route": "generate",
+      "text": "帮我写一封请假邮件",
+      "totalMs": 6199,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "clarify",
+      "message": "请提供请假原因、起止日期和天数。",
+      "cardTypes": [],
+      "committed": false,
+      "receiptStatus": null,
+      "channelsValid": null,
+      "cards": [],
+      "trace": {
+        "route": "generate",
+        "probability": 0.9837053279090641,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "generate-02",
+      "route": "generate",
+      "text": "给我规划一个三天的成都旅行行程",
+      "totalMs": 24101,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "TodoCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "TodoCard",
+          "displayProps": {
+            "title": "成都三天旅行行程",
+            "items": [
+              {
+                "id": "item-1",
+                "text": "第一天：抵达成都，入住酒店，下午逛春熙路、太古里，晚上吃火锅",
+                "done": false
+              },
+              {
+                "id": "item-2",
+                "text": "第二天：都江堰、青城山一日游，感受水利工程与道教文化",
+                "done": false
+              },
+              {
+                "id": "item-3",
+                "text": "第三天：锦里古街、武侯祠，下午返程",
+                "done": false
+              }
+            ]
+          },
+          "sourceData": {
+            "scene": "todo_list",
+            "provenance": "user-text"
+          }
+        }
+      ],
+      "trace": {
+        "route": "generate",
+        "probability": 0.9459760794048795,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "generate-03",
+      "route": "generate",
+      "text": "把会议记录总结成三个要点",
+      "totalMs": 10827,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NoteCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NoteCard",
+          "displayProps": {
+            "bullets": [
+              "周三开会",
+              "设计讨论",
+              "首页改版"
+            ]
+          },
+          "sourceData": {}
+        }
+      ],
+      "trace": {
+        "route": "generate",
+        "probability": 0.9741122899000707,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "generate-04",
+      "route": "generate",
+      "text": "做一个表格对比iPhone和华为的参数，用我给的数据：iPhone 6.1寸 华为6.7寸",
+      "totalMs": 261,
+      "plannerCalls": 0,
+      "usedProvider": null,
+      "kind": "clarify",
+      "message": "表格需要你提供数据。请回复一组「名称 数值」，如「周一3，周二5，周三4」；也可完整输入「用表格记录：周一3，周二5，周三4」。",
+      "cardTypes": [],
+      "committed": false,
+      "receiptStatus": null,
+      "channelsValid": null,
+      "cards": [],
+      "trace": {
+        "route": null,
+        "probability": 0,
+        "status": "pending",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "generate-05",
+      "route": "generate",
+      "text": "帮我想五个咖啡店的名字",
+      "totalMs": 26901,
+      "plannerCalls": 3,
+      "usedProvider": "stepfun",
+      "kind": "clarify",
+      "message": "这句话没能形成可靠参数，请补充内容或换一种说法。",
+      "cardTypes": [],
+      "committed": false,
+      "receiptStatus": null,
+      "channelsValid": null,
+      "cards": [],
+      "trace": {
+        "route": "generate",
+        "probability": 0.9571970580107285,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "generate-06",
+      "route": "generate",
+      "text": "把这段话改写得简短一点：我们团队在过去的一个季度中取得了非常显著的进步",
+      "totalMs": 7558,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [],
+      "trace": {
+        "route": "generate",
+        "probability": 0.9813510987533142,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "generate-07",
+      "route": "generate",
+      "text": "帮我做一个下周的健身计划",
+      "totalMs": 16359,
+      "plannerCalls": 2,
+      "usedProvider": "stepfun",
+      "kind": "clarify",
+      "message": "请告诉我下周每天的健身活动和时间安排？",
+      "cardTypes": [],
+      "committed": false,
+      "receiptStatus": null,
+      "channelsValid": null,
+      "cards": [],
+      "trace": {
+        "route": "generate",
+        "probability": 0.9134181745781221,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "generate-08",
+      "route": "generate",
+      "text": "根据读书笔记出几道复习题",
+      "totalMs": 6414,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "clarify",
+      "message": "请提供读书笔记的具体内容。",
+      "cardTypes": [],
+      "committed": false,
+      "receiptStatus": null,
+      "channelsValid": null,
+      "cards": [],
+      "trace": {
+        "route": "generate",
+        "probability": 0.8659537676302754,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "generate-09",
+      "route": "generate",
+      "text": "用这些数字画个柱状图：一月10 二月20 三月15",
+      "totalMs": 260,
+      "plannerCalls": 0,
+      "usedProvider": null,
+      "kind": "clarify",
+      "message": "表格需要你提供数据。请回复一组「名称 数值」，如「周一3，周二5，周三4」；也可完整输入「用表格记录：周一3，周二5，周三4」。",
+      "cardTypes": [],
+      "committed": false,
+      "receiptStatus": null,
+      "channelsValid": null,
+      "cards": [],
+      "trace": {
+        "route": null,
+        "probability": 0,
+        "status": "pending",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "generate-10",
+      "route": "generate",
+      "text": "给产品发布会写个开场白",
+      "totalMs": 33393,
+      "plannerCalls": 2,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NoteCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NoteCard",
+          "displayProps": {
+            "text": "各位来宾，大家好！欢迎来到本次产品发布会。今天，我们将共同见证一款创新产品的诞生，它以突破性技术重新定义行业标准。让我们携手开启全新时代！"
+          },
+          "sourceData": {}
+        }
+      ],
+      "trace": {
+        "route": "generate",
+        "probability": 0.9823693137130758,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "generate-11",
+      "route": "generate",
+      "text": "整理一下我这周的待办，按优先级排个序给我建议",
+      "totalMs": 51938,
+      "plannerCalls": 2,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "TodoCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "TodoCard",
+          "displayProps": {
+            "title": "本周待办（优先级排序）",
+            "items": [
+              {
+                "id": "item-1",
+                "text": "交周报",
+                "done": false
+              },
+              {
+                "id": "item-2",
+                "text": "预约牙医",
+                "done": false
+              },
+              {
+                "id": "item-3",
+                "text": "买牛奶",
+                "done": false
+              },
+              {
+                "id": "item-4",
+                "text": "鸡蛋",
+                "done": false
+              },
+              {
+                "id": "item-5",
+                "text": "洗衣液",
+                "done": false
+              }
+            ]
+          },
+          "sourceData": {}
+        }
+      ],
+      "trace": {
+        "route": "generate",
+        "probability": 0.6570253941017338,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "multi-01",
+      "route": "note",
+      "text": "帮我记个便签明天交周报，再设个50分钟倒计时",
+      "totalMs": 5039,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NoteCard",
+        "CountdownCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NoteCard",
+          "displayProps": {
+            "text": "明天交周报"
+          },
+          "sourceData": {}
+        },
+        {
+          "type": "CountdownCard",
+          "displayProps": {},
+          "sourceData": {
+            "targetAt": "2026-10-29T17:48:39.852Z",
+            "startedAt": "2026-10-29T16:58:39.852Z"
+          }
+        }
+      ],
+      "trace": {
+        "route": "note",
+        "probability": 0.944346514589564,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "multi-05",
+      "route": "answer",
+      "text": "介绍一下特斯拉，并且加个待办研究它的财报",
+      "totalMs": 7577,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NewsCard",
+        "TodoCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "NewsCard",
+          "displayProps": {
+            "headline": "特斯拉公司介绍",
+            "summary": "特斯拉（Tesla, Inc.）是一家美国电动汽车和清洁能源公司，2003年由马丁·艾伯哈德和马克·塔彭宁创立，总部位于德克萨斯州奥斯汀。公司以电动汽车、太阳能产品和储能系统为核心业务，旗下拥有Model S、Model 3、Model X、Model Y等车型，并在自动驾驶和超级充电网络领域处于行业领先地位。",
+            "keyPoints": [
+              "2003年成立",
+              "总部位于美国德克萨斯州奥斯汀",
+              "核心业务为电动汽车和清洁能源",
+              "产品线涵盖Model S/3/X/Y等车型",
+              "拥有超级充电网络和自动驾驶技术"
+            ],
+            "summaryBy": "ai"
+          },
+          "sourceData": {
+            "contract": "answer"
+          }
+        },
+        {
+          "type": "TodoCard",
+          "displayProps": {
+            "title": "待办事项",
+            "items": [
+              {
+                "id": "item-1",
+                "text": "研究特斯拉财报",
+                "done": false
+              }
+            ]
+          },
+          "sourceData": {}
+        }
+      ],
+      "trace": {
+        "route": "answer",
+        "probability": 0.7181642935233815,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "multi-07",
+      "route": "countdown",
+      "text": "五分钟后提醒我喝水和吃药",
+      "totalMs": 5564,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "CountdownCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "CountdownCard",
+          "displayProps": {},
+          "sourceData": {
+            "targetAt": "2026-10-29T17:03:53.062Z",
+            "startedAt": "2026-10-29T16:58:53.062Z",
+            "reminderText": "喝水和吃药"
+          }
+        }
+      ],
+      "trace": {
+        "route": "countdown",
+        "probability": 0.9655334956475418,
+        "status": "complete",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "multi-08",
+      "route": "todo",
+      "text": "列个待办：买菜和做饭",
+      "totalMs": 258,
+      "plannerCalls": 0,
+      "usedProvider": "rules",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "TodoCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "cards": [
+        {
+          "type": "TodoCard",
+          "displayProps": {
+            "items": [
+              {
+                "id": "item-1",
+                "text": "买菜和做饭",
+                "done": false
+              }
+            ]
+          },
+          "sourceData": {}
+        }
+      ],
+      "trace": {
+        "route": null,
+        "probability": 0,
+        "status": "pending",
+        "failedCount": 0
+      }
+    },
+    {
+      "id": "vision-01",
+      "route": "image_analysis",
+      "text": "分析这张图片里左右两块色块的颜色，并保留图片。",
+      "totalMs": 8568,
+      "plannerCalls": 1,
+      "usedProvider": "stepfun",
+      "kind": "envelope",
+      "message": "",
+      "cardTypes": [
+        "NewsCard"
+      ],
+      "committed": true,
+      "receiptStatus": "completed",
+      "channelsValid": true,
+      "retainedImage": true,
+      "cards": [
+        {
+          "type": "NewsCard",
+          "displayProps": {
+            "headline": "图片色块颜色分析",
+            "summary": "图片中有两个色块，左侧为蓝色，右侧为橙色。",
+            "keyPoints": [
+              "左侧色块为蓝色",
+              "右侧色块为橙色"
+            ],
+            "image": "media:image_ed73ec8ad240ff7049936e3d9e3a469a73abc7807506b149e8bdd643fffc903f",
+            "summaryBy": "ai"
+          },
+          "sourceData": {}
+        }
+      ],
+      "trace": {
+        "route": "unsupported",
+        "probability": 0.6917799675118446,
+        "status": "complete",
+        "failedCount": 0
+      },
+      "imageColorsCorrect": true
+    }
+  ],
+  "complete": true,
+  "cleanup": true,
+  "modelCapabilities": [
+    "structured",
+    "chat",
+    "vision"
+  ],
+  "summary": {
+    "requests": 60,
+    "modelRequests": 51,
+    "plannerCalls": 63,
+    "repairedRequests": 10,
+    "finalUnreliableParameters": 4,
+    "kindCounts": {
+      "envelope": 48,
+      "clarify": 12
+    },
+    "allLatencyMs": {
+      "p50": 7714,
+      "p95": 26901
+    },
+    "modelLatencyMs": {
+      "p50": 8895,
+      "p95": 33393
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "scope": "Computed CSS of the actual NewsCard; root light/dark attribute toggled on the isolated test page.",
+  "modes": [
+    {
+      "mode": "light",
+      "ink": "rgb(29, 29, 31)",
+      "surface": "rgba(255, 255, 255, 0.96)",
+      "ratio": 15.409963476436795
+    },
+    {
+      "mode": "dark",
+      "ink": "rgb(245, 245, 247)",
+      "surface": "rgba(29, 29, 31, 0.96)",
+      "ratio": 15.65445068613068
+    }
+  ]
+}

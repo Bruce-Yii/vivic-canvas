@@ -1,0 +1,15 @@
+{
+  "name": "DEMO · 空行动列表",
+  "config": {
+    "title": "DEMO · 等待补充",
+    "context": "从用户给出的事项开始。",
+    "period": ""
+  },
+  "data": {
+    "origin": "demo"
+  },
+  "state": {
+    "items": [],
+    "note": ""
+  }
+}

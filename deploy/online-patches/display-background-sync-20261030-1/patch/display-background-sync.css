@@ -1,0 +1,19 @@
+/* Display canvases reveal the persistent background shared with the user page. */
+.vivic-display-root[data-appearance] {
+  min-height: 100dvh;
+}
+
+.vivic-display-root[data-appearance] [data-vivic-stage],
+.vivic-display-root[data-appearance] .react-flow {
+  background: transparent;
+}
+
+.vivic-display-root[data-appearance] .react-flow {
+  --xy-background-color: transparent;
+  --xy-background-color-props: transparent;
+}
+
+/* Keep the real background visible while the display receives its canvas. */
+.vivic-display-root[data-appearance] .vivic-space-loading {
+  display: none;
+}

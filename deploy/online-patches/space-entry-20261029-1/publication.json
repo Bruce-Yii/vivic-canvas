@@ -1,0 +1,11 @@
+{
+  "release": "space-entry-20261029-1",
+  "previous": "/opt/vivic-preview-20261025/releases/stable-background-20261029-1/web",
+  "sharedBackground": true,
+  "workspacePreparedDuringTutorial": true,
+  "sourceEntry": "app-runtime-v41.js",
+  "canonicalEntry": "app-runtime.js",
+  "storageInitializationPreserved": true,
+  "runtimeSha256": "d39d55aae2d4ff3496575198377afd5271144063c4101482c95ff799d5f9c7a4",
+  "backendUnchanged": true
+}

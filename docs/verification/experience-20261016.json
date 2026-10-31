@@ -1,0 +1,162 @@
+{
+  "date": "2026-10-16",
+  "branch": "agent/next-iteration",
+  "codeRevision": "a8b813c34076a5be73917e2241aeed8c65dcd08f",
+  "commits": {
+    "typography": "1b1a7e4",
+    "controlReadingAndSearch": "a8b813c"
+  },
+  "scope": [
+    "阅读排版与材质、测量和布局估算",
+    "Control 长内容详情",
+    "Control 当前画布中文/拼音快速找卡"
+  ],
+  "reused": [
+    "Assistant UI styled registry",
+    "Radix/shadcn",
+    "Motion",
+    "React Flow",
+    "Grainient",
+    "SmoothUI Orb",
+    "existing Markdown",
+    "subcards and numbered choices",
+    "validated card.focus action"
+  ],
+  "unit": {
+    "command": "pnpm --filter @vivic/web test",
+    "files": 47,
+    "passed": 386,
+    "failed": 0,
+    "log": "evidence/experience-20261016/logs/web-tests-release.txt"
+  },
+  "typecheck": {
+    "command": "pnpm typecheck",
+    "passed": true,
+    "log": "evidence/experience-20261016/logs/typecheck-release.txt"
+  },
+  "build": {
+    "command": "pnpm build",
+    "passed": true,
+    "lazySearchChunkKB": 44.67,
+    "lazySearchChunkGzipKB": 27.99,
+    "log": "evidence/experience-20261016/logs/build-release.txt",
+    "warnings": [
+      "existing Sherpaw WASM / Node module externalization",
+      "existing large main bundle",
+      "Vite config native loader notice"
+    ]
+  },
+  "lint": {
+    "scope": "new reading/search components, search glue and metrics",
+    "passed": true,
+    "warnings": 0,
+    "log": "evidence/experience-20261016/logs/lint-release.txt"
+  },
+  "browsers": {
+    "chromium": {
+      "finalCombined": {
+        "passed": 23,
+        "failed": 0,
+        "log": "evidence/experience-20261016/logs/chromium-delivery.txt"
+      },
+      "quickFindRepeat": {
+        "passed": 3,
+        "failed": 0,
+        "log": "evidence/experience-20261016/logs/chromium-quick-find-final.txt"
+      }
+    },
+    "firefox": {
+      "experienceRepeat": {
+        "passed": 21,
+        "failed": 0,
+        "log": "evidence/experience-20261016/logs/firefox-experience-final.txt",
+        "note": "Before final Safari pointer-focus correction; affected detail flow rechecked below."
+      },
+      "finalDetailFocusRepeat": {
+        "passed": 3,
+        "failed": 0,
+        "log": "evidence/experience-20261016/logs/firefox-reading-focus-final.txt"
+      }
+    },
+    "webkit": {
+      "otherSixScenariosThreeTimes": {
+        "passed": 18,
+        "log": "evidence/experience-20261016/logs/webkit-experience-delivery.txt",
+        "note": "That command also has 3 superseded detail test failures; not a whole-suite pass."
+      },
+      "finalDetailKeyboardAndFocusThreeTimes": {
+        "passed": 3,
+        "failed": 0,
+        "log": "evidence/experience-20261016/logs/webkit-reading-focus-fixed.txt"
+      },
+      "finalCoverage": "7 scenarios × 3 across separate batches, not one 21/21 command"
+    }
+  },
+  "checks": [
+    "Chinese/full-pinyin/initials, normalized input, later todo items",
+    "stable duplicate IDs, current-board/live-only candidates, empty results",
+    "entry, Cmd/Ctrl+K, arrows, Enter, Escape, Tab/Shift+Tab trap, focus restoration",
+    "IME active and immediate post-composition Enter cannot select",
+    "dynamic search chunk absent before opening; Display does not load it",
+    "current store content updates; original data/variant/layout unchanged on reading/focus",
+    "target delete, undo, same-ID canvas changes, owner changes including a window that remains readonly",
+    "readonly search/read cannot take ownership or focus",
+    "keyboard PageDown/PageUp, text selection, article truncation label and source links",
+    "dark/light, 390px Control, 800px Display, reduced-motion dialog",
+    "fixed coordinate obstacles, content growth, delete/undo, refresh, old overlapping canvas recovery",
+    "legacy subcards and frozen numbered target choices"
+  ],
+  "visual": {
+    "independentReviewRounds": 1,
+    "mode": "existing interface review, no score",
+    "review": "evidence/experience-20261016/visual-review.md",
+    "primaryVisualCheck": true,
+    "evidence": "evidence/experience-20261016/final/",
+    "fixes": [
+      "plain-text search preview without Markdown notation",
+      "rounded keyboard focus ring",
+      "shorter find description",
+      "capture narrow canvas only after actual fit completes"
+    ]
+  },
+  "video": {
+    "path": "evidence/experience-20261016/final/chromium/TEST-reading-search-motion.webm",
+    "seconds": 6.56,
+    "codec": "vp9",
+    "width": 1100,
+    "height": 800,
+    "audioStreams": 0,
+    "inspection": "sampled frames plus live browser state assertions; no measured FPS claim"
+  },
+  "testIsolation": {
+    "ports": [
+      5174,
+      8788
+    ],
+    "isolatedContexts": true,
+    "realUserCanvasTouched": false,
+    "microphoneUsed": false,
+    "audioPlayed": false,
+    "realLLMQuotaUsed": false,
+    "finalCommandsSerial": true,
+    "invalidOverlap": "One intermediate WebKit command was started early; its results were discarded and rerun serially. See webkit-reading-keyboard-final.txt."
+  },
+  "limitations": [
+    "Physical Safari, real system IME, external monitor and physical GPU smoothness remain user acceptance items.",
+    "One Firefox VoiceInput/SelectProvider cross-component React console warning observed; this unchanged voice-settings module is outside the three-feature scope.",
+    "Original Note/article content limits unchanged; no cross-canvas, typo/synonym or full-document-body search promise.",
+    "Two mutually overlapping fixed cards still require manual unpinning; their coordinates are not moved automatically.",
+    "Screenshot/recording artifacts are local ignored evidence, not included by cloning Git."
+  ],
+  "supersededFailures": [
+    "table inner-height assertion updated with the new padding",
+    "Note raw newline text nodes restored; legacy density test rechecked",
+    "initial lazy search focus handoff corrected by keeping the Radix shell mounted",
+    "Firefox fill() emits IME composition; physical Latin typing and explicit IME guards tested separately",
+    "WebKit native reverse tab / Home behavior assertions corrected, actual pointer-return-focus bug fixed",
+    "invalid overlapping intermediate WebKit run discarded after server shutdown"
+  ],
+  "published": false,
+  "pushed": false,
+  "merged": false
+}

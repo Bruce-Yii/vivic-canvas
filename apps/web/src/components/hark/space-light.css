@@ -1,0 +1,22 @@
+/* Vivic phase and operation feedback layers over the React Bits fluid background. */
+.hark-canvas-backdrop { --space-light-strength:.55; }
+.hark-space-focus,.hark-space-activity,.hark-space-receipt { position:absolute;inset:0;pointer-events:none; }
+.hark-space-focus { opacity:0;background:radial-gradient(ellipse at 50% 47%,transparent 14%,rgb(10 19 35 / .38) 100%);transition:opacity 600ms ease; }
+.hark-canvas-backdrop[data-space-phase=focus] .hark-space-focus { opacity:1; }
+.hark-space-activity { opacity:0;background:radial-gradient(ellipse at 50% 0%,rgb(207 230 255 / .75),transparent 57%);transition:opacity 650ms ease; }
+.hark-canvas-backdrop:is([data-space-phase=thinking],[data-space-phase=listening],[data-space-phase=speaking]) .hark-space-activity { opacity:calc(var(--space-light-strength) * .55);animation:vivic-activity-breathe 2.8s ease-in-out infinite; }
+.hark-canvas-backdrop[data-space-phase=awakening] .hark-space-activity { opacity:1;animation:vivic-space-awaken 1100ms cubic-bezier(.16,1,.3,1) both; }
+.hark-space-receipt { background:radial-gradient(ellipse at 50% 80%,rgb(217 244 255 / .55),transparent 65%);animation:vivic-space-receipt 1300ms ease-out both; }
+.hark-space-receipt[data-space-receipt=transfer] { background:radial-gradient(ellipse at 50% 100%,rgb(218 229 255 / .75),transparent 58%); }
+.hark-space-receipt:is([data-space-receipt=undo],[data-space-receipt=redo]) { background:radial-gradient(ellipse at 20% 70%,rgb(234 224 255 / .55),transparent 62%); }
+.hark-canvas-backdrop[data-space-running=false] .hark-space-activity { animation-play-state:paused; }
+.hark-canvas-backdrop[data-reduced-motion=true] .hark-space-activity { animation:none;transition:none; }
+@keyframes vivic-activity-breathe { 0%,100%{transform:scale(.95);opacity:calc(var(--space-light-strength) * .3)}50%{transform:scale(1.1);opacity:calc(var(--space-light-strength) * .65)} }
+@keyframes vivic-space-awaken { 0%{opacity:0;transform:scale(.4)}35%{opacity:calc(var(--space-light-strength) * .85)}100%{opacity:0;transform:scale(1.5)} }
+@keyframes vivic-space-receipt { 0%{opacity:0;transform:scale(.6)}20%{opacity:calc(var(--space-light-strength) * .8)}100%{opacity:0;transform:scale(1.3)} }
+@media(prefers-reduced-motion:reduce) { .hark-space-activity,.hark-space-receipt{animation:none!important}.hark-space-focus{transition:none} }
+.vivic-orb-halo { position:absolute;inset:-38%;border-radius:50%;pointer-events:none;background:radial-gradient(circle,rgb(167 208 255 / .26),rgb(204 219 255 / .1) 30%,transparent 68%);opacity:.4;transform:scale(.92);transition:opacity 600ms ease; }
+.vivic-orb-halo:is([data-orb-phase=thinking],[data-orb-phase=listening],[data-orb-phase=streaming]) { opacity:.85;animation:vivic-orb-bloom 3s ease-in-out infinite alternate; }
+.vivic-orb-halo[data-orb-phase=awakening] { animation:vivic-space-awaken 1100ms ease-out both;--space-light-strength:.8; }
+.vivic-orb-halo[data-paused=true] { animation:none; }
+@keyframes vivic-orb-bloom { from{transform:scale(.9);opacity:.45}to{transform:scale(1.18);opacity:.9} }

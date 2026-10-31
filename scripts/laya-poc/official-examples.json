@@ -1,0 +1,45 @@
+[
+  {
+    "id": "official-model-card-hindi",
+    "source": "https://huggingface.co/convaiinnovations/laya-multilingual/blob/1720e3e3357cfe1e281542e223f8273b0890ca34/README.md",
+    "state": {
+      "body": "मुझसे इनवॉइस 4411 के लिए दो बार शुल्क लिया गया। कृपया आज ही धनवापसी करें।"
+    },
+    "questions": {
+      "department": {
+        "type": "choice",
+        "instructions": "Which team should handle `body`?",
+        "criteria": {
+          "billing": "invoices, payments, refunds",
+          "technical": "bugs and outages",
+          "sales": "pricing"
+        }
+      },
+      "refund_requested": {
+        "type": "noul",
+        "instructions": "Does the sender ask for money back?"
+      }
+    },
+    "expected_department": "billing",
+    "source_readme_sha256": "e85d16c3fe35fe7094ef51a7cfa81144a5cc07558e5faddcff753a8153e38a0b"
+  },
+  {
+    "id": "official-repo-spanish",
+    "source": "https://github.com/NandhaKishorM/laya/blob/432312b36714d8889eba405507b37eda25257d9c/README.md",
+    "state": "La aplicación se cierra cada vez que abro la configuración.",
+    "questions": {
+      "department": {
+        "type": "choice",
+        "instructions": "Which department should handle this?",
+        "criteria": {
+          "billing": "invoices, payments, refunds",
+          "technical": "bugs, outages, system errors",
+          "other": "everything else"
+        }
+      }
+    },
+    "expected_department": "technical",
+    "source_readme_sha256": "b17620e70cc85e9e6da813390b6e10acd9856c735fef93fca3d21be7381f0b53",
+    "note": "Original text/question; direct fixed multilingual Agent replaces Router language selection only."
+  }
+]

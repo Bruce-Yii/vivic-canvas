@@ -1,0 +1,10 @@
+{
+  "release": "card-packages-20261030-1",
+  "base_files_verified": 1673,
+  "overlay_files_verified": 194,
+  "backend_restarted": false,
+  "health_ok": true,
+  "free_bytes": 9789206528,
+  "previous_frontend": "/opt/vivic-preview-20261025/releases/unified-background-20261029-1/web",
+  "current_frontend": "/opt/vivic-preview-20261025/releases/card-packages-20261030-1/web"
+}

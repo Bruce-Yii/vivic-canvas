@@ -1,0 +1,16 @@
+{
+  "release": "auth-ui-20261025-160408",
+  "container": "vivic-preview-20261025",
+  "image": "vivic-preview-20261025:auth-ui-20261025-160408",
+  "previousImage": "vivic-preview-20261025:auth-ui-20261025-155912",
+  "rollbackContainer": "vivic-preview-20261025-before-auth-ui-20261025-160408",
+  "indexSha256": "876f86b9e663152c42b27f1fba806fec4b375a6dd5fa13a8d716fdd83b9e3eec",
+  "health": {
+    "ok": true,
+    "service": "vivic-space-api",
+    "mode": "online",
+    "persistentSpace": true
+  },
+  "runtimeConfigPreserved": true,
+  "dataMountPreserved": true
+}

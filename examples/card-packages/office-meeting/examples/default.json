@@ -1,0 +1,39 @@
+{
+  "name": "DEMO · 可交互样例",
+  "config": {
+    "title": "DEMO · 产品评审行动",
+    "context": "结论：先完善新手引导，再进行下一轮评审。以下为虚构会议笔记。"
+  },
+  "data": {
+    "origin": "demo"
+  },
+  "state": {
+    "items": [
+      {
+        "id": "demo-flow",
+        "title": "补全新手引导文案",
+        "owner": "我",
+        "due": "下周一",
+        "status": "待办",
+        "note": ""
+      },
+      {
+        "id": "demo-screen",
+        "title": "核对关键页面截图",
+        "owner": "同事甲",
+        "due": "下周二",
+        "status": "受阻",
+        "note": "等待新版页面"
+      },
+      {
+        "id": "demo-notes",
+        "title": "整理评审问题",
+        "owner": "我",
+        "due": "",
+        "status": "完成",
+        "note": ""
+      }
+    ],
+    "note": ""
+  }
+}

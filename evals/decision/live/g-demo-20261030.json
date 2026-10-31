@@ -1,0 +1,360 @@
+{
+  "at": "2026-10-30T03:56:12.771Z",
+  "realModel": true,
+  "cases": [
+    {
+      "id": "vision",
+      "text": "分析这张图片里左右两块色块的颜色，并保留图片。",
+      "elapsedMs": 11268,
+      "kind": "envelope",
+      "trace": {
+        "id": "decision_2b49e0a5-feed-45bf-9ea4-af67887fcf34",
+        "mode": "on",
+        "status": "complete",
+        "taskId": "g_demo_1a560452db_vision",
+        "clauses": [
+          "分析这张图片里左右两块色块的颜色，并保留图片。"
+        ],
+        "decisions": [
+          {
+            "text": "分析这张图片里左右两块色块的颜色，并保留图片。",
+            "route": null,
+            "probability": 0,
+            "probabilities": {
+              "chat": 0.051140220175890816,
+              "answer": 0.1795492507933353,
+              "search": 0.06478185239311314,
+              "countdown": 0.004919161602115102,
+              "todo": 0.007751277689928565,
+              "note": 0.036919499104956316,
+              "generate": 0.18005702894295636,
+              "focus": 0.008885199951841125,
+              "overview": 0.004652718482026478,
+              "restore": 0.0188375282761185,
+              "highlight": 0.0030386506973007644,
+              "edit": 0.004612513764135536,
+              "arrange": 0.007783835818598336,
+              "delete": 0.006344545946622241,
+              "undo": 0.003664488149097871,
+              "unsupported": 0.41706222821196354
+            },
+            "none": true,
+            "latencyMs": 1217,
+            "failed": false
+          }
+        ],
+        "route": null,
+        "probability": 0,
+        "latencyMs": 1218,
+        "routeLatencyMs": 1217,
+        "legacyElapsedMs": 11149,
+        "shadowWaitMs": 0,
+        "failedCount": 0,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "card.create",
+          "card.focus",
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [
+          "NewsCard"
+        ],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "checks": {
+        "durableCommitAndReceipt": true,
+        "colors": true,
+        "retainedImage": true,
+        "assetStored": true
+      },
+      "created": [
+        {
+          "id": "news_13e466eb-cd87-4f09-8ed6-6c54a510b24a",
+          "variant": "standard",
+          "sources": [],
+          "layout": {
+            "x": 0,
+            "y": 0,
+            "width": 380,
+            "height": 340,
+            "pinned": false
+          },
+          "metadata": {
+            "createdAt": "2026-10-30T03:56:24.679Z",
+            "updatedAt": "2026-10-30T03:56:24.679Z"
+          },
+          "type": "NewsCard",
+          "displayProps": {
+            "headline": "左右两个圆角正方形色块",
+            "summary": "图片左侧为蓝色色块，右侧为橙色色块，背景为白色，两个色块均为圆角正方形。",
+            "keyPoints": [
+              "左侧色块为蓝色",
+              "右侧色块为橙色",
+              "色块形状为圆角正方形",
+              "背景为白色"
+            ],
+            "image": "media:image_ed73ec8ad240ff7049936e3d9e3a469a73abc7807506b149e8bdd643fffc903f",
+            "summaryBy": "ai"
+          },
+          "sourceData": {}
+        }
+      ]
+    },
+    {
+      "id": "multi",
+      "text": "帮我记个便签出门带钥匙，再设个10分钟倒计时",
+      "elapsedMs": 2418,
+      "kind": "envelope",
+      "trace": {
+        "id": "decision_5a1ac33d-6f6c-4248-8eaf-813334409bf5",
+        "mode": "on",
+        "status": "complete",
+        "taskId": "g_demo_1a560452db_multi",
+        "clauses": [
+          "帮我记个便签出门带钥匙",
+          "设个10分钟倒计时"
+        ],
+        "decisions": [
+          {
+            "text": "帮我记个便签出门带钥匙",
+            "route": "note",
+            "probability": 0.990294815129306,
+            "probabilities": {
+              "chat": 0.00017666990324431047,
+              "answer": 9.593099264768256e-05,
+              "search": 7.32538482697092e-05,
+              "countdown": 0.0003184494026567851,
+              "todo": 0.008100039834828496,
+              "note": 0.990294815129306,
+              "generate": 9.954379210377917e-05,
+              "focus": 4.8614932209940886e-05,
+              "overview": 0.00010028457949344785,
+              "restore": 2.2953486739638034e-05,
+              "highlight": 2.246909496843068e-05,
+              "edit": 0.00012650582352157364,
+              "arrange": 7.154111665650459e-05,
+              "delete": 3.2867474133130254e-05,
+              "undo": 3.483956493751819e-05,
+              "unsupported": 0.00038122102428310895
+            },
+            "none": false,
+            "latencyMs": 1222,
+            "failed": false
+          },
+          {
+            "text": "设个10分钟倒计时",
+            "route": "countdown",
+            "probability": 0.9976832498499798,
+            "probabilities": {
+              "chat": 0.00019735580541645784,
+              "answer": 8.02445636314832e-05,
+              "search": 0.0001474951358761136,
+              "countdown": 0.9976832498499798,
+              "todo": 0.00031842916080609924,
+              "note": 0.00015556380685268831,
+              "generate": 5.77062353949995e-05,
+              "focus": 3.0785742952356995e-05,
+              "overview": 6.133155951861468e-05,
+              "restore": 1.5913543863876736e-05,
+              "highlight": 1.3335589202215365e-05,
+              "edit": 0.0008676093573381034,
+              "arrange": 3.559644673299167e-05,
+              "delete": 4.337320591374828e-05,
+              "undo": 4.077660824477204e-05,
+              "unsupported": 0.0002512333882756872
+            },
+            "none": false,
+            "latencyMs": 1140,
+            "failed": false
+          }
+        ],
+        "route": "note",
+        "probability": 0.990294815129306,
+        "latencyMs": 2362,
+        "routeLatencyMs": 1222,
+        "legacyElapsedMs": 2362,
+        "shadowWaitMs": 0,
+        "failedCount": 0,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "decision",
+        "legacyActionTypes": [
+          "card.create",
+          "card.create",
+          "canvas.fit",
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [
+          "NoteCard",
+          "CountdownCard"
+        ],
+        "plannerCalls": 0,
+        "directClauses": 2
+      },
+      "checks": {
+        "durableCommitAndReceipt": true,
+        "bothRequestsPresent": true
+      },
+      "created": [
+        {
+          "id": "note_2382c123-deae-43e9-8dee-ae0a7eda60f8",
+          "variant": "minimal",
+          "sources": [],
+          "layout": {
+            "x": 0,
+            "y": 0,
+            "width": 320,
+            "height": 120,
+            "pinned": false
+          },
+          "metadata": {
+            "createdAt": "2026-10-30T03:56:27.718Z",
+            "updatedAt": "2026-10-30T03:56:27.718Z"
+          },
+          "type": "NoteCard",
+          "displayProps": {
+            "text": "出门带钥匙"
+          },
+          "sourceData": {}
+        },
+        {
+          "id": "countdown_bf04ef27-85a5-4a03-b63a-8b03de34b1af",
+          "variant": "minimal",
+          "sources": [],
+          "layout": {
+            "x": 344,
+            "y": 0,
+            "width": 264,
+            "height": 96,
+            "pinned": false
+          },
+          "metadata": {
+            "createdAt": "2026-10-30T03:56:27.718Z",
+            "updatedAt": "2026-10-30T03:56:27.718Z"
+          },
+          "type": "CountdownCard",
+          "displayProps": {},
+          "sourceData": {
+            "targetAt": "2026-10-30T04:06:27.718Z",
+            "startedAt": "2026-10-30T03:56:27.718Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": "extension",
+      "text": "今天练了40分钟背",
+      "elapsedMs": 4269,
+      "kind": "envelope",
+      "trace": {
+        "id": "decision_a7be8f46-65c6-437c-9b76-8b6d24ee8dd8",
+        "mode": "on",
+        "status": "complete",
+        "taskId": "g_demo_1a560452db_extension",
+        "clauses": [
+          "今天练了40分钟背"
+        ],
+        "decisions": [
+          {
+            "text": "今天练了40分钟背",
+            "route": "ext.example.fitness-log",
+            "probability": 0.9895293835937664,
+            "probabilities": {
+              "chat": 0.003408994165130381,
+              "answer": 9.015787491298608e-05,
+              "search": 7.630434937493089e-05,
+              "countdown": 0.0002246400015973968,
+              "todo": 0.0001739062413538191,
+              "note": 0.005815677578404632,
+              "generate": 6.096044268952538e-05,
+              "focus": 4.2749392628809795e-05,
+              "overview": 8.167184798553602e-05,
+              "restore": 2.581053679429331e-05,
+              "highlight": 4.104274003005352e-05,
+              "edit": 0.00018654015496143977,
+              "arrange": 4.477153081507111e-05,
+              "delete": 7.054645527047594e-05,
+              "undo": 6.599940424105934e-05,
+              "unsupported": 6.084369004319246e-05,
+              "ext.example.fitness-log": 0.9895293835937664
+            },
+            "none": false,
+            "latencyMs": 1404,
+            "failed": false
+          }
+        ],
+        "route": "ext.example.fitness-log",
+        "probability": 0.9895293835937664,
+        "latencyMs": 1405,
+        "routeLatencyMs": 1404,
+        "legacyElapsedMs": 4217,
+        "shadowWaitMs": 0,
+        "failedCount": 0,
+        "legacyKind": "envelope",
+        "legacyUsedProvider": "stepfun",
+        "legacyActionTypes": [
+          "card.create",
+          "card.focus",
+          "subtitle.show"
+        ],
+        "legacyCardTypes": [
+          "ExtensionCard"
+        ],
+        "plannerCalls": 1,
+        "directClauses": 0
+      },
+      "checks": {
+        "durableCommitAndReceipt": true,
+        "realFacts": true
+      },
+      "created": [
+        {
+          "id": "ext_44dcaf8b-acdd-401a-973d-45eb4fc5df5b",
+          "variant": "standard",
+          "sources": [],
+          "layout": {
+            "x": 0,
+            "y": 0,
+            "width": 360,
+            "height": 300,
+            "pinned": false
+          },
+          "metadata": {
+            "createdAt": "2026-10-30T03:56:32.529Z",
+            "updatedAt": "2026-10-30T03:56:32.529Z",
+            "aliases": [
+              "健身记录"
+            ]
+          },
+          "type": "ExtensionCard",
+          "displayProps": {
+            "def": {
+              "id": "example.fitness-log",
+              "version": "1.0.0",
+              "hash": "094877a7723628cca2fe609fcf7dc7026199930317056d3238d50147f4ad37c2"
+            },
+            "config": {
+              "title": "训练记录"
+            },
+            "data": {
+              "trainingDate": "2026-10-30",
+              "bodyPart": "背",
+              "minutes": 40
+            },
+            "state": {
+              "note": ""
+            }
+          },
+          "sourceData": {}
+        }
+      ]
+    }
+  ],
+  "complete": true,
+  "cleanup": {
+    "emptySpace": true,
+    "emptyCatalog": true,
+    "assetsRetainedForVisualVerification": 1
+  }
+}

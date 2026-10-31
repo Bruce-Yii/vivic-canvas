@@ -1,0 +1,5 @@
+outputs/
+models/
+*.safetensors
+*.gguf
+*.bin

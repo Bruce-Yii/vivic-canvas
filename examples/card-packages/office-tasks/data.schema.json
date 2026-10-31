@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "origin": {
+      "type": "string",
+      "title": "信息来源",
+      "maxLength": 10,
+      "description": "user 表示用户输入；demo 表示明确的虚构样例。不支持 live 或第三方事实。",
+      "enum": [
+        "user",
+        "demo"
+      ]
+    }
+  },
+  "required": [
+    "origin"
+  ],
+  "additionalProperties": false
+}

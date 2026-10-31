@@ -1,0 +1,304 @@
+{
+  "source": "actual rendered screenshots and Playwright screen recording, not CSS declarations",
+  "backgroundRegion": [
+    80,
+    160,
+    380,
+    620
+  ],
+  "userPageAndDisplayScreenshotMaximumChannelDifference": 0,
+  "targetRgb": [
+    229,
+    240,
+    236
+  ],
+  "startupVideo": "D:\\\u5546\u8d5b\\VIVIC\u82cf\u5ba2\u677e\\direct-display\\videos\\candidate\\page@462c19c177197734c2492749aad25662.webm",
+  "sampledFrames": 28,
+  "firstCorrectFrameSeconds": 0.0,
+  "leadingBrowserFramesBeforeCurrentBackground": 0,
+  "postFirstPaintMismatches": 0,
+  "delayedSessionMs": 1800,
+  "lossyVideoCodecChannelTolerance": 6,
+  "frameSamples": [
+    {
+      "frame": "frame-001.png",
+      "timeSeconds": 0.0,
+      "meanRgb": [
+        228,
+        240,
+        233
+      ],
+      "maximumChannelError": 3
+    },
+    {
+      "frame": "frame-002.png",
+      "timeSeconds": 0.125,
+      "meanRgb": [
+        233,
+        235,
+        232
+      ],
+      "maximumChannelError": 5
+    },
+    {
+      "frame": "frame-003.png",
+      "timeSeconds": 0.25,
+      "meanRgb": [
+        233,
+        235,
+        232
+      ],
+      "maximumChannelError": 5
+    },
+    {
+      "frame": "frame-004.png",
+      "timeSeconds": 0.375,
+      "meanRgb": [
+        233,
+        235,
+        232
+      ],
+      "maximumChannelError": 5
+    },
+    {
+      "frame": "frame-005.png",
+      "timeSeconds": 0.5,
+      "meanRgb": [
+        233,
+        235,
+        232
+      ],
+      "maximumChannelError": 5
+    },
+    {
+      "frame": "frame-006.png",
+      "timeSeconds": 0.625,
+      "meanRgb": [
+        229,
+        239,
+        233
+      ],
+      "maximumChannelError": 3
+    },
+    {
+      "frame": "frame-007.png",
+      "timeSeconds": 0.75,
+      "meanRgb": [
+        229,
+        239,
+        233
+      ],
+      "maximumChannelError": 3
+    },
+    {
+      "frame": "frame-008.png",
+      "timeSeconds": 0.875,
+      "meanRgb": [
+        229,
+        239,
+        233
+      ],
+      "maximumChannelError": 3
+    },
+    {
+      "frame": "frame-009.png",
+      "timeSeconds": 1.0,
+      "meanRgb": [
+        229,
+        239,
+        233
+      ],
+      "maximumChannelError": 3
+    },
+    {
+      "frame": "frame-010.png",
+      "timeSeconds": 1.125,
+      "meanRgb": [
+        229,
+        239,
+        233
+      ],
+      "maximumChannelError": 3
+    },
+    {
+      "frame": "frame-011.png",
+      "timeSeconds": 1.25,
+      "meanRgb": [
+        229,
+        239,
+        233
+      ],
+      "maximumChannelError": 3
+    },
+    {
+      "frame": "frame-012.png",
+      "timeSeconds": 1.375,
+      "meanRgb": [
+        229,
+        239,
+        233
+      ],
+      "maximumChannelError": 3
+    },
+    {
+      "frame": "frame-013.png",
+      "timeSeconds": 1.5,
+      "meanRgb": [
+        229,
+        239,
+        233
+      ],
+      "maximumChannelError": 3
+    },
+    {
+      "frame": "frame-014.png",
+      "timeSeconds": 1.625,
+      "meanRgb": [
+        229,
+        239,
+        233
+      ],
+      "maximumChannelError": 3
+    },
+    {
+      "frame": "frame-015.png",
+      "timeSeconds": 1.75,
+      "meanRgb": [
+        229,
+        239,
+        233
+      ],
+      "maximumChannelError": 3
+    },
+    {
+      "frame": "frame-016.png",
+      "timeSeconds": 1.875,
+      "meanRgb": [
+        229,
+        239,
+        233
+      ],
+      "maximumChannelError": 3
+    },
+    {
+      "frame": "frame-017.png",
+      "timeSeconds": 2.0,
+      "meanRgb": [
+        229,
+        239,
+        233
+      ],
+      "maximumChannelError": 3
+    },
+    {
+      "frame": "frame-018.png",
+      "timeSeconds": 2.125,
+      "meanRgb": [
+        229,
+        239,
+        233
+      ],
+      "maximumChannelError": 3
+    },
+    {
+      "frame": "frame-019.png",
+      "timeSeconds": 2.25,
+      "meanRgb": [
+        229,
+        239,
+        233
+      ],
+      "maximumChannelError": 3
+    },
+    {
+      "frame": "frame-020.png",
+      "timeSeconds": 2.375,
+      "meanRgb": [
+        229,
+        239,
+        233
+      ],
+      "maximumChannelError": 3
+    },
+    {
+      "frame": "frame-021.png",
+      "timeSeconds": 2.5,
+      "meanRgb": [
+        229,
+        239,
+        233
+      ],
+      "maximumChannelError": 3
+    },
+    {
+      "frame": "frame-022.png",
+      "timeSeconds": 2.625,
+      "meanRgb": [
+        229,
+        239,
+        233
+      ],
+      "maximumChannelError": 3
+    },
+    {
+      "frame": "frame-023.png",
+      "timeSeconds": 2.75,
+      "meanRgb": [
+        229,
+        239,
+        233
+      ],
+      "maximumChannelError": 3
+    },
+    {
+      "frame": "frame-024.png",
+      "timeSeconds": 2.875,
+      "meanRgb": [
+        229,
+        239,
+        233
+      ],
+      "maximumChannelError": 3
+    },
+    {
+      "frame": "frame-025.png",
+      "timeSeconds": 3.0,
+      "meanRgb": [
+        229,
+        239,
+        233
+      ],
+      "maximumChannelError": 3
+    },
+    {
+      "frame": "frame-026.png",
+      "timeSeconds": 3.125,
+      "meanRgb": [
+        229,
+        239,
+        233
+      ],
+      "maximumChannelError": 3
+    },
+    {
+      "frame": "frame-027.png",
+      "timeSeconds": 3.25,
+      "meanRgb": [
+        229,
+        239,
+        233
+      ],
+      "maximumChannelError": 3
+    },
+    {
+      "frame": "frame-028.png",
+      "timeSeconds": 3.375,
+      "meanRgb": [
+        229,
+        239,
+        233
+      ],
+      "maximumChannelError": 3
+    }
+  ]
+}

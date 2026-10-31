@@ -1,0 +1,65 @@
+{
+  "at": "2026-10-29T18:55:05.392Z",
+  "mode": "on",
+  "direct": [],
+  "complete": false,
+  "cleanup": true,
+  "mainModelConnected": false,
+  "failure": "50-minute timer exceeded 3 seconds",
+  "firstRequestTrace": {
+    "id": "decision_97702904-e5b8-4af2-9f2b-b963622595d0",
+    "mode": "on",
+    "status": "complete",
+    "clauses": [
+      "倒计时50分钟"
+    ],
+    "decisions": [
+      {
+        "text": "倒计时50分钟",
+        "route": "countdown",
+        "probability": 0.9964144098468471,
+        "probabilities": {
+          "chat": 0.00010957729521256167,
+          "answer": 4.132064603075323e-05,
+          "search": 8.41985745019904e-05,
+          "countdown": 0.9964144098468471,
+          "todo": 0.0001171701389748301,
+          "note": 0.0002872858662722422,
+          "generate": 4.102979003609507e-05,
+          "focus": 3.6257002205735386e-05,
+          "overview": 5.106923396286353e-05,
+          "restore": 2.403602281924139e-05,
+          "highlight": 1.739833710145786e-05,
+          "edit": 0.0025352485474916834,
+          "arrange": 4.0167795804245225e-05,
+          "delete": 3.786390959661075e-05,
+          "undo": 4.852066206371954e-05,
+          "unsupported": 0.00011444633107885167
+        },
+        "none": false,
+        "latencyMs": 3046,
+        "failed": false
+      }
+    ],
+    "route": "countdown",
+    "probability": 0.9964144098468471,
+    "latencyMs": 3047,
+    "routeLatencyMs": 3046,
+    "legacyElapsedMs": 3056,
+    "shadowWaitMs": 0,
+    "failedCount": 0,
+    "legacyKind": "envelope",
+    "legacyUsedProvider": "decision",
+    "legacyActionTypes": [
+      "card.create",
+      "card.focus",
+      "subtitle.show"
+    ],
+    "legacyCardTypes": [
+      "CountdownCard"
+    ],
+    "plannerCalls": 0,
+    "directClauses": 1
+  },
+  "note": "First post-deployment cold request missed 3 seconds; original HTTP elapsed was not stored by initial fail-fast tool."
+}

@@ -1,0 +1,21 @@
+{
+  "release": "card-transfer-20261030-1",
+  "previous": "/opt/vivic-preview-20261025/releases/direct-display-20261030-1/web",
+  "indexSha256": "b16cf9322e3d1e635b345a8c9b76c31f9961fca268e31cf1775e8d229c5a4677",
+  "assetPath": "assets/card-packages-20261030-1/",
+  "modifiedJavaScript": {
+    "ControlApp-ConfirmationGuard20261030.js": {
+      "beforeSha256": "ada4760262d14bf2ea699e64bdbb55980f089bbc65bda46a3792c6aa04655de8",
+      "afterSha256": "1aa8c2abb33663eb2cce350e7a78210c72bb5d0482f2436f4e76dbd1b1d065de"
+    },
+    "DisplayApp-DkgZz97I.js": {
+      "beforeSha256": "12d355e023ac3fa8ad30e0c298b05d89da737f14623fb80cba56df8319c99f9b",
+      "afterSha256": "41fc5980086ba6d43c214ad5237f15dac11724589ace17183ec55c0e186384be"
+    }
+  },
+  "addedFiles": {
+    "card-transfer-ui.js": "635527e791da5f2bec61d27ef428362946348bafb6f5e687a1f8ad4c7f3c8c8f",
+    "card-transfer-ui.css": "97bb87de4342a4248b01b684e165d34d94827fcbf6e2c6a087dba23a62ebb806"
+  },
+  "unchangedEntrypoint": "vivic-startup-v59.js"
+}

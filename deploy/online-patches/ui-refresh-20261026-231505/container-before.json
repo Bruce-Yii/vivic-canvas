@@ -1,0 +1,240 @@
+[
+  {
+    "Id": "fcba29e43e72646aeb68f65883d3177c8291e0f0fafae440e2001f39fb6bd17e",
+    "Created": "2026-10-26T04:04:49.505691997Z",
+    "Path": "docker-entrypoint.sh",
+    "Args": [
+      "node",
+      "--import",
+      "tsx",
+      "src/online/index.ts"
+    ],
+    "State": {
+      "Status": "running",
+      "Running": true,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 4148463,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-10-26T04:04:49.850121814Z",
+      "FinishedAt": "0001-01-01T00:00:00Z"
+    },
+    "Image": "sha256:5aee78869902955ca84ae1197be09235e661be15bb8ac0773e7f464a19ddb53a",
+    "ResolvConfPath": "/var/lib/docker/containers/fcba29e43e72646aeb68f65883d3177c8291e0f0fafae440e2001f39fb6bd17e/resolv.conf",
+    "HostnamePath": "/var/lib/docker/containers/fcba29e43e72646aeb68f65883d3177c8291e0f0fafae440e2001f39fb6bd17e/hostname",
+    "HostsPath": "/var/lib/docker/containers/fcba29e43e72646aeb68f65883d3177c8291e0f0fafae440e2001f39fb6bd17e/hosts",
+    "LogPath": "/var/lib/docker/containers/fcba29e43e72646aeb68f65883d3177c8291e0f0fafae440e2001f39fb6bd17e/fcba29e43e72646aeb68f65883d3177c8291e0f0fafae440e2001f39fb6bd17e-json.log",
+    "Name": "/vivic-preview-20261025",
+    "RestartCount": 0,
+    "Driver": "overlay2",
+    "Platform": "linux",
+    "MountLabel": "",
+    "ProcessLabel": "",
+    "AppArmorProfile": "",
+    "ExecIDs": null,
+    "HostConfig": {
+      "Binds": [
+        "/var/lib/vivic-preview-20261025:/data/vivic"
+      ],
+      "ContainerIDFile": "",
+      "LogConfig": {
+        "Type": "json-file",
+        "Config": {
+          "max-file": "3",
+          "max-size": "50m"
+        }
+      },
+      "NetworkMode": "bridge",
+      "PortBindings": {
+        "8790/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "18890"
+          }
+        ]
+      },
+      "RestartPolicy": {
+        "Name": "unless-stopped",
+        "MaximumRetryCount": 0
+      },
+      "AutoRemove": false,
+      "VolumeDriver": "",
+      "VolumesFrom": null,
+      "ConsoleSize": [
+        0,
+        0
+      ],
+      "CapAdd": null,
+      "CapDrop": null,
+      "CgroupnsMode": "host",
+      "Dns": [],
+      "DnsOptions": [],
+      "DnsSearch": [],
+      "ExtraHosts": null,
+      "GroupAdd": null,
+      "IpcMode": "private",
+      "Cgroup": "",
+      "Links": null,
+      "OomScoreAdj": 0,
+      "PidMode": "",
+      "Privileged": false,
+      "PublishAllPorts": false,
+      "ReadonlyRootfs": true,
+      "SecurityOpt": [
+        "no-new-privileges:true"
+      ],
+      "Tmpfs": {
+        "/tmp": "rw,noexec,nosuid,size=64m"
+      },
+      "UTSMode": "",
+      "UsernsMode": "",
+      "ShmSize": 67108864,
+      "Runtime": "runc",
+      "Isolation": "",
+      "CpuShares": 0,
+      "Memory": 536870912,
+      "NanoCpus": 0,
+      "CgroupParent": "",
+      "BlkioWeight": 0,
+      "BlkioWeightDevice": [],
+      "BlkioDeviceReadBps": [],
+      "BlkioDeviceWriteBps": [],
+      "BlkioDeviceReadIOps": [],
+      "BlkioDeviceWriteIOps": [],
+      "CpuPeriod": 0,
+      "CpuQuota": 0,
+      "CpuRealtimePeriod": 0,
+      "CpuRealtimeRuntime": 0,
+      "CpusetCpus": "",
+      "CpusetMems": "",
+      "Devices": [],
+      "DeviceCgroupRules": null,
+      "DeviceRequests": null,
+      "MemoryReservation": 0,
+      "MemorySwap": 1073741824,
+      "MemorySwappiness": null,
+      "OomKillDisable": false,
+      "PidsLimit": 128,
+      "Ulimits": [],
+      "CpuCount": 0,
+      "CpuPercent": 0,
+      "IOMaximumIOps": 0,
+      "IOMaximumBandwidth": 0,
+      "MaskedPaths": [
+        "/proc/asound",
+        "/proc/acpi",
+        "/proc/kcore",
+        "/proc/keys",
+        "/proc/latency_stats",
+        "/proc/timer_list",
+        "/proc/timer_stats",
+        "/proc/sched_debug",
+        "/proc/scsi",
+        "/sys/firmware",
+        "/sys/devices/virtual/powercap"
+      ],
+      "ReadonlyPaths": [
+        "/proc/bus",
+        "/proc/fs",
+        "/proc/irq",
+        "/proc/sys",
+        "/proc/sysrq-trigger"
+      ]
+    },
+    "GraphDriver": {
+      "Data": {
+        "LowerDir": "/var/lib/docker/overlay2/6d8e4bf86d78c66df04017cb27ccc29a0c698110f740f4dacb139447ee72c1c0-init/diff:/var/lib/docker/overlay2/kuc6n3yolkt6unq2m0lnszrd5/diff:/var/lib/docker/overlay2/4ixt3rp2et23hjbbzbnqi22uu/diff:/var/lib/docker/overlay2/asi75y8b1z0g7ke4nqccaz1p2/diff:/var/lib/docker/overlay2/tljuit4fnv768mijwsia8pmkk/diff:/var/lib/docker/overlay2/7p4po4680uq8hfahlazvuzt4w/diff:/var/lib/docker/overlay2/vo9l2uagalawppl95dc0av2ka/diff:/var/lib/docker/overlay2/yxp0k8fxa8zsl2mwilj4d1lhy/diff:/var/lib/docker/overlay2/jpr9ggodzsgrdfhzt9c8mp3ms/diff:/var/lib/docker/overlay2/mbx0dmmab33rbllmxy7raz49g/diff:/var/lib/docker/overlay2/rfrgw2hcv07uqcon2xcufvxbz/diff:/var/lib/docker/overlay2/t47355ujo7cg5yx7k7upweurh/diff:/var/lib/docker/overlay2/1d8286a11acbac34739465810781edd309ece6e8a907b8aace0050525da2bc7e/diff:/var/lib/docker/overlay2/f8c2f9d7fd5df1652732c81992c65f9f31ce2a9395920f870cc3237d7ffdf064/diff:/var/lib/docker/overlay2/0367ec4045d60119bcfb1595e04b07fc4c244ac1e103c85e1a91b14be66769f0/diff:/var/lib/docker/overlay2/88331fbda3525a63ceda6b39cc5009ff251c253e4ce87e2ebf159086334de0dd/diff:/var/lib/docker/overlay2/4a636f0d7efeffe909443bdafb3ff399495caacc93a7c1b83223ab24f5d43183/diff",
+        "MergedDir": "/var/lib/docker/overlay2/6d8e4bf86d78c66df04017cb27ccc29a0c698110f740f4dacb139447ee72c1c0/merged",
+        "UpperDir": "/var/lib/docker/overlay2/6d8e4bf86d78c66df04017cb27ccc29a0c698110f740f4dacb139447ee72c1c0/diff",
+        "WorkDir": "/var/lib/docker/overlay2/6d8e4bf86d78c66df04017cb27ccc29a0c698110f740f4dacb139447ee72c1c0/work"
+      },
+      "Name": "overlay2"
+    },
+    "Mounts": [
+      {
+        "Type": "bind",
+        "Source": "/var/lib/vivic-preview-20261025",
+        "Destination": "/data/vivic",
+        "Mode": "",
+        "RW": true,
+        "Propagation": "rprivate"
+      }
+    ],
+    "Config": {
+      "Hostname": "fcba29e43e72",
+      "Domainname": "",
+      "User": "node",
+      "AttachStdin": false,
+      "AttachStdout": false,
+      "AttachStderr": false,
+      "ExposedPorts": {
+        "8790/tcp": {}
+      },
+      "Tty": false,
+      "OpenStdin": false,
+      "StdinOnce": false,
+      "Env": "[REDACTED environment]",
+      "Cmd": [
+        "node",
+        "--import",
+        "tsx",
+        "src/online/index.ts"
+      ],
+      "Image": "vivic-preview-20261025:cursor-owner-20261026",
+      "Volumes": null,
+      "WorkingDir": "/app/apps/local-api",
+      "Entrypoint": [
+        "docker-entrypoint.sh"
+      ],
+      "OnBuild": null,
+      "Labels": {}
+    },
+    "NetworkSettings": {
+      "Bridge": "",
+      "SandboxID": "03e40f4c3e940b0ef62f4c0db354435d480abe6c640618d3dfbab6a81f5c20a3",
+      "SandboxKey": "/var/run/docker/netns/03e40f4c3e94",
+      "Ports": {
+        "8790/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "18890"
+          }
+        ]
+      },
+      "HairpinMode": false,
+      "LinkLocalIPv6Address": "",
+      "LinkLocalIPv6PrefixLen": 0,
+      "SecondaryIPAddresses": null,
+      "SecondaryIPv6Addresses": null,
+      "EndpointID": "b4d0eaa049871c8ec21132f1259716eed83c7bd9158150cfd9e5b6959b30b500",
+      "Gateway": "172.17.0.1",
+      "GlobalIPv6Address": "",
+      "GlobalIPv6PrefixLen": 0,
+      "IPAddress": "172.17.0.2",
+      "IPPrefixLen": 16,
+      "IPv6Gateway": "",
+      "MacAddress": "02:42:ac:11:00:02",
+      "Networks": {
+        "bridge": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "MacAddress": "02:42:ac:11:00:02",
+          "NetworkID": "5e960d8b748e24f9b53f72a967912af12f34697e05be2f9542e45e7181c32557",
+          "EndpointID": "b4d0eaa049871c8ec21132f1259716eed83c7bd9158150cfd9e5b6959b30b500",
+          "Gateway": "172.17.0.1",
+          "IPAddress": "172.17.0.2",
+          "IPPrefixLen": 16,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "DriverOpts": null,
+          "DNSNames": null
+        }
+      }
+    }
+  }
+]

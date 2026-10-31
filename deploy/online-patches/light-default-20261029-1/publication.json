@@ -1,0 +1,8 @@
+{
+  "release": "light-default-20261029-1",
+  "previous": "/opt/vivic-preview-20261025/releases/light-entry-20261029-1/web",
+  "systemDefaultTheme": "light",
+  "initialBackground": "#f3f7fb",
+  "newAssetPrefix": "/assets/light-default-20261029-1",
+  "existingUserPreferencesPreserved": true
+}

@@ -1,0 +1,19 @@
+{
+  "release": "background-typography-20261030-1",
+  "previous": "/opt/vivic-preview-20261025/releases/clarification-guard-20261030-1/web",
+  "frontend": "/opt/vivic-preview-20261025/releases/background-typography-20261030-1/web",
+  "indexSha256": "ed0ea9e8bfca9cd905e7bad9b792a434372276aeb6988a08d80da603a6e2e80f",
+  "stylesheetSha256": "ec423ee797ff2986f2ed48f6e28a9284bdd5a79c82217883b5a3ad4494bc2bff",
+  "changedWebFiles": [
+    "index.html",
+    "assets/background-typography-20261030-1/background-typography.css"
+  ],
+  "binaryStorageReused": true,
+  "backendChanged": false,
+  "accountDataChanged": false,
+  "candidateQa": "passed; real public resources with isolated simulated account APIs",
+  "freeBytesBefore": 8385236992,
+  "requiredBytesEstimate": 2242347,
+  "state": "published",
+  "publicHtmlAndCssVerified": true
+}

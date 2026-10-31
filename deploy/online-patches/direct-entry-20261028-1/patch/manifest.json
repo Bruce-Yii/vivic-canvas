@@ -1,0 +1,11 @@
+{
+  "old": "startup-recovery-20261028-1",
+  "new": "direct-entry-20261028-1",
+  "expected": {
+    "app-runtime.js": "14cbff1c843da6099f1591eb1b43c25c29f2210f3e788a37e7f6ea5d6327b444",
+    "browserRuntime-CMMGoec6.js": "b3dd184e8cd7d7ec3598cbd185551f1b6d1212d3d11208140978e5798e04fa39",
+    "ControlApp-TutorialEntry20261028.js": "7d49633ac1d28baf58d37da1879b172c6949e3ce10c5f0990231c4399ffb7f4b"
+  },
+  "sourceIndexSha256": "cc0589c505fec2bd13ee9295f6c77718d165c37f3642d17a419db133f7e422c5",
+  "runtimeSha256": "786ad1ba27c096a9257afc40778a709c3d5f09e5613b3ed2d2da69344105b5ae"
+}
