@@ -1,14 +1,26 @@
 import { createApp, type AppDeps } from "../app.js";
 import {
   STEPFUN_PLAN_BASE_URL, INFERENCE_TIMEOUT_MS, CONNECTION_TIMEOUT_MS, SPEECH_TIMEOUT_MS, streamFeedbackEnabled,
+  providerDataDirFromEnv, providerPersistEnabled,
 } from "../config.js";
 import type { LocalApiConfig } from "../config.js";
 import type { PipelineDeps } from "../intent/pipeline.js";
 
-/** Each cookie session owns only memory; no loadConfig, preferences or local OAuth. */
+/**
+ * Each cookie session owns its in-memory credentials; no loadConfig,
+ * preferences, local OAuth or runtime. Provider settings are the one explicit
+ * exception: when the deployment supplies a data directory they persist there
+ * so a saved/seed provider survives session turnover.
+ */
 export function createOnlineSessionApp(
   session: { token: string; origin: string },
-  overrides: { fetchImpl?: typeof fetch; router?: PipelineDeps["router"]; onDecisionTrace?: PipelineDeps["onDecisionTrace"]; onDecisionReceipt?: AppDeps["onDecisionReceipt"]; getEnabledDefinitions?: AppDeps["getEnabledDefinitions"] } = {},
+  overrides: {
+    fetchImpl?: typeof fetch; router?: PipelineDeps["router"]; onDecisionTrace?: PipelineDeps["onDecisionTrace"];
+    onDecisionReceipt?: AppDeps["onDecisionReceipt"]; getEnabledDefinitions?: AppDeps["getEnabledDefinitions"];
+    /** Deployment data dir; the hosted service passes its own persistent root. */
+    providerDataDir?: string;
+    providerPersist?: boolean;
+  } = {},
 ) {
   const config: LocalApiConfig = {
     host: "127.0.0.1", port: 0, token: session.token,
@@ -28,8 +40,17 @@ export function createOnlineSessionApp(
     decisionV2ExecutionEnabled: false,
   };
   const lifetime = new AbortController();
+  // Persist provider settings only when the deployment has a durable data
+  // directory. Without one, an online app stays memory-only so a test or a
+  // stray caller can never read/write the operator's ~/.vivic. The hosted
+  // service always passes its VIVIC_SPACE_DATA_DIR root.
+  const providerDataDir = overrides.providerDataDir ?? providerDataDirFromEnv();
   const app = createApp({ config, mode: "online", fetchImpl: overrides.fetchImpl,
-    router: overrides.router, onDecisionTrace: overrides.onDecisionTrace, onDecisionReceipt: overrides.onDecisionReceipt, getEnabledDefinitions: overrides.getEnabledDefinitions });
+    router: overrides.router, onDecisionTrace: overrides.onDecisionTrace, onDecisionReceipt: overrides.onDecisionReceipt, getEnabledDefinitions: overrides.getEnabledDefinitions,
+    ...(providerDataDir ? {
+      providerDataDir,
+      providerPersist: overrides.providerPersist ?? providerPersistEnabled(process.env.VIVIC_PROVIDER_PERSIST),
+    } : {}) });
   return {
     fetch(request: Request) {
       if (lifetime.signal.aborted) return Response.json({ ok: false, error: "会话已结束。" }, { status: 410 });

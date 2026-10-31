@@ -47,10 +47,24 @@ import { ModelPlatformSettings } from "@/settings";
 
 ## 安全
 
-- Key 用 AES-256-GCM 加密后写入 `~/.vivic/providers.json`（文件 0600，密钥在同目录 `.secret-key`，0600）。
+- Key 用 AES-256-GCM 加密后写入 `providers.json`（文件 0600，密钥在同目录 `.secret-key`，0600）。本地模式目录为 `~/.vivic`；线上模式为部署数据目录（`VIVIC_PROVIDER_DATA_DIR`，未设时用 `VIVIC_SPACE_DATA_DIR`）。
 - API 响应永远不含 Key，只给 `hasApiKey` 与 `apiKeyHint`（如 `2v0U••••T4Bb`）。
 - Key 不进日志、不进测试 fixture；测试用注入的假 codec 与内存文件系统。
-- 线上模式（`mode: "online"`）用 `persist: false` 的内存 store，用户之间不串数据。
+- 线上模式（`mode: "online"`）默认持久化；没有提供数据目录时保持内存 store（测试/误调用不会碰宿主机 home）。`VIVIC_PROVIDER_PERSIST=off` 可显式关闭线上持久化。
+
+## 线上部署种子
+
+服务器环境变量可直接注入 StepFun Key，应用启动时把它变成一条普通的 `roles: ["main"]` 平台（`StepFun (seed)`），之后由设置接管：
+
+| 变量 | 必填 | 默认 |
+|---|---|---|
+| `VIVIC_STEPFUN_API_KEY` | 是（不设则不种子） | — |
+| `VIVIC_STEPFUN_BASE_URL` | 否 | `https://api.stepfun.com/v1` |
+| `VIVIC_STEPFUN_MODEL` | 否 | `step-3.5-flash` |
+
+- 只在 store 没有任何 `main` 平台时创建一次；已有平台不覆盖，设置优先于 env。
+- Key 只从进程 env 读取，交给 store 加密，不写日志、不进响应。
+- 回滚：删除这条种子平台，或去掉 env 后重启。
 
 ## 设置优先于 env
 

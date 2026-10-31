@@ -9,7 +9,8 @@
 - 首次账号需要运营者配置的单次邀请码。用户名 3–40 位小写 ASCII 名称，密码 12–256 字符，服务端用 scrypt 保存密码哈希。
 - 设备采用 HttpOnly、Secure、SameSite=Strict Cookie，服务端只保存 token 摘要。设备码单次、有时限，撤权后旧码或旧设备不能恢复。模型管理台密码不等于模型 Bearer Key。
 - SQLite、资产索引和文件放在专用持久目录。单进程锁、WAL/FULL 事务、版本检查及 requestId 回执共同约束执行；丢回执须查询原 requestId，不自动换 ID 重发。
-- LLM 和模型平台连接按账号隔离，秘密只在服务端内存，空闲 30 分钟或最长 8 小时到期。断开、服务重启需重新连接；Space 数据保留。不自动继承本机 `.env`、Pi 登录或旧配置。
+- 临时会话凭据（设置页验证过的 LLM/平台 Key）按账号隔离，只在服务端内存，空闲 30 分钟或最长 8 小时到期。断开、服务重启需重新连接；Space 数据保留。不自动继承本机 `.env`、Pi 登录或旧配置。
+- 例外是 PR3 模型平台设置：线上模式把 `main`/`decision` 平台持久化到数据目录的 `providers.json`（Key AES-GCM 加密，0600），重启后继续生效；运营者也可用服务器环境变量注入 StepFun 种子，见下文。
 - 正式原生 Jev v2 执行门控始终关闭。StartLux/GLiNER 分类供诊断/对照，不能冒充完整 state/questions/typed answers 协议或质量达标。
 - 普通 PDF/MD 阅读不调用模型；“问 Vivic”主动展开。新文件限 PDF/MD，5 个/次、10,000,000 B/批、100,000,000 B/Space；历史其他格式仅下载。图片使用受控资产 ID，不开放任意路径。
 - 客户端关闭后仍调度服务器提醒记录；重连可查看收件箱。这不表示关闭的手机已收到系统推送。本轮没有新增 Web Push、短信或外部消息。
@@ -95,6 +96,20 @@ location / {
 ## 模型与交付边界
 
 模型平台默认 `https://edsionc.top/api/v1`，运营者可通过 `VIVIC_MODEL_API_BASE_URL` 固定。用户在设置密码框分别连接 LLM 和模型平台。可选部署级 token 只能经秘密管理注入，不进入包、日志、Compose 源码或浏览器存储。
+
+### 线上平台设置与 StepFun 种子（2026-10-31）
+
+线上模式现在会读取 `main`/`decision` 平台设置并注入实际请求，不再只在本地模式生效。设置文件位于 `VIVIC_PROVIDER_DATA_DIR`（未设时复用 `VIVIC_SPACE_DATA_DIR`，容器内即 `/data/vivic`）下的 `providers.json`，Key 用 AES-GCM 加密，API 响应仍不含明文。`VIVIC_PROVIDER_PERSIST=off` 可显式退回内存模式。这是部署级共享设置（所有账号使用同一份平台配置）；设置页里临时验证过的会话凭据仍按账号隔离。
+
+没有保存任何 `main` 平台时，可用服务器环境变量注入 StepFun：
+
+| 变量 | 必填 | 默认 |
+|---|---|---|
+| `VIVIC_STEPFUN_API_KEY` | 是（不设则不种子） | — |
+| `VIVIC_STEPFUN_BASE_URL` | 否 | `https://api.stepfun.com/v1` |
+| `VIVIC_STEPFUN_MODEL` | 否 | `step-3.5-flash` |
+
+启动时创建一次名为 `StepFun (seed)` 的 `roles: ["main"]` 平台（协议 `stepfun-v1`）。已有 `main` 平台不覆盖，设置优先于 env；Key 只从进程 env 读取并交给 store 加密，不写日志或响应。回滚：删除这条种子平台，或移除环境变量后重启。部署时只通过秘密管理注入这些值，不写入 Compose 源码、镜像或报告。
 
 ASR/TTS/分类元数据在线、协议通过和真实质量通过分别报告。HTTP 取消不等于 Mac 推理已停止。断网保留草稿并提示连接，不宣称离线模型能力。
 

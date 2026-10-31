@@ -50,6 +50,23 @@ export const streamFeedbackEnabled = (value: string | undefined): boolean =>
   value?.trim().toLowerCase() !== "off";
 
 /**
+ * Online provider settings persist next to the hosted Space data by default.
+ * Only an explicit `off` keeps them in process memory (the pre-PR3 online
+ * behaviour); a typo must not silently stop persistence.
+ */
+export const providerPersistEnabled = (value: string | undefined): boolean =>
+  value?.trim().toLowerCase() !== "off";
+
+/**
+ * Directory that owns `providers.json` and the local `.secret-key`. Online
+ * deployments already keep durable state under VIVIC_SPACE_DATA_DIR; a
+ * dedicated VIVIC_PROVIDER_DATA_DIR wins when an operator wants settings on a
+ * separate volume. Forgetting both keeps the old in-memory behaviour.
+ */
+export const providerDataDirFromEnv = (env: NodeJS.ProcessEnv = process.env): string | undefined =>
+  env.VIVIC_PROVIDER_DATA_DIR?.trim() || env.VIVIC_SPACE_DATA_DIR?.trim() || undefined;
+
+/**
  * Local session auth: a random bearer token lives ONLY in
  * apps/local-api/.env.local (gitignored, mode 0600). The Vite dev proxy reads
  * the same file and injects the header server-side, so the browser bundle

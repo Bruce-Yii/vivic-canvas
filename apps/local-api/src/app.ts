@@ -50,7 +50,9 @@ import { ConnectionManager } from "./connections/manager.js";
 import { createConnectionRoutes } from "./connections/routes.js";
 import { ConnectionError } from "./connections/types.js";
 import { createFileReadRoutes, FILE_READ_BODY_LIMIT } from "./files/routes.js";
-import { ProviderStore, ProviderClient, createProviderRoutes, type ProviderProtocol } from "./providers/index.js";
+import {
+  ProviderStore, ProviderClient, createProviderRoutes, seedStepFunProvider, type ProviderProtocol,
+} from "./providers/index.js";
 
 /**
  * Vivic local decision API. Loopback only, bearer-guarded, zod on every
@@ -84,8 +86,16 @@ export interface AppDeps {
   preferences?: PreferenceStore;
   mobileBroker?: Pick<MobileSessionBroker, "status" | "create" | "dispose"> & Partial<Pick<MobileSessionBroker, "resume" | "end">>;
   localTts?: Pick<ManagedLocalTts, "status" | "prepare" | "enable" | "stop" | "clear" | "synthesize">;
-  /** Generic model-provider settings. Absent = in-memory store under ~/.vivic (local mode). */
+  /** Generic model-provider settings. Absent = store built from the fields below. */
   providerStore?: ProviderStore;
+  /**
+   * Directory for `providers.json` and its `.secret-key`. Local mode defaults
+   * to `~/.vivic`; an online session must pass the deployment data directory,
+   * otherwise settings stay in memory (no host files are touched).
+   */
+  providerDataDir?: string;
+  /** `false` keeps provider settings in memory. Defaults to on when a directory exists. */
+  providerPersist?: boolean;
 }
 
 const tokenOk = (presented: string, expected: string): boolean => {
@@ -115,15 +125,25 @@ export const createApp = (deps: AppDeps) => {
     create: async (): Promise<never> => { throw new Error("unavailable_online"); }, dispose: () => undefined }
     : deps.mobileBroker ?? new MobileSessionBroker(path.join(homedir(), ".vivic", "mobile-relay.json"));
   const credentials = deps.credentials ?? new CredentialStore();
-  // Generic provider settings. Local sessions persist to ~/.vivic/providers.json;
-  // online sessions keep them in memory so one user never inherits another's.
+  // Generic provider settings. Local sessions persist to ~/.vivic/providers.json.
+  // Online sessions persist to the deployment data directory (providers.json +
+  // .secret-key, both 0600) so a saved provider survives restarts; without a
+  // supplied directory they stay in memory, so tests and stray callers still
+  // never read or write the host's home directory.
+  const providerDataDir = deps.providerDataDir ?? (online ? undefined : path.join(homedir(), ".vivic"));
   const providerStore = deps.providerStore ?? new ProviderStore({
-    dataDir: path.join(homedir(), ".vivic"),
-    persist: !online,
+    dataDir: providerDataDir ?? path.join(homedir(), ".vivic"),
+    persist: deps.providerPersist ?? (online ? Boolean(providerDataDir) : true),
   });
-  const savedMain = online ? undefined : providerStore.findForRole("main");
+  // Deployment seed (online only): VIVIC_STEPFUN_API_KEY becomes a normal
+  // encrypted "main" provider exactly once. An existing main provider wins,
+  // and local mode keeps its previous behaviour byte for byte.
+  if (online) seedStepFunProvider(providerStore);
+  // Settings win over env in both modes. An empty store leaves today's
+  // StepFun/DeepSeek environment path untouched.
+  const savedMain = providerStore.findForRole("main");
   const savedMainKey = savedMain ? providerStore.getApiKey(savedMain.id) : undefined;
-  const savedDecision = online ? undefined : providerStore.findForRole("decision");
+  const savedDecision = providerStore.findForRole("decision");
   // `VIVIC_MAIN_PROVIDER=deepseek` only changes the main planner transport. A
   // separate in-memory store keeps speech/ASR on their StepFun credential, and
   // the key comes from DEEPSEEK_API_KEY without touching disk or logs.
@@ -137,11 +157,15 @@ export const createApp = (deps: AppDeps) => {
   }
   // Settings win over env: an explicitly configured "main" provider replaces
   // the env-seeded key and model. With no saved provider, nothing changes.
-  if (savedMain && savedMainKey && savedMain.model) {
+  // A provider without its own model falls back to the already selected one;
+  // a provider without a key (local Ollama-style endpoints) leaves the old
+  // in-memory connection alone.
+  const savedMainModel = savedMain?.model ?? mainCredentials.getSecret()?.defaultModel;
+  if (savedMain && savedMainKey && savedMainModel) {
     mainCredentials.set({
       apiKey: savedMainKey,
-      models: [savedMain.model],
-      defaultModel: savedMain.model,
+      models: [savedMainModel],
+      defaultModel: savedMainModel,
       checkedAt: new Date().toISOString(),
     });
   }
@@ -152,16 +176,23 @@ export const createApp = (deps: AppDeps) => {
   const data = deps.data ?? createDataClient({ fetchImpl: deps.fetchImpl,
     ...(online ? { config: { deviceLocation: true, networkRegionFallback: false } } : {}) });
   let decisionConfigurationError: string | undefined;
-  // Even status() on the legacy manager inspects its cache. A disabled,
-  // non-local provider avoids all filesystem/process work for cloud sessions.
-  const configuredProvider: DecisionProvider | undefined = online ? { decide: async () => ({ state: "disabled" }) } : deps.decisionProvider ?? (() => {
-    // A saved decision provider (settings) wins over the env-configured one.
+  let decisionProviderFromSettings = false;
+  // Even status() on the legacy manager inspects its cache. An online session
+  // without a usable decision provider therefore gets a disabled, non-local
+  // provider and never touches the filesystem or spawns a runtime.
+  const disabledDecisionProvider: DecisionProvider = { decide: async () => ({ state: "disabled" }) };
+  // A programmatic provider (tests, embeds) keeps its previous precedence in
+  // local mode; online sessions only ever run an explicitly saved provider.
+  const configuredProvider: DecisionProvider | undefined = (!online ? deps.decisionProvider : undefined) ?? (() => {
+    // A saved decision provider (settings) wins over the env-configured one in
+    // both modes; the protocol mapping is unchanged (4B native → startlux,
+    // 2B legacy → adapter, other endpoints → local chat).
     const decisionProtocol = (protocol: ProviderProtocol) => protocol === "startlux-native" ? "startlux" as const
       : protocol === "legacy-2b" ? "adapter" as const : "local-chat" as const;
     if (savedDecision) {
       try {
         const protocol = decisionProtocol(savedDecision.protocol);
-        return new HttpDecisionProvider(savedDecision.baseUrl, {
+        const provider = new HttpDecisionProvider(savedDecision.baseUrl, {
           name: protocol === "local-chat" ? "local" : "api",
           timeoutMs: config.decisionProviderTimeoutMs,
           fetchImpl: deps.fetchImpl,
@@ -169,13 +200,16 @@ export const createApp = (deps: AppDeps) => {
           model: savedDecision.model,
           getToken: () => providerStore.getApiKey(savedDecision.id),
         });
+        decisionProviderFromSettings = true;
+        return provider;
       } catch {
         decisionConfigurationError = "已保存的决策服务配置无效，已回退到原有指令流程。请检查地址、协议和模型名称。";
         console.warn(JSON.stringify({ event: "decision.configuration_invalid", source: "settings" }));
         safeDiagnostic(deps.onDiagnostic, { event: "decision.configuration_invalid" });
-        return undefined;
+        return online ? disabledDecisionProvider : undefined;
       }
     }
+    if (online) return disabledDecisionProvider;
     if (deps.decision || !config.decisionProviderUrl) return undefined;
     try {
     const primary = new HttpDecisionProvider(config.decisionProviderUrl, {
@@ -199,9 +233,14 @@ export const createApp = (deps: AppDeps) => {
   const managed = !online && !deps.decision && !configuredProvider && !decisionConfigurationError && config.managedDecisionEnabled === true
     ? new ManagedStartluxRuntime(config.managedDecisionRoot ?? path.join(homedir(), ".vivic", "runtime", "startlux-decision")) : undefined;
   const decision = (!online && deps.decision) || new DecisionManager(undefined, configuredProvider ?? managed, {
-    enabled: !online && config.decisionProviderEnabled !== false,
+    // Online, only an explicit saved decision provider may run: the hosted
+    // deployment keeps the env-driven DecisionManager opt-in off. Local mode
+    // keeps the existing env switch unchanged.
+    enabled: online ? decisionProviderFromSettings : config.decisionProviderEnabled !== false,
     timeoutMs: 2 * decisionTimeout(config.decisionProviderTimeoutMs),
-    modelLabel: online ? "在线决策未配置" : config.decisionProviderProtocol === "startlux" ? "StartLux · 服务端选型" : undefined,
+    modelLabel: online
+      ? decisionProviderFromSettings ? savedDecision?.model ?? "已保存的决策服务" : "在线决策未配置"
+      : config.decisionProviderProtocol === "startlux" ? "StartLux · 服务端选型" : undefined,
   });
   let nativeV2 = deps.decisionV2Provider;
   if (!nativeV2 && config.decisionV2Url) {
@@ -253,7 +292,7 @@ export const createApp = (deps: AppDeps) => {
   };
   // Only the planner uses the DeepSeek fast path; speech/ASR/readers keep the
   // StepFun deps and credential above. A saved main provider overrides both.
-  const mainModel = savedMain && savedMainKey && savedMain.model
+  const mainModel = savedMain && savedMainKey && savedMainModel
     ? { baseUrl: savedMain.baseUrl, fetchImpl: deps.fetchImpl, timeoutMs: config.requestTimeoutMs,
         ...(savedMain.presetId === "deepseek" ? { provider: "deepseek" as const } : {}) }
     : mainProvider === "deepseek"

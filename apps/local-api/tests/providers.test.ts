@@ -1,7 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { ProviderClient } from "../src/providers/client.js";
 import { ProviderStore, type ProviderStoreOptions, type SecretCodec } from "../src/providers/store.js";
 import { SecretBox } from "../src/providers/secrets.js";
+import {
+  STEPFUN_SEED_DEFAULT_BASE_URL, STEPFUN_SEED_DEFAULT_MODEL, STEPFUN_SEED_NAME,
+  seedStepFunProvider, stepFunSeedFromEnv,
+} from "../src/providers/seed.js";
 import { PROVIDER_PRESETS, maskApiKey, validateProtocolModel } from "../src/providers/types.js";
 import { fetchStub } from "./helpers.js";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
@@ -36,7 +40,7 @@ const newStore = (options: { persist?: boolean } = {}) => {
     fs,
     ...(options.persist === false ? { persist: false } : {}),
   });
-  return { store, files };
+  return { store, files, fs };
 };
 
 const API_KEY = "sk-test-abcdefghijklmnop";
@@ -134,6 +138,88 @@ describe("ProviderStore", () => {
     const cleared = store.update(created.id, { clearApiKey: true });
     expect(cleared.apiKey).toBeUndefined();
     expect(store.view(cleared).hasApiKey).toBe(false);
+  });
+});
+
+describe("StepFun boot seed", () => {
+  // Clearly fake: no real credential may ever live in a fixture.
+  const SEED_KEY = "sk-test-seed-only-not-real-0001";
+  const seedEnv = (overrides: Record<string, string | undefined> = {}) => ({
+    VIVIC_STEPFUN_API_KEY: SEED_KEY, ...overrides,
+  });
+
+  it("creates the default StepFun main provider exactly once", () => {
+    const { store } = newStore();
+    const created = seedStepFunProvider(store, seedEnv());
+    expect(created).toMatchObject({
+      name: STEPFUN_SEED_NAME, protocol: "stepfun-v1",
+      baseUrl: STEPFUN_SEED_DEFAULT_BASE_URL, model: STEPFUN_SEED_DEFAULT_MODEL,
+      roles: ["main"], enabled: true,
+    });
+    expect(store.findForRole("main")?.id).toBe(created!.id);
+    expect(store.getApiKey(created!.id)).toBe(SEED_KEY);
+    // A second boot in the same process must not duplicate the seed.
+    expect(seedStepFunProvider(store, seedEnv())).toBeUndefined();
+    expect(store.list()).toHaveLength(1);
+  });
+
+  it("survives a restart with the key encrypted and no plaintext on disk", () => {
+    const { store, files, fs } = newStore();
+    const created = seedStepFunProvider(store, seedEnv())!;
+    const raw = [...files.values()].join("\n");
+    expect(raw).toContain("apiKeyEnc");
+    expect(raw).not.toContain(SEED_KEY);
+
+    const reopened = new ProviderStore({ dataDir: "/mem", secrets: fakeCodec, fs });
+    expect(reopened.list()).toHaveLength(1);
+    expect(reopened.findForRole("main")?.id).toBe(created.id);
+    expect(reopened.getApiKey(created.id)).toBe(SEED_KEY);
+    // Loading the persisted seed means the boot seeder is a no-op.
+    expect(seedStepFunProvider(reopened, seedEnv())).toBeUndefined();
+    expect(reopened.list()).toHaveLength(1);
+  });
+
+  it("honors base URL and model overrides and falls back on blank values", () => {
+    expect(stepFunSeedFromEnv({ VIVIC_STEPFUN_API_KEY: ` ${SEED_KEY} `, VIVIC_STEPFUN_BASE_URL: " ",
+      VIVIC_STEPFUN_MODEL: "" })).toEqual({
+      apiKey: SEED_KEY, baseUrl: STEPFUN_SEED_DEFAULT_BASE_URL, model: STEPFUN_SEED_DEFAULT_MODEL,
+    });
+    const { store } = newStore();
+    const created = seedStepFunProvider(store, seedEnv({
+      VIVIC_STEPFUN_BASE_URL: "https://stepfun.example.test/v1", VIVIC_STEPFUN_MODEL: "step-3.7-flash",
+    }));
+    expect(created).toMatchObject({ baseUrl: "https://stepfun.example.test/v1", model: "step-3.7-flash" });
+  });
+
+  it("does nothing without a key", () => {
+    const { store, files } = newStore();
+    expect(seedStepFunProvider(store, {})).toBeUndefined();
+    expect(stepFunSeedFromEnv({ VIVIC_STEPFUN_API_KEY: "   " })).toBeUndefined();
+    expect(store.list()).toHaveLength(0);
+    expect(files.size).toBe(0);
+  });
+
+  it("never overwrites an existing main provider, even a disabled one", () => {
+    const { store } = newStore();
+    const existing = store.create(openaiConfig());
+    expect(seedStepFunProvider(store, seedEnv())).toBeUndefined();
+    expect(store.findForRole("main")?.id).toBe(existing.id);
+    expect(store.list()).toHaveLength(1);
+
+    store.update(existing.id, { enabled: false });
+    expect(seedStepFunProvider(store, seedEnv())).toBeUndefined();
+    expect(store.list()).toHaveLength(1);
+  });
+
+  it("fails closed on an invalid base URL without logging the key", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    try {
+      const { store } = newStore();
+      expect(seedStepFunProvider(store, seedEnv({ VIVIC_STEPFUN_BASE_URL: "not-a-url" }))).toBeUndefined();
+      expect(store.list()).toHaveLength(0);
+      expect(warn).toHaveBeenCalled();
+      expect(JSON.stringify(warn.mock.calls)).not.toContain(SEED_KEY);
+    } finally { warn.mockRestore(); }
   });
 });
 

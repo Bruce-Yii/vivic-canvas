@@ -73,7 +73,10 @@ export function createHostedService(options: HostedServiceOptions) {
     }
     if (!value) {
       const token = randomBytes(32).toString("base64url");
-      value = { token, app: createOnlineSessionApp({ token, origin: options.origin }, sessionOptions(accountId)), created: now(), touched: now() };
+      // Provider settings share the deployment's durable data root, so a saved
+      // main/decision provider survives session turnover and process restarts.
+      value = { token, app: createOnlineSessionApp({ token, origin: options.origin },
+        { ...sessionOptions(accountId), providerDataDir: options.dataDir }), created: now(), touched: now() };
       apps.set(accountId, value);
     }
     if (activity) value.touched = now(); return value;
@@ -216,7 +219,8 @@ export function createHostedService(options: HostedServiceOptions) {
       if (proxyPost.has(route) && request.method === "POST") {
         if (route === "/api/credentials/stepfun/validate") {
           const token = randomBytes(32).toString("base64url");
-          const candidate: AccountApp = { token, app: createOnlineSessionApp({ token, origin: options.origin }, sessionOptions(accountId)), created: now(), touched: now() };
+          const candidate: AccountApp = { token, app: createOnlineSessionApp({ token, origin: options.origin },
+            { ...sessionOptions(accountId), providerDataDir: options.dataDir }), created: now(), touched: now() };
           try {
             const body = await hostedBody(request);
             const response = await candidate.app.fetch(new Request(`${options.origin}${route}`, { method: "POST", signal: request.signal,

@@ -1,8 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import fs from "node:fs";
 import fsPromises from "node:fs/promises";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { createApp } from "../src/app.js";
 import { createOnlineSessionApp } from "../src/online/appFactory.js";
+import { ProviderStore } from "../src/providers/store.js";
+import { STEPFUN_SEED_NAME } from "../src/providers/seed.js";
 import { CredentialStore } from "../src/credentials.js";
 import { GptProvider } from "../src/gpt/provider.js";
 import { STEPFUN_PLAN_BASE_URL } from "../src/config.js";
@@ -12,9 +17,21 @@ const ORIGIN = "https://vivic.example";
 const KEY_A = "TEST-online-private-A";
 const KEY_B = "TEST-online-private-B";
 const sessions: Array<{ dispose(): void }> = [];
-afterEach(() => { sessions.splice(0).forEach(session => session.dispose()); vi.restoreAllMocks(); });
-function online(fetchImpl?: typeof fetch) {
-  const session = createOnlineSessionApp({ token: TEST_TOKEN, origin: ORIGIN }, { fetchImpl });
+const tempDirs: string[] = [];
+const tempDir = () => {
+  const dir = mkdtempSync(join(tmpdir(), "vivic-online-providers-"));
+  tempDirs.push(dir);
+  return dir;
+};
+afterEach(() => {
+  sessions.splice(0).forEach(session => session.dispose());
+  for (const dir of tempDirs.splice(0)) rmSync(dir, { recursive: true, force: true });
+  vi.unstubAllEnvs();
+  vi.restoreAllMocks();
+});
+function online(fetchImpl?: typeof fetch, providerDataDir?: string) {
+  const session = createOnlineSessionApp({ token: TEST_TOKEN, origin: ORIGIN },
+    { fetchImpl, ...(providerDataDir ? { providerDataDir } : {}) });
   sessions.push(session);
   const request = (route: string, body?: unknown, signal?: AbortSignal) => Promise.resolve(session.fetch(new Request(`${ORIGIN}${route}`, {
     method: body === undefined ? "GET" : "POST", headers: { ...authed, origin: ORIGIN },
@@ -191,5 +208,132 @@ describe("online app assembly", () => {
     const rejected = await (await session.request("/api/intent", { text: "做一下这个复杂任务", canvasContext: emptyContext() })).json();
     expect(rejected.kind).not.toBe("envelope");
     expect(JSON.stringify(rejected)).not.toContain("TEST never execute");
+  });
+});
+
+describe("online provider settings", () => {
+  const SAVED_KEY = "sk-test-online-saved-main-0002";
+  const SEED_KEY = "sk-test-online-seed-0003";
+  const DECISION_KEY = "sk-test-online-decision-0004";
+
+  it("persists a saved main provider and uses its base URL, model and key online", async () => {
+    const dir = tempDir();
+    const first = online(undefined, dir);
+    const created = await first.request("/api/providers", {
+      name: "部署平台", protocol: "openai-compatible", baseUrl: "https://models.example.test/v1",
+      apiKey: SAVED_KEY, model: "gpt-4o-mini", roles: ["main"],
+    });
+    expect(created.status).toBe(201);
+    expect(JSON.stringify(await created.json())).not.toContain(SAVED_KEY);
+    const raw = readFileSync(join(dir, "providers.json"), "utf8");
+    expect(raw).toContain("apiKeyEnc");
+    expect(raw).not.toContain(SAVED_KEY);
+    first.dispose();
+
+    // A new process/app over the same data directory loads the setting: the
+    // planner key, model and endpoint come from the store, not from env.
+    vi.stubEnv("VIVIC_STEPFUN_API_KEY", SEED_KEY);
+    const urls: string[] = [];
+    const second = online(vi.fn<typeof fetch>(async input => {
+      urls.push(String(input));
+      return chatOk({ reply: "秋叶落在纸上。" });
+    }), dir);
+    const status = await (await second.request("/api/providers/status")).json();
+    expect(status.providers[0]).toMatchObject({
+      name: "stepfun", connected: true, defaultModel: "gpt-4o-mini", models: ["gpt-4o-mini"],
+    });
+    expect(JSON.stringify(status)).not.toContain(SAVED_KEY);
+    // A saved main provider wins over VIVIC_STEPFUN_API_KEY: no seed row is added.
+    const listed = await (await second.request("/api/providers")).json();
+    expect(listed.providers).toHaveLength(1);
+    expect(listed.providers[0]).toMatchObject({ name: "部署平台", model: "gpt-4o-mini", hasApiKey: true });
+
+    const planned = await (await second.request("/api/intent", {
+      text: "请在五分钟后提醒我喝水", canvasContext: emptyContext(),
+    })).json();
+    expect(JSON.stringify(planned)).not.toContain(SAVED_KEY);
+    expect(urls).toContain("https://models.example.test/v1/chat/completions");
+  });
+
+  it("seeds StepFun from server env exactly once and never exposes the key", async () => {
+    vi.stubEnv("VIVIC_STEPFUN_API_KEY", SEED_KEY);
+    vi.stubEnv("VIVIC_STEPFUN_BASE_URL", "https://stepfun.example.test/v1");
+    vi.stubEnv("VIVIC_STEPFUN_MODEL", "step-3.7-flash");
+    const dir = tempDir();
+
+    const first = online(undefined, dir);
+    const status = await (await first.request("/api/providers/status")).json();
+    expect(status.providers[0]).toMatchObject({
+      name: "stepfun", connected: true, defaultModel: "step-3.7-flash", models: ["step-3.7-flash"],
+    });
+    expect(JSON.stringify(status)).not.toContain(SEED_KEY);
+    const listed = await (await first.request("/api/providers")).json();
+    expect(listed.providers).toHaveLength(1);
+    expect(listed.providers[0]).toMatchObject({
+      name: STEPFUN_SEED_NAME, protocol: "stepfun-v1",
+      baseUrl: "https://stepfun.example.test/v1", model: "step-3.7-flash",
+      roles: ["main"], hasApiKey: true,
+    });
+    expect(JSON.stringify(listed)).not.toContain(SEED_KEY);
+    expect(readFileSync(join(dir, "providers.json"), "utf8")).not.toContain(SEED_KEY);
+    first.dispose();
+
+    // Restart over the same data directory: the stored seed is reused, not duplicated.
+    const second = online(undefined, dir);
+    const again = await (await second.request("/api/providers")).json();
+    expect(again.providers).toHaveLength(1);
+    expect((await (await second.request("/api/providers/status")).json()).providers[0]).toMatchObject({ connected: true });
+  });
+
+  it("lets VIVIC_PROVIDER_PERSIST=off keep online provider settings in memory", async () => {
+    vi.stubEnv("VIVIC_PROVIDER_PERSIST", "off");
+    const dir = tempDir();
+    const first = online(undefined, dir);
+    expect((await first.request("/api/providers", {
+      name: "内存平台", protocol: "openai-compatible", baseUrl: "https://models.example.test/v1",
+      apiKey: SAVED_KEY, model: "gpt-4o-mini", roles: ["main"],
+    })).status).toBe(201);
+    expect(fs.existsSync(join(dir, "providers.json"))).toBe(false);
+    first.dispose();
+
+    const second = online(undefined, dir);
+    expect((await (await second.request("/api/providers")).json()).providers).toEqual([]);
+  });
+
+  it("applies a saved decision provider online with the existing protocol mapping", async () => {
+    const dir = tempDir();
+    new ProviderStore({ dataDir: dir }).create({
+      name: "4B 决策网关", protocol: "startlux-native", baseUrl: "https://decision.example.test/api/v1",
+      apiKey: DECISION_KEY, model: "startlux-decision-4b", roles: ["decision"],
+    });
+    const urls: string[] = [];
+    const session = online(vi.fn<typeof fetch>(async input => {
+      urls.push(String(input));
+      return Response.json({ answers: { intent: { type: "choice", choice: "fit", none_probability: 0,
+        probabilities: { fit: 1, restore: 0, focus: 0, delete: 0, expand: 0, collapse: 0, other: 0 } } } });
+    }), dir);
+    const status = await (await session.request("/api/decision/status")).json();
+    expect(status).toMatchObject({ enabled: true, model: "startlux-decision-4b" });
+    const listed = await (await session.request("/api/providers")).json();
+    expect(listed.providers).toHaveLength(1);
+    expect(JSON.stringify(listed)).not.toContain(DECISION_KEY);
+    // startlux-native still maps to the native {state, questions} endpoint.
+    const routed = await (await session.request("/api/intent", {
+      text: "把所有卡片铺满一屏", canvasContext: emptyContext(),
+    })).json();
+    expect(routed).toMatchObject({ kind: "envelope", usedProvider: "decision" });
+    expect(urls).toEqual(["https://decision.example.test/api/v1"]);
+    expect(JSON.stringify(routed)).not.toContain(DECISION_KEY);
+  });
+
+  it("keeps local mode unchanged: empty store and no env seed", async () => {
+    vi.stubEnv("VIVIC_STEPFUN_API_KEY", SEED_KEY);
+    const dir = tempDir();
+    const app = createApp({ config: testConfig(), providerDataDir: dir });
+    sessions.push(app);
+    const status = await (await app.request("/api/providers/status", { headers: authed })).json();
+    expect(status.providers[0]).toMatchObject({ name: "stepfun", connected: false });
+    expect((await (await app.request("/api/providers", { headers: authed })).json()).providers).toEqual([]);
+    expect(fs.existsSync(join(dir, "providers.json"))).toBe(false);
   });
 });
