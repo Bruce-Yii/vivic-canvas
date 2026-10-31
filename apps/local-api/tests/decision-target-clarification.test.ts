@@ -33,6 +33,22 @@ const route = (id: RouteResult["route"], probability = .99): RouteResult =>
   ({ route: id, probability, probabilities: { [id!]: probability }, none: false, latencyMs: 1 });
 const titles = canvas().cards.map(item => item.displayProps.title ?? item.displayProps.text);
 
+/** The B-pilot canvas: two todo cards whose ids are internal (`bpilot-*`), so the
+ * user must only ever see the card face and the position. */
+const pilot = (id: string, title: string, x: number, y = 0): CanvasCard => ({
+  id, type: "TodoCard", aliases: title ? [title] : [],
+  displayProps: { ...(title ? { title } : {}), items: [{ id: `${id}-item`, text: "买牛奶", done: false }] },
+  sourceDataSummary: {}, layout: { x, y, width: 360, height: 120, pinned: false },
+});
+const pilotCanvas = (cards: CanvasCard[]): CanvasContext => ({ canvasId: "TEST-bpilot", version: 3, stage: "WORKSPACE",
+  viewport: { x: 0, y: 0, zoom: 1 }, focusHistory: [], cards });
+const uuid = "3f2b8c1e-9a4d-4b7e-8f1a-2c5d6e7f8091";
+const noInternalId = (text: string) => {
+  expect(text).not.toContain("bpilot-");
+  expect(text).not.toMatch(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}/iu);
+  expect(text).not.toContain(uuid);
+};
+
 function setup(routeFor: (text: string) => RouteResult["route"], chooseTarget: IntentRouter["chooseTarget"] = async () => null,
   modelReply: unknown = { clarify: "模型不应被调用" }) {
   const router: IntentRouter = { mode: "on", directRoutes: new Set(["countdown", "todo", "note", "overview", "restore"]),
@@ -236,5 +252,112 @@ describe("an ambiguous operation lists only same-type candidates", () => {
     for (const candidate of result.task?.clarification?.candidates ?? []) {
       expect(result.message).toContain(`${candidate.number}. ${candidate.label}`);
     }
+  });
+});
+
+describe("a spatial reference is answered from the layout, not by asking", () => {
+  it("focuses the left todo of two separated cards without a second question", async () => {
+    const f = setup(text => /聚焦/.test(text) ? "focus" : "chat", async () => null,
+      { contract: "focus", slots: {}, say: "已聚焦。", text: "已聚焦左边的待办。" });
+    const result = await f.post({ text: "聚焦左边的待办",
+      canvasContext: pilotCanvas([pilot("bpilot-left", "买牛奶", 60), pilot("bpilot-right", "交周报", 720)]) });
+    expect(result.kind, JSON.stringify(result)).toBe("envelope");
+    expect(result.envelope?.actions).toContainEqual({ type: "card.focus", targetId: "bpilot-left" });
+    expect(result.message ?? "").not.toContain("哪一张");
+    // The payload keeps the id; everything the user reads must not.
+    noInternalId(result.message ?? "");
+    expect(result.task?.clarification).toBeUndefined();
+  });
+
+  it("selects the middle and the rightmost card of three", async () => {
+    const three = pilotCanvas([pilot("bpilot-left", "甲组", 60), pilot("bpilot-mid", "乙组", 440), pilot("bpilot-right", "丙组", 820)]);
+    expect(await resolveTarget("聚焦中间的待办", three, "focus")).toEqual({ targetId: "bpilot-mid", source: "spatial" });
+    expect(await resolveTarget("聚焦最右边的待办", three, "focus")).toEqual({ targetId: "bpilot-right", source: "spatial" });
+    expect(await resolveTarget("聚焦最左边的待办", three, "focus")).toEqual({ targetId: "bpilot-left", source: "spatial" });
+    // 中间 reads the axis that actually separates the cards, so a column works too.
+    const column = pilotCanvas([pilot("bpilot-top", "甲组", 60, 60), pilot("bpilot-middle", "乙组", 60, 440),
+      pilot("bpilot-bottom", "丙组", 60, 820)]);
+    expect(await resolveTarget("聚焦中间的待办", column, "focus")).toEqual({ targetId: "bpilot-middle", source: "spatial" });
+    expect(await resolveTarget("聚焦最下面的待办", column, "focus")).toEqual({ targetId: "bpilot-bottom", source: "spatial" });
+    // An explicit pronoun keeps its existing precedence over a direction.
+    expect(await resolveTarget("把这张卡移到左边", { ...three, focusHistory: ["bpilot-right"] }, "arrange"))
+      .toEqual({ targetId: "bpilot-right", source: "focus" });
+  });
+
+  it("never reads a move destination as the target card", async () => {
+    const three = pilotCanvas([pilot("bpilot-left", "甲组", 60), pilot("bpilot-mid", "乙组", 440),
+      pilot("bpilot-right", "丙组", 820)]);
+    // "to the middle" says where a card should go; the todo to move is still unclear.
+    const middle = await resolveTarget("把待办移到中间", three, "arrange");
+    expect(middle).toMatchObject({ source: "ambiguous" });
+    expect(middle && "ambiguous" in middle ? middle.ambiguous.map(candidate => candidate.id) : [])
+      .toEqual(["bpilot-left", "bpilot-mid", "bpilot-right"]);
+    // A target mention before the destination still wins, whichever side it names.
+    expect(await resolveTarget("把左边的待办移到右边", three, "arrange"))
+      .toEqual({ targetId: "bpilot-left", source: "spatial" });
+    expect(await resolveTarget("把右边的待办移到左边", three, "arrange"))
+      .toEqual({ targetId: "bpilot-right", source: "spatial" });
+    // The object between the verb and the direction does not make it a target.
+    expect(await resolveTarget("把待办移到画布左边", three, "arrange")).toMatchObject({ source: "ambiguous" });
+    // A direction without a movement verb keeps naming a card.
+    expect(await resolveTarget("聚焦最右边的待办", three, "focus"))
+      .toEqual({ targetId: "bpilot-right", source: "spatial" });
+  });
+
+  it("clarifies a stack with card-face labels and no internal ids", async () => {
+    const stack = pilotCanvas([pilot("bpilot-left", "", 60), pilot(uuid, "", 60)]);
+    const result = await resolveTarget("聚焦左边的待办", stack, "focus");
+    expect(result).toMatchObject({ source: "ambiguous" });
+    const candidates = result && "ambiguous" in result ? result.ambiguous : [];
+    expect(candidates.map(candidate => candidate.id)).toEqual(["bpilot-left", uuid]);
+    expect(new Set(candidates.map(candidate => candidate.label)).size).toBe(candidates.length);
+    for (const candidate of candidates) {
+      noInternalId(candidate.label);
+      expect(candidate.label).toContain("待办");
+      expect(candidate.label).toContain("x=60");
+    }
+  });
+
+  it("adds a position hint when two cards share the same title", async () => {
+    const stack = pilotCanvas([pilot("bpilot-left", "买牛奶", 60), pilot("bpilot-right", "买牛奶", 60, 140)]);
+    const result = await resolveTarget("聚焦左边的待办", stack, "focus");
+    const candidates = result && "ambiguous" in result ? result.ambiguous : [];
+    expect(candidates).toHaveLength(2);
+    expect(new Set(candidates.map(candidate => candidate.label)).size).toBe(2);
+    for (const candidate of candidates) {
+      noInternalId(candidate.label);
+      expect(candidate.label).toContain("买牛奶");
+      expect(candidate.label).toContain("x=60");
+    }
+  });
+
+  it("asks among an overlapping stack through the turn instead of guessing", async () => {
+    const f = setup(text => /聚焦/.test(text) ? "focus" : "chat");
+    const result = await f.post({ text: "聚焦左边的待办",
+      canvasContext: pilotCanvas([pilot("bpilot-left", "", 60), pilot("bpilot-right", "", 76)]) });
+    expect(result.kind).toBe("clarify");
+    expect(result.envelope).toBeUndefined();
+    const candidates = result.task?.clarification?.candidates ?? [];
+    expect(candidates).toHaveLength(2);
+    for (const candidate of candidates) {
+      // The question text, the chip label and the payload are one list.
+      expect(result.message).toContain(`${candidate.number}. ${candidate.label}`);
+      noInternalId(candidate.label);
+      expect(candidate.label).toContain("待办");
+    }
+    noInternalId(result.message ?? "");
+    expect(f.model).not.toHaveBeenCalled();
+  });
+
+  it("stays safe on an empty canvas or a direction with no matching card", async () => {
+    expect(await resolveTarget("聚焦左边的待办", pilotCanvas([]), "focus")).toEqual({ missing: true, source: "missing" });
+    const f = setup(text => /聚焦/.test(text) ? "focus" : "chat", async () => null,
+      { contract: "focus", slots: {}, say: "已聚焦。", text: "已聚焦。" });
+    const result = await f.post({ text: "聚焦左边的便签", canvasContext: pilotCanvas([pilot("bpilot-left", "买牛奶", 60)]) });
+    expect(result.kind).toBe("clarify");
+    expect(result.message).toBe("没有找到要操作的卡片，请说明卡名。");
+    expect(result.task?.clarification?.candidates ?? []).toHaveLength(0);
+    expect(result.envelope).toBeUndefined();
+    expect(result.hostOperation).toBeUndefined();
   });
 });
