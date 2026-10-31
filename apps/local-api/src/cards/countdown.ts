@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { CardRecordSchema } from "@vivic/contracts";
 import { buildReminderActions, MAX_REMINDERS, parseDuration, parseEnumeratedReminders, parseExactReminders } from "../intent/reminders.js";
+import { COUNTDOWN_VERBS, stripPoliteness, stripRequestFrame, trimTerminalPunctuation } from "../intent/commandText.js";
 import { newCardLayout } from "./build.js";
 import { defineCardContract } from "./types.js";
 
@@ -17,6 +18,19 @@ export const CountdownSlotsSchema = z.union([
   // folding (or dropping) an item; R2 coverage stays the guard for model plans.
   z.strictObject({ reminders: z.array(CountdownReminderSchema).min(2).max(MAX_REMINDERS) }),
 ]);
+
+/**
+ * One duration grammar for both the legacy fast rules and the decision-path
+ * contract. Accepts both word orders, optional politeness/creation verbs and
+ * measure words, a "的" before 倒计时, and sentence-final punctuation.
+ */
+export const parseCountdownDuration = (source: string): number | null => {
+  const input = trimTerminalPunctuation(stripPoliteness(source));
+  const { rest } = stripRequestFrame(input, COUNTDOWN_VERBS);
+  const match = rest.match(/^(.+?)\s*的?\s*倒计时$/u) ?? rest.match(/^倒计时\s*(.+)$/u);
+  if (!match) return null;
+  return parseDuration(match[1]!.trim());
+};
 
 export const countdownContract = defineCardContract({
   id: "countdown",
@@ -41,10 +55,7 @@ export const countdownContract = defineCardContract({
       if (reminders.length !== 1) return null;
       return { seconds: reminders[0]!.afterSeconds, text: reminders[0]!.text };
     }
-    const input = source.trim();
-    const match = input.match(/^(?:创建|新建|设|定|来)?\s*(?:一个|个)?\s*(.+?)\s*倒计时$/)
-      ?? input.match(/^倒计时\s*(.+)$/);
-    const seconds = match ? parseDuration(match[1]!) : null;
+    const seconds = parseCountdownDuration(source);
     return seconds === null ? null : { seconds };
   },
   build(slots, context, now) {

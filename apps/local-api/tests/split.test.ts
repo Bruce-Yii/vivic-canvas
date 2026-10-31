@@ -103,9 +103,8 @@ describe("ASCII commas and full stops", () => {
     expect(splitClauses(input)).toEqual(expected);
   });
 
-  it("keeps the 。 that precedes 再 on both yielded clauses", () => {
-    // 。 is not trimmed, which is why the literal parsers cannot match these.
-    expect(splitClauses("记个便签。再设个倒计时。")).toEqual(["记个便签。", "设个倒计时。"]);
+  it("trims the 。 that precedes 再 from both yielded clauses", () => {
+    expect(splitClauses("记个便签。再设个倒计时。")).toEqual(["记个便签", "设个倒计时"]);
   });
 
   it("keeps the ASCII period on both yielded clauses", () => {
@@ -139,30 +138,33 @@ describe("release-mode limits", () => {
   });
 });
 
-/** Real false splits found while building this matrix. They are recorded as
- * expected failures so the current (defective) behaviour is pinned: if the
- * splitter is fixed these tests start failing and must be promoted into the
- * normal tables above. */
-describe("known splitter defects (not fixed in this task)", () => {
-  it.fails("does not cut note content after 然后 into a second clause", () => {
-    // "记个便签，然后明天交周报" is one note whose body is 明天交周报; today the
-    // splitter hands "明天交周报" to the planner as its own clause.
+describe("sentence punctuation is a boundary only before an operation", () => {
+  it("does not cut note content after 然后 into a second clause", () => {
+    // "记个便签，然后明天交周报" is one note whose body is 明天交周报.
     expect(splitClauses("记个便签，然后明天交周报")).toEqual(["记个便签，然后明天交周报"]);
   });
 
-  it.fails("does not cut a timer's follow-up after 然后 into a second clause", () => {
+  it("does not cut a timer's follow-up after 然后 into a second clause", () => {
     expect(splitClauses("设个倒计时，然后十分钟后叫我")).toEqual(["设个倒计时，然后十分钟后叫我"]);
   });
 
-  it.fails("treats a full stop as a clause boundary", () => {
-    // 。 is not in the separator table, so two sentences reach one contract
-    // parse as a single clause and fall back to the planner.
-    expect(splitClauses("记个便签。设个倒计时。")).toEqual(["记个便签。", "设个倒计时。"]);
+  it("treats a full stop as a clause boundary", () => {
+    expect(splitClauses("记个便签。设个倒计时。")).toEqual(["记个便签", "设个倒计时"]);
   });
 
-  it.fails("trims trailing sentence punctuation from a yielded clause", () => {
-    // Even when 。 follows 再, the punctuation stays on both clauses, so the
-    // note/countdown literal parsers cannot match "记个便签。".
+  it("trims trailing sentence punctuation from a yielded clause", () => {
     expect(splitClauses("记个便签。再设个倒计时。")).toEqual(["记个便签", "设个倒计时"]);
+  });
+
+  it("splits after an exclamation mark before an operation", () => {
+    expect(splitClauses("记个便签！设个倒计时")).toEqual(["记个便签", "设个倒计时"]);
+  });
+
+  it("keeps a period inside a single note body", () => {
+    expect(splitClauses("记一下明天交周报。明天也要交")).toEqual(["记一下明天交周报。明天也要交"]);
+  });
+
+  it("splits a note body from a following operation after a full stop", () => {
+    expect(splitClauses("记一下明天交周报。然后聚焦它")).toEqual(["记一下明天交周报", "聚焦它"]);
   });
 });

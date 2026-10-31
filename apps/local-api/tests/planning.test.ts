@@ -57,7 +57,7 @@ describe("deterministic complete reminder parsing", () => {
     expect(new Set(cards.map((c) => c.sourceData.targetAt)).size).toBe(1);
     expect(call).not.toHaveBeenCalled();
   });
-  it.each([["十分钟", 600], ["二十五分三十秒", 1530], ["一小时二十分", 4800], ["半小时", 1800], ["1.5分钟", 90], ["半分钟", 30]])("parses %s exactly", (text, seconds) => {
+  it.each([["十分钟", 600], ["二十五分三十秒", 1530], ["一小时二十分", 4800], ["半小时", 1800], ["1.5分钟", 90], ["半分钟", 30], ["一个半小时", 5400], ["两个半小时", 9000], ["一刻钟", 900], ["一个钟头", 3600]])("parses %s exactly", (text, seconds) => {
     expect(parseDuration(text)).toBe(seconds);
     expect(matchRules(`${text}倒计时`, emptyContext())?.actions[0]?.type).toBe("card.create");
   });

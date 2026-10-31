@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import type { Action, CountdownCard } from "@vivic/contracts";
 import type { CanvasContext } from "../schemas.js";
+import { stripPoliteness } from "./commandText.js";
 
 export const MAX_REMINDERS = 10; // awaken + 10 creates + fit = 12 actions
 export const ReminderSchema = z.strictObject({
@@ -25,16 +26,20 @@ export const chineseNumber = (text: string): number | null => {
   return m ? (m[1] ? DIGITS[m[1]]! : 1) * 10 + (m[2] ? DIGITS[m[2]]! : 0) : null;
 };
 const NUMBER = "(?:\\d+(?:\\.\\d+)?|[零一二两三四五六七八九十半]+)";
-const PART = `${NUMBER}\\s*(?:小时|分钟|秒钟|分|秒)`;
+const PART = `${NUMBER}\\s*(?:小时|钟头|分钟|秒钟|分|秒)`;
 export const DURATION = `(?:${PART}\\s*)+`;
 
 /** Consumes the ENTIRE duration; extra instructions can never disappear. */
 export const parseDuration = (raw: string): number | null => {
-  const text = raw.trim().replace(/个(?=小时)/g, "");
+  const text = raw.trim()
+    .replace(/^一刻钟$/u, "15分钟")
+    // "一个半小时"/"两个半钟头" mean 1.5/2.5 hours, not 0.5 hours.
+    .replace(/^([一二两三四五六七八九十]|\d+)个半(小时|钟头)/u, (_match, count: string, unit: string) => `${count}${unit}30分钟`)
+    .replace(/个(?=小时|钟头)/gu, "");
   if (!new RegExp(`^${DURATION}$`).test(text)) return null;
   let total = 0;
   const seen = new Set<string>();
-  for (const match of text.matchAll(new RegExp(`(${NUMBER})\\s*(小时|分钟|秒钟|分|秒)`, "g"))) {
+  for (const match of text.matchAll(new RegExp(`(${NUMBER})\\s*(小时|钟头|分钟|秒钟|分|秒)`, "g"))) {
     const number = chineseNumber(match[1]!);
     const unit = match[2]!.startsWith("分") ? "分" : match[2]!.startsWith("秒") ? "秒" : "小时";
     if (number === null || seen.has(unit)) return null;
@@ -50,8 +55,9 @@ export const isReminderCreation = (text: string): boolean =>
   /提醒|倒计时/.test(text) && !/删除|删掉|取消|暂停|继续|恢复|修改|改成|改为|延长|缩短|放大|聚焦|高亮|待办|便签|笔记|显示全部|天气|搜索|查一下|查查|图表|表格/.test(text);
 
 export const parseExactReminders = (raw: string): Reminder[] | null => {
-  if (!isReminderCreation(raw) || !/提醒/.test(raw)) return null;
-  const clauses = raw.trim().replace(/[。！!]$/, "")
+  const text = stripPoliteness(raw);
+  if (!isReminderCreation(text) || !/提醒/.test(text)) return null;
+  const clauses = text.replace(/[。！!]$/, "")
     .split(/[，,；;\n]+|(?:然后|以及|并且|再|和)(?=\s*(?:\d|[零一二两三四五六七八九十半]))/)
     .map((s) => s.trim());
   const reminders: Reminder[] = [];
@@ -161,8 +167,9 @@ const malformedEnumeratedItem = (item: string): boolean =>
  * single-item card contract. It is deliberately stricter than
  * parseExactReminders and stays internal to coverage/planner validation. */
 export const parseEnumeratedReminders = (raw: string): Reminder[] | null => {
-  if (!isReminderCreation(raw) || !/提醒/.test(raw)) return null;
-  const text = raw.trim().replace(/[。！!]+$/, "");
+  const cleaned = stripPoliteness(raw);
+  if (!isReminderCreation(cleaned) || !/提醒/.test(cleaned)) return null;
+  const text = cleaned.replace(/[。！!]+$/, "");
   const start = new RegExp(
     `(?:(?:(?:请)?帮我|请)\\s*)?(${DURATION})\\s*(?:之后|以后|后)\\s*(?:再)?提醒我` +
     `|(?:请)?提醒我\\s*(${DURATION})\\s*(?:之后|以后|后)`, "g");
