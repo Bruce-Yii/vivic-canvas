@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 2,
+  "id": "a4e453a5-fc9a-47fa-a8d3-f71e9ea1b7a9",
+  "name": "vivic",
+  "slug": "vivic",
+  "kind": "software",
+  "lifecycle": "active",
+  "summary": "Vivic 项目源码调查与维护",
+  "createdAt": "2026-10-30T23:47:20.7495215+08:00",
+  "updatedAt": "2026-10-30T23:47:20.9792023+08:00",
+  "repository": {
+    "gitInitialized": true,
+    "defaultBranch": "main",
+    "remote": "https://github.com/Bruce-Yii/vivic"
+  },
+  "commands": {
+    "setup": "",
+    "format": "",
+    "lint": "",
+    "test": "",
+    "build": ""
+  },
+  "paths": {
+    "intermediate": "work",
+    "deliverables": "outputs"
+  }
+}

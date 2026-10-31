@@ -1,0 +1,43 @@
+{
+  "name": "@vivic/local-api",
+  "private": true,
+  "version": "0.6.0",
+  "type": "module",
+  "files": ["src"],
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "test": "vitest run",
+    "test:live": "vitest run --config vitest.live.config.ts",
+    "typecheck": "tsc -b"
+  },
+  "dependencies": {
+    "@earendil-works/pi-ai": "1.2.0",
+    "@earendil-works/pi-coding-agent": "1.2.0",
+    "@hono/node-server": "^1.19.7",
+    "@mozilla/readability": "0.6.0",
+    "@vivic/card-runtime": "workspace:*",
+    "@vivic/contracts": "workspace:*",
+    "@vivic/mobile-console-prototype": "workspace:*",
+    "fflate": "^0.8.2",
+    "hono": "^4.11.2",
+    "jsdom": "30.1.2",
+    "sharp": "0.35.5",
+    "tsx": "^4.21.0",
+    "undici": "7.30.0",
+    "ws": "^8.22.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/jsdom": "27.0.0",
+    "@types/node": "^24.13.3",
+    "@types/ws": "^8.18.2",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "typescript": "~6.0.2",
+    "vitest": "^5.0.4"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

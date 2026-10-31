@@ -1,0 +1,17 @@
+{
+  "product": "Vivic Online",
+  "createdAt": "2026-10-25T14:06:27.004Z",
+  "format": "deployment-source-and-built-web",
+  "node": "24.21.0",
+  "provider": "stepfun-coding-plan",
+  "secretsIncluded": false,
+  "localLauncherIncluded": false,
+  "modelWeightsIncluded": false,
+  "liveModelVerified": false,
+  "persistentSpace": true,
+  "independentMobile": true,
+  "databaseAndUserAssetsIncluded": false,
+  "nativeV2ExecutionEnabled": false,
+  "modelPlatform": "deployment-configured-api",
+  "linuxVerificationReceipt": "Match this archive SHA256 to the separate target-host verification report; packaging itself does not run Linux."
+}

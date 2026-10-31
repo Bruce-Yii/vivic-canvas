@@ -1,0 +1,19 @@
+.space-organizer-body { display:grid; gap:16px; }
+.space-arrange-review-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; font:400 12px/1.5 var(--hark-font); color:var(--hark-secondary); }
+.space-arrange-controls { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.space-arrange-controls label { display:flex; flex-direction:column; gap:7px; font:400 12px/1.5 var(--hark-font); color:var(--hark-secondary); }
+.space-arrange-controls label:last-child { grid-column:1/-1; }
+.space-arrange-controls select { width:100%; min-width:0; border:1px solid var(--hark-stroke); border-radius:14px; padding:11px 12px; background:var(--hark-wash); color:var(--hark-ink); font:400 14px/1.5 var(--hark-font); }
+.space-arrange-preview { padding:20px; --surface-radius:22px; --surface-fill:var(--hark-fill); --surface-stroke:var(--hark-stroke); }
+.space-arrange-preview>header { display:flex; gap:12px; align-items:center; padding-bottom:18px; }
+.space-arrange-preview h3 { margin:0; font:500 16px/1.5 var(--hark-font); }.space-arrange-preview header p { margin:4px 0 0; font:400 11px/1.5 var(--hark-font); color:var(--hark-secondary); }
+.space-arrange-list { max-height:300px; overflow:auto; padding-right:4px; scrollbar-gutter:stable; }
+.space-arrange-group+.space-arrange-group { margin-top:18px; }
+.space-arrange-group h4 { display:flex; gap:8px; align-items:center; margin:0 0 8px; font:500 11px/1.5 var(--hark-font); color:var(--hark-secondary); }
+.space-arrange-group h4 span { font-weight:400; opacity:.65; }
+.space-arrange-group ol { margin:0; padding:0; list-style:none; }
+.space-arrange-group li { display:flex; gap:10px; align-items:center; padding:11px 0; border-bottom:1px solid var(--hark-stroke); font:400 13px/1.6 var(--hark-font); }
+.space-arrange-group li:last-child { border:0; }.space-arrange-group li>span:nth-child(2) { flex:1; min-width:0; overflow-wrap:anywhere; }.space-arrange-group li>svg { color:var(--hark-secondary); flex:none; }
+.space-arrange-card-icon { display:grid; place-items:center; width:30px; height:32px; border-radius:9px; background:var(--hark-wash); flex:none; }
+.space-arrange-preview>footer { display:flex; align-items:center; justify-content:space-between; gap:12px; border-top:1px solid var(--hark-stroke); padding-top:16px; margin-top:14px; }
+.space-arrange-preview>footer>span { font-size:11px; color:var(--hark-secondary); }

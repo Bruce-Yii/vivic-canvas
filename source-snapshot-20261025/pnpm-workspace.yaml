@@ -1,0 +1,8 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+  - "contrib/mobile-console"
+allowBuilds:
+  esbuild: true
+  '@google/genai': false
+  protobufjs: false

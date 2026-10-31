@@ -230,6 +230,9 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
   const check = () => { budget.signal.throwIfAborted(); if (deps.isCurrent && !deps.isCurrent()) throw new Error("connection_changed"); };
   const fallback = (request = req, hint = deps.hint) => budget.run(() => deps.plan(request, hint, budget.signal));
   const mode = deps.multiCard ?? multiCardMode();
+  // `main-only` never consults a classifier: the observer publishes rule rows
+  // plus explicit skipped rows, and the main planner owns the rest.
+  const mainOnly = deps.router.policy === "main-only";
   try {
     check();
     // Images use the trusted current-attachment path, never a text-only label.
@@ -246,14 +249,22 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
     let ruleFallback = false;
     let rows: Row[];
     if (!hint?.result) {
-      // A router outage must not disable already-supported literal local tasks.
-      // Only uniquely parsed contracts in the explicit allow-list qualify.
-      const parsed = clauses.map(text => Object.values(CARD_CONTRACTS).filter(contract => deps.router.directRoutes?.has(contract.id as IntentRouteId)
-        && contract.parse?.(text, req.canvasContext) != null));
-      if (parsed.some(matches => matches.length !== 1)) return await fallback();
-      rows = clauses.map((text, index) => ({ text, route: parsed[index]![0]!.id as Row["route"], probability: 1,
-        probabilities: {}, none: false, latencyMs: 0, failed: false }));
-      ruleFallback = true;
+      if (mainOnly) {
+        // No classifier row exists by design. Rule clauses keep their literal
+        // route; every other clause stays unresolved for the planner (which
+        // must cover it) instead of being guessed here.
+        rows = hint?.all ? await budget.run(() => hint.all!) : clauses.map(text => ({ text, route: null,
+          probability: 0, probabilities: {}, none: true, latencyMs: 0, failed: false, routeSource: "skipped" as const }));
+      } else {
+        // A router outage must not disable already-supported literal local tasks.
+        // Only uniquely parsed contracts in the explicit allow-list qualify.
+        const parsed = clauses.map(text => Object.values(CARD_CONTRACTS).filter(contract => deps.router.directRoutes?.has(contract.id as IntentRouteId)
+          && contract.parse?.(text, req.canvasContext) != null));
+        if (parsed.some(matches => matches.length !== 1)) return await fallback();
+        rows = clauses.map((text, index) => ({ text, route: parsed[index]![0]!.id as Row["route"], probability: 1,
+          probabilities: {}, none: false, latencyMs: 0, failed: false }));
+        ruleFallback = true;
+      }
     } else rows = hint.all ? await budget.run(() => hint.all!) : clauses.length === 1
       ? [{ text: clauses[0]!, ...hint.result, failed: false }] : [];
     check();
@@ -282,7 +293,9 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
     let say: string | undefined;
     let rulePlans: ClausePlan[] = [];
     let builds: ClauseBuild[] = [];
-    let usedProvider: IntentResult["usedProvider"] = ruleFallback ? "rules-offline" : rows.every(row => row.source === "rules") ? "rules" : "decision";
+    let usedProvider: IntentResult["usedProvider"] = ruleFallback ? "rules-offline" : rows.every(row => row.source === "rules") ? "rules"
+      // main-only has no classifier decision to attribute; the planner label wins.
+      : mainOnly ? undefined : "decision";
     // M3 also covers the production initial turn: the task wrapper injects
     // taskContext for every on-mode request, but an initial task has no prior
     // step, so its clauses may still propose locally before the one planner call.

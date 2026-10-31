@@ -1,0 +1,48 @@
+/* News card. A cover (when present) runs edge to edge; the text column keeps the shell rhythm. */
+.vivic-news-layout { display: flex; flex-direction: column; min-width: 0; }
+.vivic-scene[data-fixed] .vivic-news-layout { flex: 1 1 0; min-height: 0; contain: size; overflow: hidden; }
+.vivic-news-cover { position: relative; flex: none; overflow: hidden; background: var(--vivic-subtle); }
+.vivic-scene[data-mode="control"] .vivic-news-cover { aspect-ratio: 16 / 9; }
+.vivic-news-content { display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 14px 20px 16px; }
+.vivic-scene[data-fixed] .vivic-news-content { flex: 1 1 0; min-height: 0; overflow: hidden; }
+.vivic-news-content > :not(.vivic-news) { flex-shrink: 0; }
+
+.vivic-news { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.vivic-scene[data-fixed] .vivic-news { flex: 1 1 0; min-height: 0; contain: size; overflow: hidden; }
+.vivic-news-summary {
+  margin: 0;
+  font-size: 13px;
+  line-height: 20px;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.vivic-news-points { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.vivic-scene[data-fixed] .vivic-news-points { flex: 1 1 0; min-height: 0; overflow: hidden; }
+.vivic-news-points-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  color: var(--vivic-muted-ink);
+}
+.vivic-news-points ul { display: grid; margin: 0; padding: 0; list-style: none; }
+.vivic-scene[data-mode="control"] .vivic-news-points ul { gap: 4px; }
+.vivic-news-points li { position: relative; padding-left: 14px; font-size: 12.5px; line-height: 20px; overflow-wrap: anywhere; }
+.vivic-news-points li::before {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 8px;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--vivic-accent-2);
+}
+.vivic-scene[data-fixed] .vivic-news-points li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vivic-scene[data-mode="control"] .vivic-news-points li { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }

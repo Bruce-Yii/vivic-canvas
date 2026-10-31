@@ -1,0 +1,51 @@
+/* Timeline: a vertical rail with one dot per node; the latest node is accented. */
+.vivic-scene[data-fixed] .vivic-timeline-scroll { flex: 1 1 0; min-height: 0; }
+.vivic-timeline-scroll[data-more] {
+  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 28px), transparent);
+  mask-image: linear-gradient(to bottom, black calc(100% - 28px), transparent);
+}
+.vivic-timeline { display: flex; flex-direction: column; gap: 12px; margin: 0; padding: 3px 0 2px 3px; list-style: none; min-width: 0; }
+.vivic-timeline-item { position: relative; display: flex; align-items: flex-start; gap: 6px; min-width: 0; padding-left: 20px; }
+.vivic-timeline-item::before {
+  content: "";
+  position: absolute;
+  top: 16px;
+  bottom: -14px;
+  left: 4px;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--vivic-track);
+}
+.vivic-timeline-item:last-child::before { display: none; }
+.vivic-timeline-dot {
+  position: absolute;
+  top: 4px;
+  left: 0;
+  box-sizing: border-box;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid color-mix(in oklab, var(--foreground) 26%, transparent);
+  background: var(--card);
+}
+.vivic-timeline-item[data-latest] .vivic-timeline-dot { border-color: var(--vivic-accent); background: var(--vivic-accent); box-shadow: 0 0 0 3px var(--vivic-accent-soft); }
+.vivic-timeline-text { display: flex; flex-direction: column; gap: 1px; flex: 1 1 auto; min-width: 0; }
+.vivic-timeline-date { font-size: 11.5px; line-height: 1.5; color: var(--vivic-muted-ink); font-variant-numeric: tabular-nums; }
+.vivic-timeline-item[data-latest] .vivic-timeline-date { color: color-mix(in oklab, var(--vivic-accent) 85%, var(--foreground)); font-weight: 600; }
+.vivic-timeline-title { font-size: 14px; font-weight: 650; line-height: 1.4; }
+.vivic-timeline-desc { margin: 1px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--vivic-muted-ink); overflow-wrap: anywhere; }
+.vivic-timeline-item .vivic-timeline-delete { flex-shrink: 0; width: 24px; height: 24px; }
+
+.vivic-timeline-order { display: inline-flex; gap: 4px; }
+.vivic-timeline-order .vivic-scene-chip { background: none; font-family: inherit; cursor: pointer; }
+.vivic-timeline-order .vivic-scene-chip[aria-pressed="true"] {
+  border-color: color-mix(in oklab, var(--vivic-accent) 45%, transparent);
+  background: var(--vivic-accent-soft);
+  color: color-mix(in oklab, var(--vivic-accent) 85%, var(--foreground));
+}
+.vivic-timeline-order .vivic-scene-chip:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+
+.vivic-timeline-form { display: flex; flex-direction: column; gap: 6px; padding-top: 8px; border-top: 1px solid var(--vivic-line); }
+.vivic-timeline-form-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.vivic-timeline-form-date { flex: 0 0 112px; }
+.vivic-timeline-form-title { flex: 1 1 140px; }

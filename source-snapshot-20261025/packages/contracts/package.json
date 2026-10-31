@@ -1,0 +1,21 @@
+{
+  "name": "@vivic/contracts",
+  "private": true,
+  "version": "0.6.0",
+  "type": "module",
+  "files": ["src"],
+  "exports": {
+    ".": "./src/index.ts",
+    "./json-schema": "./src/wireJsonSchema.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@js-temporal/polyfill": "0.5.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.2"
+  }
+}

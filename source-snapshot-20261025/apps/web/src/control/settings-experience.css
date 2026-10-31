@@ -1,0 +1,105 @@
+/* Hark Web 26ac2724: original fonts, glyphs, alpha materials and continuous
+   corners. Compact modal, grouping and disclosure hierarchy are Vivic D choices. */
+dialog.vivic-settings.vivic-settings-experience.vh-hark {
+ --se-ink:var(--hark-ink);--se-muted:var(--hark-secondary);--se-line:var(--hark-stroke);
+ position:fixed;inset:0;margin:auto;width:min(460px,calc(100vw - 32px));max-width:none;
+ min-height:0;max-height:calc(100dvh - 64px);padding:0;border:0;overflow:visible;background:transparent;
+ color:var(--hark-ink);font:400 15px/19px var(--hark-font);border-radius:24px;
+ box-shadow:0 8px 40px rgb(29 29 31 / .12);
+}
+dialog.vivic-settings:not([open]){display:none}
+dialog.vivic-settings::backdrop{background:rgb(29 29 31 / .12);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.se-shell{display:flex;flex-direction:column;max-height:calc(100dvh - 64px);overflow:hidden;--surface-radius:24px;--surface-fill:var(--hark-fill);--surface-stroke:var(--hark-stroke);--surface-blur:blur(50px)}
+.se-topbar{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 12px 24px;gap:16px}
+.se-topbar h1{margin:0;font:500 20px/26px var(--hark-font);letter-spacing:-.02em}
+.vivic-settings-experience .se-close{width:32px;height:32px;border-radius:50%;color:var(--hark-secondary);background:transparent;box-shadow:none}
+.se-nav{display:flex;gap:4px;padding:0 20px 16px}
+.vivic-settings-experience .se-nav button{flex:1;min-height:36px;padding:8px 12px;border-radius:999px;background:transparent;color:var(--hark-secondary);font:400 14px/20px var(--hark-font);transition:none}
+.vivic-settings-experience .se-nav button[aria-current]{background:var(--hark-composer);color:var(--hark-ink)}
+.se-nav button:hover{background:var(--hark-wash)}
+.se-scroll{max-height:calc(100dvh - 200px);min-height:220px;overflow:auto;overscroll-behavior:contain;padding:0 24px 24px;scrollbar-width:thin;scrollbar-color:var(--hark-stroke) transparent}
+.se-group[hidden],.vivic-space-tools [hidden]{display:none!important}
+.se-group{min-width:0;overflow-wrap:anywhere}
+.vivic-settings.vivic-settings-experience section{background:transparent;color:var(--hark-ink);border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+.se-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:52px}
+.se-row>span:first-child,.se-row>label{min-width:0}
+.se-row [role=combobox]{min-width:0;max-width:260px;white-space:normal;text-align:left;height:auto;min-height:36px;font-size:13px;box-shadow:none}
+.se-row>div{min-width:0}
+.se-connection-heading{min-height:44px}
+.se-connection-state{font-size:12px;color:var(--hark-secondary);white-space:nowrap;display:flex;align-items:center;gap:6px}
+.se-connection-state[data-connected=true]::before{content:"";width:5px;height:5px;border-radius:50%;background:#278166}
+.se-provider-key{display:flex;gap:8px;margin:12px 0}
+.se-provider-key input{min-width:0;flex:1;width:0;height:40px}
+.se-provider-key button{height:40px}
+.se-caption{margin:8px 0;color:var(--hark-secondary);font-size:12px;line-height:18px}
+.se-error{margin:10px 0;color:var(--color-error,#b4493e);font-size:12px;line-height:18px}
+.se-details{border-top:1px solid var(--hark-stroke);margin-top:8px}
+.se-details>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px;padding:12px 0;font-size:13px;color:var(--hark-secondary);cursor:pointer;list-style:none}
+.se-details>summary::-webkit-details-marker{display:none}
+.se-details>summary>svg{width:14px;height:14px;flex:none}
+.se-details[open]>summary>svg{transform:rotate(180deg)}
+.se-detail-body{padding:0 0 12px}
+.se-details>section{background:transparent;border:0;padding:8px 0;border-radius:0}
+.se-background .se-details{margin-top:0}
+.se-background-current{display:flex;align-items:center;justify-content:flex-end;gap:8px;color:var(--hark-ink);font-size:13px}
+.se-swatch{height:20px;width:20px;border-radius:50%;border:1px solid var(--hark-stroke)}
+.se-background .se-detail-body>div+div{margin-top:16px}
+.se-background .se-detail-body button{background:var(--hark-composer);border-color:var(--hark-stroke);color:var(--hark-ink)}
+.se-background .se-detail-body button[aria-pressed=true]{outline:1px solid var(--hark-ink)}
+.se-theme{display:flex;gap:2px;padding:3px;border-radius:999px;background:var(--hark-wash)}
+.vivic-settings-experience .se-theme button{height:30px;border-radius:999px;padding:4px 12px;font-size:12px;color:var(--hark-secondary);transition:none}
+.vivic-settings-experience .se-theme button[data-state=on]{background:var(--hark-composer);color:var(--hark-ink)}
+.se-display-options{border:0;margin:0}
+.se-display-options>summary{min-height:32px;padding:0 0 8px;font-size:12px}
+.se-preference-block{border-top:1px solid var(--hark-stroke);margin-top:8px;padding-top:4px}
+.se-switch{position:relative;display:inline-flex;width:34px;height:20px;flex:none;align-items:center;padding:2px;border-radius:999px;background:var(--hark-wash);border:1px solid var(--hark-stroke)}
+.se-switch[data-state=checked]{background:var(--hark-primary);border-color:transparent}
+.se-switch>span{display:block;height:14px;width:14px;background:var(--hark-solid);border-radius:50%;box-shadow:0 1px 3px rgb(0 0 0 / .15);transition:transform 120ms ease-out}
+.se-switch[data-state=checked]>span{transform:translateX(14px);background:var(--hark-on-fill)}
+.se-voice-choice>div{display:flex;align-items:center;gap:4px}
+.se-voice-choice [role=combobox]{max-width:210px}
+.se-range{display:grid;grid-template-columns:1fr auto;gap:8px;font-size:13px;margin:12px 0}
+.se-range input{grid-column:1/-1;height:20px;padding:0;box-shadow:none}
+.se-schedule{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.se-schedule label{display:grid;gap:8px;font-size:12px}
+.se-schedule input{width:100%;min-width:0}
+.se-inline-action{text-decoration:underline;text-underline-offset:3px;margin-left:6px}
+.se-notice{margin-bottom:12px}
+.se-data>p:first-child{margin-top:12px}
+.se-data-danger{margin-top:20px}
+.se-data-danger>summary{color:var(--color-error,#b4493e)}
+.se-data [data-vivic-data-feedback]:empty{display:none}
+.vivic-settings-experience .se-help{height:40px;font-size:12px;color:var(--hark-secondary);margin-top:8px;padding-inline:0}
+.vivic-settings-experience .se-disconnect{font-size:12px;color:var(--color-error,#b4493e);padding-inline:0}
+.vivic-settings-experience :is(button,input){accent-color:var(--hark-primary)}
+.vivic-settings-experience input:not([type=checkbox]):not([type=range]){background:var(--hark-composer);border-color:var(--hark-stroke);color:var(--hark-ink);font-family:var(--hark-font)}
+.vivic-settings-experience input::placeholder{color:var(--hark-secondary)}
+.vivic-settings-experience [role=listbox]{background:var(--hark-solid);border-color:var(--hark-stroke);color:var(--hark-ink);font-family:var(--hark-font)}
+.vivic-settings-experience [role=option][data-highlighted]{background:var(--hark-wash)}
+.vivic-settings-experience [class~=text-neutral-500],.vivic-settings-experience [class~=text-neutral-600]{color:var(--hark-secondary)}
+.vivic-settings-experience [class~=text-neutral-700],.vivic-settings-experience [class~=text-neutral-900]{color:var(--hark-ink)}
+.se-overlays{position:relative;z-index:60}
+.vivic-space-tools .vivic-dialog-header{padding:24px}
+.vivic-space-tools .vivic-reading-title{font:500 20px/26px var(--hark-font)!important}
+.vivic-space-tools .vivic-reading-caption{display:none}
+.vivic-space-tools .hark-tabs{margin:0 24px 12px}
+.vivic-space-tools-scroll{overflow:auto;min-height:0;padding:0 24px 24px;overscroll-behavior:contain}
+.vivic-space-tools-scroll section{background:transparent;border:0;padding:16px 0;color:var(--hark-ink)}
+.vivic-space-tools-scroll section+section{border-top:1px solid var(--hark-stroke)}
+.vivic-space-tools-scroll [class~=text-neutral-500],.vivic-space-tools-scroll [class~=text-neutral-400],.vivic-space-tools-scroll [class~=text-neutral-600]{color:var(--hark-secondary)}
+.vivic-space-tools-scroll [class~=border-neutral-200]{border-color:var(--hark-stroke)}
+.vivic-space-tools-scroll [data-vivic-canvas-list] li:has([data-active]){background:var(--hark-wash);color:var(--hark-ink)}
+.vivic-space-tools-scroll [data-vivic-canvas-list] :is(li,form){flex-wrap:wrap}
+.vivic-space-tools-scroll [data-vivic-canvas-list] li [data-active] span:last-child{display:none}
+.vivic-space-actions{display:flex;gap:8px;padding-top:12px;border-top:1px solid var(--hark-stroke)}
+.vh-hark .vivic-user-canvas-controls>.vivic-find-compact{width:44px;padding:0}
+@media(max-width:520px){
+ dialog.vivic-settings.vivic-settings-experience.vh-hark{width:calc(100vw - 24px);max-height:calc(100dvh - 32px)}
+ .se-shell{max-height:calc(100dvh - 32px)}
+ .se-scroll{max-height:calc(100dvh - 168px);padding:0 20px 20px}
+ .se-topbar{padding:16px 16px 12px 20px}
+ .se-nav{padding-inline:16px}
+ .se-row [role=combobox]{max-width:220px}
+ .se-theme button{padding-inline:10px}
+}
+@media(prefers-reduced-motion:reduce){.se-switch>span{transition:none}}

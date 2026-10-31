@@ -1,0 +1,61 @@
+# Deliberately independent from compose.yaml: no production names or ports.
+services:
+  vivic:
+    image: ${VIVIC_CHECK_IMAGE:?Set an isolated image tag}
+    build:
+      context: ../..
+      dockerfile: deploy/online/Dockerfile
+      args:
+        VIVIC_ONLINE_PREBUILT_WEB: "1"
+        NODE_OPTIONS: --max-old-space-size=384
+        VIVIC_NODE_IMAGE: ${VIVIC_CHECK_NODE_IMAGE:-node:24.21.0-bookworm-slim@sha256:d6aa754f16b3197301076f047b5def2f02ea1dbbc2ca920407d46d7ec7f87b20}
+    environment:
+      VIVIC_ONLINE_ORIGIN: https://vivic-staging.localhost:18443
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    mem_limit: 1g
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8790/healthz').then(async r=>{if((await r.json()).service!=='vivic-online-api')process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  fixture:
+    image: ${VIVIC_CHECK_IMAGE:?Set an isolated image tag}
+    command: [node, --import, tsx, /checks/fixture.mjs]
+    environment:
+      PORT: "18802"
+      VIVIC_ONLINE_ORIGIN: https://vivic-staging.localhost:18444
+      VIVIC_CHECK_BIND_HOST: 0.0.0.0
+      VIVIC_CHECK_APP_ROOT: /app/apps/local-api
+    volumes:
+      - ./verify:/checks:ro
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:18802/healthz').then(async r=>{if((await r.json()).service!=='vivic-online-api')process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  tls:
+    image: ${VIVIC_CHECK_NGINX_IMAGE:-nginx:stable-alpine@sha256:47928bf67eb62a1863cb08d9ecb52d3e704304ba614eaee17884204677702951}
+    entrypoint: [nginx, -g, "daemon off;"]
+    depends_on:
+      vivic: {condition: service_healthy}
+      fixture: {condition: service_healthy}
+    ports:
+      - 127.0.0.1:18443:8443
+      - 127.0.0.1:18444:8444
+    volumes:
+      - ./verify/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./verify/proxy.conf:/etc/nginx/vivic-proxy.conf:ro
+      - ${VIVIC_ONLINE_CHECK_DIR:?Set a new verification directory}/cert:/cert:ro
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 64
+    mem_limit: 96m

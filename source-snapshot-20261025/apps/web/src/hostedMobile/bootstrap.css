@@ -1,0 +1,18 @@
+/* D service bootstrap uses the existing Hark font/glyph/material/sky primitives. */
+html,body,#root{min-height:100%;margin:0}*{box-sizing:border-box}
+.hosted-bootstrap{min-height:100dvh;position:relative;display:grid;place-items:center;padding:max(24px,env(safe-area-inset-top)) 20px max(24px,env(safe-area-inset-bottom));isolation:isolate}
+.hosted-bootstrap>.hark-backdrop{position:fixed}
+.hosted-bootstrap :is(h1,p){margin:0}.hosted-bootstrap :is(button,input,a){font:inherit}
+.hosted-bootstrap-card{display:flex;flex-direction:column;gap:24px;width:min(100%,448px);padding:32px 28px;--surface-blur:blur(50px);--surface-stroke:transparent;--surface-radius:24px}
+.hosted-bootstrap-brand{font:500 20px/26px var(--hark-serif)}
+.hosted-bootstrap-card h1{font:400 32px/42.24px var(--hark-font)}
+.hosted-bootstrap-card form,.hosted-bootstrap-confirm{display:flex;flex-direction:column;gap:14px;min-width:0}
+.hosted-bootstrap-card label{font:400 14px/19px var(--hark-font)}
+.hosted-bootstrap-card input{width:100%;min-width:0;height:48px;padding:12px 16px;border:1px solid var(--hark-stroke);border-radius:16px;background:var(--hark-wash);color:var(--hark-ink);font:400 15px/19px var(--hark-font)}
+.hosted-bootstrap-hint{font:400 13px/19px var(--hark-font);color:var(--hark-secondary)}
+.hosted-bootstrap-primary,.hosted-bootstrap-quiet{display:flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:12px 18px;border:0;border-radius:24px;cursor:pointer;text-decoration:none;font:500 15px/19px var(--hark-font)}
+.hosted-bootstrap-primary{background:var(--hark-primary);color:var(--hark-on-fill)}
+.hosted-bootstrap-quiet{background:transparent;color:var(--hark-secondary)}
+.hosted-bootstrap-confirm strong{font:500 20px/26px var(--hark-font);overflow-wrap:anywhere}
+.hosted-bootstrap-message{font:400 13px/19px var(--hark-font);color:var(--hark-secondary);overflow-wrap:anywhere}
+@media(max-width:360px){.hosted-bootstrap{padding-left:12px;padding-right:12px}.hosted-bootstrap-card{padding:28px 22px}.hosted-bootstrap-card h1{font-size:28px;line-height:36px}}

@@ -1,0 +1,41 @@
+/* D Vivic choreography over unmodified Hark sky frames. Original sky source is
+   recorded in SOURCE.json; these light paths are not original Hark parameters. */
+.hark-canvas-backdrop { --space-light-strength:.55; --space-motion-travel:1; }
+.hark-canvas-backdrop > .hark-backdrop { inset:-5%; transform:scale(1.025); animation:vivic-sky-drift 36s ease-in-out infinite alternate; }
+.hark-space-light,.hark-space-focus,.hark-space-activity,.hark-space-receipt { position:absolute;inset:0;pointer-events:none; }
+.hark-space-light { overflow:hidden;opacity:calc(var(--space-light-strength) * .72);transition:opacity 800ms cubic-bezier(.45,0,.55,1);mix-blend-mode:soft-light; }
+.hark-space-light i { position:absolute;display:block;width:105%;height:125%;left:-25%;top:-50%;border-radius:50%;transform-origin:50% 70%;background:radial-gradient(ellipse at 50% 45%,rgb(255 255 255 / .95),rgb(255 255 255 / .4) 27%,transparent 65%);animation:vivic-light-sweep 18s ease-in-out infinite alternate; }
+.hark-space-light i:nth-child(2) { left:34%;top:8%;width:105%;height:110%;background:radial-gradient(ellipse,rgb(180 214 255 / .95),transparent 65%);animation:vivic-light-orbit 23s ease-in-out -7s infinite alternate; }
+.hark-space-light i:nth-child(3) { left:-15%;top:42%;height:95%;background:radial-gradient(ellipse,var(--space-light-accent),transparent 65%);animation:vivic-light-orbit 28s ease-in-out -12s infinite alternate-reverse; }
+.hark-canvas-backdrop[data-vivic-atmosphere-theme=dark] .hark-space-light { mix-blend-mode:screen;opacity:calc(var(--space-light-strength) * .28); }
+.hark-canvas-backdrop[data-space-motion=vivid] { --space-motion-travel:1.8; }
+.hark-canvas-backdrop[data-space-motion=vivid] .hark-space-light { opacity:calc(var(--space-light-strength) * .98); }
+.hark-canvas-backdrop[data-space-motion=vivid][data-vivic-atmosphere-theme=dark] .hark-space-light { opacity:calc(var(--space-light-strength) * .43); }
+.hark-canvas-backdrop[data-space-motion=vivid] .hark-space-light i { animation-duration:12s; }
+.hark-space-focus { opacity:0;background:radial-gradient(ellipse at 50% 47%,transparent 14%,rgb(10 19 35 / .38) 100%);transition:opacity 600ms ease; }
+.hark-canvas-backdrop[data-space-phase=focus] .hark-space-focus { opacity:1; }
+.hark-space-activity { opacity:0;background:radial-gradient(ellipse at 50% 0%,rgb(207 230 255 / .75),transparent 57%);transition:opacity 650ms ease; }
+.hark-canvas-backdrop:is([data-space-phase=thinking],[data-space-phase=listening],[data-space-phase=speaking]) .hark-space-activity { opacity:calc(var(--space-light-strength) * .55);animation:vivic-activity-breathe 2.8s ease-in-out infinite; }
+.hark-canvas-backdrop[data-space-phase=awakening] .hark-space-activity { opacity:1;animation:vivic-space-awaken 1100ms cubic-bezier(.16,1,.3,1) both; }
+.hark-space-receipt { background:radial-gradient(ellipse at 50% 80%,rgb(217 244 255 / .55),transparent 65%);animation:vivic-space-receipt 1300ms ease-out both; }
+.hark-space-receipt[data-space-receipt=transfer] { background:radial-gradient(ellipse at 50% 100%,rgb(218 229 255 / .75),transparent 58%); }
+.hark-space-receipt:is([data-space-receipt=undo],[data-space-receipt=redo]) { background:radial-gradient(ellipse at 20% 70%,rgb(234 224 255 / .55),transparent 62%); }
+.hark-canvas-backdrop[data-space-running=false] > .hark-backdrop,.hark-canvas-backdrop[data-space-running=false] .hark-space-light i,.hark-canvas-backdrop[data-space-running=false] .hark-space-activity { animation-play-state:paused; }
+.hark-canvas-backdrop:is([data-space-motion=off],[data-reduced-motion=true]) .hark-space-light { opacity:0; }
+.hark-canvas-backdrop[data-reduced-motion=true] .hark-space-activity { animation:none;transition:none; }
+@keyframes vivic-sky-drift { from{transform:scale(1.025) translate3d(-1%,0,0)}to{transform:scale(1.065) translate3d(1%,1%,0)} }
+@keyframes vivic-light-sweep { from{transform:translate3d(-8%,-5%,0) rotate(-12deg)}to{transform:translate3d(calc(14% * var(--space-motion-travel)),12%,0) rotate(20deg)} }
+@keyframes vivic-light-orbit { from{transform:translate3d(6%,-8%,0) scale(.92)}to{transform:translate3d(calc(-14% * var(--space-motion-travel)),9%,0) scale(1.16)} }
+@keyframes vivic-activity-breathe { 0%,100%{transform:scale(.95);opacity:calc(var(--space-light-strength) * .3)}50%{transform:scale(1.1);opacity:calc(var(--space-light-strength) * .65)} }
+@keyframes vivic-space-awaken { 0%{opacity:0;transform:scale(.4)}35%{opacity:calc(var(--space-light-strength) * .85)}100%{opacity:0;transform:scale(1.5)} }
+@keyframes vivic-space-receipt { 0%{opacity:0;transform:scale(.6)}20%{opacity:calc(var(--space-light-strength) * .8)}100%{opacity:0;transform:scale(1.3)} }
+@media(max-width:600px) { .hark-space-light i:nth-child(3){display:none}.hark-space-light{opacity:calc(var(--space-light-strength) * .4)} }
+@media(prefers-reduced-motion:reduce) { .hark-canvas-backdrop > .hark-backdrop,.hark-space-light i,.hark-space-activity,.hark-space-receipt{animation:none!important}.hark-space-light{display:none}.hark-space-focus{transition:none} }
+.vivic-orb-halo { position:absolute;inset:-38%;border-radius:50%;pointer-events:none;background:radial-gradient(circle,rgb(167 208 255 / .26),rgb(204 219 255 / .1) 30%,transparent 68%);opacity:.4;transform:scale(.92);transition:opacity 600ms ease; }
+.vivic-orb-halo:is([data-orb-phase=thinking],[data-orb-phase=listening],[data-orb-phase=streaming]) { opacity:.85;animation:vivic-orb-bloom 3s ease-in-out infinite alternate; }
+.vivic-orb-halo[data-orb-phase=awakening] { animation:vivic-space-awaken 1100ms ease-out both;--space-light-strength:.8; }
+.vivic-orb-halo[data-paused=true] { animation:none; }
+@keyframes vivic-orb-bloom { from{transform:scale(.9);opacity:.45}to{transform:scale(1.18);opacity:.9} }
+.hark-light-slider { display:flex;align-items:center;gap:12px;margin:16px 0 4px;font-size:13px;color:var(--hark-secondary); }
+.hark-light-slider input { min-width:0;flex:1;accent-color:var(--hark-primary); }
+.hark-light-slider output { min-width:34px;text-align:right;font-variant-numeric:tabular-nums; }

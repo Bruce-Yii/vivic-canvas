@@ -83,6 +83,8 @@ export interface PipelineDeps {
   decisionTelemetry?: { plannerCalls: number; directClauses: number; plans?: ClausePlan[]; built?: ClauseBuild[]; firstFeedbackMs?: number };
   /** Internal multi-card switch (default `VIVIC_MULTI_CARD_MODE`, itself "off"). */
   multiCard?: MultiCardMode;
+  /** True only for `VIVIC_DECISION_POLICY=main-only`; widens planner candidates and never calls the 4B. */
+  mainOnly?: boolean;
   /** Keep verified data/search/schedule adapters, while on-mode fallback skips old broad fast rules. */
   skipFastRules?: boolean;
   slotPlanning?: boolean;
@@ -140,8 +142,12 @@ const assembleEnvelope = (actions: Action[], canvasId: string, spokenText?: stri
  * validation repair. The 90s turn deadline is never restarted by a retry. */
 export const runIntent = async (req: IntentRequest, deps: PipelineDeps, signal?: AbortSignal, adapterOnly = false, plannerOnly = false): Promise<IntentResult> => {
   const router = deps.executionRouter ?? deps.router;
+  const mainOnly = router?.policy === "main-only";
   // Resolve the opt-in switch once per request; "off" keeps every path unchanged.
-  deps = { ...deps, multiCard: deps.multiCard ?? multiCardMode(), decisionTelemetry: deps.decisionTelemetry ?? { plannerCalls: 0, directClauses: 0 } };
+  // Main-only needs the hybrid shape by definition: literal clauses stay local
+  // and the remaining subset costs exactly one planner call.
+  deps = { ...deps, mainOnly, multiCard: deps.multiCard ?? (mainOnly ? "hybrid" : multiCardMode()),
+    decisionTelemetry: deps.decisionTelemetry ?? { plannerCalls: 0, directClauses: 0 } };
   const slotPlanning = router?.mode === "on" || (deps.slotPlanning ?? router?.mode === "shadow");
   const legacy = async (routeHint = deps.routeHint, request = req, onlyPlanner = plannerOnly, requestSignal = signal, skipFastRules = false) => {
     const result = await runLegacyIntent(request, { ...deps, slotPlanning, executionRouter: router, skipFastRules,
@@ -349,7 +355,10 @@ const runLegacyIntent = async (
     if (deps.slotPlanning) {
       const planned = await budget.run(() => runSlotPlanner(req, {
         hint: deps.routeHint, definitions, page, travel: deps.travel, signal: budget.signal, usedProvider,
+        // Cache identity: provider wins, otherwise the selected model id.
+        model: deps.planner ? "gpt" : credential?.defaultModel ?? deps.mainProvider ?? deps.stepfun.provider ?? "unknown",
         allowTargetCandidates: deps.executionRouter?.mode === "on",
+        mainOnly: deps.mainOnly === true,
         // A hybrid planner call maps its active clause subset back to the original split.
         ...(deps.multiCard !== "off" ? { report: (plans: Array<{ clause: number; contract: string; cardIds: string[] }>) => {
           if (!deps.decisionTelemetry) return;

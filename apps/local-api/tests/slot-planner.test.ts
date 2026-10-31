@@ -3,12 +3,15 @@ import { ActionEnvelopeSchema, CardRecordSchema, type Action, type IntentRouteId
 import { CredentialStore } from "../src/credentials.js";
 import { runIntent, type IntentResult, type PipelineDeps } from "../src/intent/pipeline.js";
 import { normalizePlanSlots, relativeYear } from "../src/intent/slotNormalize.js";
+import { runSlotPlanner } from "../src/intent/slotPlanner.js";
+import { planCache, resetPlanCache } from "../src/intent/planCache.js";
+import { COMPACT_PROMPT_PREFIX } from "../src/intent/promptCompact.js";
 import type { IntentRouter, RouteResult } from "../src/decision/router.js";
 import type { ChatMessage, StepfunResult } from "../src/stepfun.js";
 import { demoTravelProvider } from "../src/providers/travel.js";
 import type { CanvasContext } from "../src/schemas.js";
 
-afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers(); });
+afterEach(() => { vi.unstubAllEnvs(); vi.restoreAllMocks(); vi.useRealTimers(); resetPlanCache(); });
 
 const emptyContext = (cards: CanvasContext["cards"] = []): CanvasContext => ({
   canvasId: "TEST-canvas", stage: "WORKSPACE", viewport: { x: 0, y: 0, zoom: 1 }, focusHistory: [], cards,
@@ -685,5 +688,189 @@ describe("generate fallback preserves business slots validation", () => {
     release.resolve();
     noExecution(await pending, "error");
     expect(f.generate).toHaveBeenCalledTimes(3);
+  });
+});
+
+function capturedPrompt(f: ReturnType<typeof setup>) {
+  const messages = f.generate.mock.calls.at(-1)![0];
+  return { system: messages[0]!.content, user: messages[1]!.content,
+    payload: JSON.parse(messages[1]!.content) as { canvas: { cards: Array<Record<string, unknown>> } } };
+}
+
+const targetCard = (): CanvasContext["cards"][number] => ({
+  id: "TEST-google", type: "NewsCard",
+  displayProps: { headline: "Google 公司介绍", summary: "谷歌总部位于美国加州山景城，1998 年由佩奇和布林创立。",
+    keyPoints: ["总部山景城", "1998 年创立"] },
+  sourceDataSummary: {}, layout: { x: 0, y: 0, width: 640, height: 480 },
+});
+
+describe("compact planner prompt (VIVIC_COMPACT_PROMPT)", () => {
+  it("is off by default and keeps today's full prompt and canvas", async () => {
+    const f = setup("note", [mixedPlan]);
+    const ctx = todoContext();
+    await runIntent({ text: mixedText, canvasContext: ctx }, f.deps);
+    const { system, payload } = capturedPrompt(f);
+    expect(system).toContain("photo_memory");
+    expect((system.match(/"id":/g) ?? []).length).toBeGreaterThan(3);
+    expect(payload.canvas.cards[0]!.layout).toMatchObject({ x: 0, y: 0, width: 288 });
+  });
+
+  it("sends at most three contracts over a stable prefix and keeps plans/clause", async () => {
+    vi.stubEnv("VIVIC_COMPACT_PROMPT", "on");
+    const f = setup("note", [mixedPlan]);
+    const result = await runIntent({ text: mixedText, canvasContext: emptyContext() }, f.deps);
+    expect(result.kind).toBe("envelope");
+    expect(cards(result).map(card => card.type)).toEqual(["NoteCard", "CountdownCard"]);
+    const { system } = capturedPrompt(f);
+    expect(system.startsWith(COMPACT_PROMPT_PREFIX)).toBe(true);
+    expect(system).toContain('"plans"');
+    expect(system).toContain("clause");
+    expect((system.match(/"id":/g) ?? []).length).toBeLessThanOrEqual(3);
+    expect(system).toContain('"id":"note"');
+    expect(system).toContain('"id":"countdown"');
+  });
+
+  it("cuts the planner prompt size on a multi-clause turn", async () => {
+    const full = setup("note", [mixedPlan]);
+    await runIntent({ text: mixedText, canvasContext: emptyContext() }, full.deps);
+    const fullSystem = capturedPrompt(full).system;
+    vi.stubEnv("VIVIC_COMPACT_PROMPT", "on");
+    const compact = setup("note", [mixedPlan]);
+    await runIntent({ text: mixedText, canvasContext: emptyContext() }, compact.deps);
+    const compactSystem = capturedPrompt(compact).system;
+    expect(compactSystem.length).toBeLessThan(fullSystem.length * 0.5);
+  });
+
+  it("keeps the target card title and body for an answer about that card", async () => {
+    vi.stubEnv("VIVIC_COMPACT_PROMPT", "on");
+    const f = setup("answer", [{ slots: { headline: "Google 公司介绍", summary: "谷歌总部位于山景城，1998 年创立。",
+      keyPoints: ["总部山景城", "1998 年创立"] } }]);
+    const ctx = emptyContext([targetCard()]);
+    ctx.selectedCardIds = ["TEST-google"];
+    const result = await runIntent({ text: "这张卡讲了什么？", canvasContext: ctx }, f.deps);
+    expect(result.kind).toBe("envelope");
+    const { payload } = capturedPrompt(f);
+    const target = payload.canvas.cards.find(card => card.id === "TEST-google")!;
+    expect((target.displayProps as Record<string, unknown>).headline).toBe("Google 公司介绍");
+    expect((target.displayProps as Record<string, unknown>).summary).toContain("山景城");
+    expect((target.displayProps as Record<string, unknown>).keyPoints).toContain("1998 年创立");
+  });
+
+  it("keeps the confusable travel/schedule scenes and drops unrelated rows", async () => {
+    vi.stubEnv("VIVIC_COMPACT_PROMPT", "on");
+    const f = setup("generate", [{ clarify: "请问是几月几号出发？" }]);
+    const result = await runIntent({ text: "帮我规划一个成都三天旅行行程", canvasContext: emptyContext() }, f.deps);
+    expect(result.kind).toBe("clarify");
+    const { system } = capturedPrompt(f);
+    expect(system).toContain("travel_offers");
+    expect(system).toContain("weekly_schedule");
+    expect(system).toContain("project_roadmap");
+    expect(system).not.toContain("photo_memory");
+    expect((system.match(/data结构=/g) ?? []).length).toBeLessThanOrEqual(3);
+  });
+
+  it("keeps edit mode/operation enumerations and still updates the card", async () => {
+    vi.stubEnv("VIVIC_COMPACT_PROMPT", "on");
+    const f = setup("edit", [{ contract: "edit", slots: { mode: "todo", operation: "update", itemIndex: 0, text: "交周报", done: true } }]);
+    const result = await runIntent({ text: "把工作清单里的交周报勾掉", canvasContext: todoContext() }, f.deps);
+    expect(result.kind).toBe("envelope");
+    expect(result.envelope!.actions.some(action => action.type === "card.update")).toBe(true);
+    const { system } = capturedPrompt(f);
+    expect(system).toContain('"operation"');
+    expect(system).toContain('"append"');
+    expect(system).toContain('"pause"');
+    expect(system).toContain('"resume"');
+  });
+
+  it("still builds a grounded scene card with only the relevant guide", async () => {
+    vi.stubEnv("VIVIC_COMPACT_PROMPT", "on");
+    const f = setup("generate", [{ contract: "generate", slots: { scene_id: "data_visualization",
+      data: { chartKind: "bar", points: [{ x: "一月", y: 10 }, { x: "二月", y: 20 }, { x: "三月", y: 15 }] } } }]);
+    const result = await runIntent({ text: "用这些数字画个柱状图：一月10 二月20 三月15", canvasContext: emptyContext() }, f.deps);
+    expect(result.kind).toBe("envelope");
+    expect(cards(result).map(card => card.type)).toEqual(["ChartCard"]);
+    const { system } = capturedPrompt(f);
+    expect(system).toContain("data_visualization");
+    expect(system).toContain("option_comparison");
+    expect(system).not.toContain("photo_memory");
+  });
+});
+
+describe("local plan cache (VIVIC_PLAN_CACHE)", () => {
+  const cachedNoteText = "帮我记一下明天交周报";
+
+  it("is off by default, so every request reaches the model", async () => {
+    const f = setup("note", [note]);
+    await runIntent({ text: noteText, canvasContext: emptyContext() }, f.deps);
+    await runIntent({ text: noteText, canvasContext: emptyContext() }, f.deps);
+    expect(f.generate).toHaveBeenCalledTimes(2);
+    expect(planCache.size).toBe(0);
+  });
+
+  it("replays parsed plans without a second model call and rebuilds the card", async () => {
+    vi.stubEnv("VIVIC_PLAN_CACHE", "on");
+    const f = setup("note", [note]);
+    const first = await runIntent({ text: cachedNoteText, canvasContext: emptyContext() }, f.deps);
+    const second = await runIntent({ text: cachedNoteText, canvasContext: emptyContext() }, f.deps);
+    expect(first.kind).toBe("envelope");
+    expect(second.kind).toBe("envelope");
+    expect(f.generate).toHaveBeenCalledTimes(1);
+    // The host still executes: a fresh card is built from the cached slots.
+    expect(cards(second).map(card => card.type)).toEqual(["NoteCard"]);
+    expect(cards(second)[0]!.id).not.toBe(cards(first)[0]!.id);
+    expect(cards(second)[0]!.displayProps).toEqual({ text: "明天交周报" });
+  });
+
+  it("misses when the canvas changes", async () => {
+    vi.stubEnv("VIVIC_PLAN_CACHE", "on");
+    const f = setup("note", [note]);
+    const first = await runIntent({ text: cachedNoteText, canvasContext: emptyContext() }, f.deps);
+    const second = await runIntent({ text: cachedNoteText,
+      canvasContext: emptyContext([{ id: "TEST-other", type: "NoteCard", displayProps: { text: "旧卡" }, sourceDataSummary: {},
+        layout: { x: 0, y: 0, width: 320, height: 120 } }]) }, f.deps);
+    expect(first.kind).toBe("envelope");
+    expect(second.kind).toBe("envelope");
+    expect(f.generate).toHaveBeenCalledTimes(2);
+  });
+
+  it("misses when the model changes", async () => {
+    vi.stubEnv("VIVIC_PLAN_CACHE", "on");
+    const run = (model: string) => {
+      const generate = vi.fn(async () => ({ ok: true as const, value: note }));
+      const deps = { definitions: [], usedProvider: "stepfun" as const, model,
+        hint: Promise.resolve({ result: decision("note"), target: Promise.resolve(undefined) }),
+        generate, isCurrent: () => true, lookup: async () => ({ kind: "error" as const, message: "TEST lookup forbidden" }) };
+      return { deps, generate };
+    };
+    const first = run("deepseek-flash"), second = run("step-3.7-flash");
+    expect((await runSlotPlanner({ text: cachedNoteText, canvasContext: emptyContext() }, first.deps)).kind).toBe("envelope");
+    expect((await runSlotPlanner({ text: cachedNoteText, canvasContext: emptyContext() }, second.deps)).kind).toBe("envelope");
+    expect(first.generate).toHaveBeenCalledTimes(1);
+    expect(second.generate).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not share a cache entry between compact and full prompts", async () => {
+    vi.stubEnv("VIVIC_PLAN_CACHE", "on");
+    const f = setup("note", [note]);
+    vi.stubEnv("VIVIC_COMPACT_PROMPT", "on");
+    await runIntent({ text: cachedNoteText, canvasContext: emptyContext() }, f.deps);
+    vi.stubEnv("VIVIC_COMPACT_PROMPT", "off");
+    await runIntent({ text: cachedNoteText, canvasContext: emptyContext() }, f.deps);
+    expect(f.generate).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not cache per-turn evidence and writes no card text to logs", async () => {
+    vi.stubEnv("VIVIC_PLAN_CACHE", "on");
+    const info = vi.spyOn(console, "info"), log = vi.spyOn(console, "log");
+    const warn = vi.spyOn(console, "warn"), error = vi.spyOn(console, "error");
+    const f = setup("note", [note]);
+    await runIntent({ text: cachedNoteText, canvasContext: emptyContext() }, f.deps);
+    await runIntent({ text: cachedNoteText, canvasContext: emptyContext() }, f.deps);
+    expect(f.generate).toHaveBeenCalledTimes(1);
+    for (const spy of [info, log, warn, error]) {
+      for (const call of spy.mock.calls) expect(JSON.stringify(call)).not.toContain("周报");
+    }
+    // Only parsed plans/slots and the two subtitle channels are stored.
+    expect(planCache.size).toBe(1);
   });
 });

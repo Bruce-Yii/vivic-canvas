@@ -1,0 +1,64 @@
+@import "./source-theme.css";
+@import "./card-refinement.css";
+@font-face{font-family:"GT Standard L";src:url("./assets/gt-standard-l-standard-regular.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"GT Standard L";src:url("./assets/gt-standard-l-standard-medium.woff2") format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:"GT Standard L";src:url("./assets/gt-standard-l-standard-semibold.woff2") format("woff2");font-weight:600;font-display:swap}
+@font-face{font-family:"GT Standard L";src:url("./assets/gt-standard-l-standard-bold.woff2") format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:"Hark Serif";src:url("./assets/hark-serif-light.woff2") format("woff2");font-weight:300;font-display:swap}
+@font-face{font-family:"Hark Serif";src:url("./assets/hark-serif-medium.woff2") format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:"GT Standard Mono";src:url("./assets/gt-standard-mono-standard-regular.woff2") format("woff2");font-weight:400;font-display:swap}
+
+/* Original role/alpha values are supplied by source-theme.css; target names are D aliases. */
+:root,.vh-hark{
+ --hark-font:"GT Standard L","PingFang SC","Microsoft YaHei UI","Microsoft YaHei","Noto Sans CJK SC","Segoe UI",system-ui,sans-serif;
+ --hark-serif:"Hark Serif","GT Standard L","PingFang SC","Microsoft YaHei UI","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+ --hark-mono:"GT Standard Mono",Consolas,monospace;
+ --hark-ink:var(--text-primary);--hark-secondary:var(--text-secondary);--hark-stroke:var(--stroke-primary);
+ --hark-fill:var(--regular-bg);--hark-solid:var(--regular-solid-bg);--hark-composer:var(--composer-bg);
+ --hark-user:var(--bubble-user-bg);--hark-agent:var(--bubble-agent-bg);--hark-wash:var(--hover-wash);
+ --hark-primary:var(--fill-primary);--hark-on-fill:var(--text-primary-on);--hark-accent:#2b729e;
+ --hark-mode-duration:800ms;--hark-mode-ease:cubic-bezier(.45,0,.55,1);
+}
+.vh-hark{font-family:var(--hark-font);font-size:15px;line-height:19px;font-synthesis:none;color:var(--hark-ink);isolation:isolate;--font-sans:var(--hark-font);--font-heading:var(--hark-font);--foreground:var(--hark-ink);--card-foreground:var(--hark-ink);--muted-foreground:var(--hark-secondary);--border:var(--hark-stroke);--input:var(--hark-stroke);--card:var(--hark-fill);--popover:var(--hark-solid);--popover-foreground:var(--hark-ink);--primary:var(--hark-primary);--primary-foreground:var(--hark-on-fill);--secondary:var(--hark-wash);--secondary-foreground:var(--hark-ink);--accent:var(--hark-wash);--accent-foreground:var(--hark-ink)}
+.dark .vh-hark,.vh-hark[data-theme=dark],.vh-hark[data-appearance=dark],.vh-hark[data-mode=dark]{--hark-accent:#a1d0ff;color-scheme:dark}
+.vh-hark :is(button,input,textarea,select){font-family:inherit}
+.vh-hark :is(button,a,input,textarea,select):focus-visible{outline:2px solid #84baff;outline-offset:3px}
+.vh-hark button:disabled{opacity:.35;cursor:default}
+.vh-hark button{transition:color var(--hark-mode-duration) var(--hark-mode-ease),background-color var(--hark-mode-duration) var(--hark-mode-ease),scale 120ms ease-out}
+.vh-hark button:active:not(:disabled){scale:.97}
+.vh-hark [data-glyph]{display:inline-block;flex-shrink:0;vertical-align:middle}
+.hark-surface{position:relative;isolation:isolate;--surface-fill:var(--hark-fill);--surface-stroke:var(--hark-stroke);--surface-radius:24px;border-radius:var(--surface-radius);background:transparent}
+.hark-surface>.hark-surface-fill,.hark-surface>.hark-surface-stroke{position:absolute;inset:0;z-index:-1;pointer-events:none;border-radius:inherit;transition:background-color var(--hark-mode-duration) var(--hark-mode-ease)}
+.hark-surface>.hark-surface-fill{background:var(--surface-fill);backdrop-filter:var(--surface-blur,none);-webkit-backdrop-filter:var(--surface-blur,none)}
+.hark-surface>.hark-surface-stroke{background:var(--surface-stroke)}
+.hark-icon-button{width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border:0;border-radius:50%;background:transparent;color:inherit}
+.hark-icon-button:hover:not(:disabled){background:var(--hark-wash)}
+.hark-tabs{display:flex;padding:4px;height:48px;gap:0;border-radius:32px;background:var(--hark-composer);backdrop-filter:blur(50px);-webkit-backdrop-filter:blur(50px)}
+.hark-tabs button{height:40px;min-width:70px;padding:0 16px;color:var(--hark-secondary);background:transparent;border:0;border-radius:24px;font-weight:500;font-size:15px;line-height:19px;cursor:pointer}
+.hark-tabs button[aria-current=page]{background:var(--hark-primary);color:var(--hark-on-fill)}
+.hark-task-card{display:flex;align-items:center;gap:12px;min-height:88px;padding:16px;--surface-stroke:transparent;--surface-blur:blur(50px);text-align:left}
+.hark-task-mark{display:flex;align-items:center;justify-content:center;width:36px;height:36px;flex-shrink:0;border-radius:12px;background:var(--hark-wash);align-self:flex-start}
+.hark-task-copy{flex:1;min-width:0}
+.hark-task-copy h3{margin:0;font:500 20px/26px var(--hark-serif);overflow-wrap:anywhere}
+.hark-task-copy p{margin:6px 0 0;color:var(--hark-secondary);font:400 15px/19px var(--hark-font);overflow-wrap:anywhere}
+.vh-hark [data-vivic-button]{min-height:44px;border-radius:24px;font:500 15px/19px var(--hark-font);box-shadow:none;border-color:var(--hark-stroke)}
+.vh-hark [data-vivic-button=default]{background:var(--hark-primary);color:var(--hark-on-fill)}
+.vh-hark [data-vivic-button=secondary],.vh-hark [data-vivic-button=outline]{background:var(--hark-wash);color:var(--hark-ink)}
+.vh-hark [data-vivic-button=ghost]{background:transparent;color:var(--hark-secondary)}
+.vh-hark [data-vivic-button=ghost]:hover{background:var(--hark-wash);color:var(--hark-ink)}
+.vh-hark [data-vivic-button=destructive]{background:var(--system-red);color:white}
+.vh-hark [data-vivic-button-size=sm]{min-height:36px;font-size:13px;line-height:17px}
+.vh-hark [data-vivic-button-size=icon]{width:44px;height:44px;padding:0}
+.vh-hark [data-vivic-input]{height:48px;border-radius:16px;background:var(--hark-wash);border-color:var(--hark-stroke);color:var(--hark-ink);font:400 15px/19px var(--hark-font);box-shadow:none}
+.vh-hark [data-vivic-input]::placeholder{color:var(--hark-secondary)}
+.hark-dialog-overlay{background:rgb(0 0 0 / .35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.hark-confirm{--surface-fill:var(--hark-solid);--surface-stroke:transparent;box-shadow:0 8px 40px rgb(29 29 31 / .12)}
+.hark-confirm-title{font:500 20px/24px var(--hark-font);color:var(--hark-ink);margin:0}
+.hark-confirm-description{font:400 15px/21px var(--hark-font);color:var(--hark-secondary)}
+.hark-backdrop{position:absolute;inset:0;z-index:-1;pointer-events:none;background:#c0d2e0 url("./assets/sky-light.webp") center/cover no-repeat;transition:background-color var(--hark-mode-duration) var(--hark-mode-ease)}
+.hark-canvas-backdrop{isolation:isolate;z-index:0}
+.hark-canvas-backdrop>.hark-backdrop{z-index:0}
+.hark-palette-tint{position:absolute;inset:0;mix-blend-mode:soft-light;transition:background-color var(--hark-mode-duration) var(--hark-mode-ease)}
+.dark .hark-backdrop,[data-appearance=dark] .hark-backdrop,[data-mode=dark] .hark-backdrop,.hark-backdrop[data-theme=dark]{background-image:url("./assets/sky-dark.webp");background-color:#293149}
+@media(max-width:600px){.hark-tabs button{min-width:54px;padding:0 11px;font-size:14px}.hark-task-card{padding:16px;gap:12px}.hark-task-copy h3{font-size:20px;line-height:26px}}
+@media(prefers-reduced-motion:reduce){.vh-hark{--hark-mode-duration:0ms}.vh-hark *,.vh-hark *::before,.vh-hark *::after{animation-duration:0ms!important;transition-duration:0ms!important;scroll-behavior:auto!important}}

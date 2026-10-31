@@ -1,0 +1,123 @@
+{
+  "provider": "StepFun",
+  "model": "stepaudio-2.5-tts",
+  "voice": "wenrounvsheng",
+  "speed": 1,
+  "generatedAt": "2026-10-22T09:52:27.784Z",
+  "source": "https://platform.stepfun.com/docs/zh/api-reference/audio/create-audio",
+  "generation": "Authored generic Chinese phrases; Plan endpoint; file generation only; no playback or voice cloning.",
+  "files": [
+    {
+      "id": "checking",
+      "text": "我看看",
+      "file": "checking.mp3",
+      "bytes": 26796,
+      "sha256": "896c7326e354f0e5e0b8be432db6c35552ec7bfb60690a2e944a5f59f9d99fec"
+    },
+    {
+      "id": "waiting",
+      "text": "稍等",
+      "file": "waiting.mp3",
+      "bytes": 14504,
+      "sha256": "21176b5dd940bf4dde0144f68c7e738b0190a7de4063e0e2a9406ce3792d7fed"
+    },
+    {
+      "id": "okay",
+      "text": "好的",
+      "file": "okay.mp3",
+      "bytes": 17578,
+      "sha256": "43812e3dd1269a83a5dd5e6956015305053154da97330cf9811acfb22d6487b4"
+    },
+    {
+      "id": "organizing",
+      "text": "我来帮你整理一下",
+      "file": "organizing.mp3",
+      "bytes": 26792,
+      "sha256": "0f422b91f26178f9b00a96d4118687f41892137be3ea8557af5c024bcd8aa682"
+    },
+    {
+      "id": "planning",
+      "text": "我来安排一下",
+      "file": "planning.mp3",
+      "bytes": 24878,
+      "sha256": "f712b091a19edfbccdc6f785f31e75cdde7e410fc251212688ea3af5c87d8c1b"
+    },
+    {
+      "id": "working",
+      "text": "正在处理，请稍等",
+      "file": "working.mp3",
+      "bytes": 42154,
+      "sha256": "f39c8e7e61774319e4e843ed38ed769d13f1c1bdc2d5dbb3135dde7733967fd5"
+    },
+    {
+      "id": "done",
+      "text": "已经处理好了",
+      "file": "done.mp3",
+      "bytes": 24874,
+      "sha256": "b76ab8456ceebe17a4e58bf2837b074cb74cb5284ea8e48d99a661c7062d0e99"
+    },
+    {
+      "id": "saved",
+      "text": "已保存",
+      "file": "saved.mp3",
+      "bytes": 20264,
+      "sha256": "27037b7b098b77b754c02bd17873d9d85916e79c466e00f753653b953b45d726"
+    },
+    {
+      "id": "cancelled",
+      "text": "已取消本次请求",
+      "file": "cancelled.mp3",
+      "bytes": 30634,
+      "sha256": "2dbe0316396437d1532a5dab84f7a36c49415bbbbd6dc494af5014e55071507b"
+    },
+    {
+      "id": "undone",
+      "text": "已撤销",
+      "file": "undone.mp3",
+      "bytes": 21032,
+      "sha256": "c8729b6d01a410c105b910ac7f43106149756acee1d2ca3f2ba8f5b1dc74c4c6"
+    },
+    {
+      "id": "ready",
+      "text": "准备好了",
+      "file": "ready.mp3",
+      "bytes": 22954,
+      "sha256": "9b2b3b47616d4dad6da0f0a55ce395f2840bc15a078c8c029c21ff59e135eaf1"
+    },
+    {
+      "id": "connected",
+      "text": "连接成功",
+      "file": "connected.mp3",
+      "bytes": 22186,
+      "sha256": "f5beaa33a042a858756401ffc029cb4cd7b67973d81b41810e7c17837f726312"
+    },
+    {
+      "id": "disconnected",
+      "text": "连接已断开",
+      "file": "disconnected.mp3",
+      "bytes": 26024,
+      "sha256": "bd2cd18c7794692d77636fa0ac123bf9f7cdac8c8daf193819226df4220a17e5"
+    },
+    {
+      "id": "retry",
+      "text": "刚才没有成功，请再试一次",
+      "file": "retry.mp3",
+      "bytes": 42538,
+      "sha256": "38893e7640e4ed0824f37a27edd04e2747653c54940e4099f77e4141942b2249"
+    },
+    {
+      "id": "clarify",
+      "text": "你想调整哪一张卡片",
+      "file": "clarify.mp3",
+      "bytes": 30634,
+      "sha256": "e9b72d2c6bc4008dc82cc7336f18da90a6c4ce3179f839e6e7e6f7e0a59d9e17"
+    },
+    {
+      "id": "empty",
+      "text": "这里还没有卡片",
+      "file": "empty.mp3",
+      "bytes": 33706,
+      "sha256": "7f6e08f91b982f8cf68c979ca0672b2cf2d31197fe875159ee71210393b8395e"
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+/* Paper card. Display rows use fixed line boxes so the view can clamp to whole lines. */
+.vivic-paper { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.vivic-scene[data-fixed] .vivic-paper { flex: 1 1 0; min-height: 0; contain: size; overflow: hidden; }
+
+.vivic-paper-abstract {
+  margin: 0;
+  font-size: 13px;
+  line-height: 20px;
+  color: color-mix(in oklab, var(--card-foreground) 86%, var(--vivic-muted-ink));
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.vivic-paper-points { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.vivic-scene[data-fixed] .vivic-paper-points { flex: 1 1 0; min-height: 0; overflow: hidden; }
+.vivic-paper-points-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  color: var(--vivic-muted-ink);
+}
+.vivic-paper-points ul { display: grid; margin: 0; padding: 0; list-style: none; }
+.vivic-scene[data-mode="control"] .vivic-paper-points ul { gap: 4px; }
+.vivic-paper-points li { position: relative; padding-left: 14px; font-size: 12.5px; line-height: 20px; overflow-wrap: anywhere; }
+.vivic-paper-points li::before {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 8px;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--vivic-accent);
+  opacity: 0.75;
+}
+.vivic-scene[data-fixed] .vivic-paper-points li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vivic-scene[data-mode="control"] .vivic-paper-points li { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+.vivic-paper-tags { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; }
+/* Display: tags read as keywords right under the abstract; key points take whatever height is left. */
+.vivic-scene[data-fixed] .vivic-paper-tags { order: 1; flex: none; flex-wrap: nowrap; height: 24px; overflow: hidden; }
+.vivic-scene[data-fixed] .vivic-paper-points { order: 2; }
+.vivic-paper-tags .vivic-scene-chip { flex: 0 1 auto; min-width: 0; }
+.vivic-paper-tags .vivic-scene-chip > span { overflow: hidden; text-overflow: ellipsis; }
+.vivic-paper-tags .vivic-scene-chip[data-more] { flex-shrink: 0; }
