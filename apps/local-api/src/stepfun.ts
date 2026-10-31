@@ -17,6 +17,12 @@ export interface StepfunDeps {
   fetchImpl?: typeof fetch;
   timeoutMs?: number;
   signal?: AbortSignal;
+  /**
+   * `deepseek` uses the official OpenAI-compatible transport (same JSON mode,
+   * streaming, timeout and retry rules) with thinking explicitly disabled.
+   * Unset keeps the StepFun Plan request body byte-for-byte unchanged.
+   */
+  provider?: "stepfun" | "deepseek";
 }
 
 export type StepfunErrorCode = "cancelled" | "timeout" | "network" | "provider" | "invalid-response";
@@ -319,11 +325,15 @@ const chatJsonOnce = async (
       } : { role: message.role, content: message.content }),
       temperature: 0.2,
       response_format: { type: "json_object" },
-      // Official docs (2026-10-15) confirm these exact models only:
-      // /docs/zh/guides/models/step-3.5-flash (2603: low/high)
-      // /docs/zh/guides/models/step-3.7-flash (low/medium/high)
-      ...(["step-3.5-flash-2603", "step-3.7-flash"].includes(credential.defaultModel)
-        ? { reasoning_effort: "low" } : {}),
+      ...(deps.provider === "deepseek"
+        // Official DeepSeek accepts OpenAI extra_body semantics as a plain body
+        // field; disabling thinking keeps the fast non-reasoning path.
+        ? { thinking: { type: "disabled" } }
+        // Official docs (2026-10-15) confirm these exact models only:
+        // /docs/zh/guides/models/step-3.5-flash (2603: low/high)
+        // /docs/zh/guides/models/step-3.7-flash (low/medium/high)
+        : ["step-3.5-flash-2603", "step-3.7-flash"].includes(credential.defaultModel)
+          ? { reasoning_effort: "low" } : {}),
       ...(options?.maxTokens ? { max_tokens: options.maxTokens } : {}),
       ...(options?.onTextDelta ? { stream: true } : {}),
     }),

@@ -6,7 +6,7 @@ import { HOST_OPERATION_PROMPT, hostOperationIssue } from "../decision/hostOpera
 import type { CredentialStore } from "../credentials.js";
 import type { CanvasContext } from "../schemas.js";
 import { chatJson, type StepfunDeps, type ChatMessage, type StepfunResult } from "../stepfun.js";
-import { INTENT_BUDGET_MS } from "../config.js";
+import { INTENT_BUDGET_MS, PLAN_MAX_TOKENS, type MainProvider } from "../config.js";
 import { buildSystemPrompt, buildReminderSystemPrompt, buildUserPrompt } from "./prompt.js";
 import { matchRules } from "./rules.js";
 import { providerRecoveryHint } from "../providerError.js";
@@ -91,6 +91,10 @@ export interface PipelineDeps {
   onDecisionTrace?: (request: IntentRequest, trace: DecisionTrace, result: IntentResult) => void | Promise<void>;
   credentials: CredentialStore;
   stepfun: StepfunDeps;
+  /** Main planner transport label; unset preserves the existing StepFun wording. */
+  mainProvider?: MainProvider;
+  /** Planner output cap (config default 4096); reminders keep their own 4096. */
+  planMaxTokens?: number;
   onPlannerCall?: (attempt: number) => void;
   /** Only the authenticated SSE transport opts in; ordinary JSON clients retain their request format. */
   streamFeedback?: boolean;
@@ -168,6 +172,7 @@ const runLegacyIntent = async (
   plannerOnly = false,
 ): Promise<IntentResult> => {
   const budget = createBudget(INTENT_BUDGET_MS, [signal, deps.stepfun.signal]);
+  const planMaxTokens = deps.planMaxTokens ?? PLAN_MAX_TOKENS;
   const startedAt = performance.now();
   const report = (stage: Parameters<NonNullable<PipelineDeps["onStage"]>>[0]["stage"], status: "started" | "completed" | "failed", elapsedMs?: number) => {
     try { deps.onStage?.({ stage, status, ...(elapsedMs === undefined ? {} : { elapsedMs: Math.round(elapsedMs) }) }); } catch { /* telemetry is noncritical */ }
@@ -316,6 +321,11 @@ const runLegacyIntent = async (
       // No model to plan with: an informational question still goes online.
       const offlineQuery = deps.search && !hasImages && !continuation ? offlineSearchQuery(req.text) : null;
       if (offlineQuery) return await runIntent({ text: `搜索 ${offlineQuery}`, canvasContext: req.canvasContext }, deps, budget.signal, true);
+      if (!deps.planner && deps.mainProvider === "deepseek") {
+        // Never fall through to a StepFun key: the operator asked for DeepSeek.
+        return { kind: "error", usedProvider: "rules-offline",
+          message: "未配置 DEEPSEEK_API_KEY，DeepSeek 官方快路径不可用。请设置该环境变量并重启本地服务；不会回退 StepFun。" };
+      }
       return { kind: "unknown", message: deps.planner ? "GPT 未连接；本地文字指令仍可使用。请先连接 GPT 或选择 StepFun。" : OFFLINE_MESSAGE, usedProvider: "rules-offline" };
     }
     usedProvider = deps.planner?.provider ?? "stepfun";
@@ -349,7 +359,7 @@ const runLegacyIntent = async (
         } } : {}),
         generate: async (messages, attempt) => {
           plannerCall(attempt);
-          const result = await generate(messages, credential, 8192);
+          const result = await generate(messages, credential, planMaxTokens);
           budget.signal.throwIfAborted();
           return result;
         },
@@ -384,7 +394,7 @@ const runLegacyIntent = async (
       const messages: ChatMessage[] = [
         { role: "system", content: system }, { role: "user", content: user + feedback, ...(hasImages ? { images: req.attachments } : {}) },
       ];
-      const res = await generate(messages, credential, reminderMode ? 4096 : 8192);
+      const res = await generate(messages, credential, reminderMode ? 4096 : planMaxTokens);
       budget.signal.throwIfAborted();
       if ((deps.planner ? !deps.planner.isCurrent() : deps.credentials.getSecret() !== credential)
         || (deps.isSessionCurrent && !deps.isSessionCurrent())) return { kind: "error", message: "请求已取消：模型连接已变更。", usedProvider };

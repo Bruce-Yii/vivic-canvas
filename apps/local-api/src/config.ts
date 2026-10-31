@@ -3,10 +3,35 @@ import fs from "node:fs";
 import path from "node:path";
 
 export const STEPFUN_PLAN_BASE_URL = "https://api.stepfun.com/step_plan/v1";
+export const DEEPSEEK_BASE_URL = "https://api.deepseek.com";
+export const DEFAULT_DEEPSEEK_MODEL = "deepseek-flash";
 export const INFERENCE_TIMEOUT_MS = 60_000;
 export const CONNECTION_TIMEOUT_MS = 30_000;
 export const SPEECH_TIMEOUT_MS = 15_000;
 export const INTENT_BUDGET_MS = 90_000;
+
+/** Main planning provider. Unset or unrecognized keeps today's StepFun path. */
+export type MainProvider = "stepfun" | "deepseek";
+
+export const parseMainProvider = (value: string | undefined): MainProvider =>
+  value?.trim().toLowerCase() === "deepseek" ? "deepseek" : "stepfun";
+
+/** Planner output cap: 1024–8192, default 4096 (the old 8192 amplified latency). */
+export const PLAN_MAX_TOKENS = 4096;
+export const MIN_PLAN_MAX_TOKENS = 1024;
+export const MAX_PLAN_MAX_TOKENS = 8192;
+
+export const parsePlanMaxTokens = (value: unknown): number => {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed >= MIN_PLAN_MAX_TOKENS && parsed <= MAX_PLAN_MAX_TOKENS
+    ? parsed : PLAN_MAX_TOKENS;
+};
+
+/** A fixed model id: no /models discovery on the official DeepSeek fast path. */
+export const parseDeepseekModel = (value: string | undefined): string => {
+  const model = value?.trim();
+  return model && /^[a-zA-Z0-9_.-]{1,128}$/.test(model) ? model : DEFAULT_DEEPSEEK_MODEL;
+};
 
 /** Invalid overrides fall back; no individual request may exceed a turn. */
 export const boundedTimeout = (value: unknown, fallback: number): number => {
@@ -39,6 +64,16 @@ export interface LocalApiConfig {
   tokenGenerated: boolean;
   allowedOrigins: string[];
   stepfunBaseUrl: string;
+  /** `stepfun` (default, today's behavior) or the official DeepSeek fast path. */
+  mainProvider?: MainProvider;
+  /** Official DeepSeek base; only used when `mainProvider` is `deepseek`. */
+  deepseekBaseUrl?: string;
+  /** Fixed planner model for DeepSeek; no `/models` discovery. */
+  deepseekModel?: string;
+  /** `DEEPSEEK_API_KEY`, memory only: never persisted, logged or serialized. */
+  deepseekApiKey?: string;
+  /** Planner max_tokens (1024–8192); default 4096. Reminders stay at 4096. */
+  planMaxTokens?: number;
   /** User's own model platform. Key is supplied later and kept only in memory. */
   modelApiBaseUrl: string;
   requestTimeoutMs: number;
@@ -115,6 +150,11 @@ export const loadConfig = (
       .map((s) => s.trim())
       .filter(Boolean),
     stepfunBaseUrl: (env.STEPFUN_BASE_URL ?? STEPFUN_PLAN_BASE_URL).replace(/\/+$/, ""),
+    mainProvider: parseMainProvider(env.VIVIC_MAIN_PROVIDER),
+    deepseekBaseUrl: (env.VIVIC_DEEPSEEK_BASE_URL?.trim() || DEEPSEEK_BASE_URL).replace(/\/+$/, ""),
+    deepseekModel: parseDeepseekModel(env.VIVIC_DEEPSEEK_MODEL),
+    deepseekApiKey: env.DEEPSEEK_API_KEY?.trim() || undefined,
+    planMaxTokens: parsePlanMaxTokens(env.VIVIC_PLAN_MAX_TOKENS),
     modelApiBaseUrl: (env.VIVIC_MODEL_API_BASE_URL ?? "https://edsionc.top/api/v1").replace(/\/+$/, ""),
     requestTimeoutMs: boundedTimeout(env.VIVIC_REQUEST_TIMEOUT_MS, INFERENCE_TIMEOUT_MS),
     connectionTimeoutMs: boundedTimeout(env.VIVIC_CONNECTION_TIMEOUT_MS, CONNECTION_TIMEOUT_MS),

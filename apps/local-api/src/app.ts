@@ -4,7 +4,7 @@ import { streamSSE } from "hono/streaming";
 import { cors } from "hono/cors";
 import { bodyLimit } from "hono/body-limit";
 import { z } from "zod";
-import type { LocalApiConfig } from "./config.js";
+import { DEEPSEEK_BASE_URL, DEFAULT_DEEPSEEK_MODEL, PLAN_MAX_TOKENS, type LocalApiConfig } from "./config.js";
 import { CredentialStore } from "./credentials.js";
 import type { CardDefinition } from "@vivic/card-runtime";
 import { currentCardDefinitions } from "./cards/catalog.js";
@@ -112,6 +112,17 @@ export const createApp = (deps: AppDeps) => {
     create: async (): Promise<never> => { throw new Error("unavailable_online"); }, dispose: () => undefined }
     : deps.mobileBroker ?? new MobileSessionBroker(path.join(homedir(), ".vivic", "mobile-relay.json"));
   const credentials = deps.credentials ?? new CredentialStore();
+  // `VIVIC_MAIN_PROVIDER=deepseek` only changes the main planner transport. A
+  // separate in-memory store keeps speech/ASR on their StepFun credential, and
+  // the key comes from DEEPSEEK_API_KEY without touching disk or logs.
+  const mainProvider = config.mainProvider ?? "stepfun";
+  const mainCredentials = mainProvider === "deepseek" ? deps.credentials ?? new CredentialStore() : credentials;
+  const deepseekModel = config.deepseekModel ?? DEFAULT_DEEPSEEK_MODEL;
+  if (mainProvider === "deepseek" && !mainCredentials.getSecret()) {
+    const deepseekKey = config.deepseekApiKey?.trim();
+    if (deepseekKey) mainCredentials.set({ apiKey: deepseekKey, models: [deepseekModel], defaultModel: deepseekModel, checkedAt: new Date().toISOString() });
+    else mainCredentials.recordError("未配置 DEEPSEEK_API_KEY，DeepSeek 官方快路径不可用；不会回退 StepFun。");
+  }
   const platform = new PlatformCredentialStore();
   let platformRevision = 0;
   let platformAttempt: AbortController | undefined;
@@ -197,6 +208,12 @@ export const createApp = (deps: AppDeps) => {
     fetchImpl: deps.fetchImpl,
     timeoutMs: config.requestTimeoutMs,
   };
+  // Only the planner uses the DeepSeek fast path; speech/ASR/readers keep the
+  // StepFun deps and credential above.
+  const mainModel = mainProvider === "deepseek"
+    ? { baseUrl: config.deepseekBaseUrl ?? DEEPSEEK_BASE_URL, provider: "deepseek" as const,
+      fetchImpl: deps.fetchImpl, timeoutMs: config.requestTimeoutMs }
+    : stepfun;
 
   const app = new Hono<{ Variables: { requestId: string } }>();
   app.use("*", async (c, next) => {
@@ -289,6 +306,10 @@ export const createApp = (deps: AppDeps) => {
   }));
 
   app.post("/api/credentials/stepfun/validate", async (c) => {
+    if (mainProvider === "deepseek") {
+      return c.json({ ok: false, connected: false,
+        error: "当前使用 DeepSeek 官方快路径（VIVIC_MAIN_PROVIDER=deepseek），模型由 DEEPSEEK_API_KEY 和 VIVIC_DEEPSEEK_MODEL 配置，不接受 StepFun Key。" }, 400);
+    }
     let raw: unknown;
     try {
       raw = await c.req.json();
@@ -329,6 +350,7 @@ export const createApp = (deps: AppDeps) => {
     connectionRevision++; providerRevision++;
     connectionAttempt?.abort(); connectionAttempt = undefined;
     credentials.clear();
+    if (mainCredentials !== credentials) mainCredentials.clear();
     return c.json({ ok: true, connected: false });
   });
 
@@ -371,7 +393,9 @@ export const createApp = (deps: AppDeps) => {
 
   app.get("/api/providers/status", (c) => {
     c.header("Cache-Control", "no-store");
-    const status = credentials.status();
+    // The "stepfun" slot is the main planner slot: in DeepSeek mode it reports
+    // the env-keyed fixed model so existing clients keep working unchanged.
+    const status = mainCredentials.status();
     rememberGpt();
     if (activeProvider === "gpt") gpt.keepWarm();
     return c.json({
@@ -383,8 +407,10 @@ export const createApp = (deps: AppDeps) => {
         ? []
         : [
             {
-              code: "stepfun-disconnected",
-              message: "所选模型未连接，/api/intent 只做本地规则，复杂指令暂不可用。",
+              code: mainProvider === "deepseek" ? "deepseek-disconnected" : "stepfun-disconnected",
+              message: mainProvider === "deepseek"
+                ? "DeepSeek 官方快路径未连接：未配置 DEEPSEEK_API_KEY。不会回退 StepFun，复杂指令暂不可用。"
+                : "所选模型未连接，/api/intent 只做本地规则，复杂指令暂不可用。",
             },
           ],
     });
@@ -408,6 +434,9 @@ export const createApp = (deps: AppDeps) => {
       if (!source) return c.json({ ok: false, error: "请先连接 GPT。" }, 503);
       const ok = await gpt.connect(source, body.data.model); providerRevision++; rememberGpt();
       return c.json({ ok, ...gpt.status() });
+    }
+    if (mainProvider === "deepseek") {
+      return c.json({ ok: false, error: "当前使用 DeepSeek 官方快路径，模型由 VIVIC_DEEPSEEK_MODEL 固定配置。" }, 400);
     }
     const credential = credentials.getSecret();
     if (!credential || !credential.models.includes(body.data.model) || !PLAN_CHAT_MODELS.includes(body.data.model)) return c.json({ ok: false, error: "请选择已连接套餐中的推理模型。" }, 400);
@@ -616,16 +645,16 @@ export const createApp = (deps: AppDeps) => {
     if (restoringGpt && activeProvider === "gpt") await restoringGpt;
     const version = providerRevision;
     const gptVersion = gpt.generation();
-    const imageCredential = credentials.getSecret();
+    const imageCredential = mainCredentials.getSecret();
     if (parsed.data.attachments?.length) {
       const vision = activeProvider === "gpt" ? gpt.status().connected && gpt.status().capabilities.includes("vision")
-        : credentials.status().connected && credentials.status().capabilities.includes("vision");
+        : mainCredentials.status().connected && mainCredentials.status().capabilities.includes("vision");
       if (!vision) return c.json({ kind: "error", message: "当前所选模型没有可用的视觉能力。请选择支持图片的模型，或移除图片后发送文字。" });
       try {
         for (const attachment of parsed.data.attachments) await validateImageAttachment(attachment, deps.imageDecoder ?? decodeImage);
       } catch (error) { return c.json({ kind: "error", message: imageInputErrorMessage(error) }); }
       if (c.req.raw.signal.aborted) return c.json({ kind: "error", message: "图片请求已取消。" });
-      if (version !== providerRevision || (activeProvider === "gpt" ? !gpt.isCurrent(gptVersion) : imageCredential !== credentials.getSecret())) {
+      if (version !== providerRevision || (activeProvider === "gpt" ? !gpt.isCurrent(gptVersion) : imageCredential !== mainCredentials.getSecret())) {
         return c.json({ kind: "error", message: "模型连接已变更，图片请求已取消。" });
       }
     }
@@ -643,7 +672,8 @@ export const createApp = (deps: AppDeps) => {
       ...(event.elapsedMs !== undefined ? { elapsedMs: Math.round(event.elapsedMs) } : {}),
     });
     const execute = (signal: AbortSignal, onStage = observeStage, streamFeedback = false) => {
-      const pipeline: PipelineDeps = { credentials, stepfun, search, data, decision, onStage, streamFeedback, travel: deps.travel,
+      const pipeline: PipelineDeps = { credentials: mainCredentials, stepfun: mainModel, mainProvider,
+      planMaxTokens: config.planMaxTokens ?? PLAN_MAX_TOKENS, search, data, decision, onStage, streamFeedback, travel: deps.travel,
       router: requestRouter, onDecisionTrace: deps.onDecisionTrace,
       decisionTelemetry: { plannerCalls: 0, directClauses: 0 },
       slotPlanning: requestRouter?.mode === "shadow" || requestRouter?.mode === "on",
@@ -761,7 +791,8 @@ export const createApp = (deps: AppDeps) => {
     connectionAttempt?.abort(); connectionAttempt = undefined;
     platformAttempt?.abort(); platformAttempt = undefined;
     connections.dispose();
-    credentials.clear(); platform.clear(); gpt.dispose(); mobileBroker.dispose(); decision.stop(); decisionTasks.dispose(); localTts?.stop();
+    credentials.clear(); if (mainCredentials !== credentials) mainCredentials.clear();
+    platform.clear(); gpt.dispose(); mobileBroker.dispose(); decision.stop(); decisionTasks.dispose(); localTts?.stop();
     receiptTimes.clear();
   } });
 };
