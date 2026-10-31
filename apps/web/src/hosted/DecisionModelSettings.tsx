@@ -1,4 +1,4 @@
-import { decisionConnectionLabel, decisionConnectionState, isDecisionModelConnected, type DecisionConnectionStatus, type DecisionModelId } from "./decisionModelStatus";
+import { decisionConnectionLabel, decisionConnectionState, decisionModelNames, isDecisionModelConnected, type DecisionConnectionStatus, type DecisionModelId } from "./decisionModelStatus";
 
 export interface HostedDecisionProbe {
   model: DecisionModelId;
@@ -20,11 +20,6 @@ export interface DecisionModelSettingsProps {
   onClassify(): void;
 }
 
-const modelNames: Record<DecisionModelId, string> = {
-  "startlux-decision-2b": "Startlux Decision 2B",
-  "gliner2.5-multi-decide": "GLiNER 2.5 Multi Decide",
-};
-
 const choiceNames: Record<string, string> = {
   fit: "在一屏显示全部卡片", restore: "恢复之前的画布视图", focus: "聚焦一张卡片", delete: "删除卡片",
   expand: "展开便笺并查看全文", collapse: "收起便笺只显示摘要", other: "不明确或其他要求",
@@ -35,18 +30,21 @@ export function DecisionModelSettings({ models, selectedModel, input, result, bu
   const connected = isDecisionModelConnected(models?.configured, models?.decision, selectedModel);
   const connectionState = decisionConnectionState(models?.configured, models?.decision, selectedModel);
   const label = decisionConnectionLabel(models?.configured, models?.decision, selectedModel);
+  const wireProtocol = models?.decision?.wireProtocol ?? null;
   return <div className="hosted-decision-settings">
     <div className="hosted-setting-row">
       <span>决策模型连接</span>
-      <span className="hosted-model-status" data-state={connectionState} role="status">
+      <span className="hosted-model-status" data-state={connectionState} data-wire-protocol={wireProtocol ?? undefined} role="status">
         <i aria-hidden="true" />{label}
+        {connectionState === "connected" && wireProtocol === "native" && <em className="hosted-model-protocol">原生协议</em>}
       </span>
     </div>
     <form className="hosted-form hosted-decision-form" onSubmit={event => { event.preventDefault(); onConnect(); }}>
       <label htmlFor="hosted-decision-model">决策模型
         <select id="hosted-decision-model" value={selectedModel} onChange={event => onModelChange(event.target.value as DecisionModelId)}>
-          <option value="startlux-decision-2b">{modelNames["startlux-decision-2b"]}</option>
-          <option value="gliner2.5-multi-decide">{modelNames["gliner2.5-multi-decide"]}</option>
+          <option value="startlux-decision-2b">{decisionModelNames["startlux-decision-2b"]}</option>
+          <option value="startlux-decision-4b">{decisionModelNames["startlux-decision-4b"]}</option>
+          <option value="gliner2.5-multi-decide">{decisionModelNames["gliner2.5-multi-decide"]}</option>
         </select>
       </label>
       <div className="hosted-decision-actions">
@@ -56,6 +54,7 @@ export function DecisionModelSettings({ models, selectedModel, input, result, bu
         <button type="button" className="hosted-quiet" disabled={busy || !models?.decision?.configured} onClick={onDisconnect}>断开决策模型</button>
       </div>
     </form>
+    <p className="hosted-muted hosted-decision-protocol">StartLux 4B 使用原生 state/questions 协议；2B 与 GLiNER 使用旧 input/labels 协议。协议由所选模型固定，不会静默切换。</p>
     <p className="hosted-muted">使用上方已连接的平台 Key。连接会先执行一次分类探测；分类质量仍待验收，卡片执行已关闭。</p>
     <form className="hosted-form hosted-decision-form" onSubmit={event => { event.preventDefault(); onClassify(); }}>
       <label htmlFor="hosted-decision-input">分类测试语句
