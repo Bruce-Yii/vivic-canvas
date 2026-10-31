@@ -7,7 +7,8 @@ import { cardLabel, cardTitle, selectedCards, type IntentRouter } from "./router
 export type TargetSource = "title" | "alias" | "focus" | "ordinal" | "type" | "spatial" | "classifier" | "frozen" | "user_pick" | "missing" | "ambiguous";
 export type TargetResult = { targetId: string; source?: TargetSource } | { ambiguous: Array<{ id: string; label: string }>; source?: TargetSource } | { missing: true; source?: TargetSource };
 type ContextCard = CanvasContext["cards"][number];
-const targeted = new Set<IntentRouteId>(["focus", "highlight", "edit", "arrange", "delete"]);
+export const targetedRoutes: ReadonlySet<IntentRouteId> = new Set<IntentRouteId>(["focus", "highlight", "edit", "arrange", "delete"]);
+const targeted = targetedRoutes;
 const types: Array<[RegExp, RegExp]> = [[/待办|任务清单/, /TodoCard/], [/便签|便笺|笔记/, /NoteCard/],
   [/倒计时|计时器|提醒/, /CountdownCard/], [/天气/, /WeatherCard/], [/新闻|回答/, /NewsCard/],
   [/表格/, /TableCard/], [/图表/, /ChartCard/]];
@@ -36,6 +37,28 @@ const spatialOf = (text: string): Spatial | undefined => {
   }
   return undefined;
 };
+/** "A挪到B下面": the moved card is A, B is the reference and 下面 the axis.
+ * The direction word is a destination, so it must not be read as the target. */
+export type MoveDirection = "left" | "right" | "up" | "down";
+export interface MovementParts { target: string; reference?: string; direction?: MoveDirection }
+const MOVE_VERB = "(?:移到|移动到|挪到|搬(?:到|至)|放到|拖(?:到|至)|移至|移向|推向|放在|移去|挪去|挪至)";
+const MOVE_WORD = /(左上角|右上角|左下角|右下角|左上|右上|左下|右下|最左|左边|左侧|左面|最右|右边|右侧|右面|最上|上面|上方|上边|顶部|最下|下面|下方|下边|底部|中间|正中|中央)$/u;
+const moveDirection = (word: string): MoveDirection | undefined =>
+  /左/u.test(word) ? "left" : /右/u.test(word) ? "right" : /上|顶/u.test(word) ? "up" : /下|底/u.test(word) ? "down" : undefined;
+export function movementParts(text: string): MovementParts | undefined {
+  const match = text.trim().match(new RegExp(`^(?:请|帮我|请帮我)?\\s*(?:把|将)?\\s*(.+?)\\s*${MOVE_VERB}\\s*(.*)$`, "u"));
+  const target = match?.[1]?.trim();
+  if (!target) return undefined;
+  let rest = match![2]!.trim().replace(/[。！!？?]+$/u, "");
+  const word = rest.match(MOVE_WORD);
+  let reference: string | undefined;
+  if (word?.index !== undefined) {
+    reference = rest.slice(0, word.index).trim().replace(/(?:的|卡|卡片)$/u, "").trim();
+    rest = rest.slice(word.index);
+  }
+  const direction = moveDirection(word?.[0] ?? rest);
+  return { target, ...(reference ? { reference } : {}), ...(direction ? { direction } : {}) };
+}
 const position = (card: ContextCard, axis: "x" | "y") => card.layout[axis];
 const extent = (card: ContextCard, axis: "x" | "y") => (axis === "x" ? card.layout.width : card.layout.height) ?? 0;
 /** Cards whose anchors are closer than a fraction of their own size read as one
@@ -103,36 +126,40 @@ export async function resolveTarget(text: string, context: CanvasContext, route:
     });
   };
   if (!cards.length) return { missing: true, source: "missing" };
+  // "读书笔记挪到购物清单下面" names two cards: only the phrase before the
+  // movement verb is the target; 购物清单 is the relation reference.
+  const movement = route === "arrange" ? movementParts(text) : undefined;
+  const scope = movement?.target ?? text;
   const names = cards.filter(card => [cardTitle(card), ...(card.aliases ?? [])]
-    .some(name => name.length >= 2 && text.toLocaleLowerCase().includes(name.toLocaleLowerCase())));
+    .some(name => name.length >= 2 && scope.toLocaleLowerCase().includes(name.toLocaleLowerCase())));
   if (names.length === 1) {
     const title = cardTitle(names[0]!);
-    return { targetId: names[0]!.id, source: title.length >= 2 && text.toLocaleLowerCase().includes(title.toLocaleLowerCase()) ? "title" : "alias" };
+    return { targetId: names[0]!.id, source: title.length >= 2 && scope.toLocaleLowerCase().includes(title.toLocaleLowerCase()) ? "title" : "alias" };
   }
-  const ordinal = ["highlight", "edit"].includes(route) && /第[一二三四五六七八九十百\d]+[条项点行]/.test(text);
+  const ordinal = ["highlight", "edit"].includes(route) && /第[一二三四五六七八九十百\d]+[条项点行]/.test(scope);
   const hasEntries = (card: ContextCard) => [card.displayProps.items, card.displayProps.bullets,
     card.displayProps.keyPoints, card.displayProps.rows, card.sourceDataSummary.items, card.sourceDataSummary.bullets,
     card.sourceDataSummary.keyPoints].some(value => Array.isArray(value) && value.length > 0);
-  if (/这张|它|刚才那张/.test(text) || ordinal) {
+  if (/这张|它|刚才那张/.test(scope) || ordinal) {
     const focus = context.focusHistory.at(-1);
     const focused = cards.find(card => card.id === focus);
-    if (focused && (/这张|它|刚才那张/.test(text) || hasEntries(focused))) {
-      return { targetId: focused.id, source: /这张|它|刚才那张/.test(text) ? "focus" : "ordinal" };
+    if (focused && (/这张|它|刚才那张/.test(scope) || hasEntries(focused))) {
+      return { targetId: focused.id, source: /这张|它|刚才那张/.test(scope) ? "focus" : "ordinal" };
     }
     if (ordinal) { const lists = cards.filter(hasEntries); return { ambiguous: labels(lists.length ? lists : cards), source: "ambiguous" }; }
   }
-  const type = types.find(([pattern]) => pattern.test(text))?.[1];
+  const type = types.find(([pattern]) => pattern.test(scope))?.[1];
   const pool = type ? cards.filter(card => type.test(card.type)) : cards;
   if (!pool.length) return { missing: true, source: "missing" };
   // A direction is answerable from the layout alone: pick the separated card,
   // and only ask among cards that visually sit on top of each other.
-  const spatial = spatialOf(text);
+  const spatial = spatialOf(scope);
   if (spatial) return spatialTarget(pool, spatial, labels);
   if (type && pool.length === 1) return { targetId: pool[0]!.id, source: "type" };
   if (cards.some(card => ["ambiguous", "missing"].includes(card.id))) return { ambiguous: labels(pool), source: "ambiguous" };
   const criteria = Object.fromEntries(pool.map(card => [card.id, cardLabel(card)]));
   Object.assign(criteria, { ambiguous: "用户指的卡片不唯一，需要追问", missing: "画布上没有用户说的卡片" });
-  const result = await router?.chooseTarget(text, context, criteria, signal);
+  const result = await router?.chooseTarget(scope, context, criteria, signal);
   if (result?.choice === "missing" && result.probability >= .8) return { missing: true, source: "missing" };
   if (result?.choice && result.probability >= .8 && pool.some(card => card.id === result.choice)) {
     return { targetId: result.choice, source: "classifier" };
@@ -141,8 +168,42 @@ export async function resolveTarget(text: string, context: CanvasContext, route:
   // user explicitly named ("日程卡"). Listing every unrelated card as a candidate
   // induces a wrong pick, so report the card as absent instead.
   if ((!result || result.choice === "ambiguous") && !type && !names.length && pool.length === cards.length
-    && explicitCardReference(text)) return { missing: true, source: "missing" };
+    && explicitCardReference(scope)) return { missing: true, source: "missing" };
   return { ambiguous: labels(names.length ? names : pool), source: "ambiguous" };
+}
+
+/** Does this clause actually name a card, a card type, a position or a pronoun?
+ * A follow-up that names none of them ("把标题改成…") inherits the card the
+ * previous clause focused instead of asking "which card?" again. */
+export const hasExplicitCardReference = (text: string, context: CanvasContext): boolean => {
+  const cards = selectedCards(context);
+  if (cards.some(card => [cardTitle(card), ...(card.aliases ?? [])]
+    .some(name => name.length >= 2 && text.toLocaleLowerCase().includes(name.toLocaleLowerCase())))) return true;
+  if (/这张|它|刚才那张/.test(text) || /第[一二三四五六七八九十百\d]+[条项点行]/.test(text)) return true;
+  if (types.some(([pattern]) => pattern.test(text))) return true;
+  const scope = movementParts(text)?.target ?? text;
+  if (spatialOf(scope)) return true;
+  return explicitCardReference(text);
+};
+
+/** The card a movement relation is anchored to ("购物清单" in
+ * "读书笔记挪到购物清单下面"). Host-resolved: no model id or coordinate. */
+export function resolveMovementReference(reference: string, context: CanvasContext, targetId: string):
+  { targetId: string } | { ambiguous: true } | { missing: true } | undefined {
+  const cards = selectedCards(context).filter(card => card.id !== targetId);
+  const named = cards.filter(card => [cardTitle(card), ...(card.aliases ?? [])]
+    .some(name => name.length >= 2 && (reference.includes(name) || name.includes(reference))));
+  if (named.length === 1) return { targetId: named[0]!.id };
+  if (named.length > 1) return { ambiguous: true };
+  const type = types.find(([pattern]) => pattern.test(reference))?.[1];
+  if (type) {
+    const pool = cards.filter(card => type.test(card.type));
+    if (pool.length === 1) return { targetId: pool[0]!.id };
+    if (pool.length > 1) return { ambiguous: true };
+  }
+  // "画布/中间/屏幕" is a viewport relation, not a missing card.
+  if (explicitCardReference(reference) || /卡/.test(reference)) return { missing: true };
+  return undefined;
 }
 
 /** Layout-only spatial resolution: pick when the coordinates separate the cards,

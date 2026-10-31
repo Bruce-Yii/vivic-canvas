@@ -103,7 +103,8 @@ describe("compact reminder planner", () => {
     const result = await runIntent({ text: "五分钟后提醒我喝水和吃药以及拉伸", canvasContext: emptyContext() }, deps);
     expect(created(result).map(c => c.sourceData.reminderText)).toEqual(["喝水", "吃药", "拉伸"]);
     expect(new Set(created(result).map(c => c.sourceData.targetAt)).size).toBe(1);
-    expect(call).toHaveBeenCalledTimes(1);
+    // The conjunction enumeration is deterministic now: no model extraction.
+    expect(call).not.toHaveBeenCalled();
   });
   it("repairs the schema exactly once without forwarding upstream content", async () => {
     let calls = 0;

@@ -11,7 +11,7 @@ import { buildSystemPrompt, buildReminderSystemPrompt, buildUserPrompt } from ".
 import { matchRules } from "./rules.js";
 import { providerRecoveryHint } from "../providerError.js";
 import { createBudget } from "./budget.js";
-import { buildReminderActions, isReminderCreation, ReminderPlanSchema, reminderCoverageIssue } from "./reminders.js";
+import { buildReminderActions, isReminderCreation, parseEnumeratedReminders, ReminderPlanSchema, reminderCoverageIssue } from "./reminders.js";
 import { actionExecutionIssue, normalizeBatchCamera, normalizeReminderStamps } from "./validation.js";
 import { searchQuery, buildSearchEnvelope, offlineSearchQuery } from "./search.js";
 import type { SearchEvidence } from "../search/index.js";
@@ -338,6 +338,18 @@ const runLegacyIntent = async (
       ?? (deps.mainProvider === "deepseek" || deps.stepfun.provider === "deepseek" ? "deepseek" : "stepfun");
     // "生日倒计时" / "距离考试还有 30 天" are date countdown cards, not minute timers.
     const reminderMode = !hasImages && !continuation && !req.taskContext && isReminderCreation(req.text) && !looksLikeDateCountdown(req.text);
+    // A single explicit trigger with an enumerated item list ("五分钟后提醒我
+    // 喝水和吃药") is deterministic: one card per item, never a folded or
+    // dropped item. Several triggers stay with the model/coverage path.
+    if (reminderMode && (req.text.match(/提醒我/g)?.length ?? 0) === 1
+      && !/如果|要是|除非|假如|否则|每天|每隔|重复|不要|不用|取消|同时|顺便|接着|另外|随后|并(?:打开|关闭|创建|新建|添加|设|删除|显示|恢复|保存)/.test(req.text)) {
+      const enumerated = parseEnumeratedReminders(req.text);
+      if (enumerated && enumerated.length > 1) {
+        const envelope = assembleEnvelope(buildReminderActions(enumerated, req.canvasContext),
+          req.canvasContext.canvasId, `已设置 ${enumerated.length} 项提醒`);
+        if (envelope) return { kind: "envelope", envelope, usedProvider };
+      }
+    }
     // A link the user wants summarised or saved is read once by the verified reader; its text is evidence only.
     const sourceUrl = !hasImages && !reminderMode && deps.search?.fetchContent ? sceneSourceUrl(req.text) : null;
     let page: ScenePage | undefined;
