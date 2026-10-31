@@ -215,9 +215,47 @@ function normalizeEnvelopeActions(actions: Action[]): Action[] {
     { type: "canvas.fit" }];
 }
 
+/** "加个待办" / "记个任务": the clause is only the command, not its content. */
+const BARE_TODO_APPEND = /^(?:再|顺便|另外|然后)?\s*(?:帮我|给我)?\s*(?:加|添加|新增|创建|新建|记|建|弄|搞|列)(?:一个|个|一条|一下|下)?\s*(?:待办|任务|待办项|todo|to-?do)(?:项|清单|列表)?$/iu;
+/** The content clause must be an item, not another operation. */
+const OPERATION_CLAUSE = /倒计时|计时器|计时|提醒|闹钟|天气|气温|搜索|查询|聚焦|删掉|删除|移除|显示全部|恢复原视图|撤销|重做|高亮|移动|挪|固定|打开|关闭|暂停|继续|放大|缩小/u;
+
+/** The item text of a "…, 加个待办" sentence, or null when it is not that shape. */
+export function parseTodoAppend(text: string): string | null {
+  const clauses = splitClauses(text);
+  if (clauses.length !== 2) return null;
+  const [content, command] = clauses as [string, string];
+  if (!BARE_TODO_APPEND.test(command.trim())) return null;
+  const item = content.trim().replace(/[，,；;。！!]+$/u, "");
+  // Keep the user's own words (an explicit time word belongs to the item text);
+  // never invent or rewrite content the planner would otherwise have written.
+  if (item.length < 2 || item.length > 160) return null;
+  if (OPERATION_CLAUSE.test(item)) return null;
+  return item;
+}
+
+/** "明天上午先把合同发给王经理，加个待办" → one TodoCard, no planner call. */
+export async function planTodoAppend(text: string, ctx: CanvasContext, now = Date.now()): Promise<DeterministicPlan | null> {
+  const item = parseTodoAppend(text);
+  if (!item) return null;
+  const working = contextFor(ctx);
+  const todo = CARD_CONTRACTS.todo!;
+  const built = await todo.build({ items: [item] }, working, new Date(now));
+  if (!Array.isArray(built) || !built.length) return null;
+  recordCards(built, working);
+  const cards = built.flatMap(action => action.type === "card.create" ? [action.card.type] : []);
+  // Both clauses belong to the one todo: the content clause carries the item and
+  // the trailing append clause is only its command, so provenance covers both.
+  return { actions: normalizeEnvelopeActions(built), routes: splitClauses(text).map(() => "todo" as const), say: "已记下这条待办。",
+    groups: [{ clause: 0, contract: "todo", cardIds: createdIds(built), cards, route: "todo" }] };
+}
+
 /** Entry point shared by the rules fast path and the on-mode proposal path. */
 export async function planDeterministic(text: string, ctx: CanvasContext, now = Date.now()): Promise<DeterministicPlan | null> {
   const clauses = splitClauses(text);
-  if (clauses.length > 1) return isNumberedList(text) ? planNumbered(clauses, ctx, now) : null;
+  if (clauses.length > 1) {
+    if (isNumberedList(text)) return planNumbered(clauses, ctx, now);
+    return planTodoAppend(text, ctx, now);
+  }
   return planWeekly(text, ctx, now);
 }

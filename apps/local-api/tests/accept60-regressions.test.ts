@@ -79,6 +79,35 @@ describe("accept60: enumerated reminder items are built as one card per item", (
   });
 });
 
+describe("accept60: a trailing bare append command joins the clause before it", () => {
+  it("sc-05 builds one TodoCard for 明天上午先把合同发给王经理，加个待办", async () => {
+    const f = setup(["todo", "todo"], [{ clarify: "模型不应被调用" }]);
+    const result = await runIntent({ text: "明天上午先把合同发给王经理，加个待办", canvasContext: canvas() }, f.deps);
+    expect(result.kind, JSON.stringify(result)).toBe("envelope");
+    expect(created(result).map(item => item.type)).toEqual(["TodoCard"]);
+    const todo = created(result)[0];
+    expect(todo?.type).toBe("TodoCard");
+    if (todo?.type !== "TodoCard") return;
+    // The user's own words are the item; nothing is invented or rewritten.
+    expect(todo.displayProps.items.map(item => item.text)).toEqual(["明天上午先把合同发给王经理"]);
+    expect(f.generate).not.toHaveBeenCalled();
+  });
+
+  it("keeps a real second operation on the planner instead of merging it", async () => {
+    const f = setup(["todo"], [{ clarify: "模型不应被调用" }]);
+    const result = await runIntent({ text: "把合同发给王经理，加个待办", canvasContext: canvas() }, f.deps);
+    // One content clause + one append command is exactly the deterministic shape.
+    expect(result.kind, JSON.stringify(result)).toBe("envelope");
+    expect(created(result).map(item => item.type)).toEqual(["TodoCard"]);
+  });
+
+  it("does not merge an operation sentence into a todo item", async () => {
+    const f = setup(["arrange"], [{ clarify: "模型不应被调用" }]);
+    const result = await runIntent({ text: "显示全部，加个待办", canvasContext: canvas() }, f.deps);
+    expect(created(result).map(item => item.type)).not.toEqual(["TodoCard"]);
+  });
+});
+
 describe("accept60: weekly plan content is generation, not invented user facts", () => {
   it("sc-16 builds the next week's plan without inventing clock times", async () => {
     vi.useFakeTimers({ toFake: ["Date"] });
