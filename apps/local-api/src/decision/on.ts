@@ -191,9 +191,13 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
     if (!protectedText) {
       const index = rows.findIndex(row => row.probability >= .8 && row.target && "ambiguous" in row.target);
       const target = rows[index]?.target;
-      if (target && "ambiguous" in target) return { kind: "clarify", usedProvider: "decision",
-        message: `你要操作哪一张？${target.ambiguous.slice(0, 5).map((card, i) => `${i + 1}. ${card.label}`).join(" ")}`.slice(0, 180),
-        targetCandidates: target.ambiguous, targetClause: index };
+      if (target && "ambiguous" in target) {
+        // The message and the clickable payload must be the same five candidates.
+        const shown = target.ambiguous.slice(0, 5);
+        return { kind: "clarify", usedProvider: "decision",
+          message: `你要操作哪一张？${shown.map((card, i) => `${i + 1}. ${card.label}`).join(" ")}`.slice(0, 180),
+          targetCandidates: shown, targetClause: index };
+      }
     }
     if (rows.length !== clauses.length) return await fallback();
     // Never let a classifier turn an explanation, condition or negation into execution.

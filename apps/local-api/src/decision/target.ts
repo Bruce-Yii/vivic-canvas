@@ -45,5 +45,15 @@ export async function resolveTarget(text: string, context: CanvasContext, route:
   const result = await router?.chooseTarget(text, context, criteria, signal);
   if (result?.choice === "missing" && result.probability >= .8) return { missing: true };
   if (result?.choice && result.probability >= .8 && pool.some(card => card.id === result.choice)) return { targetId: result.choice };
+  // The classifier answering "ambiguous" over the whole canvas has not found the
+  // card the user explicitly named ("日程卡"). Listing every unrelated card as a
+  // candidate induces a wrong pick, so report the card as absent instead.
+  if (result?.choice === "ambiguous" && !names.length && pool.length === cards.length && explicitCardReference(text)) return { missing: true };
   return { ambiguous: labels(names.length ? names : pool) };
 }
+
+/** ``X卡``/``X卡片`` names a card; demonstratives and collectives ("这张卡", "所有卡片") do not. */
+const explicitCardReference = (text: string): boolean => {
+  const name = /([\u4e00-\u9fa5A-Za-z0-9]{2,8})卡(?:片)?/u.exec(text)?.[1];
+  return name !== undefined && !/(?:所有|全部|这些|那些|整个|任何|每张|几张|哪张|这张|那张|这个|那个|哪个|几个|一些|一张)$/u.test(name);
+};

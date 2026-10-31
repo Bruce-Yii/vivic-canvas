@@ -39,6 +39,19 @@ export function standaloneDeletion(text: string): "one" | "all" | undefined {
     || new RegExp(`^${prefix}(?:把|将)\\s*\\S[\\s\\S]*?(?:删除|删掉|删去|移除)$`, "u").test(input) ? "one" : undefined;
 }
 
+/** Question text and clickable payload share one numbered list, capped at five
+ * and at the question length; the payload is exactly the candidates that fit. */
+export function numberedChoiceQuestion(question: string, candidates: NumberedCandidate[]): { message: string; candidates: NumberedCandidate[] } {
+  const shown: NumberedCandidate[] = [];
+  const text = () => `${question}${shown.map(candidate => `${candidate.number}. ${candidate.label}`).join(" ")}`;
+  for (const candidate of candidates.slice(0, 5)) {
+    const entry = `${candidate.number}. ${candidate.label}`;
+    if (text().length + (shown.length ? 1 : 0) + entry.length > 180) break;
+    shown.push(candidate);
+  }
+  return { message: text(), candidates: shown };
+}
+
 export function numberedCandidates(candidates: TargetCandidate[], context: CanvasContext): NumberedCandidate[] {
   const seen = new Set<string>();
   const numbered: NumberedCandidate[] = [];

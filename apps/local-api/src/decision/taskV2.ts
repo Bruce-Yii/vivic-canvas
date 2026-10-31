@@ -9,8 +9,8 @@ import { createBudget } from "../intent/budget.js";
 import { CAPABILITIES, CATALOG_VERSION, capabilityCatalog, cardCatalog, type OperationId } from "./catalogV2.js";
 import { acceptedNativeChoice, DEFAULT_NATIVE_GATE, type NativeGate, type NativeQuestion, type NativeScore, type NativeV2Provider } from "./nativeV2.js";
 import { exactHostOperation, hostOperationIssue } from "./hostOperations.js";
-import { confirmsDeletion, deletionStillCurrent, deletionTargets, freezeDeletion, numberedCandidates, publicIntentResult,
-  selectedCandidate, standaloneDeletion, type DeleteConfirmation } from "./confirmation.js";
+import { confirmsDeletion, deletionStillCurrent, deletionTargets, freezeDeletion, numberedCandidates, numberedChoiceQuestion,
+  publicIntentResult, selectedCandidate, standaloneDeletion, type DeleteConfirmation } from "./confirmation.js";
 import { splitClauses } from "./split.js";
 import type { PlannerRouteHint } from "./trace.js";
 
@@ -235,8 +235,12 @@ export class DecisionTaskManager {
             const resolved = task.resolvedTargets["0"] ?? task.resolvedTargetId ?? request.resolvedTargets?.["0"] ?? request.resolvedTargetId;
             const target = resolved ? { targetId: resolved } : await budget.run(() => hint.target);
             check();
-            if (target && "ambiguous" in target) return this.plannerClarification(task, { kind: "clarify", message: "你要删除哪张卡片？请用编号或完整标题选择。",
-              targetCandidates: target.ambiguous, targetClause: 0 });
+            if (target && "ambiguous" in target) {
+              // Number the delete question from the same frozen list the payload uses.
+              const choice = numberedChoiceQuestion("你要删除哪张卡片？", numberedCandidates(target.ambiguous, task.context));
+              return this.plannerClarification(task, { kind: "clarify",
+                message: choice.message, targetCandidates: choice.candidates, targetClause: 0 });
+            }
             if (!target || "missing" in target || task.context.cards.filter(card => card.id === target.targetId).length !== 1)
               return this.clarify(task, "没有找到要删除的卡片，请明确卡名或刷新画布；本次未执行任何操作。");
             actions = [{ type: "card.delete", targetId: target.targetId }];
