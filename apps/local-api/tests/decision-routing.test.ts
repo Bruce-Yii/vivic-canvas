@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from "vitest";
-import { buildState, cardLabel, cardTitle, createIntentRouter } from "../src/decision/router.js";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { buildState, cardLabel, cardTitle, createIntentRouter, parseDecisionTimeoutMs } from "../src/decision/router.js";
 import { resolveTarget } from "../src/decision/target.js";
 import { splitClauses } from "../src/decision/split.js";
 import { emptyContext } from "./helpers.js";
@@ -64,6 +64,52 @@ describe("independent route classification", () => {
     const timer = card("timer", "unused", "CountdownCard");timer.aliases = [];timer.displayProps = {};
     timer.sourceDataSummary = { reminderText: "喝水提醒", targetAt: "2026-10-29T10:18:00.000Z", pausedAt: "2026-10-29T10:00:00.000Z" };
     expect(cardTitle(timer)).toBe("喝水提醒");expect(cardLabel(timer)).toContain("18分钟");
+  });
+});
+describe("decision timeout", () => {
+  afterEach(() => { vi.useRealTimers(); vi.unstubAllEnvs(); });
+  it.each([
+    [undefined, 6000], ["", 6000], ["6000", 6000], ["1000", 1000], ["15000", 15000],
+    ["3000", 3000], ["999", 6000], ["15001", 6000], ["abc", 6000], ["6000.5", 6000],
+  ] as const)("parses %j to %i ms", (value, expected) => {
+    expect(parseDecisionTimeoutMs(value)).toBe(expected);
+  });
+  const hanging = () => vi.fn((_url: string | URL | Request, init?: RequestInit) => new Promise<Response>((_resolve, reject) => {
+    init?.signal?.addEventListener("abort", () => reject(new DOMException("cancelled", "AbortError")), { once: true });
+  })) as unknown as typeof fetch;
+  const start = () => {
+    let settled = false;
+    const pending = createIntentRouter({ url: "https://unit.test", apiKey: "unit-only", fetchImpl: hanging() })
+      .routeUtterance("你好", emptyContext())
+      .finally(() => { settled = true; });
+    return { pending, settled: () => settled };
+  };
+  it("uses the 6000ms default instead of the old hard 4000ms limit", async () => {
+    vi.useFakeTimers();
+    vi.stubEnv("VIVIC_DECISION_TIMEOUT_MS", "");
+    const { pending, settled } = start();
+    await vi.advanceTimersByTimeAsync(5999);
+    expect(settled()).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
+    await expect(pending).resolves.toBeNull();
+  });
+  it("honors a valid VIVIC_DECISION_TIMEOUT_MS override without retrying", async () => {
+    vi.useFakeTimers();
+    vi.stubEnv("VIVIC_DECISION_TIMEOUT_MS", "12000");
+    const { pending, settled } = start();
+    await vi.advanceTimersByTimeAsync(11999);
+    expect(settled()).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
+    await expect(pending).resolves.toBeNull();
+  });
+  it("falls back to the default outside 1000–15000 or on an invalid value", async () => {
+    vi.useFakeTimers();
+    vi.stubEnv("VIVIC_DECISION_TIMEOUT_MS", "15001");
+    const { pending, settled } = start();
+    await vi.advanceTimersByTimeAsync(5999);
+    expect(settled()).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
+    await expect(pending).resolves.toBeNull();
   });
 });
 describe("clause splitting", () => {

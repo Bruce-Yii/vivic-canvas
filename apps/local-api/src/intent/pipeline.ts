@@ -66,7 +66,7 @@ export interface IntentResult {
   envelope?: z.infer<typeof ActionEnvelopeSchema>;
   message?: string;
   suggestions?: string[];
-  usedProvider?: "rules" | "stepfun" | "gpt" | "rules-offline" | "search" | "decision";
+  usedProvider?: "rules" | "stepfun" | "deepseek" | "gpt" | "rules-offline" | "search" | "decision";
   trace?: DecisionTrace;
   /** Internal clarification handoff; the task manager removes it from the wire. */
   targetCandidates?: Array<{ id: string; label: string }>;
@@ -328,7 +328,8 @@ const runLegacyIntent = async (
       }
       return { kind: "unknown", message: deps.planner ? "GPT 未连接；本地文字指令仍可使用。请先连接 GPT 或选择 StepFun。" : OFFLINE_MESSAGE, usedProvider: "rules-offline" };
     }
-    usedProvider = deps.planner?.provider ?? "stepfun";
+    usedProvider = deps.planner?.provider
+      ?? (deps.mainProvider === "deepseek" || deps.stepfun.provider === "deepseek" ? "deepseek" : "stepfun");
     // "生日倒计时" / "距离考试还有 30 天" are date countdown cards, not minute timers.
     const reminderMode = !hasImages && !continuation && !req.taskContext && isReminderCreation(req.text) && !looksLikeDateCountdown(req.text);
     // A link the user wants summarised or saved is read once by the verified reader; its text is evidence only.

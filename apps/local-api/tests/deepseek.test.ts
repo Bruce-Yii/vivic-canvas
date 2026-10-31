@@ -6,6 +6,8 @@ import { createApp } from "../src/app.js";
 import { loadConfig } from "../src/config.js";
 import { CredentialStore } from "../src/credentials.js";
 import { runIntent } from "../src/intent/pipeline.js";
+import type { IntentRouter } from "../src/decision/router.js";
+import { IntentResponseSchema } from "../src/schemas.js";
 import { chatJson } from "../src/stepfun.js";
 import { authed, chatOk, emptyContext, TEST_TOKEN, testConfig } from "./helpers.js";
 
@@ -134,6 +136,9 @@ describe("DeepSeek app path", () => {
         body: JSON.stringify({ text: "帮我写一首关于秋天的短诗", canvasContext: emptyContext() }) });
       const body = await response.json();
       expect(body.kind).toBe("envelope");
+      // The status slot is still named "stepfun"; the result label must say
+      // which provider actually produced it.
+      expect(body.usedProvider).toBe("deepseek");
       expect(urls).toEqual(["https://api.deepseek.test/chat/completions"]);
       expect(bodies[0]).toMatchObject({ model: "deepseek-flash", thinking: { type: "disabled" },
         response_format: { type: "json_object" }, max_tokens: 4096 });
@@ -177,6 +182,35 @@ describe("DeepSeek app path", () => {
       expect(await response.json()).toMatchObject({ ok: false, connected: false });
       expect(fetchImpl).not.toHaveBeenCalled();
     } finally { app.dispose(); }
+  });
+});
+
+describe("planner provider label", () => {
+  const credentials = new CredentialStore();
+  credentials.set(credential);
+  const reply = () => vi.fn<typeof fetch>(async () => chatOk({ reply: "好" }));
+  const request = { text: "帮我写一首关于秋天的短诗", canvasContext: emptyContext() };
+  const shadow: IntentRouter = { mode: "shadow",
+    routeUtterance: vi.fn(async () => ({ route: "chat" as const, probability: .9, probabilities: { chat: .9 }, none: false, latencyMs: 1 })),
+    chooseTarget: vi.fn(async () => null) };
+
+  it("labels an official DeepSeek answer as deepseek, not stepfun", async () => {
+    const result = await runIntent(request, { credentials, mainProvider: "deepseek",
+      stepfun: { baseUrl: "https://api.deepseek.test", provider: "deepseek", fetchImpl: reply() } });
+    expect(result).toMatchObject({ kind: "envelope", usedProvider: "deepseek" });
+  });
+
+  it("keeps the stepfun label when the main provider is unset", async () => {
+    const result = await runIntent(request, { credentials,
+      stepfun: { baseUrl: "https://unit.test/v1", fetchImpl: reply() } });
+    expect(result).toMatchObject({ kind: "envelope", usedProvider: "stepfun" });
+  });
+
+  it("carries deepseek into the decision trace and response schema", async () => {
+    const result = await runIntent(request, { credentials, mainProvider: "deepseek", router: shadow, slotPlanning: false,
+      stepfun: { baseUrl: "https://api.deepseek.test", provider: "deepseek", fetchImpl: reply() } });
+    expect(result.trace?.legacyUsedProvider).toBe("deepseek");
+    expect(IntentResponseSchema.safeParse(result).success).toBe(true);
   });
 });
 

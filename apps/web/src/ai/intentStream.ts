@@ -102,7 +102,7 @@ export const IntentResultSchema = z.object({
   suggestions: z.array(z.string().max(100)).max(5).optional(),
   locale: z.object({ name: z.string(), admin1: z.string().optional(), country: z.string().optional(),
     basis: z.enum(["device", "network"]), answer: z.string() }).optional(),
-  usedProvider: z.enum(["rules", "stepfun", "gpt", "rules-offline", "search", "decision"]).optional(),
+  usedProvider: z.enum(["rules", "stepfun", "deepseek", "gpt", "rules-offline", "search", "decision"]).optional(),
 }).refine(result => result.kind !== "envelope" || Boolean(result.envelope), "缺少已校验的操作")
   .refine(result => result.kind !== "host-operation" || Boolean(result.hostOperation && result.task?.status === "awaiting_execution"), "缺少宿主操作任务")
   .refine(result => !(result.envelope && result.hostOperation), "操作类型冲突");

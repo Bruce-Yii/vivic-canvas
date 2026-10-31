@@ -45,6 +45,9 @@ export const DecisionTraceSchema = z.strictObject({
   latencyMs: z.number().nonnegative(), routeLatencyMs: z.number().nonnegative(),
   legacyElapsedMs: z.number().nonnegative(), shadowWaitMs: z.number().nonnegative(),
   failedCount: z.int().min(0).max(3), legacyKind: z.string().max(32),
+  /** Provider that produced the authoritative result: rules, stepfun,
+   * deepseek, gpt, rules-offline, search or decision. A bounded string keeps
+   * traces written before the deepseek label readable. */
   legacyUsedProvider: z.string().max(32).optional(), legacyActionTypes: z.array(z.string().max(80)).max(32),
   legacyCardTypes: z.array(z.string().max(80)).max(32),
   plannerCalls: z.int().min(0).max(100).optional(),
