@@ -1,14 +1,18 @@
 import { createHash, randomBytes } from "node:crypto";
+import path from "node:path";
+import { existsSync } from "node:fs";
+import { ProviderStore } from "../providers/store.js";
 import { z } from "zod";
 import { createSpaceHandler, SpaceError, type SpaceIdentity } from "../space/index.js";
 import { createOnlineSessionApp } from "../online/appFactory.js";
 import { createModelApiClient, type ModelApiClient, type ModelApiDecisionModel } from "../modelApi/index.js";
 import { createHostedAssetService } from "./assets.js";
+import { createHostedEvents } from "./events.js";
 import { createHostedTaskService } from "./tasks.js";
 import { createHostedReminderScheduler } from "./reminders.js";
 import { createHostedMigrationService } from "./migration.js";
 import { boundedBytes, hostedBody, hostedFailure, hostedForm, hostedJson } from "./http.js";
-import { ownerRoute } from "./owner.js";
+import { ownerCanvas, ownerRoute } from "./owner.js";
 import { createIntentRouter, type IntentRouter } from "../decision/router.js";
 import { decisionOutcome } from "../decision/logging.js";
 import type { PipelineDeps } from "../intent/pipeline.js";
@@ -35,13 +39,17 @@ const DECISION_LABELS = {
   fit: "在一屏显示全部卡片", restore: "恢复之前的画布视图", focus: "聚焦一张卡片", delete: "删除卡片",
   expand: "展开便笺并查看全文", collapse: "收起便笺只显示摘要", other: "不明确、否定、复合或其他要求",
 };
-const proxyGet = new Set(["/api/providers/status", "/api/speech/voices", "/api/decision/status", "/api/connections/status"]);
-const proxyPost = new Set(["/api/credentials/stepfun/validate", "/api/credentials/stepfun/disconnect", "/api/credentials/platform/validate", "/api/credentials/platform/disconnect", "/api/providers/select", "/api/providers/model", "/api/intent", "/api/intent/stream", "/api/speech", "/api/files/read", "/api/weather/here", "/api/travel/refresh", "/api/locale", "/api/search", "/api/connections/connect", "/api/connections/disconnect", "/api/connections/query"]);
+const proxyGet = new Set(["/api/providers/status", "/api/speech/voices", "/api/decision/status", "/api/connections/status", "/api/connections/authorization/capabilities"]);
+const proxyPost = new Set(["/api/credentials/stepfun/validate", "/api/credentials/stepfun/disconnect", "/api/credentials/deepseek/validate", "/api/credentials/deepseek/disconnect", "/api/credentials/platform/validate", "/api/credentials/platform/disconnect", "/api/providers/select", "/api/providers/model", "/api/intent", "/api/intent/stream", "/api/speech", "/api/files/read", "/api/weather/here", "/api/travel/refresh", "/api/locale", "/api/search", "/api/connections/connect", "/api/connections/disconnect", "/api/connections/query"]);
+for (const route of ["configure", "test", "ask", "authorization/start", "authorization/poll", "authorization/cancel"]) proxyPost.add(`/api/connections/${route}`);
 
 /** Durable domain data and short-lived model credentials have deliberately separate lifetimes. */
 export function createHostedService(options: HostedServiceOptions) {
   const now = options.now ?? Date.now;
-  const router = options.router ?? createIntentRouter({ fetchImpl: options.fetchImpl });
+  // Hosted turns use deterministic contracts first, then the selected main
+  // model. Keep the previous classifier path as an explicit operator opt-in.
+  const router = options.router ?? createIntentRouter({ fetchImpl: options.fetchImpl,
+    policy: process.env.VIVIC_DECISION_POLICY?.trim().toLowerCase() === "full" ? "full" : "main-only" });
   const space = createSpaceHandler({ origin: options.origin, dataDir: options.dataDir, inviteCode: options.inviteCode, now });
   const apps = new Map<string, AccountApp>(), models = new Map<string, ModelConnection>();
   const disabledModels = new Set<string>();
@@ -76,10 +84,20 @@ export function createHostedService(options: HostedServiceOptions) {
     }
     if (!value) {
       const token = randomBytes(32).toString("base64url");
+      const providerDataDir = path.join(options.dataDir, "account-providers", accountId);
+      // Existing deployment settings were intentionally shared operator defaults.
+      // Copy them once, through their encrypted stores, before account-local edits.
+      // Never use another account's private directory as a template.
+      if (!existsSync(path.join(providerDataDir, "providers.json")) && existsSync(path.join(options.dataDir, "providers.json"))) {
+        const defaults = new ProviderStore({ dataDir: options.dataDir });
+        const scoped = new ProviderStore({ dataDir: providerDataDir });
+        for (const entry of defaults.list()) scoped.create({ name: entry.name, protocol: entry.protocol, baseUrl: entry.baseUrl,
+          apiKey: entry.apiKey, model: entry.model, headers: entry.headers, roles: entry.roles, presetId: entry.presetId, enabled: entry.enabled });
+      }
       // Provider settings share the deployment's durable data root, so a saved
       // main/decision provider survives session turnover and process restarts.
       value = { token, app: createOnlineSessionApp({ token, origin: options.origin },
-        { ...sessionOptions(accountId), providerDataDir: options.dataDir }), created: now(), touched: now() };
+        { ...sessionOptions(accountId), providerDataDir }), created: now(), touched: now() };
       apps.set(accountId, value);
     }
     if (activity) value.touched = now(); return value;
@@ -99,6 +117,7 @@ export function createHostedService(options: HostedServiceOptions) {
   }
   const tasks = createHostedTaskService({ store: space.store,
     invoke: (accountId, route, body, signal) => invoke(accountId, route, body, signal, "task"), now });
+  const events = createHostedEvents(space.store, now);
   const migration = createHostedMigrationService({ store: space.store, assetService: assets });
   function modelFor(accountId: string) {
     let session = models.get(accountId);
@@ -221,13 +240,21 @@ export function createHostedService(options: HostedServiceOptions) {
       if (!identity) throw new SpaceError(401, "login-required", "请先登录或连接此设备。");
       const { accountId } = identity;
       if (!space.store.takeRateLimit(`hosted:${accountId}`, 180)) throw new SpaceError(429, "rate-limit", "请求较多，请稍后重试。");
+      const event = await events.handle(request, identity); if (event) return event;
+      const nativeSnapshot = /^\/api\/space\/native\/spaces\/([A-Za-z0-9_-]{1,128})$/.exec(route);
+      if (nativeSnapshot && request.method === "GET") {
+        const snapshot = space.store.getSnapshot(accountId, nativeSnapshot[1]!);
+        const projected = ownerCanvas(space.store, accountId, nativeSnapshot[1]!).record;
+        return hostedJson({ ...snapshot, space: { ...snapshot.space,
+          cards: projected.cardOrder.map(id => projected.cardsById[id]!) } });
+      }
       if (route === "/api/space/decision-log" && request.method === "GET") {
         const raw = url.searchParams.get("limit") ?? "200";
         if (!/^\d{1,3}$/.test(raw) || Number(raw) < 1 || Number(raw) > 200) throw new SpaceError(400, "invalid-limit", "limit 需要为1–200。");
         return hostedJson({ entries: space.store.listDecisionLogs(accountId, Number(raw)) });
       }
       const packages = await cardPackageRoute(space.store, request, identity); if (packages) return packages;
-      const owner = await ownerRoute(space.store, request, identity); if (owner) { if (request.method !== "GET") reminders.check(); return owner; }
+      const owner = await ownerRoute(space.store, request, identity); if (owner) { if (request.method !== "GET") { events.changed(accountId, identity.device.id, owner); reminders.check(); } return owner; }
       if (route === "/api/transcribe" && request.method === "POST") {
         const value = appFor(accountId, true), bytes = await boundedBytes(request, 22 * 1024 * 1024);
         return await value.app.fetch(new Request(`${options.origin}${route}`, { method: "POST", signal: request.signal,
@@ -249,11 +276,13 @@ export function createHostedService(options: HostedServiceOptions) {
       // PR3 provider settings: the online owner panel is the same app as the
       // local one, so CRUD/list/presets/preview/test must reach the session
       // app instead of 404 at the hosted boundary. Settings are deployment
-      // level (shared by accounts), matching the persisted store.
+      // scoped to the authenticated account, including encrypted persistence.
       const providerCrud = route === "/api/providers" || route === "/api/providers/presets"
         || route.startsWith("/api/providers/preview/")
         || /^\/api\/providers\/(?!status$|select$|model$)[^/]+(?:\/(?:test|models))?$/.test(route);
       if (providerCrud) {
+        const accountHint = request.headers.get("x-vivic-account");
+        if (accountHint && accountHint !== accountId) throw new SpaceError(409, "account-changed", "账号已切换，请重新打开模型设置。");
         if (!["GET", "POST", "PATCH", "DELETE"].includes(request.method)) throw new SpaceError(405, "method-not-allowed", "此接口不支持该请求方法。");
         const body = request.method === "GET" ? undefined : await hostedBody(request, 128 * 1024);
         const response = await invokeMethod(accountId, route, request.method, body, request.signal);
@@ -262,20 +291,11 @@ export function createHostedService(options: HostedServiceOptions) {
       }
       if (proxyGet.has(route) && request.method === "GET") return await invoke(accountId, route, undefined, request.signal);
       if (proxyPost.has(route) && request.method === "POST") {
-        if (route === "/api/credentials/stepfun/validate") {
-          const token = randomBytes(32).toString("base64url");
-          const candidate: AccountApp = { token, app: createOnlineSessionApp({ token, origin: options.origin },
-            { ...sessionOptions(accountId), providerDataDir: options.dataDir }), created: now(), touched: now() };
-          try {
-            const body = await hostedBody(request);
-            const response = await candidate.app.fetch(new Request(`${options.origin}${route}`, { method: "POST", signal: request.signal,
-              headers: { authorization: `Bearer ${token}`, origin: options.origin, "content-type": "application/json" }, body: JSON.stringify(body) }));
-            request.signal.throwIfAborted(); space.store.assertDeviceActive(accountId, identity.device.id);
-            if (response.ok) { const previous = apps.get(accountId); apps.set(accountId, candidate); if (previous) void previous.app.dispose(); }
-            else await candidate.app.dispose();
-            return response;
-          } catch (error) { await candidate.app.dispose(); throw error; }
-        }
+        const accountHint = request.headers.get("x-vivic-account");
+        if (route.startsWith("/api/credentials/") && accountHint && accountHint !== accountId)
+          throw new SpaceError(409, "account-changed", "账号已切换，请重新打开连接设置。");
+        // Each provider validates atomically inside the account app. Replacing the
+        // whole app here would discard the other provider and break failover.
         const body = await hostedBody(request, route.startsWith("/api/intent") || route === "/api/files/read" ? 6 * 1024 * 1024 : 64 * 1024);
         let trustedImageRef: string | undefined;
         if (route.startsWith("/api/intent") && router.mode !== "off") {
@@ -296,7 +316,7 @@ export function createHostedService(options: HostedServiceOptions) {
       }
       if (route.startsWith("/api/space/")) {
         const response = await space.fetch(request);
-        if (response.ok && request.method !== "GET") reminders.check();
+        if (response.ok && request.method !== "GET") { events.changed(accountId, identity.device.id, response); reminders.check(); }
         return response;
       }
       throw new SpaceError(404, "not-found", "没有此接口。");
@@ -332,7 +352,7 @@ export function createHostedService(options: HostedServiceOptions) {
     }
   }
   return { fetch: boundedFetch, store: space.store, tasks, assets, reminders,
-    async dispose() { closed = true; clearInterval(expiry); reminders.dispose(); await tasks.dispose();
+    async dispose() { closed = true; clearInterval(expiry); events.dispose(); reminders.dispose(); await tasks.dispose();
       recentDecisionReceipts.clear();
       for (const model of models.values()) { model.key = undefined; model.controller.abort(); } models.clear();
       await Promise.allSettled([...apps.values()].map(record => Promise.resolve(record.app.dispose()))); apps.clear(); space.dispose(); } };

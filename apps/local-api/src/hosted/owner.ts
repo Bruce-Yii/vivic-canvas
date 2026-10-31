@@ -64,13 +64,16 @@ export async function ownerRoute(store: HostedSpaceStore, request: Request, iden
     const input = z.strictObject({ record: OwnerCanvasSchema, expectedVersion: z.int().min(0).nullable(), requestId: id }).parse(await hostedBody(request, 8 * 1024 * 1024));
     if (input.record.id !== canvas[1]) throw new SpaceError(400, "canvas-id-mismatch", "画布编号不一致。");
     request.signal.throwIfAborted();
+    const before = store.listSpaces(accountId).find(space => space.id === canvas[1])?.version;
     store.saveOwnerCanvas(accountId, input, device.id);
-    return hostedJson(ownerCanvas(store, accountId, canvas[1]!));
+    const saved = ownerCanvas(store, accountId, canvas[1]!);
+    return hostedJson(saved, 200, { "X-Vivic-Space": canvas[1]!, "X-Vivic-Space-Version": String(saved.serverVersion),
+      ...(saved.serverVersion === before ? { "X-Vivic-Deduplicated": "1" } : {}) });
   }
   if (canvas && request.method === "DELETE") {
     const input = z.strictObject({ expectedVersion: z.int().min(0) }).parse(await hostedBody(request));
     store.deleteOwnerCanvas(accountId, canvas[1]!, input.expectedVersion, device.id);
-    return hostedJson({ ok: true });
+    return hostedJson({ ok: true }, 200, { "X-Vivic-Space": canvas[1]!, "X-Vivic-Space-Deleted": "1" });
   }
   const meta = new RegExp(`^${base}/meta/(lastCanvasId|reminderInbox|displayPreferences(?:_[A-Za-z0-9_-]{1,128})?)$`).exec(route);
   if (meta && request.method === "GET") return hostedJson({ value: store.getAccountValue(accountId, `ownerUI:${meta[1]}`) });

@@ -7,7 +7,7 @@ import { planDeterministic } from "../intent/plans.js";
 import { hasExplicitCardReference, resolveTarget, targetedRoutes } from "./target.js";
 import type { TargetResult } from "./target.js";
 import { isBuiltinRoute, type RouteResult } from "./router.js";
-import { literalRoute } from "./on.js";
+import { immediateGreeting, literalRoute } from "./on.js";
 
 /** The planner shares the observer's first RPC and target lookup. */
 export interface PlannerRouteHint {
@@ -75,6 +75,7 @@ export async function observeDecision(req: IntentRequest, deps: PipelineDeps, si
   // explicit "skipped" rows so the plan/execution path sees the same clause
   // shape, and telemetry can tell a skipped classifier apart from a failure.
   const mainOnly = router.policy === "main-only";
+  const greeting = router.mode === "on" && immediateGreeting(req);
   const start = performance.now(), controller = new AbortController();
   const abort = () => controller.abort();
   signal?.addEventListener("abort", abort, { once: true });
@@ -113,7 +114,7 @@ export async function observeDecision(req: IntentRequest, deps: PipelineDeps, si
       const clauseStarted = performance.now();
       try {
         if (router.mode === "on") controller.signal.throwIfAborted();
-        const exact = router.mode === "on" && !req.attachments?.length && !req.continuation && !req.resolvedTargetId && !req.resolvedTargets
+        const exact = greeting ? "chat" : router.mode === "on" && !req.attachments?.length && !req.continuation && !req.resolvedTargetId && !req.resolvedTargets
           ? literalRoute(text, shadowContext, router) : undefined;
         const value = exact ? { route: exact, probability: 1, probabilities: { [exact]: 1 }, none: false,
           latencyMs: performance.now() - clauseStarted }
@@ -136,7 +137,7 @@ export async function observeDecision(req: IntentRequest, deps: PipelineDeps, si
           : clauses.length === 1 && req.resolvedTargetId ? { targetId: req.resolvedTargetId, source: "frozen" as const } : selected;
         output.push(value ? { text, ...value, ...(exact ? { source: "rules" as const } : mainOnly ? {} : { source: "decision" as const }),
           failed: false, ...(target ? { target } : {}),
-          ...(mainOnly ? { routeSource: exact ? "rules" as const : "skipped" as const } : {}) }
+          ...(greeting || mainOnly ? { routeSource: exact ? "rules" as const : "skipped" as const } : {}) }
           : { text, route: null, probability: 0, probabilities: {}, none: true, latencyMs: Math.round(performance.now() - clauseStarted),
             failed: true, ...(mainOnly ? { routeSource: "skipped" as const } : {}) });
         if (value?.route === "focus" && value.probability >= .8 && target && "targetId" in target) {

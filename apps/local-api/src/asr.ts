@@ -2,6 +2,8 @@ import { Hono } from "hono";
 import type { LocalApiConfig } from "./config.js";
 import type { CredentialStore } from "./credentials.js";
 import { AsrAudioError, extractAsrPcm, MAX_ASR_FILE_BYTES } from "./asrAudio.js";
+import type { ProviderStore } from "./providers/store.js";
+import { resolveSavedAsr } from "./providers/asr.js";
 
 export const ASR_MODEL = "stepaudio-2.5-asr";
 export const ASR_TIMEOUT_MS = 30_000;
@@ -13,6 +15,7 @@ const PLAN_BASE = "https://api.stepfun.com/step_plan/v1";
 export interface AsrDeps {
   config: LocalApiConfig & { asrTimeoutMs?: number };
   credentials: CredentialStore;
+  providerStore?: ProviderStore;
   fetchImpl?: typeof fetch;
 }
 
@@ -84,7 +87,7 @@ const readTranscript = async (response: Response, signal: AbortSignal): Promise<
     let event: unknown;
     try { event = JSON.parse(raw); } catch { throw invalidResponse(); }
     if (!event || typeof event !== "object" || !("type" in event)) throw invalidResponse();
-    if (event.type === "error") throw new AsrFailure(503, "asr-upstream-error", "Plan 语音识别失败，请检查套餐权限或额度后重试；未执行任何指令。");
+    if (event.type === "error") throw new AsrFailure(503, "asr-upstream-error", "语音识别失败，请检查所选语音模型的权限或额度后重试；未执行任何指令。");
     if (event.type === "transcript.text.delta") {
       if (!("delta" in event) || typeof event.delta !== "string") throw invalidResponse();
     } else if (event.type === "transcript.text.done") {
@@ -119,12 +122,16 @@ const readTranscript = async (response: Response, signal: AbortSignal): Promise<
 };
 
 /** Mount under /api after the existing session-auth/origin middleware. No intent execution. */
-export const createAsrRoutes = ({ config, credentials, fetchImpl = fetch }: AsrDeps) => {
+export const createAsrRoutes = ({ config, credentials, providerStore, fetchImpl = fetch }: AsrDeps) => {
   const routes = new Hono();
   routes.post("/transcribe", async (c) => {
     c.header("Cache-Control", "no-store");
     c.header("X-Content-Type-Options", "nosniff");
     const credential = credentials.getSecret();
+    const selected = providerStore ? resolveSavedAsr(providerStore) : undefined;
+    const backend = selected && !("error" in selected) ? selected : undefined;
+    const registry = providerStore ? JSON.stringify(providerStore.list()) : undefined;
+    const isCurrent = () => backend ? JSON.stringify(providerStore!.list()) === registry : credentials.getSecret() === credential;
     const deadline = new AbortController();
     const configured = config.asrTimeoutMs;
     const timeout = typeof configured === "number" && Number.isFinite(configured) && configured >= 1
@@ -134,9 +141,10 @@ export const createAsrRoutes = ({ config, credentials, fetchImpl = fetch }: AsrD
     let upstreamResponse: Response | undefined;
     try {
       signal.throwIfAborted();
-      if (!credential) throw new AsrFailure(503, "asr-disconnected", "请先连接 StepFun Plan Key，再进行语音识别。");
+      if (selected && "error" in selected) throw new AsrFailure(503, "asr-disconnected", selected.error ?? "语音识别连接不可用。");
+      if (!backend && !credential) throw new AsrFailure(503, "asr-disconnected", "请先配置语音识别 ASR，或连接 StepFun API。");
       // Exact allowlist: no proxy, ordinary billing base, redirects or alternate provider.
-      if (config.stepfunBaseUrl.replace(/\/+$/, "") !== PLAN_BASE) {
+      if (!backend && config.stepfunBaseUrl.replace(/\/+$/, "") !== PLAN_BASE) {
         throw new AsrFailure(503, "asr-plan-required", "识别不可用：必须使用官方 StepFun Plan 地址，不会切换按量计费接口。");
       }
       if (new URL(c.req.url).search) throw new AsrFailure(400, "asr-invalid-input", "识别接口不接受 URL 查询参数，仅接受一个 file 音频字段。");
@@ -171,14 +179,23 @@ export const createAsrRoutes = ({ config, credentials, fetchImpl = fetch }: AsrD
       }
       const pcm = extractAsrPcm(new Uint8Array(await abortable(file.arrayBuffer(), signal)));
       signal.throwIfAborted();
-      if (credentials.getSecret() !== credential) throw new AsrFailure(503, "asr-disconnected", "识别已取消：模型连接已变更，请重新录音。");
-      const request = fetchImpl(`${PLAN_BASE}/audio/asr/sse`, {
+      if (!isCurrent()) throw new AsrFailure(503, "asr-disconnected", "识别已取消：模型连接已变更，请重新录音。");
+      let upload: FormData | undefined;
+      if (backend?.protocol === "multipart") {
+        upload = new FormData(); upload.append("file", file, "voice.wav"); upload.append("model", backend.model); upload.append("language", "zh");
+      }
+      const headers = backend?.headers ?? { authorization: `Bearer ${credential!.apiKey}` };
+      const requestHeaders = new Headers(headers);
+      if (upload) { requestHeaders.delete("content-type"); requestHeaders.set("accept", "application/json"); }
+      else { requestHeaders.set("content-type", "application/json"); requestHeaders.set("accept", "text/event-stream"); }
+      const request = fetchImpl(`${backend?.baseUrl ?? PLAN_BASE}/audio/${upload ? "transcriptions" : "asr/sse"}`, {
         method: "POST", redirect: "error", signal,
-        headers: { authorization: `Bearer ${credential.apiKey}`, "content-type": "application/json", accept: "text/event-stream" },
-        body: JSON.stringify({ audio: {
+        headers: backend ? requestHeaders : { authorization: `Bearer ${credential!.apiKey}`, "content-type": "application/json", accept: "text/event-stream" },
+        body: upload ?? JSON.stringify({ audio: {
           data: Buffer.from(pcm).toString("base64"),
           input: {
-            transcription: { model: ASR_MODEL, language: "zh", enable_itn: true },
+            transcription: { model: backend?.model ?? ASR_MODEL, language: "zh", enable_itn: true,
+              ...(backend ? { hotwords: ["Vivic", "维维克", "倒计时", "便笺", "待办"] } : {}) },
             format: { type: "pcm", codec: "pcm_s16le", rate: 16000, bits: 16, channel: 1 },
           },
         } }),
@@ -189,15 +206,23 @@ export const createAsrRoutes = ({ config, credentials, fetchImpl = fetch }: AsrD
       signal.throwIfAborted();
       if (!response.ok) {
         cancelBody(response.body);
-        throw new AsrFailure(503, "asr-unavailable", `Plan 识别请求被拒绝（HTTP ${response.status}），请检查套餐权限或额度；不会切换计费接口。`);
+        throw new AsrFailure(503, "asr-unavailable", backend ? `语音识别 API 请求被拒绝（HTTP ${response.status}），请检查所选 ASR 的 Key、模型和权限。`
+          : `Plan 识别请求被拒绝（HTTP ${response.status}），请检查套餐权限或额度；不会切换计费接口。`);
       }
-      const text = await readTranscript(response, signal);
+      let text: string;
+      if (upload) {
+        let json = ""; const decoder = new TextDecoder("utf-8", { fatal: true });
+        await readChunks(response.body, signal, MAX_RESPONSE_BYTES, (chunk, done) => { json += decoder.decode(chunk, { stream: !done }); }, invalidResponse());
+        const result = JSON.parse(json) as { text?: unknown };
+        if (typeof result.text !== "string" || !result.text.trim() || result.text.trim().length > 500 || /[\p{Cc}\p{Cf}]/u.test(result.text.trim())) throw invalidResponse();
+        text = result.text.trim();
+      } else text = await readTranscript(response, signal);
       signal.throwIfAborted();
-      if (credentials.getSecret() !== credential) throw new AsrFailure(503, "asr-disconnected", "识别已取消：模型连接已变更，旧转写已丢弃。");
+      if (!isCurrent()) throw new AsrFailure(503, "asr-disconnected", "识别已取消：模型连接已变更，旧转写已丢弃。");
       return c.json({ ok: true, text });
     } catch (error) {
       let failure: AsrFailure;
-      if (credentials.getSecret() !== credential) {
+      if (!isCurrent()) {
         failure = new AsrFailure(503, "asr-disconnected", "识别已取消：模型连接已变更，旧转写已丢弃。");
       } else if (signal.aborted) {
         failure = deadline.signal.aborted

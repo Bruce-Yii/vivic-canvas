@@ -20,6 +20,7 @@ export function createOnlineSessionApp(
     /** Deployment data dir; the hosted service passes its own persistent root. */
     providerDataDir?: string;
     providerPersist?: boolean;
+    providerSeed?: boolean;
   } = {},
 ) {
   const config: LocalApiConfig = {
@@ -45,7 +46,7 @@ export function createOnlineSessionApp(
   // stray caller can never read/write the operator's ~/.vivic. The hosted
   // service always passes its VIVIC_SPACE_DATA_DIR root.
   const providerDataDir = overrides.providerDataDir ?? providerDataDirFromEnv();
-  const app = createApp({ config, mode: "online", fetchImpl: overrides.fetchImpl,
+  const app = createApp({ config, mode: "online", fetchImpl: overrides.fetchImpl, providerSeed: overrides.providerSeed,
     router: overrides.router, onDecisionTrace: overrides.onDecisionTrace, onDecisionReceipt: overrides.onDecisionReceipt, getEnabledDefinitions: overrides.getEnabledDefinitions,
     ...(providerDataDir ? {
       providerDataDir,

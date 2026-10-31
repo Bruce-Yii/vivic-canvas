@@ -151,10 +151,11 @@ export class ProviderStore {
 
   findForRole(role: ProviderRole): ProviderConfig | undefined {
     const candidates = [...this.#configs.values()].filter((config) => config.enabled && config.roles.includes(role));
+    if (role === "main") {
+      const stepfun = candidates.filter(config => config.protocol.startsWith("stepfun")).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0];
+      if (stepfun) return stepfun;
+    }
     // A provider explicitly configured for the role wins over a shared one.
-    // Within the same specificity the most recently updated row wins, so a
-    // provider saved after the deployment seed takes effect without the
-    // operator having to find and disable the seed row first.
     const newestFirst = [...candidates].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
     return newestFirst.find((config) => config.roles.length === 1 && config.roles[0] === role) ?? newestFirst[0];
   }

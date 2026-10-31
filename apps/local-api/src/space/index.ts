@@ -17,6 +17,12 @@ const ClaimSchema = z.strictObject({ code: z.string().regex(/^[A-Za-z0-9_-]{12}$
 const hash = (value: string) => createHash("sha256").update(value).digest("hex");
 const json = (value: unknown, status = 200, extra?: HeadersInit) => {
   const headers = new Headers(extra);
+  const result = value as { snapshot?: { space?: { id?: unknown; version?: unknown } }; space?: { id?: unknown; version?: unknown }; deduplicated?: boolean };
+  const changed = result?.snapshot?.space ?? result?.space;
+  if (typeof changed?.id === "string" && typeof changed.version === "number") {
+    headers.set("X-Vivic-Space", changed.id); headers.set("X-Vivic-Space-Version", String(changed.version));
+    if (result.deduplicated) headers.set("X-Vivic-Deduplicated", "1");
+  }
   headers.set("Content-Type", "application/json; charset=utf-8");
   headers.set("Cache-Control", "no-store");
   headers.set("X-Content-Type-Options", "nosniff");

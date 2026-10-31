@@ -6,3 +6,6 @@ dist-online/
 .DS_Store
 *.log
 .vite/
+
+# local cleanup window runtime data (sqlite space store; never commit)
+.local-data/

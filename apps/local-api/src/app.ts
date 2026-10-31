@@ -6,6 +6,9 @@ import { bodyLimit } from "hono/body-limit";
 import { z } from "zod";
 import { DEEPSEEK_BASE_URL, DEFAULT_DEEPSEEK_MODEL, PLAN_MAX_TOKENS, type LocalApiConfig } from "./config.js";
 import { CredentialStore } from "./credentials.js";
+import { DeepseekCredentialStore, deepseekModel as normalizeDeepseekModel, validateDeepseek } from "./deepseek.js";
+import { accountPlanner } from "./modelFallback.js";
+import { resolveSavedMain } from "./providers/main.js";
 import type { CardDefinition } from "@vivic/card-runtime";
 import { currentCardDefinitions } from "./cards/catalog.js";
 import { PlatformCredentialStore } from "./platformCredential.js";
@@ -21,9 +24,10 @@ import {
   SpeechRequestSchema,
   ValidateKeyRequestSchema,
 } from "./schemas.js";
-import { validateConnection, chatJson, probeAnswered, PLAN_CHAT_MODELS } from "./stepfun.js";
+import { validateConnection, chatJson, probeAnswered, PLAN_CHAT_MODELS, type StepfunDeps } from "./stepfun.js";
 import { providerRecoveryHint } from "./providerError.js";
 import { SPEECH_MODEL, synthesizeSpeech } from "./speech.js";
+import { resolveSavedSpeech } from "./providers/speech.js";
 import { DEFAULT_SPEECH_SPEED, DEFAULT_SPEECH_VOICE, SPEECH_VOICES, SPEECH_VOICES_SOURCE } from "./voices.js";
 import { createAsrRoutes, ASR_BODY_LIMIT_BYTES } from "./asr.js";
 import { createSearchClient, createSearchRoutes, type SearchClient } from "./search/index.js";
@@ -53,7 +57,6 @@ import { createFileReadRoutes, FILE_READ_BODY_LIMIT } from "./files/routes.js";
 import {
   ProviderStore, ProviderClient, createProviderRoutes, seedStepFunProvider, type ProviderProtocol,
 } from "./providers/index.js";
-import { resolveSavedMain } from "./providers/main.js";
 
 /**
  * Vivic local decision API. Loopback only, bearer-guarded, zod on every
@@ -97,6 +100,7 @@ export interface AppDeps {
   providerDataDir?: string;
   /** `false` keeps provider settings in memory. Defaults to on when a directory exists. */
   providerPersist?: boolean;
+  providerSeed?: boolean;
 }
 
 const tokenOk = (presented: string, expected: string): boolean => {
@@ -131,35 +135,32 @@ export const createApp = (deps: AppDeps) => {
   // .secret-key, both 0600) so a saved provider survives restarts; without a
   // supplied directory they stay in memory, so tests and stray callers still
   // never read or write the host's home directory.
-  const providerDataDir = deps.providerDataDir ?? (online ? undefined : path.join(homedir(), ".vivic"));
+  const providerDataDir = deps.providerDataDir;
   const providerStore = deps.providerStore ?? new ProviderStore({
     dataDir: providerDataDir ?? path.join(homedir(), ".vivic"),
-    persist: deps.providerPersist ?? (online ? Boolean(providerDataDir) : true),
+    persist: deps.providerPersist ?? Boolean(providerDataDir),
   });
   // Deployment seed (online only): VIVIC_STEPFUN_API_KEY becomes a normal
   // encrypted "main" provider exactly once. An existing main provider wins,
   // and local mode keeps its previous behaviour byte for byte.
-  if (online) seedStepFunProvider(providerStore);
+  if (online && deps.providerSeed !== false) seedStepFunProvider(providerStore);
   // Settings win over env in both modes. An empty store leaves today's
   // StepFun/DeepSeek environment path untouched.
   const savedDecision = providerStore.findForRole("decision");
-  // `VIVIC_MAIN_PROVIDER=deepseek` only changes the main planner transport when
-  // no provider is saved. A separate in-memory store keeps speech/ASR on their
-  // StepFun credential, and the key comes from DEEPSEEK_API_KEY without
-  // touching disk or logs.
+  // `VIVIC_MAIN_PROVIDER=deepseek` only changes the main planner transport. A
+  // separate in-memory store keeps speech/ASR on their StepFun credential, and
+  // the key comes from DEEPSEEK_API_KEY without touching disk or logs.
   const mainProvider = config.mainProvider ?? "stepfun";
-  const deepseekModel = config.deepseekModel ?? DEFAULT_DEEPSEEK_MODEL;
-  const envDeepseekCredentials = mainProvider === "deepseek" ? deps.credentials ?? new CredentialStore() : undefined;
-  if (envDeepseekCredentials && !envDeepseekCredentials.getSecret()) {
-    const deepseekKey = config.deepseekApiKey?.trim();
-    if (deepseekKey) envDeepseekCredentials.set({ apiKey: deepseekKey, models: [deepseekModel], defaultModel: deepseekModel, checkedAt: new Date().toISOString() });
-    else envDeepseekCredentials.recordError("未配置 DEEPSEEK_API_KEY，DeepSeek 官方快路径不可用；不会回退 StepFun。");
-  }
-  // The provider store is authoritative for the main planner: its base URL,
-  // key and model are resolved again on every status/intent request. Saving a
-  // provider on a live session therefore takes effect immediately, and a
-  // DeepSeek key never leaks into the legacy StepFun slot used by speech/ASR.
+  const envMainCredentials = mainProvider === "deepseek" ? deps.credentials ?? new CredentialStore() : credentials;
   const settingsCredentials = new CredentialStore();
+  let mainCredentials = envMainCredentials;
+  let mainDirectDeepseek = mainProvider === "deepseek";
+  const deepseekModel = config.deepseekModel ?? DEFAULT_DEEPSEEK_MODEL;
+  if (mainProvider === "deepseek" && !mainCredentials.getSecret()) {
+    const deepseekKey = config.deepseekApiKey?.trim();
+    if (deepseekKey) mainCredentials.set({ apiKey: deepseekKey, models: [deepseekModel], defaultModel: deepseekModel, checkedAt: new Date().toISOString() });
+    else mainCredentials.recordError("未配置 DEEPSEEK_API_KEY，DeepSeek 官方快路径不可用；不会回退 StepFun。");
+  }
   const platform = new PlatformCredentialStore();
   let platformRevision = 0;
   let platformAttempt: AbortController | undefined;
@@ -250,6 +251,9 @@ export const createApp = (deps: AppDeps) => {
   let providerRevision = 0;
   let connectionRevision = 0;
   let connectionAttempt: AbortController | undefined;
+  const deepseek = new DeepseekCredentialStore();
+  let deepseekRevision = 0;
+  let deepseekAttempt: AbortController | undefined;
   let disposed = false;
   // Proposal→owner-receipt latency is transport telemetry: the receipt request
   // carries no trace, so the proposal time is remembered by task id here.
@@ -281,39 +285,79 @@ export const createApp = (deps: AppDeps) => {
     fetchImpl: deps.fetchImpl,
     timeoutMs: config.requestTimeoutMs,
   };
-  /**
-   * The one source of truth for the main planner. Settings beat the env switch,
-   * which beats the legacy StepFun slot. Only the planner uses this transport;
-   * speech/ASR/readers keep the StepFun deps and credential above.
-   */
-  const resolveMain = () => {
-    const saved = resolveSavedMain(providerStore, { fetchImpl: deps.fetchImpl, timeoutMs: config.requestTimeoutMs });
-    if (saved) {
-      const next = saved.credential, current = settingsCredentials.getSecret();
-      if (!next) settingsCredentials.clear();
-      else if (!current || current.apiKey !== next.apiKey || current.defaultModel !== next.defaultModel
-        || current.models.join("\u0000") !== next.models.join("\u0000")) settingsCredentials.set(next);
-      // Keep the cached object identity: in-flight image requests compare it.
-      return { ...saved, credential: settingsCredentials.getSecret(), credentials: settingsCredentials };
+  // Only the planner uses the DeepSeek fast path; speech/ASR/readers keep the
+  // StepFun deps and credential above. A saved main provider overrides both.
+  let mainModel: StepfunDeps = mainProvider === "deepseek"
+    ? { baseUrl: config.deepseekBaseUrl ?? DEEPSEEK_BASE_URL, provider: "deepseek" as const,
+      fetchImpl: deps.fetchImpl, timeoutMs: config.requestTimeoutMs }
+    : stepfun;
+  const isDeepseek = (value: ReturnType<ProviderStore["list"]>[number]) => /^https:\/\/api\.deepseek\.com(?:\/v1)?\/?$/.test(value.baseUrl);
+  const registryRevision = () => JSON.stringify(providerStore.list().filter(value => value.roles.includes("main")));
+  let loadedRegistry: string | undefined;
+  const syncRegistry = () => {
+    const next = registryRevision();
+    if (loadedRegistry === next) return;
+    const previous = loadedRegistry; loadedRegistry = next;
+    const entries = providerStore.list().filter(value => value.enabled && value.roles.includes("main"))
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+    const selected = resolveSavedMain(providerStore, { fetchImpl: deps.fetchImpl, timeoutMs: config.requestTimeoutMs });
+    const secondary = entries.find(isDeepseek);
+    if (selected) {
+      mainCredentials = settingsCredentials;
+      mainModel = selected.transport;
+      mainDirectDeepseek = selected.provider === "deepseek" && !isDeepseek(selected.saved!);
+      const primary = selected.provider !== "deepseek" || mainDirectDeepseek ? selected.credential : undefined;
+      const current = settingsCredentials.getSecret();
+      if (!primary) settingsCredentials.clear();
+      else if (current?.apiKey !== primary.apiKey || current.defaultModel !== primary.defaultModel)
+        settingsCredentials.set(primary);
+    } else if (providerStore.list().some(value => value.roles.includes("main"))) {
+      mainCredentials = settingsCredentials; settingsCredentials.clear(); mainDirectDeepseek = false; mainModel = stepfun;
+    } else {
+      mainCredentials = envMainCredentials; mainDirectDeepseek = mainProvider === "deepseek";
+      mainModel = mainDirectDeepseek ? { ...stepfun, baseUrl: config.deepseekBaseUrl ?? DEEPSEEK_BASE_URL, provider: "deepseek" as const } : stepfun;
     }
-    settingsCredentials.clear();
-    if (envDeepseekCredentials) {
-      const credential = envDeepseekCredentials.getSecret();
-      return {
-        source: "env" as const, slot: "deepseek" as const, provider: "deepseek" as const,
-        transport: { baseUrl: config.deepseekBaseUrl ?? DEEPSEEK_BASE_URL, provider: "deepseek" as const,
-          fetchImpl: deps.fetchImpl, timeoutMs: config.requestTimeoutMs },
-        credential, model: credential?.defaultModel ?? deepseekModel, credentials: envDeepseekCredentials,
-      };
+    const model = secondary && normalizeDeepseekModel(secondary.model);
+    if (secondary?.apiKey && model) {
+      const current = deepseek.getSecret();
+      if (current?.apiKey !== secondary.apiKey || current.defaultModel !== model)
+        deepseek.set({ apiKey: secondary.apiKey, defaultModel: model, checkedAt: secondary.updatedAt });
+    } else if (previous !== undefined) deepseek.clear();
+    if (previous !== undefined) providerRevision++;
+  };
+  const rememberConnection = (brand: "stepfun" | "deepseek", apiKey?: string, model?: string) => {
+    const existing = providerStore.list().find(value => brand === "deepseek" ? isDeepseek(value) : value.protocol === "stepfun-plan");
+    if (!apiKey || !model) {
+      for (const entry of providerStore.list()) if (brand === "deepseek" ? isDeepseek(entry) : entry.protocol.startsWith("stepfun"))
+        providerStore.update(entry.id, { enabled: false });
+      return;
     }
-    return {
-      source: "legacy" as const, slot: "stepfun" as const, provider: "stepfun" as const,
-      transport: stepfun, credential: credentials.getSecret(), credentials,
-    };
+    const input = { name: brand === "stepfun" ? "StepFun" : "DeepSeek", apiKey, model, roles: ["main" as const], enabled: true,
+      presetId: brand, protocol: brand === "stepfun" ? "stepfun-plan" as const : "openai-compatible" as const,
+      baseUrl: brand === "stepfun" ? config.stepfunBaseUrl : "https://api.deepseek.com" };
+    if (existing) providerStore.update(existing.id, input); else providerStore.create(input);
+  };
+  syncRegistry();
+  const makePlanner = (): NonNullable<PipelineDeps["planner"]> => {
+    syncRegistry();
+    const revision = providerRevision, generation = gpt.generation(), registry = registryRevision();
+    const current = () => !disposed && providerRevision === revision && registryRevision() === registry;
+    if (activeProvider === "gpt") return { provider: "gpt" as const, connected: gpt.status().connected,
+      generate: (messages, signal, _maxTokens, onTextDelta) => gpt.generate(messages, signal, onTextDelta),
+      isCurrent: () => current() && gpt.isCurrent(generation) };
+    if (mainDirectDeepseek) {
+      const credential = mainCredentials.getSecret();
+      return { provider: "deepseek", connected: Boolean(credential), isCurrent: () => current() && credential === mainCredentials.getSecret(),
+        generate: (messages, signal, maxTokens, onTextDelta) => credential
+          ? chatJson(credential, messages, { ...mainModel, signal }, { maxTokens, onTextDelta })
+          : Promise.resolve({ ok: false, code: "provider", error: "DeepSeek 未连接" }) };
+    }
+    return accountPlanner({ credentials: mainCredentials, deepseek, stepfun: mainModel, selected: "stepfun", isCurrent: current });
   };
 
   const app = new Hono<{ Variables: { requestId: string } }>();
   app.use("*", async (c, next) => {
+    syncRegistry();
     const requestId = randomUUID(), started = performance.now();
     c.set("requestId", requestId);
     c.header("X-Request-Id", requestId);
@@ -384,20 +428,18 @@ export const createApp = (deps: AppDeps) => {
 
   app.route("/api/connections", createConnectionRoutes(connections, async (messages, signal) => {
     if (restoringGpt && activeProvider === "gpt") await restoringGpt;
-    const version = providerRevision, selected = activeProvider, credential = credentials.getSecret(), gptVersion = gpt.generation();
-    const result = selected === "gpt" ? await gpt.generate(messages, signal)
-      : credential ? await chatJson(credential, messages, { ...stepfun, signal }, { maxTokens: 2048 }) : undefined;
-    if (disposed || version !== providerRevision || selected === "gpt" && !gpt.isCurrent(gptVersion) || selected !== "gpt" && credentials.getSecret() !== credential) throw new ConnectionError("model-changed", "模型连接已改变，请重新查询。", 409);
+    const planner = makePlanner();
+    const result = planner.connected ? await planner.generate(messages, signal, 2048) : undefined;
+    if (!planner.isCurrent()) throw new ConnectionError("model-changed", "模型连接已改变，请重新查询。", 409);
     if (!result?.ok) throw new ConnectionError("planner-unavailable", "语言模型暂不可用，请检查连接或使用指定查询。", 409);
     return result.value;
   }));
   app.route("/api/files", createFileReadRoutes(async () => {
     if (restoringGpt && activeProvider === "gpt") await restoringGpt;
-    const version = providerRevision, selected = activeProvider, credential = credentials.getSecret(), gptVersion = gpt.generation();
+    const planner = makePlanner();
     return {
-      isCurrent: () => !disposed && version === providerRevision && (selected === "gpt" ? gpt.isCurrent(gptVersion) : credentials.getSecret() === credential),
-      generate: (messages, signal) => selected === "gpt" ? gpt.generate(messages, signal)
-        : credential ? chatJson(credential, messages, { ...stepfun, signal }, { maxTokens: 4096 })
+      isCurrent: planner.isCurrent,
+      generate: (messages, signal) => planner.connected ? planner.generate(messages, signal, 4096)
           : Promise.resolve({ ok: false as const, code: "provider" as const, error: "模型未连接" }),
     };
   }));
@@ -434,12 +476,14 @@ export const createApp = (deps: AppDeps) => {
     if (!result.ok) {
       // A failed key must not leave stale credentials around (fail closed).
       credentials.clear();
+      rememberConnection("stepfun");
       const error = `${result.error}。${providerRecoveryHint(result.status)}`;
       credentials.recordError(error);
       return c.json({ ok: false, connected: false, error });
     }
     // Replace credentials atomically; the key object never leaves this scope.
     credentials.set({ apiKey: parsed.data.apiKey, ...result.value });
+    rememberConnection("stepfun", parsed.data.apiKey, result.value.defaultModel);
     return c.json({ ok: true, ...credentials.status() });
   });
 
@@ -447,9 +491,34 @@ export const createApp = (deps: AppDeps) => {
     connectionRevision++; providerRevision++;
     connectionAttempt?.abort(); connectionAttempt = undefined;
     credentials.clear();
-    // The env DeepSeek fast path shares this disconnect control; a saved
-    // provider is settings-owned and must survive a StepFun disconnect.
-    if (envDeepseekCredentials && envDeepseekCredentials !== credentials) envDeepseekCredentials.clear();
+    rememberConnection("stepfun");
+    if (mainCredentials !== credentials) mainCredentials.clear();
+    return c.json({ ok: true, connected: false });
+  });
+
+  app.post("/api/credentials/deepseek/validate", async c => {
+    let raw: unknown;
+    try { raw = await c.req.json(); } catch { return c.json({ ok: false, connected: false, error: "请输入有效的 DeepSeek Key。" }, 400); }
+    const input = z.strictObject({ apiKey: z.string().min(8).max(512).regex(/^\S+$/),
+      model: z.enum(["deepseek-flash", "deepseek-v4-flash", "deepseek-v4-pro"]).optional() }).safeParse(raw);
+    if (!input.success) return c.json({ ok: false, connected: false, error: "请输入有效的 DeepSeek Key 和模型。" }, 400);
+    const revision = ++deepseekRevision; deepseekAttempt?.abort();
+    const controller = new AbortController(); deepseekAttempt = controller;
+    const result = await validateDeepseek(input.data.apiKey, normalizeDeepseekModel(input.data.model)!, {
+      fetchImpl: deps.fetchImpl, timeoutMs: config.connectionTimeoutMs ?? 12_000,
+      signal: AbortSignal.any([c.req.raw.signal, controller.signal]),
+    }).finally(() => { if (deepseekAttempt === controller) deepseekAttempt = undefined; });
+    if (disposed || revision !== deepseekRevision || c.req.raw.signal.aborted)
+      return c.json({ ok: false, connected: false, error: "连接已取消或已被新的连接替代。" }, 409);
+    providerRevision++;
+    if (!result.ok) { deepseek.clear(); rememberConnection("deepseek"); deepseek.recordError(result.error); return c.json({ ok: false, connected: false, error: result.error }); }
+    deepseek.set({ apiKey: input.data.apiKey, ...result.value });
+    rememberConnection("deepseek", input.data.apiKey, result.value.defaultModel);
+    return c.json({ ok: true, ...deepseek.status() });
+  });
+  app.post("/api/credentials/deepseek/disconnect", c => {
+    deepseekRevision++; providerRevision++; deepseekAttempt?.abort(); deepseekAttempt = undefined; deepseek.clear();
+    rememberConnection("deepseek");
     return c.json({ ok: true, connected: false });
   });
 
@@ -492,32 +561,31 @@ export const createApp = (deps: AppDeps) => {
 
   app.get("/api/providers/status", (c) => {
     c.header("Cache-Control", "no-store");
-    // The main planner slot reports whatever the provider store (or the env
-    // fallback) actually selected. A saved DeepSeek row is resolved here on
-    // every read, so saving settings on a live session is visible immediately.
-    const main = resolveMain();
-    const status = main.credentials.status();
-    const mainSlotName = main.slot;
-    // `activeProvider` is the user's selected planner (GPT or the main slot);
-    // `mainProvider` always names the saved/env main slot behind it.
-    const activeName = activeProvider === "gpt" ? "gpt" : mainSlotName;
-    const displayStatus = { ...status, name: mainSlotName };
+    // The "stepfun" slot is the main planner slot: in DeepSeek mode it reports
+    // the env-keyed fixed model so existing clients keep working unchanged.
+    const status = mainCredentials.status();
+    // Legacy clients still read the "stepfun" main slot, but when the provider
+    // store selects DeepSeek the displayed provider must say DeepSeek.
+    const mainSlotName = mainDirectDeepseek || !status.connected && deepseek.status().connected ? "deepseek" : "stepfun";
+    const displayStatus = mainSlotName === "deepseek" && !mainDirectDeepseek ? deepseek.status() : { ...status, name: mainSlotName };
     rememberGpt();
     if (activeProvider === "gpt") gpt.keepWarm();
     return c.json({
-      activeProvider: activeName, mainProvider: mainSlotName, instance,
+      activeProvider: activeProvider === "gpt" ? "gpt" : mainSlotName, mainProvider: mainSlotName, instance,
       ...(restoringGpt ? { restoring: "gpt" } : {}),
+      // Keep the established provider array shape for deployed clients. New
+      // clients discover the additive DeepSeek connection through this field.
       providers: online ? [displayStatus] : [displayStatus, gpt.status()],
+      deepseek: deepseek.status(),
+      fallback: { preferred: "stepfun", secondary: "deepseek", configured: deepseek.status().connected },
       platform: platform.status(),
-      degradations: (activeProvider === "stepfun" ? status.connected : gpt.status().connected)
+      degradations: (activeProvider === "stepfun" ? status.connected || deepseek.status().connected : gpt.status().connected)
         ? []
         : [
             {
-              code: main.provider === "deepseek" ? "deepseek-disconnected" : "stepfun-disconnected",
-              message: main.provider === "deepseek"
-                ? main.source === "settings"
-                  ? "已选 DeepSeek，但保存的密钥或模型不可用。请在模型设置中重新填写并测试；不会回退 StepFun，复杂指令暂不可用。"
-                  : "DeepSeek 官方快路径未连接：未配置 DEEPSEEK_API_KEY。不会回退 StepFun，复杂指令暂不可用。"
+              code: mainProvider === "deepseek" ? "deepseek-disconnected" : "stepfun-disconnected",
+              message: mainProvider === "deepseek"
+                ? "DeepSeek 官方快路径未连接：未配置 DEEPSEEK_API_KEY。不会回退 StepFun，复杂指令暂不可用。"
                 : "所选模型未连接，/api/intent 只做本地规则，复杂指令暂不可用。",
             },
           ],
@@ -543,11 +611,7 @@ export const createApp = (deps: AppDeps) => {
       const ok = await gpt.connect(source, body.data.model); providerRevision++; rememberGpt();
       return c.json({ ok, ...gpt.status() });
     }
-    const main = resolveMain();
-    if (main.source === "settings") {
-      return c.json({ ok: false, error: "当前主模型由「模型设置」中已保存的 Provider 决定；请在那里修改模型并测试。" }, 400);
-    }
-    if (main.provider === "deepseek") {
+    if (mainProvider === "deepseek") {
       return c.json({ ok: false, error: "当前使用 DeepSeek 官方快路径，模型由 VIVIC_DEEPSEEK_MODEL 固定配置。" }, 400);
     }
     const credential = credentials.getSecret();
@@ -557,6 +621,7 @@ export const createApp = (deps: AppDeps) => {
     if (disposed || c.req.raw.signal.aborted || credentials.getSecret() !== credential) return c.json({ ok: false, error: "连接已变更，请重新选择。" }, 409);
     if (!probe.ok && !probeAnswered(probe)) return c.json({ ok: false, error: probe.error });
     credentials.set({ ...candidate, checkedAt: new Date().toISOString() }); providerRevision++;
+    rememberConnection("stepfun", candidate.apiKey, candidate.defaultModel);
     return c.json({ ok: true, ...credentials.status() });
   });
   app.post("/api/gpt/connect", async c => {
@@ -621,22 +686,26 @@ export const createApp = (deps: AppDeps) => {
         error: "语音请求仅接受 text（1–200 字符可见短句）、voice（可选官方音色）、speed（可选 0.5–2）、timestamps（可选布尔值）。",
       }, 400);
     }
-    const credential = credentials.getSecret();
-    if (!credential) {
-      return c.json({ ok: false, code: "speech-disconnected", error: "语音不可用：请先连接 StepFun Coding Plan Key。" }, 503);
-    }
+    const selected = resolveSavedSpeech(providerStore);
+    if (selected && "error" in selected) return c.json({ ok: false, code: "speech-disconnected", error: selected.error }, 503);
+    const saved = selected?.saved;
+    const credential = saved ? { apiKey: "", models: [selected.backend.model], defaultModel: selected.backend.model, checkedAt: saved.updatedAt }
+      : credentials.getSecret();
+    if (!credential) return c.json({ ok: false, code: "speech-disconnected", error: "语音未连接：请在模型设置中配置 TTS，或连接 StepFun API。" }, 503);
+    const speechRevision = JSON.stringify(providerStore.list());
     const result = await synthesizeSpeech(credential, parsed.data.text, {
       ...stepfun, timeoutMs: config.speechTimeoutMs ?? 15000,
-    }, c.req.raw.signal, parsed.data);
+    }, c.req.raw.signal, parsed.data, selected?.backend);
     // A disconnect/reconnect during synthesis must not deliver stale audio.
-    if (credentials.getSecret() !== credential) {
+    if (saved ? JSON.stringify(providerStore.list()) !== speechRevision : credentials.getSecret() !== credential) {
       return c.json({ ok: false, code: "speech-disconnected", error: "语音已取消：模型连接已变更。" }, 503);
     }
     if (!result.ok) {
       return c.json({ ok: false, code: result.code, error: result.error }, result.status);
     }
-    if (parsed.data.timestamps) return c.json({ audioBase64: Buffer.from(result.audio).toString("base64"), words: result.words ?? [] });
-    c.header("Content-Type", "audio/mpeg");
+    if (parsed.data.timestamps && (selected?.backend.supportsTimestamps ?? true)) return c.json({ audioBase64: Buffer.from(result.audio).toString("base64"), words: result.words ?? [] });
+    c.header("Content-Type", result.mime ?? "audio/mpeg");
+    if (selected?.backend.clientSpeed) c.header("X-Vivic-Speech-Playback-Rate", "client");
     c.header("X-Content-Type-Options", "nosniff");
     return c.body(result.audio, 200);
   });
@@ -764,19 +833,17 @@ export const createApp = (deps: AppDeps) => {
     if (restoringGpt && activeProvider === "gpt") await restoringGpt;
     const version = providerRevision;
     const gptVersion = gpt.generation();
-    // Resolve the selected provider once for this request: the saved DeepSeek
-    // row (or env fallback) supplies the planner transport and its own key.
-    const main = resolveMain();
-    const imageCredential = main.credential;
+    const imageCredential = mainCredentials.getSecret();
     if (parsed.data.attachments?.length) {
       const vision = activeProvider === "gpt" ? gpt.status().connected && gpt.status().capabilities.includes("vision")
-        : main.credentials.status().connected && main.credentials.status().capabilities.includes("vision");
+        : credentials.status().connected && credentials.status().capabilities.includes("vision")
+          || deepseek.status().connected && deepseek.status().capabilities.includes("vision");
       if (!vision) return c.json({ kind: "error", message: "当前所选模型没有可用的视觉能力。请选择支持图片的模型，或移除图片后发送文字。" });
       try {
         for (const attachment of parsed.data.attachments) await validateImageAttachment(attachment, deps.imageDecoder ?? decodeImage);
       } catch (error) { return c.json({ kind: "error", message: imageInputErrorMessage(error) }); }
       if (c.req.raw.signal.aborted) return c.json({ kind: "error", message: "图片请求已取消。" });
-      if (version !== providerRevision || (activeProvider === "gpt" ? !gpt.isCurrent(gptVersion) : imageCredential !== resolveMain().credential)) {
+      if (version !== providerRevision || (activeProvider === "gpt" ? !gpt.isCurrent(gptVersion) : imageCredential !== mainCredentials.getSecret())) {
         return c.json({ kind: "error", message: "模型连接已变更，图片请求已取消。" });
       }
     }
@@ -794,14 +861,13 @@ export const createApp = (deps: AppDeps) => {
       ...(event.elapsedMs !== undefined ? { elapsedMs: Math.round(event.elapsedMs) } : {}),
     });
     const execute = (signal: AbortSignal, onStage = observeStage, streamFeedback = false) => {
-      const pipeline: PipelineDeps = { credentials: main.credentials, stepfun: main.transport, mainProvider: main.provider,
+      const pipeline: PipelineDeps = { credentials: mainCredentials, stepfun: mainModel, mainProvider,
       planMaxTokens: config.planMaxTokens ?? PLAN_MAX_TOKENS, search, data, decision, onStage, streamFeedback, travel: deps.travel,
       router: requestRouter, onDecisionTrace: deps.onDecisionTrace,
       decisionTelemetry: { plannerCalls: 0, directClauses: 0 },
       slotPlanning: requestRouter?.mode === "shadow" || requestRouter?.mode === "on",
       isSessionCurrent: () => version === providerRevision,
-      ...(activeProvider === "gpt" ? { planner: { provider: "gpt" as const, connected: gpt.status().connected,
-        generate: (messages, signal, onTextDelta) => gpt.generate(messages, signal, onTextDelta), isCurrent: () => gpt.isCurrent(gptVersion) } } : {}),
+      planner: makePlanner(),
       };
       const intent = { ...parsed.data, requestId,
         tracePath: c.req.header("x-vivic-trace-path") === "task" ? "task" as const : "browser" as const,
@@ -949,17 +1015,17 @@ export const createApp = (deps: AppDeps) => {
   app.post("/api/intent", intentLimit, handleIntent);
   app.post("/api/intent/stream", intentLimit, handleIntent);
 
-  app.route("/api", createAsrRoutes({ config, credentials, fetchImpl: deps.fetchImpl }));
+  app.route("/api", createAsrRoutes({ config, credentials, providerStore, fetchImpl: deps.fetchImpl }));
   if (search) app.route("/api", createSearchRoutes({ client: search }));
   else app.post("/api/search", c => c.json({ ok: false, error: "联网查询未启用。" }, 503));
   return Object.assign(app, { dispose: () => {
     if (disposed) return;
     disposed = true; connectionRevision++; providerRevision++; platformRevision++;
     connectionAttempt?.abort(); connectionAttempt = undefined;
+    deepseekRevision++; deepseekAttempt?.abort(); deepseekAttempt = undefined; deepseek.clear();
     platformAttempt?.abort(); platformAttempt = undefined;
     connections.dispose();
-    credentials.clear(); settingsCredentials.clear();
-    if (envDeepseekCredentials && envDeepseekCredentials !== credentials) envDeepseekCredentials.clear();
+    credentials.clear(); if (mainCredentials !== credentials) mainCredentials.clear();
     platform.clear(); gpt.dispose(); mobileBroker.dispose(); decision.stop(); decisionTasks.dispose(); localTts?.stop();
     receiptTimes.clear();
   } });

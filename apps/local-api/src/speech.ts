@@ -3,23 +3,33 @@ import type { StepfunDeps } from "./stepfun.js";
 import { DEFAULT_SPEECH_SPEED, DEFAULT_SPEECH_VOICE, type SpeechOptions } from "./voices.js";
 import { readSpeechStream } from "./speechStream.js";
 import type { SpeechWord } from "@vivic/contracts";
+import { inspectWav } from "./modelApi/wav.js";
 
 export const SPEECH_MODEL = "stepaudio-2.5-tts";
 const MAX_AUDIO_BYTES = 4 * 1024 * 1024;
 
 type SpeechResult =
-  | { ok: true; audio: Uint8Array<ArrayBuffer>; words?: SpeechWord[] }
+  | { ok: true; audio: Uint8Array<ArrayBuffer>; words?: SpeechWord[]; mime?: "audio/mpeg" | "audio/wav" }
   | { ok: false; status: 502 | 503 | 504; code: string; error: string };
 
-/** One Plan request, no retries, redirects, alternate models or billing routes. */
+/** Server-resolved saved configuration; never accepted from an HTTP body. */
+export interface SpeechBackend {
+  baseUrl: string; model: string; headers: Record<string, string>;
+  format: "mp3" | "wav"; voice?: string; supportsTimestamps: boolean; clientSpeed?: boolean;
+}
+
+/** One request to the selected endpoint. No retries or alternate billing routes. */
 export const synthesizeSpeech = async (
   credential: StepfunCredential,
   text: string,
   deps: StepfunDeps,
   signal?: AbortSignal,
   options: SpeechOptions = {},
+  backend?: SpeechBackend,
 ): Promise<SpeechResult> => {
-  const base = deps.baseUrl.replace(/\/+$/, "");
+  const base = (backend?.baseUrl ?? deps.baseUrl).replace(/\/+$/, "");
+  const format = backend?.format ?? "mp3";
+  const timestamps = options.timestamps && (backend?.supportsTimestamps ?? true);
   let url: URL;
   try {
     url = new URL(base);
@@ -28,7 +38,7 @@ export const synthesizeSpeech = async (
   }
   // Prevent an accidental ordinary StepFun base override from billing TTS.
   if ((url.hostname === "api.stepfun.com" || url.hostname === "api.stepfun.ai") &&
-      (url.protocol !== "https:" || url.pathname !== "/step_plan/v1" || url.search || url.hash || url.username || url.password)) {
+      (url.protocol !== "https:" || !(url.pathname === "/step_plan/v1" || backend && url.pathname === "/v1") || url.search || url.hash || url.username || url.password)) {
     return {
       ok: false, status: 503, code: "speech-plan-required",
       error: "语音不可用：必须使用 StepFun Plan 地址，不会切换按量计费接口。",
@@ -42,14 +52,14 @@ export const synthesizeSpeech = async (
     const res = await (deps.fetchImpl ?? fetch)(`${base}/audio/speech`, {
       method: "POST",
       headers: {
-        authorization: `Bearer ${credential.apiKey}`,
+        ...(backend?.headers ?? { authorization: `Bearer ${credential.apiKey}` }),
         "content-type": "application/json",
-        accept: options.timestamps ? "text/event-stream, audio/mpeg" : "audio/mpeg",
+        accept: timestamps ? "text/event-stream, audio/mpeg" : format === "wav" ? "audio/wav" : "audio/mpeg",
       },
       body: JSON.stringify({
-        model: SPEECH_MODEL, input: text, voice: options.voice ?? DEFAULT_SPEECH_VOICE,
-        response_format: "mp3", speed: options.speed ?? DEFAULT_SPEECH_SPEED,
-        ...(options.timestamps ? { timestamp: true, stream_format: "sse" } : {}),
+        model: backend?.model ?? SPEECH_MODEL, input: text, voice: backend?.voice ?? options.voice ?? DEFAULT_SPEECH_VOICE,
+        response_format: format, ...(!backend?.clientSpeed ? { speed: options.speed ?? DEFAULT_SPEECH_SPEED } : {}),
+        ...(timestamps ? { timestamp: true, stream_format: "sse" } : {}),
       }),
       redirect: "error",
       signal: requestSignal,
@@ -58,11 +68,12 @@ export const synthesizeSpeech = async (
       await res.body?.cancel();
       return {
         ok: false, status: 503, code: "speech-unavailable",
-        error: `语音不可用：Plan 语音请求被拒绝（HTTP ${res.status}），请检查套餐权限或额度；不会切换计费接口。`,
+        error: backend ? `语音 API 请求被拒绝（HTTP ${res.status}），请检查所选 TTS 的 Key、模型和权限。`
+          : `语音不可用：Plan 语音请求被拒绝（HTTP ${res.status}），请检查套餐权限或额度；不会切换计费接口。`,
       };
     }
     const mime = res.headers.get("content-type")?.split(";")[0]?.trim().toLowerCase();
-    if (options.timestamps && mime === "text/event-stream") {
+    if (timestamps && mime === "text/event-stream") {
       try {
         const result = await readSpeechStream(res, text, requestSignal);
         return { ok: true, ...result };
@@ -71,10 +82,11 @@ export const synthesizeSpeech = async (
         return { ok: false, status: 502, code: "speech-invalid-stream", error: "语音服务返回的音频流不完整或格式无效，未播放。" };
       }
     }
-    if (!["audio/mpeg", "audio/mp3", "application/octet-stream"].includes(mime ?? "") ||
+    if (!(format === "wav" ? ["audio/wav", "audio/x-wav", "audio/wave", "audio/vnd.wave", "application/octet-stream"]
+      : ["audio/mpeg", "audio/mp3", "application/octet-stream"]).includes(mime ?? "") ||
         Number(res.headers.get("content-length") ?? 0) > MAX_AUDIO_BYTES || !res.body) {
       await res.body?.cancel();
-      return { ok: false, status: 502, code: "speech-invalid-audio", error: "语音服务未返回有效的 MP3 音频。" };
+      return { ok: false, status: 502, code: "speech-invalid-audio", error: `语音服务未返回有效的 ${format.toUpperCase()} 音频。` };
     }
     // Bound even responses without Content-Length; keep timeout through body read.
     const reader = res.body.getReader();
@@ -108,7 +120,11 @@ export const synthesizeSpeech = async (
       audio.set(chunk, offset);
       offset += chunk.byteLength;
     }
-    return { ok: true, audio };
+    if (format === "wav") {
+      try { if (!inspectWav(audio).nonSilent) throw Error("silent"); }
+      catch { return { ok: false, status: 502, code: "speech-invalid-audio", error: "语音 API 返回的 WAV 音频无效或静音。" }; }
+    }
+    return { ok: true, audio, mime: format === "wav" ? "audio/wav" : "audio/mpeg" };
   } catch {
     // Neither upstream bodies nor transport error messages are safe to echo.
     const timedOut = requestSignal.aborted && requestSignal.reason?.name === "TimeoutError";

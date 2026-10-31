@@ -17,6 +17,8 @@ export interface StepfunDeps {
   fetchImpl?: typeof fetch;
   timeoutMs?: number;
   signal?: AbortSignal;
+  /** An account with a second provider uses failover instead of repeating this inference. */
+  retry?: boolean;
   /**
    * `deepseek` uses the official OpenAI-compatible transport (same JSON mode,
    * streaming, timeout and retry rules) with thinking explicitly disabled.
@@ -288,10 +290,7 @@ export const chatJson = async (
   options?: ChatJsonOptions,
 ): Promise<StepfunResult<unknown>> => {
   const first = await chatJsonOnce(credential, messages, deps, options);
-  if (first.ok || deps.signal?.aborted) return first;
-  // Timeout and cancellation are historical no-retry cases; never spend a
-  // second generation after either.
-  if (first.code === "timeout" || first.code === "cancelled") return first;
+  if (first.ok || deps.signal?.aborted || deps.retry === false) return first;
   const wait = first.code === "network" ? RETRY_DELAY_MS
     : first.code === "provider" && first.status && RETRYABLE_STATUS.has(first.status) ? first.retryAfterMs ?? RETRY_DELAY_MS : undefined;
   if (!options?.onTextDelta) {

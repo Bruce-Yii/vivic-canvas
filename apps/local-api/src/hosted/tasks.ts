@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { z } from "zod";
-import { resumeReminderSource, type CardRecord, type DecisionTaskStatus, type HostedSpaceSnapshot, type HostOperation } from "@vivic/contracts";
+import { resumeReminderSource, ViewportSchema, type CardRecord, type DecisionTaskStatus, type HostedSpaceSnapshot, type HostOperation } from "@vivic/contracts";
 import { IntentResponseSchema, type CanvasContext, type IntentResponse } from "../schemas.js";
 import { hostOperationIssue } from "../decision/hostOperations.js";
 import { createBudget } from "../intent/budget.js";
@@ -55,22 +55,27 @@ function summarize(record: Record<string, unknown>) {
   }));
   return { value, truncatedFields };
 }
-export function hostedCanvasContext(snapshot: HostedSpaceSnapshot): CanvasContext {
-  const selected = [...snapshot.space.cards].sort((a, b) => Number(b.layout.pinned) - Number(a.layout.pinned) || b.metadata.updatedAt.localeCompare(a.metadata.updatedAt));
+export function hostedCanvasContext(snapshot: HostedSpaceSnapshot, ownerRecord?: unknown): CanvasContext {
+  const saved = z.object({ viewport: ViewportSchema.optional(), focusHistory: z.array(z.string()).max(20).optional() }).safeParse(ownerRecord);
+  const owner = saved.success ? saved.data : undefined;
+  const focused = owner?.focusHistory?.at(-1);
+  const selected = [...snapshot.space.cards].sort((a, b) => Number(b.id === focused) - Number(a.id === focused)
+    || Number(b.layout.pinned) - Number(a.layout.pinned) || b.metadata.updatedAt.localeCompare(a.metadata.updatedAt));
   const cards: CanvasContext["cards"] = []; let bytes = 0;
   for (const card of selected) {
     const display = summarize(card.displayProps), source = summarize(card.sourceData);
     const value: CanvasContext["cards"][number] = { id: card.id, type: card.type,
       ...(card.metadata.aliases ? { aliases: card.metadata.aliases.slice(0, 12) } : {}), displayProps: display.value,
       sourceDataSummary: source.value, layout: { x: card.layout.x, y: card.layout.y, width: card.layout.width,
-        height: card.layout.height, pinned: card.layout.pinned }, surface: "display",
+        height: card.layout.height, pinned: card.layout.pinned }, surface: card.layout.surface ?? "display",
       ...(display.truncatedFields.length ? { contextSummary: { truncatedFields: display.truncatedFields } } : {}) };
     const size = Buffer.byteLength(JSON.stringify(value));
     if (cards.length >= 64 || bytes + size > 48_000) break;
     cards.push(value); bytes += size;
   }
+  const visibleIds = new Set(cards.map(card => card.id));
   return { canvasId: snapshot.space.id, version: snapshot.space.version, stage: snapshot.space.cards.length ? "WORKSPACE" : "STANDBY",
-    viewport: { x: 0, y: 0, zoom: 1 }, focusHistory: [], timeZone: "Asia/Shanghai", cards,
+    viewport: owner?.viewport ?? { x: 0, y: 0, zoom: 1 }, focusHistory: (owner?.focusHistory ?? []).filter(id => visibleIds.has(id)), timeZone: "Asia/Shanghai", cards,
     ...(cards.length < snapshot.space.cards.length ? { totalCardCount: snapshot.space.cards.length } : {}) };
 }
 
@@ -173,7 +178,8 @@ export function createHostedTaskService(options: { store: HostedSpaceStore; invo
         const snapshot = store.getSnapshot(task.accountId, task.spaceId);
         if (step === 0 && snapshot.space.version !== task.expectedVersion) { task.expectedVersion = snapshot.space.version; save(task); }
         let result: IntentResponse;
-        try { result = await invokeIntent({ text: planningText, canvasContext: hostedCanvasContext(snapshot), task: continuation }); }
+        try { result = await invokeIntent({ text: planningText, canvasContext: hostedCanvasContext(snapshot,
+          store.getSpaceDocument(task.accountId, task.spaceId).ownerRecord), task: continuation }); }
         catch (error) {
           if (!(error instanceof SpaceError) || error.code !== "version-conflict" || error.status !== 409) throw error;
           await replan(); step--; continue;

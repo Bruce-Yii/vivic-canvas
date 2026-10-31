@@ -37,7 +37,7 @@ export const chatUrl = (config: Pick<ProviderConfig, "protocol" | "baseUrl">): s
 export const decisionsUrl = (config: Pick<ProviderConfig, "baseUrl">): string =>
   `${trimBase(config.baseUrl)}/decisions`;
 
-const authHeaders = (
+export const authHeaders = (
   config: Pick<ProviderConfig, "protocol" | "presetId" | "apiKey" | "headers">,
 ): Record<string, string> => {
   const headers: Record<string, string> = { "content-type": "application/json" };

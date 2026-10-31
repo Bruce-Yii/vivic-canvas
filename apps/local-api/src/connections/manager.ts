@@ -4,9 +4,10 @@ import type { ChatMessage } from "../stepfun.js";
 import { McpConnection } from "./mcp.js";
 import { CLI_TOOLS, runCli, type CliRunner } from "./cli.js";
 import { validateToolArguments } from "./schema.js";
+import { QrAuthorizationManager, type ManagedCliCredential, type QrAdapter } from "./qr.js";
 import { ConnectionConfigSchema, ConnectionError, LABELS, endpointFor, type ConnectionConfig, type ConnectionProvider, type ConnectionResult, type ConnectionStatus, type ReadTool } from "./types.js";
 
-interface Entry { id: string; config: ConnectionConfig; mcp?: McpConnection; tools: ReadTool[]; connected: boolean; checkedAt?: string; error?: string; lifetime: AbortController; busy: boolean }
+interface Entry { id: string; config: ConnectionConfig; mcp?: McpConnection; managed?: ManagedCliCredential; tools: ReadTool[]; connected: boolean; checkedAt?: string; error?: string; lifetime: AbortController; busy: boolean }
 export type ConnectionPlanner = (messages: ChatMessage[], signal: AbortSignal) => Promise<unknown>;
 const ReadPlan = z.union([
   z.object({ tool: z.string().max(128), args: z.record(z.string(), z.unknown()) }).strict(),
@@ -70,7 +71,22 @@ export class ConnectionManager {
   private disposed = false;
   private readonly fetchImpl: typeof fetch;
   private readonly cli: CliRunner;
-  constructor(options: { fetchImpl?: typeof fetch; cli?: CliRunner } = {}) { this.fetchImpl = options.fetchImpl ?? fetch; this.cli = options.cli ?? runCli; }
+  readonly qr: QrAuthorizationManager;
+  constructor(options: { fetchImpl?: typeof fetch; cli?: CliRunner; qrAdapter?: QrAdapter } = {}) {
+    this.fetchImpl = options.fetchImpl ?? fetch; this.cli = options.cli ?? runCli;
+    this.qr = new QrAuthorizationManager((credential, signal) => this.attachManagedCli(credential, signal), options.qrAdapter);
+  }
+  private async attachManagedCli(credential: ManagedCliCredential, signal: AbortSignal) {
+    const { provider } = credential.config;
+    if (provider === "mcdonalds") throw new ConnectionError("qr-unsupported", "此服务暂不支持扫码连接。");
+    // Keep any working connection until the new identity has actually been verified.
+    await credential.run(credential.config, "test", {}, signal);
+    signal.throwIfAborted();
+    if (this.disposed) throw new ConnectionError("session-ended", "会话已结束。", 409);
+    this.disconnectEntry(provider);
+    this.entries.set(provider, { id: randomUUID(), config: credential.config, managed: credential,
+      tools: CLI_TOOLS[provider], connected: true, checkedAt: new Date().toISOString(), lifetime: new AbortController(), busy: false });
+  }
   status(): ConnectionStatus[] {
     return (Object.keys(LABELS) as ConnectionProvider[]).map(provider => {
       const entry = this.entries.get(provider);
@@ -87,16 +103,22 @@ export class ConnectionManager {
     if (config.provider !== "dingtalk" && !config.token) throw new ConnectionError("token-required", "请输入本人的授权令牌。");
     if (config.provider === "feishu" && config.transport === "cli" && !config.appId) throw new ConnectionError("app-id-required", "Lark CLI 连接还需要飞书应用 App ID。");
     if (config.transport === "mcp") endpointFor(config);
-    this.disconnect(config.provider);
+    this.qr.cancelProvider(config.provider);
+    this.disconnectEntry(config.provider);
     this.entries.set(config.provider, { id: randomUUID(), config, mcp: config.transport === "mcp" ? new McpConnection(config, this.fetchImpl) : undefined,
       tools: [], connected: false, lifetime: new AbortController(), busy: false });
     return this.status();
   }
   disconnect(provider: ConnectionProvider): ConnectionStatus[] {
+    this.qr.cancelProvider(provider);
+    this.disconnectEntry(provider);
+    return this.status();
+  }
+  private disconnectEntry(provider: ConnectionProvider): void {
     const entry = this.entries.get(provider);
     entry?.lifetime.abort();
+    if (entry?.managed) void entry.managed.dispose().catch(() => {});
     this.entries.delete(provider);
-    return this.status();
   }
   private async run<T>(provider: ConnectionProvider, signal: AbortSignal, work: (entry: Entry, combined: AbortSignal) => Promise<T>): Promise<T> {
     const entry = this.entries.get(provider);
@@ -119,7 +141,7 @@ export class ConnectionManager {
   async test(provider: ConnectionProvider, signal: AbortSignal): Promise<ConnectionStatus[]> {
     await this.run(provider, signal, async (entry, combined) => {
       entry.connected = false; entry.tools = [];
-      const tools = entry.mcp ? await entry.mcp.discover(combined) : (await this.cli(entry.config, "test", {}, combined), CLI_TOOLS[provider as "feishu" | "wecom"]);
+      const tools = entry.mcp ? await entry.mcp.discover(combined) : (await (entry.managed?.run ?? this.cli)(entry.config, "test", {}, combined), CLI_TOOLS[provider as "feishu" | "wecom" | "dingtalk"]);
       combined.throwIfAborted();
       if (!tools.length) throw new ConnectionError("no-read-tools", "连接已响应，但当前授权没有可用的只读查询工具。", 403);
       entry.tools = tools.map(tool => {
@@ -139,7 +161,7 @@ export class ConnectionManager {
     if (serialized.length > 16_000) throw new ConnectionError("query-too-large", "查询参数过多，请缩小查询范围。", 413);
     if ([entry.config.token, entry.config.endpoint].some(secret => secret && serialized.includes(secret))) throw new ConnectionError("credential-in-query", "查询内容不能包含连接凭据。");
     validateToolArguments(tool.inputSchema, args);
-    const result = entry.mcp ? await entry.mcp.call(name, args, signal) : await this.cli(entry.config, name, args, signal);
+    const result = entry.mcp ? await entry.mcp.call(name, args, signal) : await (entry.managed?.run ?? this.cli)(entry.config, name, args, signal);
     return normalizeResult(result, entry, tool, args);
   }
   async query(provider: ConnectionProvider, name: string, args: Record<string, unknown>, signal: AbortSignal): Promise<ConnectionResult> {
@@ -163,5 +185,5 @@ export class ConnectionManager {
       return this.execute(entry, tool, args, combined);
     });
   }
-  dispose() { if (this.disposed) return; this.disposed = true; for (const provider of this.entries.keys()) this.disconnect(provider); }
+  dispose() { if (this.disposed) return; this.disposed = true; this.qr.dispose(); for (const provider of this.entries.keys()) this.disconnectEntry(provider); }
 }

@@ -48,6 +48,15 @@ export function isInitialTask(req: IntentRequest): boolean {
   return true;
 }
 
+/** A whole-turn greeting carries no task or card intent. Never consume a
+ * greeting embedded in a command, attachment request or clarification reply. */
+export function immediateGreeting(req: IntentRequest): string | undefined {
+  if (req.attachments?.length || req.task?.receipt || req.task?.cancel || !isInitialTask(req)) return;
+  if (/^(?:你好|您好|嗨|哈喽|哈啰|hello|hi)(?:[\s,，]*(?:vivic))?[\s!！。.,，~～]*$/iu.test(req.text.trim())) {
+    return "你好，我在。有什么想交给我？";
+  }
+}
+
 interface OnDeps {
   router: IntentRouter;
   hint?: Promise<PlannerRouteHint | null>;
@@ -241,6 +250,14 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
   const mainOnly = deps.router.policy === "main-only";
   try {
     check();
+    const greeting = immediateGreeting(req);
+    if (greeting) {
+      const envelope = ActionEnvelopeSchema.parse({ schemaVersion: "0.6", requestId: `greeting_${randomUUID()}`,
+        canvasId: req.canvasContext.canvasId, spokenText: greeting,
+        actions: [{ type: "subtitle.show", text: greeting }] });
+      deps.telemetry.directClauses++;
+      return { kind: "envelope", envelope, usedProvider: "rules" };
+    }
     // Images use the trusted current-attachment path, never a text-only label.
     if (req.attachments?.length) return await fallback();
     if (req.continuation || req.resolvedTargetId || req.resolvedTargets) {

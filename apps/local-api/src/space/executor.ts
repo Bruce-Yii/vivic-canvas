@@ -159,7 +159,7 @@ export function executeHostedEnvelope(current: SpaceContent, raw: ActionEnvelope
           subcards: (card.metadata.subcards ?? []).filter(item => item.id !== action.subcardId), updatedAt: stamp } });
         cards = cards.map(item => item.id === card.id ? updated : item); break;
       }
-      case "stage.awaken": case "stage.sleep": case "card.focus": case "card.highlight": case "canvas.fit": case "canvas.restore":
+      case "stage.awaken": case "card.focus": case "card.highlight": case "canvas.fit": case "canvas.restore":
       case "subtitle.show": case "subtitle.hide": break; // presentation effects do not mutate authoritative cards
       case "canvas.create": case "canvas.switch": case "ambient.setPreset": invalid("执行计划不能切换目标空间或修改设备偏好。");
     }

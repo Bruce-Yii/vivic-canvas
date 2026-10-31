@@ -3,8 +3,11 @@ import { bodyLimit } from "hono/body-limit";
 import { z } from "zod";
 import { ConnectionManager, type ConnectionPlanner } from "./manager.js";
 import { ConnectionError, ProviderSchema } from "./types.js";
+import { FeishuAppCredentialsSchema } from "./qr.js";
 
 const ProviderRequest = z.object({ provider: ProviderSchema }).strict();
+const StartRequest = z.union([FeishuAppCredentialsSchema.extend({ provider: z.literal("feishu") }).strict(), ProviderRequest]);
+const QrRequest = z.object({ provider: ProviderSchema, id: z.string().uuid() }).strict();
 const QueryRequest = z.object({ provider: ProviderSchema, tool: z.string().regex(/^[\w.\/-]{1,128}$/), args: z.record(z.string(), z.unknown()).default({}) }).strict();
 const AskRequest = z.object({ provider: ProviderSchema, question: z.string().trim().min(1).max(2000) }).strict();
 export function createConnectionRoutes(manager: ConnectionManager, planner?: ConnectionPlanner) {
@@ -12,6 +15,21 @@ export function createConnectionRoutes(manager: ConnectionManager, planner?: Con
   app.use("*", bodyLimit({ maxSize: 32 * 1024, onError: c => c.json({ ok: false, code: "connection-body-too-large", error: "连接请求过大。" }, 413) }));
   app.use("*", async (c, next) => { c.header("Cache-Control", "no-store"); await next(); });
   app.get("/status", c => c.json({ ok: true, connections: manager.status() }));
+  app.get("/authorization/capabilities", c => c.json({ ok: true, providers: manager.qr.capabilities() }));
+  for (const action of ["start", "poll", "cancel"] as const) app.post(`/authorization/${action}`, async c => {
+    try {
+      const body = await c.req.json();
+      const parsed = action === "start" ? StartRequest.safeParse(body) : QrRequest.safeParse(body);
+      if (!parsed.success) throw new ConnectionError("invalid-authorization-request", "扫码请求无效。");
+      const flow = action === "start" ? manager.qr.start(parsed.data.provider, "appId" in parsed.data ? { appId: parsed.data.appId, appSecret: parsed.data.appSecret } : undefined)
+        : action === "poll" ? manager.qr.poll(parsed.data.provider, (parsed.data as z.infer<typeof QrRequest>).id)
+        : manager.qr.cancel(parsed.data.provider, (parsed.data as z.infer<typeof QrRequest>).id);
+      return c.json({ ok: true, flow });
+    } catch (error) {
+      const failure = error instanceof ConnectionError ? error : new ConnectionError("authorization-failed", "扫码授权暂时无法完成，请重试。", 502);
+      return c.json({ ok: false, code: failure.code, error: failure.message }, failure.status);
+    }
+  });
   for (const action of ["configure", "test", "disconnect", "query", "ask"] as const) app.post(`/${action}`, async c => {
     let body: unknown;
     try { body = await c.req.json(); } catch { return c.json({ ok: false, error: "请求格式不正确。" }, 400); }

@@ -40,14 +40,17 @@ interface Session {
 const GET_ROUTES = new Set([
   "/api/providers/status", "/api/speech/voices", "/api/decision/status",
   "/api/connections/status",
+  "/api/connections/authorization/capabilities",
 ]);
 const POST_ROUTES = new Set([
   "/api/credentials/stepfun/validate", "/api/credentials/stepfun/disconnect",
+  "/api/credentials/deepseek/validate", "/api/credentials/deepseek/disconnect",
   "/api/credentials/platform/validate", "/api/credentials/platform/disconnect",
   "/api/providers/select", "/api/providers/model", "/api/intent", "/api/intent/stream",
   "/api/speech", "/api/transcribe", "/api/search", "/api/weather/here", "/api/locale", "/api/travel/refresh",
   "/api/connections/configure", "/api/connections/test", "/api/connections/disconnect", "/api/connections/query",
   "/api/connections/ask",
+  "/api/connections/authorization/start", "/api/connections/authorization/poll", "/api/connections/authorization/cancel",
   "/api/files/read",
 ]);
 const json = (value: unknown, status = 200, extra?: HeadersInit) => {

@@ -54,7 +54,7 @@ function startLocalApi() {
     : "[vivic-local-api] OpenAI egress direct (no proxy configured)");
 
   const config = loadConfig();
-  const app = createLocalApp({ config });
+  const app = createLocalApp({ config, providerDataDir: path.join(homedir(), ".vivic") });
 
   const dist = path.resolve(import.meta.dirname, "../../web/dist");
   if (fs.existsSync(dist)) {

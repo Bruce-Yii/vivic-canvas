@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, statSync, accessSync, constants } from "node:fs";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -8,7 +8,7 @@ import { ConnectionError, type ConnectionConfig, type ReadTool } from "./types.j
 
 const objectSchema = (properties: Record<string, unknown>, required: string[]) => ({ type: "object", properties, required, additionalProperties: false });
 const textField = (description: string) => ({ type: "string", minLength: 1, maxLength: 1000, description });
-export const CLI_TOOLS: Record<"feishu" | "wecom", ReadTool[]> = {
+export const CLI_TOOLS: Record<"feishu" | "wecom" | "dingtalk", ReadTool[]> = {
   feishu: [
     { name: "search-doc", title: "搜索文档", description: "按关键词搜索当前用户可访问的飞书文档。", inputSchema: objectSchema({ query: textField("搜索关键词") }, ["query"]) },
     { name: "fetch-doc", title: "阅读文档", description: "阅读飞书 docx 或 Wiki 文档。", inputSchema: objectSchema({ doc: textField("飞书文档链接") }, ["doc"]) },
@@ -17,12 +17,16 @@ export const CLI_TOOLS: Record<"feishu" | "wecom", ReadTool[]> = {
     { name: "search-doc", title: "搜索文档", description: "按关键词搜索当前用户可访问的企业微信文档。", inputSchema: objectSchema({ query: textField("搜索关键词") }, ["query"]) },
     { name: "fetch-doc", title: "阅读文档", description: "阅读企业微信在线 doc 文档，暂不支持表格及智能文档。", inputSchema: objectSchema({ doc: textField("企业微信 doc 文档链接") }, ["doc"]) },
   ],
+  dingtalk: [
+    { name: "search-doc", title: "搜索文档", description: "搜索已授权的钉钉文档。", inputSchema: objectSchema({ query: textField("搜索关键词") }, ["query"]) },
+    { name: "fetch-doc", title: "阅读文档", description: "读取已授权的钉钉文档。", inputSchema: objectSchema({ doc: textField("钉钉文档编号或链接") }, ["doc"]) },
+  ],
 };
 
 /** Only native CLI binaries are launched, never shell wrappers or model-generated commands. */
-export function findCli(provider: "feishu" | "wecom"): string | undefined {
-  const name = provider === "feishu" ? "lark-cli" : "wecom-cli";
-  const override = process.env[provider === "feishu" ? "VIVIC_LARK_CLI_PATH" : "VIVIC_WECOM_CLI_PATH"];
+export function findCli(provider: "feishu" | "wecom" | "dingtalk"): string | undefined {
+  const name = provider === "feishu" ? "lark-cli" : provider === "wecom" ? "wecom-cli" : "dws";
+  const override = process.env[provider === "feishu" ? "VIVIC_LARK_CLI_PATH" : provider === "wecom" ? "VIVIC_WECOM_CLI_PATH" : "VIVIC_DINGTALK_CLI_PATH"];
   const candidates: string[] = override && path.isAbsolute(override) ? [override] : [];
   for (const directory of (process.env.PATH ?? "").split(path.delimiter).filter(Boolean)) {
     const ext = process.platform === "win32" ? ".exe" : "";
@@ -31,10 +35,19 @@ export function findCli(provider: "feishu" | "wecom"): string | undefined {
     else candidates.push(path.join(directory, `node_modules/@wecom/cli/node_modules/@wecom/cli-${process.platform}-${process.arch}/bin`, name + ext),
       path.join(directory, `node_modules/@wecom/cli-${process.platform}-${process.arch}/bin`, name + ext));
   }
-  return candidates.find(candidate => !/\.(cmd|bat|ps1|js|mjs|cjs)$/i.test(candidate) && existsSync(candidate));
+  return candidates.find(candidate => {
+    if (/\.(cmd|bat|ps1|js|mjs|cjs)$/i.test(candidate) || !existsSync(candidate)) return false;
+    try { accessSync(candidate, constants.X_OK); return statSync(candidate).isFile(); } catch { return false; }
+  });
 }
 
-export function cliArguments(provider: "feishu" | "wecom", name: string, args: Record<string, unknown>): string[] {
+export function cliArguments(provider: "feishu" | "wecom" | "dingtalk", name: string, args: Record<string, unknown>): string[] {
+  if (provider === "dingtalk") {
+    if (name === "test") return ["auth", "status", "--readonly", "--format", "json"];
+    if (name === "search-doc") return ["doc", "search", "--query", String(args.query), "--format", "json"];
+    if (name === "fetch-doc") return ["doc", "read", "--node", String(args.doc), "--format", "json"];
+    throw new ConnectionError("tool-not-allowed", "此操作未开放。", 403);
+  }
   if (name === "test") return provider === "feishu" ? ["api", "GET", "/open-apis/authen/v1/user_info", "--as", "user", "--format", "json"] : ["identity", "whoami"];
   if (name === "search-doc") {
     const query = String(args.query);

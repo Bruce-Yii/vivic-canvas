@@ -26,7 +26,8 @@ export const chineseNumber = (text: string): number | null => {
   return m ? (m[1] ? DIGITS[m[1]]! : 1) * 10 + (m[2] ? DIGITS[m[2]]! : 0) : null;
 };
 const NUMBER = "(?:\\d+(?:\\.\\d+)?|[零一二两三四五六七八九十半]+)";
-const PART = `${NUMBER}\\s*(?:小时|钟头|分钟|秒钟|分|秒)`;
+const DURATION_UNIT = "(?:小时|钟头|分钟|秒钟|分|秒|[hHmMsS])(?![A-Za-z])";
+const PART = `${NUMBER}\\s*${DURATION_UNIT}`;
 export const DURATION = `(?:${PART}\\s*)+`;
 
 /** Consumes the ENTIRE duration; extra instructions can never disappear. */
@@ -39,9 +40,10 @@ export const parseDuration = (raw: string): number | null => {
   if (!new RegExp(`^${DURATION}$`).test(text)) return null;
   let total = 0;
   const seen = new Set<string>();
-  for (const match of text.matchAll(new RegExp(`(${NUMBER})\\s*(小时|钟头|分钟|秒钟|分|秒)`, "g"))) {
+  for (const match of text.matchAll(new RegExp(`(${NUMBER})\\s*(${DURATION_UNIT})`, "g"))) {
     const number = chineseNumber(match[1]!);
-    const unit = match[2]!.startsWith("分") ? "分" : match[2]!.startsWith("秒") ? "秒" : "小时";
+    const rawUnit = match[2]!.toLowerCase();
+    const unit = rawUnit.startsWith("分") || rawUnit === "m" ? "分" : rawUnit.startsWith("秒") || rawUnit === "s" ? "秒" : "小时";
     if (number === null || seen.has(unit)) return null;
     seen.add(unit);
     total += number * (unit === "小时" ? 3600 : unit === "分" ? 60 : 1);
