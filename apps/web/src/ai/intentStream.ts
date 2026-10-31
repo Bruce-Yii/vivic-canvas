@@ -8,6 +8,10 @@ export const IntentProgressSchema = z.object({
   status: z.enum(["started", "completed", "failed"]),
   elapsedMs: z.number().finite().nonnegative().optional(),
   feedback: z.string().trim().min(1).max(80).optional(),
+  // Optional additions for newer clients. `z.object` strips them for older
+  // readers, so the wire format stays backward compatible.
+  route: z.string().max(90).optional(),
+  feedbackSource: z.enum(["model", "preset"]).optional(),
 });
 export type IntentProgress = z.infer<typeof IntentProgressSchema>;
 export const intentStageLabel = (stage: IntentProgress["stage"]): string => ({
@@ -15,6 +19,72 @@ export const intentStageLabel = (stage: IntentProgress["stage"]): string => ({
   decision: "正在判断操作…", planner: "正在整理卡片内容…", validation: "正在校验结果…",
   travel: "正在查询旅游结果…", total: "正在完成处理…",
 })[stage];
+
+/**
+ * Visible-slot priority: final result > model first sentence > preset > neutral > stage label.
+ * A progress frame may replace the visible line only when its rank is strictly higher
+ * (except settling, which is absolute). Stage labels rank lowest because they are
+ * telemetry: they describe the pipeline, not what Vivic is doing for the user.
+ */
+export const FEEDBACK_RANK = { stage: 5, neutral: 10, slow: 20, preset: 30, model: 40, final: 90 } as const;
+export type FeedbackTier = keyof typeof FEEDBACK_RANK;
+/** A result faster than this is a fast completion: the first sentence layer never paints. */
+export const FAST_DONE_MS = 250;
+
+export interface FeedbackSlot {
+  requestId: string;
+  tier: FeedbackTier;
+  text: string | null;
+  /** Advisory route from the decision layer; recorded as telemetry, never rendered by itself. */
+  route?: string;
+  /** A result/error/cancel ended this request; later progress frames are discarded. */
+  settled: boolean;
+}
+
+export type FeedbackEvent =
+  | { type: "neutral"; text: string; requestId?: string }
+  | { type: "slow"; text: string; requestId?: string }
+  | { type: "progress"; stage: IntentProgress["stage"]; feedback?: string; feedbackSource?: "model" | "preset"; route?: string; requestId?: string }
+  | { type: "settle"; text: string | null; elapsedMs?: number; quiet?: boolean; requestId?: string };
+
+export const newFeedbackSlot = (requestId: string, text: string): FeedbackSlot =>
+  ({ requestId, tier: "neutral", text, settled: false });
+
+/**
+ * One request owns exactly one visible line. This reducer is the only place that
+ * decides what may replace what, so the UI cannot accidentally let a late stage
+ * frame, a slow hint or an old request overwrite a better sentence.
+ */
+export function reduceFeedback(slot: FeedbackSlot, event: FeedbackEvent): FeedbackSlot {
+  // Frames from a superseded request are dropped before they can touch the slot.
+  if (event.requestId && event.requestId !== slot.requestId) return slot;
+  if (slot.settled) return slot;
+  if (event.type === "settle") {
+    // A silent success faster than the quiet window clears the line instead of
+    // flashing neutral/first-sentence text; other fast completions paint only
+    // their own final line.
+    const quietFast = event.quiet === true && event.elapsedMs !== undefined && event.elapsedMs < FAST_DONE_MS;
+    return { ...slot, tier: "final", text: quietFast && slot.tier === "neutral" ? null : event.text, settled: true };
+  }
+  if (event.type === "neutral") {
+    if (FEEDBACK_RANK.neutral <= FEEDBACK_RANK[slot.tier]) return slot;
+    return { ...slot, tier: "neutral", text: event.text };
+  }
+  if (event.type === "slow") {
+    // The 5s slow hint may only replace the neutral sentence, and nothing later
+    // (stage, preset, a second slow hint) may overwrite it.
+    if (slot.tier !== "neutral") return slot;
+    return { ...slot, tier: "slow", text: event.text };
+  }
+  const next = event.route && event.route !== slot.route ? { ...slot, route: event.route } : slot;
+  if (event.feedback) {
+    const tier: FeedbackTier = event.feedbackSource === "preset" ? "preset" : "model";
+    if (FEEDBACK_RANK[tier] <= FEEDBACK_RANK[slot.tier]) return next;
+    return { ...next, tier, text: event.feedback };
+  }
+  // A stage label is telemetry: it may record the route but never writes the line.
+  return next;
+}
 
 export const IntentResultSchema = z.object({
   kind: z.enum(["envelope", "clarify", "unknown", "error", "locale", "host-operation", "task"]),

@@ -63,10 +63,137 @@ export const parseExactReminders = (raw: string): Reminder[] | null => {
     // Only an explicit enumeration is deterministic. Conjunctions/conditions
     // can change meaning, so the model must extract or ask for clarification.
     const items = m[2]!.split("、").map((s) => s.trim());
-    if (seconds === null || items.some((s) => !s || s.length > 160 || /和|以及|然后|如果|再|提醒|倒计时|并且|或者|还是|每天|每隔|重复|不要|别|不用|取消/.test(s))) return null;
+    // A bare 及 is a real item boundary, but a single 涉及/及时 item must keep
+    // working. Defer the whole clause instead of building one compound card.
+    if (seconds === null || items.some((s) => !s || s.length > 160 || containsItemBoundary(s) ||
+      /和|以及|然后|如果|再|提醒|倒计时|并且|或者|还是|每天|每隔|重复|不要|别|不用|取消/.test(s))) return null;
     reminders.push(...items.map((text) => ({ afterSeconds: seconds, text })));
   }
   return reminders.length > 0 && reminders.length <= MAX_REMINDERS ? reminders : null;
+};
+
+/** Conservative item boundary guards. A conjunction only separates two real
+ * reminder items; comitative phrases ("和家人开会") and lexical words
+ * ("和平", "温和", "涉及") keep their 和/及. */
+const PERSON_PREFIX = ["家人", "家里", "朋友", "同事", "同学", "老师", "老板", "领导", "客户", "供应商", "团队",
+  "公司", "父母", "妈妈", "爸爸", "老婆", "老公", "孩子", "儿子", "女儿", "哥哥", "姐姐", "弟弟", "妹妹",
+  "爷爷", "奶奶", "阿姨", "叔叔", "我", "你", "他", "她", "它", "大家", "别人", "对方", "他人", "伙伴", "室友", "邻居"];
+const HE_RIGHT_WORD = ["和平", "和谐", "和解", "和好", "和睦", "和气", "和蔼", "和服", "和尚", "和声", "和弦",
+  "和风", "和煦", "和缓", "和议", "和谈", "和约", "和棋", "和数", "和面", "和稀泥", "和盘", "和衣", "和颜", "和衷"];
+const HE_LEFT_WORD = ["温", "柔", "平", "缓", "总", "饱", "调", "中", "附", "迎", "随", "谦", "暖", "热", "软", "共", "还"];
+const JI_RIGHT_WORD = ["及时", "及格", "及早", "及第", "及其", "及至", "及物"];
+// Common words whose last character precedes 及: 涉及, 普及, 埃及, 不及, 企及...
+const JI_LEFT_WORD = ["涉", "普", "波", "危", "顾", "提", "触", "以", "埃", "不", "企", "殃", "累", "料", "比", "赶", "又"];
+
+// `phrase` starts at the connector itself, so 和平/及时 are matched whole
+// rather than as a bare right-hand item ("苹果" must not be mistaken for 和平).
+const splitHe = (left: string, right: string, phrase: string): boolean =>
+  left.length >= 2 && right.length >= 2 &&
+  !PERSON_PREFIX.some((prefix) => right.startsWith(prefix)) &&
+  !HE_RIGHT_WORD.some((word) => phrase.startsWith(word)) &&
+  !HE_LEFT_WORD.some((word) => left.endsWith(word));
+const splitJi = (left: string, right: string, phrase: string): boolean =>
+  left.length >= 2 && right.length >= 2 &&
+  !JI_RIGHT_WORD.some((word) => phrase.startsWith(word)) &&
+  !JI_LEFT_WORD.some((word) => left.endsWith(word));
+
+/** A bare 及 used as a list boundary must defer rather than become one
+ * compound reminder; 涉及/及时 are lexical and stay single items. */
+function containsItemBoundary(text: string): boolean {
+  for (let index = 0; index < text.length; index += 1) {
+    const phrase = text.slice(index);
+    if (phrase.startsWith("以及")) {
+      if (text.slice(0, index).trim().length >= 2 && text.slice(index + 2).trim().length >= 2) return true;
+    }
+    if (phrase.startsWith("及") && splitJi(text.slice(0, index).trim(), text.slice(index + 1).trim(), phrase)) return true;
+  }
+  return false;
+}
+
+/** Splits only explicit enumerations. Anything that could be a comitative
+ * phrase, a lexical word, a condition, a negation or a second operation keeps
+ * the whole clause so the caller can defer rather than guess. */
+const splitEnumeratedItems = (text: string): string[] | null => {
+  const items: string[] = [];
+  let current = "";
+  let malformed = false;
+  const push = () => {
+    const item = current.trim();
+    if (!item) malformed = true;
+    else items.push(item);
+    current = "";
+  };
+  for (let index = 0; index < text.length; index += 1) {
+    const rest = text.slice(index);
+    const char = text[index]!;
+    if (char === "、" || char === "，" || char === ",") { push(); continue; }
+    if (rest.startsWith("还有")) {
+      const left = current.trim(), right = text.slice(index + 2).trim();
+      if (left.length >= 2 && right.length >= 2) { push(); index += 1; continue; }
+    }
+    if (rest.startsWith("以及")) {
+      const left = current.trim(), right = text.slice(index + 2).trim();
+      if (left.length >= 2 && right.length >= 2) { push(); index += 1; continue; }
+    }
+    if (rest.startsWith("及")) {
+      const left = current.trim(), right = text.slice(index + 1).trim();
+      if (splitJi(left, right, rest)) { push(); continue; }
+    }
+    if (char === "和") {
+      const left = current.trim(), right = text.slice(index + 1).trim();
+      if (splitHe(left, right, rest)) { push(); continue; }
+    }
+    current += char;
+  }
+  const last = current.trim();
+  if (!last) malformed = true;
+  else items.push(last);
+  return malformed ? null : items;
+};
+
+const malformedEnumeratedItem = (item: string): boolean =>
+  !item || item.length > 160 ||
+  /以及|还有|然后|如果|再|提醒|倒计时|并且|或者|还是|每天|每隔|重复|不要|别|不用|取消/.test(item) ||
+  /(?:以及|还有)$/.test(item) ||
+  new RegExp(DURATION).test(item);
+
+/** Item-level enumeration used to verify coverage, never to bypass the
+ * single-item card contract. It is deliberately stricter than
+ * parseExactReminders and stays internal to coverage/planner validation. */
+export const parseEnumeratedReminders = (raw: string): Reminder[] | null => {
+  if (!isReminderCreation(raw) || !/提醒/.test(raw)) return null;
+  const text = raw.trim().replace(/[。！!]+$/, "");
+  const start = new RegExp(
+    `(?:(?:(?:请)?帮我|请)\\s*)?(${DURATION})\\s*(?:之后|以后|后)\\s*(?:再)?提醒我` +
+    `|(?:请)?提醒我\\s*(${DURATION})\\s*(?:之后|以后|后)`, "g");
+  const matches = [...text.matchAll(start)].map((match) => {
+    const duration = match[1] ?? match[2] ?? "";
+    const seconds = parseDuration(duration);
+    return seconds === null ? null : { index: match.index!, end: match.index! + match[0].length, seconds };
+  });
+  if (!matches.length || matches.some((match) => !match)) return null;
+  const leading = text.slice(0, matches[0]!.index).trim();
+  if (leading && !/^(?:请|帮我|请帮我|在|请在|帮我在|请帮我在)$/.test(leading)) return null;
+  const reminders: Reminder[] = [];
+  for (const [position, match] of matches.entries()) {
+    const next = matches[position + 1];
+    let object = next ? text.slice(match!.end, next.index) : text.slice(match!.end);
+    if (next) {
+      // The next clause may be introduced by a comma plus a sequencing word.
+      for (;;) {
+        const before = object;
+        object = object.trim().replace(/[\s，,；;、]+$/, "").replace(/(?:然后|并且|以及|还有|再|和)$/, "");
+        if (object === before) break;
+      }
+    } else {
+      object = object.trim().replace(/[\s，,；;、]+$/, "");
+    }
+    const items = splitEnumeratedItems(object);
+    if (!items || items.some(malformedEnumeratedItem)) return null;
+    reminders.push(...items.map((item) => ({ afterSeconds: match!.seconds, text: item })));
+    if (reminders.length > MAX_REMINDERS) return null;
+  }
+  return reminders.length > 0 ? reminders : null;
 };
 
 export const buildReminderActions = (reminders: Reminder[], ctx: CanvasContext): Action[] => {
@@ -95,7 +222,10 @@ const compactText = (text: string) => text.replace(/[\s，,。；;、：:！!？
  * Ambiguous implicit references still require model clarification. */
 export const reminderCoverageIssue = (text: string, reminders: Reminder[]): string | null => {
   if (/如果|除非|每隔|每天|重复|或者|还是|不要|不用|取消/.test(text)) return "条件、重复或否定提醒需要澄清，不能只执行部分事项";
-  const exact = parseExactReminders(text);
+  // Enumerated items ("喝水、吃药", "喝水和吃药") must all be covered. The
+  // planner may still return several plans for one clause; it must not fold
+  // distinct items into one reminder text or drop one of them.
+  const exact = parseEnumeratedReminders(text) ?? parseExactReminders(text);
   if (exact && (exact.length !== reminders.length || exact.some((r, i) =>
     r.afterSeconds !== reminders[i]?.afterSeconds || r.text !== reminders[i]?.text))) return "遗漏或更改了明确的提醒事项";
   const countMatch = text.match(new RegExp(`(${NUMBER})\\s*(?:件事|个提醒|项提醒|个倒计时)`));

@@ -10,8 +10,11 @@ const terminal = frame({}, "stop") + "data: [DONE]\n\n";
 const response = (text: string, chunks = [encoder.encode(text)]) => new Response(new ReadableStream<Uint8Array>({
   start(controller) { chunks.forEach(chunk => controller.enqueue(chunk)); controller.close(); },
 }), { headers: { "content-type": "text/event-stream; charset=utf-8" } });
-const harness = (reply: () => Response | Promise<Response>, options: ChatJsonOptions = {}, signal?: AbortSignal, timeoutMs?: number) => {
-  const fetchImpl = vi.fn<typeof fetch>(async () => reply());
+const jsonResponse = (content: string, finish = "stop") =>
+  Response.json({ choices: [{ index: 0, message: { content }, finish_reason: finish }] });
+const harness = (reply: (attempt: number) => Response | Promise<Response>, options: ChatJsonOptions = {}, signal?: AbortSignal, timeoutMs?: number) => {
+  let attempt = 0;
+  const fetchImpl = vi.fn<typeof fetch>(async () => reply(++attempt));
   return { fetchImpl, pending: chatJson(credential, [{ role: "user", content: "测试流读取" }],
     { baseUrl: "https://unit.test/v1", fetchImpl, signal, timeoutMs }, options) };
 };
@@ -73,64 +76,156 @@ describe("StepFun optional JSON completion stream", () => {
     expect(onTextDelta).toHaveBeenCalledOnce();
   });
 
-  it.each(["length", "content_filter", "tool_calls"])("rejects finish_reason=%s even when content is valid JSON", async finish => {
+  it("accepts finish_reason=length when the content is already complete JSON", async () => {
     const onTextDelta = vi.fn();
-    const { pending, fetchImpl } = harness(() => response(frame({ content: '{"ok":true}' }) + frame({}, finish) + "data: [DONE]\n\n"), { onTextDelta });
-    expect(await pending).toMatchObject({ ok: false, code: "invalid-response" });
+    const { pending, fetchImpl } = harness(() => response(frame({ content: '{"ok":true}' }) + frame({}, "length")), { onTextDelta });
+    expect(await pending).toEqual({ ok: true, value: { ok: true } });
+    expect(fetchImpl).toHaveBeenCalledOnce();
+    expect(onTextDelta).toHaveBeenCalledOnce();
+  });
+
+  it.each([
+    ["content_filter", "内容安全"],
+    ["tool_calls", "工具调用"],
+  ])("rejects finish_reason=%s with an honest error and does not let the fallback accept it", async (finish, message) => {
+    const { pending, fetchImpl } = harness(attempt => attempt === 1
+      ? response(frame({ content: '{"ok":true}' }) + frame({}, finish) + "data: [DONE]\n\n")
+      : jsonResponse('{"ok":true}', finish), { onTextDelta: vi.fn<(delta: string) => void>() });
+    const result = await pending;
+    expect(result).toMatchObject({ ok: false, code: "invalid-response" });
+    expect((result as { error: string }).error).toContain(message);
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    expect(JSON.parse(String(fetchImpl.mock.calls[1]![1]!.body))).not.toHaveProperty("stream");
+  });
+
+  it("accepts a stream that only sends [DONE] once the content is complete", async () => {
+    const onTextDelta = vi.fn();
+    const { pending, fetchImpl } = harness(() => response(frame({ content: '{"ok":true}' }) + "data: [DONE]\n\n"), { onTextDelta });
+    expect(await pending).toEqual({ ok: true, value: { ok: true } });
+    expect(fetchImpl).toHaveBeenCalledOnce();
+    expect(onTextDelta).toHaveBeenCalledOnce();
+  });
+
+  it("accepts a finish_reason=stop stream that never sends [DONE]", async () => {
+    const { pending, fetchImpl } = harness(() => response(frame({ content: '{"ok":true}' }) + frame({}, "stop")), { onTextDelta: vi.fn<(delta: string) => void>() });
+    expect(await pending).toEqual({ ok: true, value: { ok: true } });
+    expect(fetchImpl).toHaveBeenCalledOnce();
+  });
+
+  it("accepts a complete answer whose [DONE] line is not terminated by a blank line", async () => {
+    const { pending, fetchImpl } = harness(() => response(frame({ content: '{"ok":true}' }) + frame({}, "stop") + "data: [DONE]\n"),
+      { onTextDelta: vi.fn<(delta: string) => void>() });
+    expect(await pending).toEqual({ ok: true, value: { ok: true } });
     expect(fetchImpl).toHaveBeenCalledOnce();
   });
 
   it.each([
-    ["without finish", frame({ content: '{"ok":true}' }) + "data: [DONE]\n\n"],
     ["invalid event JSON", `data: ${credential.apiKey}\n\n`],
-    ["upstream error event", `data: {"error":{"message":"${credential.apiKey}"}}\n\n`],
     ["another choice", 'data: {"choices":[{"index":1,"delta":{"content":"{}"}}]}\n\n'],
     ["nontext content", 'data: {"choices":[{"index":0,"delta":{"content":42}}]}\n\n'],
     ["content after finish", frame({ content: "{}" }, "stop") + frame({ content: "extra" }) + "data: [DONE]\n\n"],
     ["non JSON answer", frame({ content: "你好" }) + terminal],
     ["empty content", frame({ reasoning_content: "TEST-private-reasoning" }) + terminal],
-  ])("rejects %s without exposing upstream diagnostics", async (_name, wire) => {
-    const { pending, fetchImpl } = harness(() => response(wire), { onTextDelta: vi.fn<(delta: string) => void>() });
+  ])("rejects %s without exposing upstream diagnostics after the fallback", async (_name, wire) => {
+    const { pending, fetchImpl } = harness(attempt => attempt === 1 ? response(wire) : jsonResponse("不是 JSON"),
+      { onTextDelta: vi.fn<(delta: string) => void>() });
     const result = await pending;
     expect(result).toMatchObject({ ok: false, code: "invalid-response" });
     expect(JSON.stringify(result)).not.toContain(credential.apiKey);
     expect(JSON.stringify(result)).not.toContain("TEST-private-reasoning");
-    expect(fetchImpl).toHaveBeenCalledOnce();
-  });
-
-  it.each([
-    ["without DONE", frame({ content: '{"ok":true}' }) + frame({}, "stop")],
-    ["in a frame", frame({ content: '{"ok":true}' }) + 'data: {"choices":'],
-    ["unterminated DONE", frame({ content: '{"ok":true}' }) + frame({}, "stop") + "data: [DONE]\n"],
-  ])("treats a closed stream %s as a failed transport and retries once", async (_name, wire) => {
-    const { pending, fetchImpl } = harness(() => response(wire), { onTextDelta: vi.fn<(delta: string) => void>() });
-    expect(await pending).toMatchObject({ ok: false, code: "network" });
     expect(fetchImpl).toHaveBeenCalledTimes(2);
   });
 
-  it("retries a dropped body once and allows the second attempt to complete", async () => {
-    let attempts = 0;
+  it.each([
+    ["without finish or DONE", frame({ content: '{"ok":true}' })],
+    ["in a frame", frame({ content: '{"ok":true}' }) + 'data: {"choices":'],
+  ])("treats a closed stream %s as a failed transport and retries once non-streaming", async (_name, wire) => {
+    const { pending, fetchImpl } = harness(attempt => attempt === 1 ? response(wire) : Promise.reject(new TypeError("fallback dropped")),
+      { onTextDelta: vi.fn<(delta: string) => void>() });
+    expect(await pending).toMatchObject({ ok: false, code: "network" });
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    expect(JSON.parse(String(fetchImpl.mock.calls[1]![1]!.body))).not.toHaveProperty("stream");
+  });
+
+  it("falls back to a non-streaming request once when stream:true is rejected with 400", async () => {
     const onTextDelta = vi.fn();
-    const { pending, fetchImpl } = harness(() => ++attempts === 1
+    const { pending, fetchImpl } = harness(attempt => attempt === 1
+      ? new Response("stream unsupported", { status: 400 })
+      : jsonResponse('{"ok":true}'), { onTextDelta });
+    expect(await pending).toEqual({ ok: true, value: { ok: true } });
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    expect(JSON.parse(String(fetchImpl.mock.calls[0]![1]!.body)).stream).toBe(true);
+    expect(JSON.parse(String(fetchImpl.mock.calls[1]![1]!.body))).not.toHaveProperty("stream");
+    expect(onTextDelta).not.toHaveBeenCalled();
+  });
+
+  it("recovers when an SSE content type actually carries one JSON body", async () => {
+    const body = JSON.stringify({ choices: [{ finish_reason: "stop", message: { content: '{"ok":true}' } }] });
+    const { pending, fetchImpl } = harness(attempt => attempt === 1
+      ? new Response(body, { headers: { "content-type": "text/event-stream" } })
+      : jsonResponse('{"ok":true}'), { onTextDelta: vi.fn<(delta: string) => void>() });
+    expect(await pending).toEqual({ ok: true, value: { ok: true } });
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    expect(JSON.parse(String(fetchImpl.mock.calls[1]![1]!.body))).not.toHaveProperty("stream");
+  });
+
+  it("retries a half-written JSON stream once without streaming and recovers", async () => {
+    const onTextDelta = vi.fn();
+    const { pending, fetchImpl } = harness(attempt => attempt === 1
+      ? response(frame({ content: '{"ok":true}' }) + 'data: {"choices":')
+      : jsonResponse('{"ok":true}'), { onTextDelta });
+    expect(await pending).toEqual({ ok: true, value: { ok: true } });
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    expect(onTextDelta).toHaveBeenCalledOnce();
+    expect(JSON.parse(String(fetchImpl.mock.calls[1]![1]!.body))).not.toHaveProperty("stream");
+  });
+
+  it("returns an honest output-length error for truncated, unparseable content", async () => {
+    const { pending, fetchImpl } = harness(attempt => attempt === 1
+      ? response(frame({ content: '{"ok":' }) + frame({}, "length"))
+      : jsonResponse('{"ok":', "length"), { onTextDelta: vi.fn<(delta: string) => void>() });
+    const result = await pending;
+    expect(result).toMatchObject({ ok: false, code: "invalid-response", truncated: true });
+    expect((result as { error: string }).error).toContain("输出长度");
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    expect(JSON.parse(String(fetchImpl.mock.calls[1]![1]!.body))).not.toHaveProperty("stream");
+  });
+
+  it("classifies an in-stream error frame as a retryable network failure, not model output", async () => {
+    const wire = `data: {"error":{"message":"${credential.apiKey}"}}\n\n`;
+    const { pending, fetchImpl } = harness(attempt => attempt === 1 ? response(wire) : Promise.reject(new TypeError("fallback dropped")),
+      { onTextDelta: vi.fn<(delta: string) => void>() });
+    const result = await pending;
+    expect(result).toMatchObject({ ok: false, code: "network" });
+    expect(JSON.stringify(result)).not.toContain(credential.apiKey);
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    expect(JSON.parse(String(fetchImpl.mock.calls[1]![1]!.body))).not.toHaveProperty("stream");
+  });
+
+  it("retries a dropped stream once with the non-streaming fallback", async () => {
+    const onTextDelta = vi.fn();
+    const { pending, fetchImpl } = harness(attempt => attempt === 1
       ? new Response(new ReadableStream<Uint8Array>({
         start(controller) { controller.enqueue(encoder.encode(frame({ content: '{"attempt":1}' }))); },
         pull(controller) { controller.error(new Error(credential.apiKey)); },
       }), { headers: { "content-type": "text/event-stream" } })
-      : response(frame({ content: '{"attempt":2}' }) + terminal), { onTextDelta });
+      : jsonResponse('{"attempt":2}'), { onTextDelta });
     expect(await pending).toEqual({ ok: true, value: { attempt: 2 } });
     expect(fetchImpl).toHaveBeenCalledTimes(2);
-    expect(onTextDelta.mock.calls.map(call => call[0])).toEqual(['{"attempt":1}', '{"attempt":2}']);
+    // The whole JSON answer arrives through the non-streaming fallback, so no
+    // second partial prefix is ever exposed to the feedback reader.
+    expect(onTextDelta.mock.calls.map(call => call[0])).toEqual(['{"attempt":1}']);
   });
 
-  it("resets an incomplete feedback prefix before the successful transport retry", async () => {
+  it("does not publish a partial feedback phrase when a broken stream falls back to non-streaming", async () => {
     const publish = vi.fn(), onTextDelta = feedbackReader(publish);
     const value = { feedback: "我来整理这份内容。", slots: { text: "阅读草稿" } };
-    let attempts = 0;
-    const { pending, fetchImpl } = harness(() => response(++attempts === 1 ? frame({ content: '{"feedback":"我来' })
-      : frame({ content: JSON.stringify(value) }) + terminal), { onTextDelta });
+    const { pending, fetchImpl } = harness(attempt => attempt === 1
+      ? response(frame({ content: '{"feedback":"我来' }))
+      : jsonResponse(JSON.stringify(value)), { onTextDelta });
     expect(await pending).toEqual({ ok: true, value });
     expect(fetchImpl).toHaveBeenCalledTimes(2);
-    expect(publish.mock.calls).toEqual([[value.feedback]]);
+    expect(publish).not.toHaveBeenCalled();
   });
 
   it("isolates reset exceptions from inference", async () => {
@@ -141,11 +236,14 @@ describe("StepFun optional JSON completion stream", () => {
     expect(onTextDelta).toHaveBeenCalledOnce();
   });
 
-  it("rejects malformed UTF-8 without forwarding replacement text", async () => {
+  it("recovers from malformed UTF-8 through the fallback without forwarding replacement text", async () => {
     const onTextDelta = vi.fn();
-    const { pending } = harness(() => response("", [new Uint8Array([0xff])]), { onTextDelta });
-    expect(await pending).toMatchObject({ ok: false, code: "invalid-response" });
+    const { pending, fetchImpl } = harness(attempt => attempt === 1
+      ? response("", [new Uint8Array([0xff])])
+      : jsonResponse('{"ok":true}'), { onTextDelta });
+    expect(await pending).toEqual({ ok: true, value: { ok: true } });
     expect(onTextDelta).not.toHaveBeenCalled();
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
   });
 
   it("stops callbacks within a chunk when a consumer cancels the request", async () => {

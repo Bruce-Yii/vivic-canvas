@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { fetchWeatherHere, intentStageLabel } from "@/ai/api";
+import { fetchWeatherHere } from "@/ai/api";
+import { FEEDBACK_RANK, newFeedbackSlot, reduceFeedback, type FeedbackEvent, type FeedbackSlot } from "@/ai/intentStream";
 import { runDecisionTask, cancelDecisionTask } from "@/ai/decisionTask";
 import { cancelWakeActivity, getWakeActivity, isWakeInputBusy, subscribeWakeActivity } from "@/ai/wakeActivity";
 import { fixForRequest, freshFix, looksLikeWeather, subscribeLocation } from "@/location/deviceLocation";
@@ -120,8 +121,8 @@ export const ControlApp = () => {
     deadlineTimer: ReturnType<typeof setTimeout>;
     feedbackTimer: ReturnType<typeof setTimeout>;
     expiresAt: number;
-    text: string;
-    modelFeedback?: string;
+    /** The single visible feedback slot; `text` never changes outside its reducer. */
+    slot: FeedbackSlot;
   } | null>(null);
   const reminderQueue = useRef<ReminderNotice[]>([]);
   useEffect(() => {
@@ -180,7 +181,7 @@ export const ControlApp = () => {
         if (voiceActivityId) {
           host.setActivity(voiceActivityId, null); voiceActivityId = null;
           const current = pending.current;
-          host.setActivity(current.requestId, { requestId: current.requestId, text: current.text, phase: "thinking", expiresAt: current.expiresAt });
+          host.setActivity(current.requestId, { requestId: current.requestId, text: current.slot.text ?? "让我想想…", phase: "thinking", expiresAt: current.expiresAt });
         }
         return;
       }
@@ -448,9 +449,44 @@ export const ControlApp = () => {
       const requestId = newId("intent");
       const controller = new AbortController();
       const expiresAt = Date.now() + INTENT_TIMEOUT_MS;
+      const submittedAt = Date.now();
       const isCurrent = () => !controller.signal.aborted && pending.current?.requestId === requestId &&
         host.getSnapshot().activeCanvasId === activeCanvasId &&
         host.getSnapshot().ownerMode === "owner";
+      // One request, one visible line. The reducer is the sole authority for what may
+      // replace what: final > model first sentence > preset > neutral > stage label.
+      const applyFeedback = (event: FeedbackEvent) => {
+        const current = pending.current;
+        if (!current || current.requestId !== requestId) return false;
+        const previous = current.slot, next = reduceFeedback(previous, event);
+        if (next === previous) return false;
+        current.slot = next;
+        // A route hint alone changes telemetry, not the sentence on screen.
+        if (next.text === previous.text) return false;
+        if (next.text === null) {
+          setFeedback(null);
+          host.setActivity(requestId, null);
+        } else {
+          setFeedback(next.text);
+          host.setActivity(requestId, { requestId, text: next.text, expiresAt, phase: "thinking" });
+        }
+        window.dispatchEvent(new CustomEvent("vivic:feedback-trace", { detail: { requestId,
+          source: next.tier, rank: FEEDBACK_RANK[next.tier], textLength: next.text?.length ?? 0,
+          elapsedMs: Date.now() - submittedAt, ...(next.route ? { route: next.route } : {}), at: Date.now() } }));
+        return true;
+      };
+      // Results are terminal. A silent success inside the quiet window leaves no line
+      // at all instead of letting neutral or a first sentence flash on screen.
+      const finish = (text: string) => {
+        const current = pending.current;
+        if (current && current.requestId === requestId) {
+          const next = reduceFeedback(current.slot, { type: "settle", text, requestId,
+            elapsedMs: Date.now() - submittedAt, quiet: QUIET_SUCCESS_FEEDBACK.has(text.trim()) });
+          current.slot = next;
+          if (next.text === null) { setFeedback(null); host.setActivity(requestId, null); return; }
+        }
+        setFeedback(text);
+      };
       pending.current = {
         requestId,
         canvasId: activeCanvasId,
@@ -460,14 +496,13 @@ export const ControlApp = () => {
           if (isCurrent()) void speakShortFeedback("我看看", { requestId: `${requestId}:checking`, signal: controller.signal });
         }, 300),
         slowTimer: setTimeout(() => {
-          if (!isCurrent() || pending.current!.modelFeedback) return;
-          const text = "响应较慢，仍在处理…";
-          pending.current!.text = text;
-          setFeedback(text);
-          host.setActivity(requestId, { requestId, text, expiresAt, phase: "thinking" });
-          void speakShortFeedback("稍等", { requestId: `${requestId}:slow`, signal: controller.signal });
+          if (!isCurrent()) return;
+          // The slow hint may only replace a still-neutral line; the reducer keeps
+          // every later stage frame (and a second hint) from overwriting it.
+          if (applyFeedback({ type: "slow", text: "响应较慢，仍在处理…", requestId }))
+            void speakShortFeedback("稍等", { requestId: `${requestId}:slow`, signal: controller.signal });
         }, 5000),
-        expiresAt, text: "让我想想…",
+        expiresAt, slot: newFeedbackSlot(requestId, "让我想想…"),
       };
       setBusy(true);
       setFeedback("正在理解你的指令…");
@@ -488,19 +523,25 @@ export const ControlApp = () => {
             onProgress: event => {
               if (!isCurrent() || event.status !== "started" || event.stage === "total") return;
               const current = pending.current!;
-              // The first complete model sentence stays visible until this request finishes.
-              // It is transient activity, so it cannot invalidate a pending canvas version.
-              if (current.modelFeedback) return;
-              const text = event.stage === "planner" && event.feedback ? event.feedback : intentStageLabel(event.stage);
-              if (event.stage === "planner" && event.feedback) {
-                current.modelFeedback = text;
-                clearTimeout(current.slowTimer);
-                clearTimeout(current.feedbackTimer);
-                cancelShortFeedback(requestId);
+              // Only a complete first sentence is painted: model feedback from the
+              // planner (or a route-preset frame). A later stage can never replace it.
+              const sentence = event.feedback && (event.stage === "planner" || event.feedbackSource === "preset")
+                ? event.feedback : undefined;
+              if (sentence) {
+                if (applyFeedback({ type: "progress", stage: event.stage, feedback: sentence,
+                  feedbackSource: event.feedbackSource, route: event.route, requestId })) {
+                  clearTimeout(current.slowTimer);
+                  clearTimeout(current.feedbackTimer);
+                  cancelShortFeedback(requestId);
+                }
+                return;
               }
-              pending.current!.text = text;
-              setFeedback(text);
-              host.setActivity(requestId, { requestId, text, expiresAt, phase: "thinking" });
+              // Stage labels are telemetry only: record the stage and any route hint
+              // without writing the visible line, so they cannot overwrite neutral,
+              // the slow hint, a preset sentence or the model first sentence.
+              applyFeedback({ type: "progress", stage: event.stage, route: event.route, feedbackSource: event.feedbackSource, requestId });
+              window.dispatchEvent(new CustomEvent("vivic:feedback-trace", { detail: { requestId, source: "stage",
+                stage: event.stage, ...(event.route ? { route: event.route } : {}), suppressed: true, at: Date.now() } }));
             },
           });
           if (!isCurrent()) {
@@ -517,7 +558,7 @@ export const ControlApp = () => {
           }
           if (result.task || result.executed || result.handled) {
             const message = result.message ?? (result.task?.status === "completed" ? "已完成并保存。" : "操作未完成，请重试。");
-            setFeedback(message);
+            finish(message);
             // A question freezes the canvas version. Persisting its subtitle
             // would invalidate the very confirmation it asks the user to send.
             if (canPublishTaskFeedback(result)) publishFeedback(host, message);
@@ -541,7 +582,7 @@ export const ControlApp = () => {
           } else if (result.kind === "envelope" && result.envelope) {
             const res = host.dispatch({ ...result.envelope, actions: focusResponseActions(result.envelope.actions, canvasStore.getState()) });
             const message = res.ok ? result.envelope.spokenText ?? "已执行" : `指令未执行（${res.error}）`;
-            setFeedback(message);
+            finish(message);
             if (!res.ok) publishFeedback(host, message);
             if (res.ok && !res.deduplicated && result.envelope.spokenText) {
               void speakText(result.envelope.spokenText, { requestId: result.envelope.requestId });
@@ -557,7 +598,7 @@ export const ControlApp = () => {
             if (result.kind === "locale" && result.locale) {
               // A place answer, not a card: shown and spoken like other feedback.
               const answer = result.locale.answer;
-              setFeedback(answer);
+              finish(answer);
               publishFeedback(host, answer);
               void speakText(answer, { requestId: newId("speech") });
               setSuggestions([]);
@@ -565,7 +606,7 @@ export const ControlApp = () => {
               applyResult(host, local);
             } else {
               const message = result.message ?? local.message;
-              setFeedback(message);
+              finish(message);
               publishFeedback(host, message);
               setSuggestions(result.suggestions ?? []);
               if (result.kind === "clarify" && result.message) previousQuestion.current = {

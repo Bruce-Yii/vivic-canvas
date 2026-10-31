@@ -11,7 +11,8 @@ import { currentCardDefinitions } from "./cards/catalog.js";
 import { PlatformCredentialStore } from "./platformCredential.js";
 import { createModelApiClient } from "./modelApi/index.js";
 import { runIntent, type PipelineDeps } from "./intent/pipeline.js";
-import { observeDecision } from "./decision/trace.js";
+import { observeDecision, type PlannerRouteHint } from "./decision/trace.js";
+import { splitClauses } from "./decision/split.js";
 import { safeDiagnostic, type DiagnosticSink } from "./diagnostics.js";
 import {
   IntentRequestSchema,
@@ -645,26 +646,45 @@ export const createApp = (deps: AppDeps) => {
       const intent = { ...parsed.data, tracePath: c.req.header("x-vivic-trace-path") === "task" ? "task" as const : "browser" as const,
         ...(installedDefinitions ? { installedDefinitions, extensionDefinitions: undefined } : {}),
         ...(online && c.req.header("x-vivic-intent-image-ref") ? { trustedImageRef: c.req.header("x-vivic-intent-image-ref") } : {}) };
+      // The on-mode router hint already exists for every clause. Publish it on the
+      // existing progress channel as optional fields instead of opening a second
+      // message chain; older clients strip the unknown keys and see today's label.
+      const publishRouteHint = (hint: Promise<PlannerRouteHint | null> | undefined) => {
+        if (!streamFeedback || !hint || requestRouter?.mode !== "on" || parsed.data.attachments?.length
+          || parsed.data.continuation || parsed.data.task) return;
+        void hint.then(value => {
+          if (signal.aborted || !value?.result) return;
+          const { route, probability, none } = value.result;
+          if (!route || none || probability < 0.8 || splitClauses(intent.text).length !== 1) return;
+          // "decision" is an existing stage, so old clients keep their old label.
+          const progress = { stage: "decision" as const, status: "started" as const,
+            route: route.slice(0, 90), feedbackSource: "preset" as const };
+          try { onStage(progress); } catch { /* progress is advisory */ }
+        }).catch(() => { /* a route hint never fails the request */ });
+      };
       if (requestRouter?.mode !== "on" && !nativeV2 && !parsed.data.task) return runIntent(intent, pipeline, signal);
-      return observeDecision(intent, pipeline, signal, routeHint => decisionTasks.run(intent, {
-        safetyMode: requestRouter?.mode === "on", routeHint,
-        legacy: (request, taskSignal, plannerOnly) => runIntent({ ...request,
-          offlineReferenceCompatibility: request.offlineReferenceCompatibility === true
-            && (online || !configuredProvider && !deps.decision && !decision.status().enabled),
-        }, { ...pipeline, routeHint, executionRouter: requestRouter, router: undefined, onDecisionTrace: undefined }, taskSignal, false, plannerOnly),
-        isCurrent: () => version === providerRevision,
-        tools: {
-          weather: (city, canvasContext, taskSignal) => runIntent({ text: `${city}天气`, canvasContext, deviceLocation: parsed.data.deviceLocation }, { ...pipeline, decision: undefined }, taskSignal, true),
-          ...(search ? { search: (query: string, canvasContext: typeof parsed.data.canvasContext, taskSignal: AbortSignal) => runIntent({ text: `搜索 ${query}`, canvasContext }, { ...pipeline, decision: undefined }, taskSignal, true) } : {}),
-        },
-      }, signal).then(result => {
-        if (intent.task && (intent.task.receipt || intent.task.cancel)) {
-          const outcome = result.task?.status === "completed" ? "succeeded"
-            : result.task?.status === "failed" || result.task?.status === "cancelled" ? "failed" : undefined;
-          if (outcome) { try { deps.onDecisionReceipt?.(intent.task.id, outcome); } catch { /* telemetry is advisory */ } }
-        }
-        return result;
-      }));
+      return observeDecision(intent, pipeline, signal, routeHint => {
+        publishRouteHint(routeHint);
+        return decisionTasks.run(intent, {
+          safetyMode: requestRouter?.mode === "on", routeHint,
+          legacy: (request, taskSignal, plannerOnly) => runIntent({ ...request,
+            offlineReferenceCompatibility: request.offlineReferenceCompatibility === true
+              && (online || !configuredProvider && !deps.decision && !decision.status().enabled),
+          }, { ...pipeline, routeHint, executionRouter: requestRouter, router: undefined, onDecisionTrace: undefined }, taskSignal, false, plannerOnly),
+          isCurrent: () => version === providerRevision,
+          tools: {
+            weather: (city, canvasContext, taskSignal) => runIntent({ text: `${city}天气`, canvasContext, deviceLocation: parsed.data.deviceLocation }, { ...pipeline, decision: undefined }, taskSignal, true),
+            ...(search ? { search: (query: string, canvasContext: typeof parsed.data.canvasContext, taskSignal: AbortSignal) => runIntent({ text: `搜索 ${query}`, canvasContext }, { ...pipeline, decision: undefined }, taskSignal, true) } : {}),
+          },
+        }, signal).then(result => {
+          if (intent.task && (intent.task.receipt || intent.task.cancel)) {
+            const outcome = result.task?.status === "completed" ? "succeeded"
+              : result.task?.status === "failed" || result.task?.status === "cancelled" ? "failed" : undefined;
+            if (outcome) { try { deps.onDecisionReceipt?.(intent.task.id, outcome); } catch { /* telemetry is advisory */ } }
+          }
+          return result;
+        });
+      });
     };
     if (c.req.path.endsWith("/stream") || c.req.header("accept")?.includes("text/event-stream")) {
       c.header("X-Accel-Buffering", "no");

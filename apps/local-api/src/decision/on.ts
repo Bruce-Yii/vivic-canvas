@@ -13,13 +13,23 @@ import { looksLikeDateCountdown } from "../scenes/index.js";
 import { splitClauses } from "./split.js";
 import { resolveTarget } from "./target.js";
 import { isBuiltinRoute, type IntentRouter } from "./router.js";
-import type { PlannerRouteHint, DecisionTrace } from "./trace.js";
+import type { ClausePlan, PlannerRouteHint, DecisionTrace } from "./trace.js";
+
+/** One sentence may carry several card intents. "off" keeps the pre-existing
+ * rules / per-clause / whole-sentence paths; "plans" plans it once; "hybrid"
+ * proposes the clauses an approved contract parses and plans only the rest. */
+export type MultiCardMode = "off" | "plans" | "hybrid";
+export function multiCardMode(value: string | undefined = process.env.VIVIC_MULTI_CARD_MODE): MultiCardMode {
+  return value === "plans" || value === "hybrid" ? value : "off";
+}
 
 interface OnDeps {
   router: IntentRouter;
   hint?: Promise<PlannerRouteHint | null>;
   telemetry: NonNullable<PipelineDeps["decisionTelemetry"]>;
   isCurrent?: () => boolean;
+  /** Internal opt-in; HTTP JSON can never set it. The environment default is "off". */
+  multiCard?: MultiCardMode;
   plan(request: IntentRequest, hint: Promise<PlannerRouteHint | null> | undefined, signal: AbortSignal): Promise<IntentResult>;
 }
 type Row = DecisionTrace["decisions"][number];
@@ -31,11 +41,125 @@ export function literalRoute(text: string, context: IntentRequest["canvasContext
     && contract.parse?.(text, context) != null);
   if (matches.length === 1) return matches[0]!.id as IntentRouteId;
 }
+
+type HybridOutcome =
+  | { kind: "actions"; actions: Action[]; directClauses: number; provider?: IntentResult["usedProvider"]; say?: string; plans: ClausePlan[] }
+  | { kind: "whole" }
+  | { kind: "result"; result: IntentResult };
+
+interface HybridInput {
+  req: IntentRequest;
+  clauses: string[];
+  rows: Row[];
+  deps: OnDeps;
+  signal: AbortSignal;
+  check(): void;
+  run<T>(work: () => Promise<T>): Promise<T>;
+  plan(request: IntentRequest, hint: Promise<PlannerRouteHint | null>): Promise<IntentResult>;
+}
+
+/** M3 hybrid: every clause an approved literal contract fully parses becomes an
+ * in-memory proposal (never a submission); the remaining clauses go to ONE
+ * planner call as `plans[]`. The caller merges both segments by clause order,
+ * validates the whole batch and returns a single envelope. Any uncertainty in
+ * either segment returns one clarification and commits nothing. */
+async function hybridProposal(input: HybridInput): Promise<HybridOutcome> {
+  const { req, clauses, rows, deps, check, run } = input;
+  const context: CardBuildContext = { ...req.canvasContext, cards: [...req.canvasContext.cards], focusHistory: [...req.canvasContext.focusHistory] };
+  const ruleByClause = new Map<number, Action[]>();
+  const plans: ClausePlan[] = [];
+  const remaining: number[] = [];
+  for (const [index, text] of clauses.entries()) {
+    check();
+    const row = rows[index];
+    const route = row?.route;
+    // Only a confident, approved route owning a unique literal parse may propose.
+    const contract = route && isBuiltinRoute(route) && deps.router.directRoutes?.has(route) && Object.hasOwn(CARD_CONTRACTS, route)
+      ? CARD_CONTRACTS[route] : undefined;
+    if (!row || !contract || row.failed || row.none || row.probability < .8) { remaining.push(index); continue; }
+    let built: Action[];
+    // Preserve the existing verified scheduled-reminder adapter as a parser.
+    const schedule = row.route === "countdown" ? scheduledReminderIntent(text, context) : null;
+    if (schedule) {
+      // An incomplete scheduled reminder is a rule-level question, not a planner guess.
+      if (!schedule.actions) return { kind: "result", result: { kind: "clarify", message: schedule.message, usedProvider: "decision" } };
+      built = schedule.actions;
+    } else {
+      const slots = row.route === "countdown" && looksLikeDateCountdown(text) ? null : contract.parse?.(text, context);
+      if (slots === null || slots === undefined) { remaining.push(index); continue; }
+      const value = await run(async () => contract.build(slots, context, new Date()));
+      if (!Array.isArray(value)) return { kind: "result", result: { kind: "clarify", message: "本次包含需要单独处理的操作，请分开发送。", usedProvider: "decision" } };
+      built = value;
+    }
+    if (!built.length) { remaining.push(index); continue; }
+    const placed: Action[] = [];
+    for (const action of built) {
+      const next = action.type === "card.create" ? { ...action, card: { ...action.card,
+        layout: { ...action.card.layout, ...newCardLayout(action.card.layout.width, action.card.layout.height, context) } } } : action;
+      placed.push(next);
+      if (action.type === "stage.awaken") context.stage = "WORKSPACE";
+      if (next.type === "card.create") context.cards.push({ id: next.card.id, type: next.card.type, aliases: next.card.metadata.aliases,
+        displayProps: next.card.displayProps, sourceDataSummary: next.card.sourceData, layout: next.card.layout });
+      if (action.type === "card.focus") context.focusHistory = [...context.focusHistory, action.targetId].slice(-20);
+    }
+    ruleByClause.set(index, placed);
+    plans.push({ clause: index, contract: contract.id, source: "rules",
+      cardIds: placed.flatMap(action => action.type === "card.create" ? [action.card.id] : []) });
+  }
+  if (!remaining.length) return { kind: "actions", actions: [...ruleByClause.values()].flat(), directClauses: ruleByClause.size, plans };
+  // Nothing is literal: keep the existing single whole-sentence planner path.
+  if (remaining.length === clauses.length) return { kind: "whole" };
+  const remainingText = remaining.map(index => clauses[index]!).join("，");
+  const remainingRows = remaining.map(index => rows[index]!);
+  const [only] = remainingRows;
+  // The observer resolved this clause against the pre-proposal canvas; a rule
+  // clause may have just created the card it names ("记个便签，然后聚焦它").
+  const target = only && only.route && isBuiltinRoute(only.route)
+    ? input.run(() => resolveTarget(remainingText, context, only.route as IntentRouteId, deps.router, input.signal))
+    : Promise.resolve(only?.target);
+  const hint: PlannerRouteHint = remaining.length === 1 && only
+    ? { result: { ...only, route: only.route as IntentRouteId }, target }
+    : { result: null, target: Promise.resolve(undefined), all: Promise.resolve(remainingRows) };
+  const request: IntentRequest = { ...req, text: remainingText, canvasContext: context, taskContext: {
+    original_goal: req.text, active_clauses: remaining.map(index => clauses[index]!), active_clause_indexes: remaining,
+    instruction: "只处理 active_clauses 列出的子句；其他子句已由宿主按规则处理，不得重复或遗漏。" } };
+  const reported = deps.telemetry.plans?.length ?? 0;
+  const planned = await input.plan(request, Promise.resolve(hint));
+  check();
+  if (planned.kind !== "envelope" || !planned.envelope) {
+    // A host operation cannot join a rule segment: asking for it costs one turn.
+    if (planned.hostOperation) return { kind: "result", result: { kind: "clarify",
+      message: "这些操作需要分别处理，本次没有执行任何部分。", usedProvider: "decision" } };
+    const clause = planned.targetClause;
+    if (planned.kind === "clarify") return { kind: "result", result: planned.targetCandidates && typeof clause === "number"
+      ? { ...planned, targetClause: remaining[clause] ?? clause } : planned };
+    // A plain-text or offline answer cannot satisfy a clause that needs a card.
+    if (planned.kind === "error") return { kind: "result", result: planned };
+    return { kind: "result", result: { kind: "clarify",
+      message: "这句话还有一项没能形成完整方案，本次没有执行任何部分；请补充或分开提出要求。", usedProvider: "decision" } };
+  }
+  // Clause 1:1 coverage for the model segment; a dropped clause must not commit.
+  if (remaining.length > 1) {
+    const covered = new Set((deps.telemetry.plans ?? []).slice(reported)
+      .filter(plan => plan.source === "planner").map(plan => plan.clause));
+    if (!remaining.every(index => covered.has(index))) return { kind: "result", result: { kind: "clarify",
+      message: "这句话有一项没有形成完整方案，请分开或补充说明。", usedProvider: "decision" } };
+  }
+  const first = remaining[0]!;
+  const actions: Action[] = [];
+  for (const [index, list] of ruleByClause) if (index < first) actions.push(...list);
+  actions.push(...planned.envelope.actions);
+  for (const [index, list] of ruleByClause) if (index > first) actions.push(...list);
+  return { kind: "actions", actions, directClauses: ruleByClause.size, provider: planned.usedProvider,
+    say: planned.envelope.spokenText, plans };
+}
+
 /** Approved routes may build proposals; the real owner/task executor still commits them. */
 export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: AbortSignal): Promise<IntentResult> {
   const budget = createBudget(INTENT_BUDGET_MS, [signal]);
   const check = () => { budget.signal.throwIfAborted(); if (deps.isCurrent && !deps.isCurrent()) throw new Error("connection_changed"); };
   const fallback = (request = req, hint = deps.hint) => budget.run(() => deps.plan(request, hint, budget.signal));
+  const mode = deps.multiCard ?? multiCardMode();
   try {
     check();
     // Images use the trusted current-attachment path, never a text-only label.
@@ -71,48 +195,63 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
         message: `你要操作哪一张？${target.ambiguous.slice(0, 5).map((card, i) => `${i + 1}. ${card.label}`).join(" ")}`.slice(0, 180),
         targetCandidates: target.ambiguous, targetClause: index };
     }
-    if (rows.length !== clauses.length || rows.some(row => row.failed || !row.route || row.probability < .8
-      || row.none || !isBuiltinRoute(row.route) || !deps.router.directRoutes?.has(row.route) || !Object.hasOwn(CARD_CONTRACTS, row.route))) return await fallback();
+    if (rows.length !== clauses.length) return await fallback();
     // Never let a classifier turn an explanation, condition or negation into execution.
     if (protectedText) return await fallback();
+    // M1: one plans[] call for the whole sentence, even when every clause is literal.
+    if (mode === "plans" && clauses.length > 1 && !req.taskContext) return await fallback();
+    const directRows = rows.every(row => !row.failed && row.route && row.probability >= .8
+      && !row.none && isBuiltinRoute(row.route) && deps.router.directRoutes?.has(row.route) && Object.hasOwn(CARD_CONTRACTS, row.route));
     let context: CardBuildContext = { ...req.canvasContext, cards: [...req.canvasContext.cards], focusHistory: [...req.canvasContext.focusHistory] };
-    const actions: Action[] = [];
+    let actions: Action[] = [];
     let directClauses = 0;
+    let say: string | undefined;
+    let rulePlans: ClausePlan[] = [];
     let usedProvider: IntentResult["usedProvider"] = ruleFallback ? "rules-offline" : rows.every(row => row.source === "rules") ? "rules" : "decision";
-    for (const row of rows) {
-      check();
-      const contract = CARD_CONTRACTS[row.route!];
-      let built: Action[];
-      // Preserve the existing verified scheduled-reminder adapter as a parser.
-      const schedule = row.route === "countdown" ? scheduledReminderIntent(row.text, context) : null;
-      if (schedule) {
-        if (!schedule.actions) return { kind: "clarify", message: schedule.message, usedProvider: "decision" };
-        built = schedule.actions; directClauses++;
-      } else {
-        const slots = row.route === "countdown" && looksLikeDateCountdown(row.text) ? null : contract.parse?.(row.text, context);
-        if (slots !== null && slots !== undefined) {
-          const value = await budget.run(async () => contract.build(slots, context, new Date()));
-          if (!Array.isArray(value)) return { kind: "clarify", message: "本次包含需要单独处理的操作，请分开发送。", usedProvider: "decision" };
-          built = value; directClauses++;
+    if (mode === "hybrid" && clauses.length > 1 && !req.taskContext) {
+      // M3: literal clauses propose first, the remaining subset costs one planner call.
+      const outcome = await hybridProposal({ req, clauses, rows, deps, signal: budget.signal, check, run: budget.run, plan: (request, partHint) => fallback(request, partHint) });
+      if (outcome.kind === "whole") return await fallback();
+      if (outcome.kind === "result") return outcome.result;
+      actions = outcome.actions; directClauses = outcome.directClauses;
+      usedProvider = outcome.provider ?? usedProvider; say = outcome.say; rulePlans = outcome.plans;
+    } else {
+      if (!directRows) return await fallback();
+      for (const row of rows) {
+        check();
+        const contract = CARD_CONTRACTS[row.route!];
+        let built: Action[];
+        // Preserve the existing verified scheduled-reminder adapter as a parser.
+        const schedule = row.route === "countdown" ? scheduledReminderIntent(row.text, context) : null;
+        if (schedule) {
+          if (!schedule.actions) return { kind: "clarify", message: schedule.message, usedProvider: "decision" };
+          built = schedule.actions; directClauses++;
         } else {
-          const partHint: PlannerRouteHint = { result: { ...row, route: row.route as IntentRouteId }, target: Promise.resolve(row.target) };
-          const partRequest: IntentRequest = rows.length === 1 ? req : { ...req, text: row.text, canvasContext: context,
-            taskContext: { original_goal: req.text, active_clause: row.text, instruction: "只处理当前子句，其他子句由宿主合并，不得重复或遗漏。" } };
-          const planned = await fallback(partRequest, Promise.resolve(partHint));
-          check();
-          if (!planned.envelope) return planned.hostOperation ? { kind: "clarify", message: "这些操作需要分别处理，本次没有执行任何部分。", usedProvider: "decision" } : planned;
-          usedProvider = planned.usedProvider ?? usedProvider;
-          built = planned.envelope.actions;
+          const slots = row.route === "countdown" && looksLikeDateCountdown(row.text) ? null : contract.parse?.(row.text, context);
+          if (slots !== null && slots !== undefined) {
+            const value = await budget.run(async () => contract.build(slots, context, new Date()));
+            if (!Array.isArray(value)) return { kind: "clarify", message: "本次包含需要单独处理的操作，请分开发送。", usedProvider: "decision" };
+            built = value; directClauses++;
+          } else {
+            const partHint: PlannerRouteHint = { result: { ...row, route: row.route as IntentRouteId }, target: Promise.resolve(row.target) };
+            const partRequest: IntentRequest = rows.length === 1 ? req : { ...req, text: row.text, canvasContext: context,
+              taskContext: { original_goal: req.text, active_clause: row.text, instruction: "只处理当前子句，其他子句由宿主合并，不得重复或遗漏。" } };
+            const planned = await fallback(partRequest, Promise.resolve(partHint));
+            check();
+            if (!planned.envelope) return planned.hostOperation ? { kind: "clarify", message: "这些操作需要分别处理，本次没有执行任何部分。", usedProvider: "decision" } : planned;
+            usedProvider = planned.usedProvider ?? usedProvider;
+            built = planned.envelope.actions;
+          }
         }
-      }
-      for (const action of built) {
-        const placed = action.type === "card.create" ? { ...action, card: { ...action.card,
-          layout: { ...action.card.layout, ...newCardLayout(action.card.layout.width, action.card.layout.height, context) } } } : action;
-        actions.push(placed);
-        if (action.type === "stage.awaken") context.stage = "WORKSPACE";
-        if (placed.type === "card.create") context.cards.push({ id: placed.card.id, type: placed.card.type, aliases: placed.card.metadata.aliases,
-          displayProps: placed.card.displayProps, sourceDataSummary: placed.card.sourceData, layout: placed.card.layout });
-        if (action.type === "card.focus") context.focusHistory = [...context.focusHistory, action.targetId].slice(-20);
+        for (const action of built) {
+          const placed = action.type === "card.create" ? { ...action, card: { ...action.card,
+            layout: { ...action.card.layout, ...newCardLayout(action.card.layout.width, action.card.layout.height, context) } } } : action;
+          actions.push(placed);
+          if (action.type === "stage.awaken") context.stage = "WORKSPACE";
+          if (placed.type === "card.create") context.cards.push({ id: placed.card.id, type: placed.card.type, aliases: placed.card.metadata.aliases,
+            displayProps: placed.card.displayProps, sourceDataSummary: placed.card.sourceData, layout: placed.card.layout });
+          if (action.type === "card.focus") context.focusHistory = [...context.focusHistory, action.targetId].slice(-20);
+        }
       }
     }
     check();
@@ -122,12 +261,13 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
     const issue = actionExecutionIssue(merged.filter(action => action.type !== "subtitle.show" && action.type !== "subtitle.hide"), req.canvasContext, prebuilt);
     if (issue) return { kind: "clarify", message: "本次提案未通过校验，请补充或分开提出要求。", usedProvider: "decision" };
     const subtitle = merged.findLast(action => action.type === "subtitle.show");
-    const channels = normalizeOutputChannels({ text: subtitle?.type === "subtitle.show" ? subtitle.text : undefined },
-      rows.length > 1 ? "已处理这几项要求。" : "已处理。" );
+    const channels = normalizeOutputChannels({ text: subtitle?.type === "subtitle.show" ? subtitle.text : undefined, ...(say ? { say } : {}) },
+      clauses.length > 1 ? "已处理这几项要求。" : "已处理。" );
     const envelope = ActionEnvelopeSchema.safeParse({ schemaVersion: "0.6", requestId: `direct_${randomUUID()}`,
       canvasId: req.canvasContext.canvasId, ...applyOutputChannels(merged, channels) });
     if (!envelope.success) return { kind: "clarify", message: "这句话包含的操作过多或参数不完整，请分开发送。", usedProvider: "decision" };
     if (!ruleFallback) deps.telemetry.directClauses += directClauses;
+    if (rulePlans.length) deps.telemetry.plans = [...(deps.telemetry.plans ?? []), ...rulePlans];
     return { kind: "envelope", envelope: envelope.data, usedProvider };
   } catch {
     return { kind: "error", message: budget.signal.reason?.name === "TimeoutError" ? "本次请求超时，未执行任何动作。" : "请求已取消或连接已变更，未执行任何动作。", usedProvider: "decision" };

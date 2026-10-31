@@ -35,11 +35,11 @@ import { incompleteCanvasIssue } from "./contextSafety.js";
 import type { DecisionManager } from "../decision/manager.js";
 import type { IntentRouter } from "../decision/router.js";
 import type { CardDefinition } from "@vivic/card-runtime";
-import { observeDecision, type DecisionTrace, type PlannerRouteHint } from "../decision/trace.js";
+import { observeDecision, type ClausePlan, type DecisionTrace, type PlannerRouteHint } from "../decision/trace.js";
 import { runSlotPlanner } from "./slotPlanner.js";
 import { applyOutputChannels, normalizeOutputChannels } from "./channels.js";
 import { splitClauses } from "../decision/split.js";
-import { runDecisionOn } from "../decision/on.js";
+import { runDecisionOn, multiCardMode, type MultiCardMode } from "../decision/on.js";
 import { feedbackReader, FEEDBACK_PROMPT, withoutFeedback } from "./feedback.js";
 
 export interface IntentRequest { text: string; canvasContext: CanvasContext; attachments?: Attachment[]; continuation?: { utterance: string; question: string }; deviceLocation?: DevicePosition; extensionDefinitions?: unknown[]; task?: DecisionTaskRequest; taskContext?: unknown;
@@ -78,7 +78,9 @@ export interface PipelineDeps {
   router?: IntentRouter;
   /** Preserve the same on-mode router through the task wrapper without observing twice. */
   executionRouter?: IntentRouter;
-  decisionTelemetry?: { plannerCalls: number; directClauses: number };
+  decisionTelemetry?: { plannerCalls: number; directClauses: number; plans?: ClausePlan[] };
+  /** Internal multi-card switch (default `VIVIC_MULTI_CARD_MODE`, itself "off"). */
+  multiCard?: MultiCardMode;
   /** Keep verified data/search/schedule adapters, while on-mode fallback skips old broad fast rules. */
   skipFastRules?: boolean;
   slotPlanning?: boolean;
@@ -113,6 +115,14 @@ const PlannerOutputSchema = z.union([
     clarify: z.string().trim().min(1).max(180).optional() }).refine(output => !Object.hasOwn(output, "hostOperation") && (output.actions !== undefined || output.cards !== undefined)),
 ]);
 const OFFLINE_MESSAGE = "未连接模型，当前只做本地规则：这条指令我还不会处理。连接 GPT 或 StepFun 后重试，或先用「倒计时/加待办/显示全部/恢复原视图」。";
+/** Hybrid planning hands the planner a clause subset; this maps it back to the
+ * original split so trace provenance keeps the user's clause numbering. */
+const partialClauseIndexes = (taskContext: unknown): number[] | undefined => {
+  const value = taskContext && typeof taskContext === "object" && !Array.isArray(taskContext)
+    ? (taskContext as { active_clause_indexes?: unknown }).active_clause_indexes : undefined;
+  if (!Array.isArray(value) || !value.length || !value.every(item => Number.isInteger(item) && (item as number) >= 0 && (item as number) <= 2)) return undefined;
+  return value as number[];
+};
 const assembleEnvelope = (actions: Action[], canvasId: string, spokenText?: string) => {
   const parsed = ActionEnvelopeSchema.safeParse({ schemaVersion: "0.6",
     requestId: `llm_${Date.now().toString(36)}_${randomUUID().slice(0, 8)}`,
@@ -124,7 +134,8 @@ const assembleEnvelope = (actions: Action[], canvasId: string, spokenText?: stri
  * validation repair. The 90s turn deadline is never restarted by a retry. */
 export const runIntent = async (req: IntentRequest, deps: PipelineDeps, signal?: AbortSignal, adapterOnly = false, plannerOnly = false): Promise<IntentResult> => {
   const router = deps.executionRouter ?? deps.router;
-  deps = { ...deps, decisionTelemetry: deps.decisionTelemetry ?? { plannerCalls: 0, directClauses: 0 } };
+  // Resolve the opt-in switch once per request; "off" keeps every path unchanged.
+  deps = { ...deps, multiCard: deps.multiCard ?? multiCardMode(), decisionTelemetry: deps.decisionTelemetry ?? { plannerCalls: 0, directClauses: 0 } };
   const slotPlanning = router?.mode === "on" || (deps.slotPlanning ?? router?.mode === "shadow");
   const legacy = async (routeHint = deps.routeHint, request = req, onlyPlanner = plannerOnly, requestSignal = signal, skipFastRules = false) => {
     const result = await runLegacyIntent(request, { ...deps, slotPlanning, executionRouter: router, skipFastRules,
@@ -141,7 +152,7 @@ export const runIntent = async (req: IntentRequest, deps: PipelineDeps, signal?:
     return { ...result, envelope };
   };
   const execute = (hint = deps.routeHint) => router?.mode === "on" ? runDecisionOn(req, {
-    router, hint, telemetry: deps.decisionTelemetry!, isCurrent: deps.isSessionCurrent,
+    router, hint, telemetry: deps.decisionTelemetry!, isCurrent: deps.isSessionCurrent, multiCard: deps.multiCard,
     plan: (request, routeHint, planSignal) => legacy(routeHint, { ...request, offlineReferenceCompatibility: false }, false, planSignal, true),
   }, signal) : legacy(hint);
   return adapterOnly || plannerOnly ? legacy() : observeDecision(req, deps, signal, execute);
@@ -322,6 +333,14 @@ const runLegacyIntent = async (
       const planned = await budget.run(() => runSlotPlanner(req, {
         hint: deps.routeHint, definitions, page, travel: deps.travel, signal: budget.signal, usedProvider,
         allowTargetCandidates: deps.executionRouter?.mode === "on",
+        // A hybrid planner call maps its active clause subset back to the original split.
+        ...(deps.multiCard !== "off" ? { report: (plans: Array<{ clause: number; contract: string; cardIds: string[] }>) => {
+          if (!deps.decisionTelemetry) return;
+          const subset = partialClauseIndexes(req.taskContext);
+          deps.decisionTelemetry.plans = [...(deps.decisionTelemetry.plans ?? []), ...plans.map(entry => ({
+            clause: subset?.[entry.clause] ?? entry.clause, contract: entry.contract, cardIds: entry.cardIds,
+            source: "planner" as const }))];
+        } } : {}),
         generate: async (messages, attempt) => {
           plannerCall(attempt);
           const result = await generate(messages, credential, 8192);
@@ -352,6 +371,9 @@ const runLegacyIntent = async (
     let sceneAsk: string | undefined, sceneReply: string | undefined;
     for (let attempt = 1; attempt <= 2; attempt += 1) {
       budget.signal.throwIfAborted();
+      // A validation retry starts a new plan: allow the next attempt's real
+      // first-sentence to replace the one that described the rejected plan.
+      if (attempt > 1) feedbackPublished = false;
       plannerCall(attempt);
       const messages: ChatMessage[] = [
         { role: "system", content: system }, { role: "user", content: user + feedback, ...(hasImages ? { images: req.attachments } : {}) },
@@ -362,8 +384,12 @@ const runLegacyIntent = async (
         || (deps.isSessionCurrent && !deps.isSessionCurrent())) return { kind: "error", message: "请求已取消：模型连接已变更。", usedProvider };
       let issue = "输出不符合 JSON 契约";
       if (!res.ok) {
-        if (res.code !== "invalid-response") return { kind: "error", usedProvider,
+        const truncated = "truncated" in res && res.truncated === true;
+        // A truncated response cannot be repaired by re-running with the same
+        // max_tokens; give the honest error instead of a second full generation.
+        if (res.code !== "invalid-response" || truncated) return { kind: "error", usedProvider,
           message: res.code === "cancelled" ? "请求已取消。" :
+            truncated ? res.error :
             `模型暂时不可用（${res.error}）。${providerRecoveryHint(res.status)}`.slice(0, 400) };
       } else if (reminderMode) {
         const output = ReminderPlanSchema.safeParse(res.value);

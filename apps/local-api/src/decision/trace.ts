@@ -14,6 +14,9 @@ export interface PlannerRouteHint {
   target: Promise<TargetResult | undefined>;
   all?: Promise<DecisionTrace["decisions"]>;
 }
+/** Clause → contract → card ids. It answers "which clause produced what" without
+ * granting anything: a plan only proves provenance after the host commits it. */
+export interface ClausePlan { clause: number; contract: string; cardIds: string[]; source: "rules" | "planner" }
 
 const route = z.union([z.enum(Object.keys(ROUTES) as [keyof typeof ROUTES, ...Array<keyof typeof ROUTES>]),
   z.string().max(90).regex(/^ext\.[a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*)*$/)]);
@@ -24,6 +27,8 @@ const target = z.union([z.strictObject({ targetId: z.string().max(128) }),
 const decision = z.strictObject({ text: z.string().max(500), route: route.nullable(),
   probability: z.number().min(0).max(1), probabilities: z.record(z.string(), z.number().min(0).max(1)),
   none: z.boolean(), latencyMs: z.number().nonnegative(), failed: z.boolean(), target: target.optional(), source: z.enum(["rules", "decision"]).optional() });
+const plan = z.strictObject({ clause: z.int().min(0).max(2), contract: z.string().min(1).max(100),
+  cardIds: z.array(z.string().max(128)).max(12), source: z.enum(["rules", "planner"]) });
 export const DecisionTraceSchema = z.strictObject({
   id: z.string().max(128), mode: z.enum(["shadow", "on"]), status: z.enum(["pending", "complete", "failed"]),
   taskId: z.string().max(128).optional(),
@@ -36,6 +41,8 @@ export const DecisionTraceSchema = z.strictObject({
   legacyCardTypes: z.array(z.string().max(80)).max(32),
   plannerCalls: z.int().min(0).max(100).optional(),
   directClauses: z.int().min(0).max(3).optional(),
+  /** Backward-compatible: absent unless this turn committed an envelope. */
+  plans: z.array(plan).max(12).optional(),
 });
 export type DecisionTrace = z.infer<typeof DecisionTraceSchema>;
 
@@ -106,6 +113,12 @@ export async function observeDecision(req: IntentRequest, deps: PipelineDeps, si
   const build = (): DecisionTrace => {
     const first = rows?.[0], failures = rows?.filter(row => row.failed).length ?? 0;
     const actions = result.envelope?.actions ?? [];
+    // Provenance is only truthful for a committed proposal: drop plans whose
+    // cards did not reach the returned envelope.
+    const created = new Set(actions.flatMap(action => action.type === "card.create" ? [action.card.id] : []));
+    const plans = result.envelope ? deps.decisionTelemetry?.plans
+      ?.filter(entry => entry.cardIds.every(cardId => created.has(cardId)))
+      .sort((a, b) => a.clause - b.clause) : undefined;
     return { id, mode: router.mode === "on" ? "on" : "shadow", status: !rows ? "pending" : failures ? "failed" : "complete",
       ...(req.task?.id ? { taskId: req.task.id } : {}),
       clauses, decisions: rows ?? [], route: first?.route ?? null, probability: first?.probability ?? 0,
@@ -116,6 +129,7 @@ export async function observeDecision(req: IntentRequest, deps: PipelineDeps, si
       legacyActionTypes: [...actions.map(action => action.type), ...(result.hostOperation ? [result.hostOperation.kind] : [])],
       legacyCardTypes: actions.flatMap(action => action.type === "card.create" ? [action.card.type] : []),
       ...(deps.decisionTelemetry ? { plannerCalls: deps.decisionTelemetry.plannerCalls, directClauses: deps.decisionTelemetry.directClauses } : {}),
+      ...(plans?.length ? { plans } : {}),
     };
   };
   const returned = build();

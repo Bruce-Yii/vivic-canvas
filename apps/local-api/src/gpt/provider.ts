@@ -271,6 +271,7 @@ export class GptProvider {
   }
   async #complete(connection: Connection, messages: ChatMessage[], signal: AbortSignal, onTextDelta?: ((delta: string) => void) & { reset?: () => void }): Promise<StepfunResult<unknown>> {
     let completed = false;
+    let incomplete = false;
     let httpStatus: number | undefined;
     let text: string;
     try {
@@ -292,8 +293,12 @@ export class GptProvider {
             && "delta" in event && typeof event.delta === "string") {
             try { onTextDelta?.(event.delta); } catch { /* progress is advisory */ }
           }
+          if (event && typeof event === "object" && "type" in event && event.type === "response.incomplete") incomplete = true;
           if (event && typeof event === "object" && "type" in event && event.type === "response.completed" && "response" in event && event.response && typeof event.response === "object") {
             completed = "status" in event.response && event.response.status === "completed" && !("error" in event.response && event.response.error);
+            // Keep the truncation reason for the error text only. `completed`
+            // stays the implementation's safety invariant.
+            incomplete = "status" in event.response && event.response.status === "incomplete";
           }
         },
         ...(connection.route === "openai-codex" ? { transport: "sse" as const } : {}),
@@ -301,9 +306,13 @@ export class GptProvider {
       signal.throwIfAborted();
       if (!completed || result.stopReason !== "stop") {
         // No response at all, a retryable status, or a 200 stream that broke off.
-        const transient = httpStatus === undefined || RETRYABLE_STATUS.has(httpStatus) || (httpStatus === 200 && result.stopReason === "error");
+        // A length-limited answer is explainable, not transient: retrying it
+        // would spend another generation on the same output budget.
+        const lengthLimited = result.stopReason === "length" || incomplete;
+        const transient = !lengthLimited && (httpStatus === undefined || RETRYABLE_STATUS.has(httpStatus) || (httpStatus === 200 && result.stopReason === "error"));
         return { ok: false, code: transient ? "network" : "provider", status: httpStatus,
-          error: transient && !RETRYABLE_STATUS.has(httpStatus ?? 0) ? "GPT 网络连接中断，未得到完整结果" : "GPT 未完整完成推理，请检查登录或额度后重试" };
+          error: lengthLimited ? "GPT 输出长度用尽，未得到完整结果"
+            : transient && !RETRYABLE_STATUS.has(httpStatus ?? 0) ? "GPT 网络连接中断，未得到完整结果" : "GPT 未完整完成推理，请检查登录或额度后重试" };
       }
       text = result.content.filter(part => part.type === "text").map(part => part.text).join("");
     } catch {

@@ -487,6 +487,17 @@ describe("GPT provider through the real pinned Pi SDK", () => {
     expect(f.fetchImpl.mock.calls.map(([url]) => String(url))).toEqual([GPT_RESPONSES]);
     await f.gpt.disconnect();
   });
+
+  it("explains a length-limited answer without retrying or trusting it as complete", async () => {
+    const f = await fixture(); await f.gpt.connect("pi", MODEL);
+    f.fetchImpl.mockClear();
+    f.respond(() => piSse({ ok: true }, "response.incomplete"));
+    const result = await f.gpt.generate([{ role: "user", content: "TEST long inference" }]);
+    expect(result).toMatchObject({ ok: false, code: "provider" });
+    expect((result as { error: string }).error).toContain("输出长度");
+    expect(f.fetchImpl.mock.calls.map(([url]) => String(url))).toEqual([GPT_RESPONSES]);
+    await f.gpt.disconnect();
+  });
 });
 
 const searchOutput = (overrides: Record<string, unknown> = {}) => [
