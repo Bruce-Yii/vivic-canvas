@@ -1,7 +1,11 @@
 import { randomUUID } from "node:crypto";
 import type { Action, CardRecord } from "@vivic/contracts";
 import type { CanvasContext } from "../schemas.js";
-import { buildReminderActions, parseDuration, parseExactReminders } from "./reminders.js";
+import { buildReminderActions, parseExactReminders } from "./reminders.js";
+import { parseCountdownDuration } from "../cards/countdown.js";
+import { parseLiteralNoteSlots } from "../cards/note.js";
+import { parseTodoSlots } from "../cards/todo.js";
+import { normalizeSimpleCommand } from "./commandText.js";
 
 /**
  * TEMPORARY (Phase 2a): server-side mirror of the fast exact-match subset of
@@ -52,38 +56,68 @@ export interface RuleHit {
   spokenText: string;
 }
 
+const DELETE_ALL = new RegExp("^(?:"
+  + "(?:删除|删掉|移除|清空)(?:当前)?画布(?:上|中)?(?:的)?(?:所有|全部)(?:的)?卡片"
+  + "|清空(?:当前)?画布"
+  + "|清空(?:所有|全部)(?:的)?卡片"
+  + "|(?:删除|删掉|移除)(?:所有|全部)(?:的)?卡片"
+  + "|把(?:(?:当前)?画布(?:上|中)?(?:的)?)?(?:所有|全部)?(?:的)?卡片(?:全部|都)?(?:删除|删掉|移除|清空)"
+  + "|把(?:当前)?画布清空"
+  + ")$", "u");
+const OVERVIEW = /^(?:显示全部|全部显示|看全部|适应画布|fit)$/i;
+const RESTORE = /^(?:恢复原视图|恢复刚才的画面|恢复视图|退出聚焦|取消聚焦|restore)$/i;
+const AWAKEN = /^(?:唤醒|唤醒一下)$/u;
+
 /** Deterministic match or null. Never guesses — null defers to the planner. */
 export const matchRules = (rawText: string, ctx: CanvasContext): RuleHit | null => {
   const input = rawText.trim();
   if (!input) return null;
   const withAwaken = (actions: Action[]): Action[] =>
     ctx.stage === "STANDBY" ? [{ type: "stage.awaken" }, ...actions] : actions;
+  // One canonical surface for the fixed-phrase commands. The same politeness
+  // and sentence-final punctuation are stripped for countdown/todo/note by
+  // their shared parsers below.
+  const simple = normalizeSimpleCommand(input);
 
-  if (/^(?:请)?(?:(?:删除|删掉|移除|清空)(?:当前画布(?:上|中)?(?:的)?)?(?:所有|全部)(?:的)?卡片|清空(?:当前)?画布|把(?:所有|全部)(?:的)?卡片(?:全部|都)?(?:删除|删掉|移除|清空))[。！!]?$/u.test(input) && ctx.cards.length) {
+  if (DELETE_ALL.test(simple) && ctx.cards.length) {
     return { actions: [{ type: "cards.delete", targetIds: ctx.cards.map(card => card.id) }], spokenText: "已删除当前画布全部卡片，可撤销" };
   }
-  if (/^(显示全部|全部显示|看全部|适应画布|fit)$/i.test(input)) {
+  if (OVERVIEW.test(simple)) {
     return {
       actions: withAwaken([{ type: "canvas.fit" }]),
       spokenText: "已显示全部卡片",
     };
   }
-  if (/^(恢复原视图|恢复刚才的画面|恢复视图|退出聚焦|取消聚焦|restore)$/i.test(input)) {
+  if (RESTORE.test(simple)) {
     return {
       actions: withAwaken([{ type: "canvas.restore" }]),
       spokenText: "已恢复原视图",
     };
   }
-  if (/^唤醒$/.test(input)) {
+  if (AWAKEN.test(simple)) {
     return { actions: [{ type: "stage.awaken" }], spokenText: "已唤醒" };
   }
 
+  // The todo contract owns the literal list guards; the fast path only builds
+  // the same items into a minimal card. This prevents a second operation
+  // ("加待办：买牛奶；显示全部") from being swallowed as an item. It runs
+  // before the note parser so "记录待办：…" stays a todo, not note text.
+  const todo = parseTodoSlots(input);
+  if (todo) {
+    return {
+      actions: withAwaken([{ type: "card.create", card: todoCard(todo.items) }]),
+      spokenText: `已记下 ${todo.items.length} 条待办`,
+    };
+  }
+
   // Explicit literal note content needs no probabilistic IDs or timestamps.
-  const note = input.match(/^(?:请|帮我|请帮我)?\s*(?:创建|新建|添加|记下|记|记录)(?:一?[张个条])?(?:便笺|便签|笔记)\s*[:：]\s*([\s\S]+)$/);
-  if (note && note[1]!.trim().length <= 500) {
+  // The note contract owns the literal-body guards (quoted commands, trailing
+  // operations); reusing it keeps this fast path and the decision path aligned.
+  const note = parseLiteralNoteSlots(input);
+  if (note && "text" in note) {
     const stamp = iso();
     return { spokenText: "已记下便笺", actions: withAwaken([{ type: "card.create", card: {
-      id: newId("note"), type: "NoteCard", variant: "minimal", displayProps: { text: note[1]!.trim() }, sourceData: {}, sources: [],
+      id: newId("note"), type: "NoteCard", variant: "minimal", displayProps: { text: note.text }, sourceData: {}, sources: [],
       layout: { x: 0, y: 0, width: 320, height: 120, pinned: false }, metadata: { createdAt: stamp, updatedAt: stamp },
     } }]) };
   }
@@ -91,39 +125,17 @@ export const matchRules = (rawText: string, ctx: CanvasContext): RuleHit | null 
   const reminders = parseExactReminders(input);
   if (reminders) return { actions: buildReminderActions(reminders, ctx), spokenText: `已设置 ${reminders.length} 项提醒` };
 
-  // Full-duration match keeps the ordinary countdown path offline and fast.
-  // Accept both orders ("30分钟倒计时" / "倒计时30分钟"), the common
-  // "帮我创建一个倒计时 30 分钟" phrasing, and trailing punctuation.
-  const countdownText = input.replace(/[。！!]+$/, "").trim();
-  const countdownMatch =
-    countdownText.match(/^(?:请|帮我|请帮我)?\s*(?:创建|新建|设|定|来)?\s*(?:一个|个)?\s*(.+?)\s*的?\s*倒计时$/) ??
-    countdownText.match(/^倒计时\s*(.+)$/) ??
-    countdownText.match(/^(?:请|帮我|请帮我)?\s*(?:创建|新建|设|定|来)?\s*(?:一个|个)?\s*倒计时\s*(.+)$/);
-  if (countdownMatch) {
-    const total = parseDuration(countdownMatch[1]!);
-    if (total === null || total < 5) return null;
-    const mins = Math.floor(total / 60);
-    const secs = total % 60;
+  // One duration grammar shared with the decision-path countdown contract:
+  // both orders ("30分钟倒计时" / "倒计时30分钟"), polite prefixes, creation
+  // verbs, measure words, "的" and trailing punctuation.
+  const seconds = parseCountdownDuration(input);
+  if (seconds !== null) {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
     const label = mins > 0 ? `${mins}分${secs > 0 ? `${secs}秒` : ""}` : `${secs}秒`;
     return {
-      actions: withAwaken([{ type: "card.create", card: countdownCard(total) }]),
+      actions: withAwaken([{ type: "card.create", card: countdownCard(seconds) }]),
       spokenText: `${label}倒计时已就位`,
-    };
-  }
-
-  // todo: 加待办：a；b；c
-  const todoMatch =
-    input.match(/^(?:加|添加|新增|创建|列)(?:个|一条|几条|下)?\s*待办\s*[:：]?\s*(.+)$/) ??
-    input.match(/^待办\s*[:：]\s*(.+)$/);
-  if (todoMatch) {
-    const items = todoMatch[1]!
-      .split(/[;；,，、\n]+/)
-      .map((t) => t.trim())
-      .filter((t) => t.length > 0);
-    if (items.length === 0 || items.length > 12 || items.some((t) => t.length > 160 || /提醒|倒计时|然后|并且|再(?:创建|删除|聚焦)/.test(t))) return null;
-    return {
-      actions: withAwaken([{ type: "card.create", card: todoCard(items) }]),
-      spokenText: `已记下 ${items.length} 条待办`,
     };
   }
 

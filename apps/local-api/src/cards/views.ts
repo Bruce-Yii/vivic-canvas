@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ActionSchema, type Action } from "@vivic/contracts";
+import { normalizeSimpleCommand } from "../intent/commandText.js";
 import { awakenFor } from "./build.js";
 import { defineCardContract, type CardBuildContext } from "./types.js";
 
@@ -23,14 +24,14 @@ function targetAction(type: "card.focus" | "card.highlight", context: CardBuildC
 export const overviewContract = defineCardContract({
   id: "overview", name: "显示全部", description: "显示当前画布全部卡片，不更改布局。",
   examples: ["显示全部", "适应画布"], cardType: "none", slots: EmptySlotsSchema,
-  parse: text => /^(显示全部|全部显示|看全部|适应画布|fit)$/i.test(text.trim()) ? {} : null,
+  parse: text => /^(显示全部|全部显示|看全部|适应画布|fit)$/i.test(normalizeSimpleCommand(text)) ? {} : null,
   build: (_slots, context) => awakenFor([{ type: "canvas.fit" }], context),
 });
 
 export const restoreContract = defineCardContract({
   id: "restore", name: "恢复视图", description: "恢复聚焦前的视图，不更改卡片。",
   examples: ["恢复原视图", "退出聚焦"], cardType: "none", slots: EmptySlotsSchema,
-  parse: text => /^(恢复原视图|恢复刚才的画面|恢复视图|退出聚焦|取消聚焦|restore)$/i.test(text.trim()) ? {} : null,
+  parse: text => /^(恢复原视图|恢复刚才的画面|恢复视图|退出聚焦|取消聚焦|restore)$/i.test(normalizeSimpleCommand(text)) ? {} : null,
   build: (_slots, context) => awakenFor([{ type: "canvas.restore" }], context),
 });
 
@@ -49,6 +50,6 @@ export const highlightContract = defineCardContract({
 export const undoContract = defineCardContract({
   id: "undo", name: "撤销", description: "由宿主撤销上一步内容或布局操作。",
   examples: ["撤销", "撤回刚才的操作"], cardType: "none", slots: EmptySlotsSchema,
-  parse: text => /^(?:请)?(?:撤销|撤回)(?:上一步|刚才的操作|上次操作)?[。！!]?$/.test(text.trim()) ? {} : null,
+  parse: text => /^(?:撤销|撤回)(?:上一步|刚才的操作|上次操作)?$/u.test(normalizeSimpleCommand(text)) ? {} : null,
   build: () => ({ hostOperation: { kind: "history.undo" } }),
 });
