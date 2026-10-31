@@ -24,15 +24,21 @@ const URLS = /https?:\/\/[^\s<>"'，。、；！？）)\]】]+/g;
 const zoneOf = (ctx: CanvasContext) => ctx.timeZone ?? "Asia/Shanghai";
 
 /** Evidence the model may cite: the user's words, the clarification turn, the linked page and the canvas. */
-export function sceneCorpus(req: SceneRequest): { corpus: Corpus; sourceTextLength: number } {
+export function sceneCorpus(req: SceneRequest): { corpus: Corpus; sourceTextLength: number; ownWeekdays: ReadonlySet<number> } {
   const canvas = req.ctx.cards.map(card => {
     const truncated = (card as typeof card & { contextSummary?: { truncatedFields: string[] } }).contextSummary?.truncatedFields ?? [];
     return JSON.stringify({ aliases: card.aliases ?? [], displayProps: Object.fromEntries(Object.entries(card.displayProps).filter(([key]) => !truncated.includes(key))), source: card.sourceDataSummary });
   });
-  const corpus = buildCorpus([req.text, req.continuation?.utterance ?? "", req.continuation?.question ?? "", req.page?.title ?? "", req.page?.text ?? "", ...canvas],
+  const ownText = [req.text, req.continuation?.utterance ?? "", req.continuation?.question ?? ""];
+  const corpus = buildCorpus([...ownText, req.page?.title ?? "", req.page?.text ?? "", ...canvas],
     { now: req.now, timeZone: zoneOf(req.ctx) });
+  // A requested plan's days are the plan's own content: whether the user named a
+  // weekday decides that, and a canvas card that happens to mention 周三 must not
+  // bind (or block) the plan. Own-turn weekdays are tracked separately so the
+  // canvas/page evidence can never stand in for the user's words here.
+  const ownWeekdays = buildCorpus(ownText, { now: req.now, timeZone: zoneOf(req.ctx) }).weekdays;
   const own = `${req.text}\n${req.continuation?.utterance ?? ""}`.replace(URLS, "").replace(/\s+/g, "");
-  return { corpus, sourceTextLength: own.length };
+  return { corpus, sourceTextLength: own.length, ownWeekdays };
 }
 
 /** Today/zone for relative dates, plus the linked page as untrusted data. */
@@ -62,8 +68,8 @@ export type SceneBuild = { ok: true; actions: Action[]; ids: string[]; cards: Ca
 export function buildSceneActions(rawCards: unknown[], req: SceneRequest): SceneBuild {
   if (!rawCards.length) return { ok: false, issue: "cards 不能为空" };
   if (rawCards.length > MAX_SCENE_CARDS) return { ok: false, issue: `一次最多生成 ${MAX_SCENE_CARDS} 张场景卡片` };
-  const { corpus, sourceTextLength } = sceneCorpus(req);
-  const context = { corpus, sourceTextLength, page: req.page, timeZone: zoneOf(req.ctx), now: req.now ?? Date.now() };
+  const { corpus, sourceTextLength, ownWeekdays } = sceneCorpus(req);
+  const context = { corpus, sourceTextLength, ownWeekdays, page: req.page, timeZone: zoneOf(req.ctx), now: req.now ?? Date.now() };
   const cards: CardRecord[] = [];
   for (const raw of rawCards) {
     const parsed = parseScenePayload(raw);

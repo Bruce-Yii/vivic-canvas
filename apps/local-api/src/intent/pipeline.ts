@@ -39,12 +39,11 @@ import { observeDecision, type ClauseBuild, type ClausePlan, type DecisionTrace,
 import { runSlotPlanner } from "./slotPlanner.js";
 import { applyOutputChannels, normalizeOutputChannels } from "./channels.js";
 import { splitClauses } from "../decision/split.js";
-import { planDeterministic } from "./plans.js";
+import { planDeterministic, countdownControlIssue } from "./plans.js";
 import { runDecisionOn, multiCardMode, type MultiCardMode } from "../decision/on.js";
 import { feedbackReader, FEEDBACK_PROMPT, withoutFeedback } from "./feedback.js";
 
-export interface IntentRequest { text: string; canvasContext: CanvasContext; attachments?: Attachment[]; continuation?: { utterance: string; question: string }; deviceLocation?: DevicePosition; extensionDefinitions?: unknown[]; task?: DecisionTaskRequest; taskContext?: unknown;
-  /** Internal task-manager opt-in, never accepted from the HTTP request schema. */
+export interface IntentRequest { text: string; canvasContext: CanvasContext; attachments?: Attachment[]; continuation?: { utterance: string; question: string }; deviceLocation?: DevicePosition; extensionDefinitions?: unknown[]; task?: DecisionTaskRequest; taskContext?: unknown;  /** Internal task-manager opt-in, never accepted from the HTTP request schema. */
   offlineReferenceCompatibility?: boolean;
   /** Authenticated host metadata; never accepted by the HTTP body schema. */
   tracePath?: "browser" | "task";
@@ -125,6 +124,18 @@ const PlannerOutputSchema = z.union([
     clarify: z.string().trim().min(1).max(180).optional() }).refine(output => !Object.hasOwn(output, "hostOperation") && (output.actions !== undefined || output.cards !== undefined)),
 ]);
 const OFFLINE_MESSAGE = "未连接模型，当前只做本地规则：这条指令我还不会处理。连接 GPT 或 StepFun 后重试，或先用「倒计时/加待办/显示全部/恢复原视图」。";
+/** The host task wrapper injects a context for every turn. A context that only
+ * repeats the whole goal (no clause subset, no subtask, no completed step) is
+ * still the user's own sentence, so the rules may answer it. */
+const isScopedSubtask = (taskContext: unknown): boolean => {
+  if (!taskContext || typeof taskContext !== "object" || Array.isArray(taskContext)) return false;
+  const context = taskContext as { active_clause?: unknown; active_clauses?: unknown; active_clause_indexes?: unknown;
+    subtask?: unknown; completed_steps?: unknown; observations?: unknown };
+  return context.active_clause !== undefined || context.active_clauses !== undefined
+    || context.active_clause_indexes !== undefined || context.subtask !== undefined
+    || (Array.isArray(context.completed_steps) && context.completed_steps.length > 0)
+    || (Array.isArray(context.observations) && context.observations.length > 0);
+};
 /** Hybrid planning hands the planner a clause subset; this maps it back to the
  * original split so trace provenance keeps the user's clause numbering. */
 const partialClauseIndexes = (taskContext: unknown): number[] | undefined => {
@@ -167,7 +178,15 @@ export const runIntent = async (req: IntentRequest, deps: PipelineDeps, signal?:
   };
   const execute = (hint = deps.routeHint) => router?.mode === "on" ? runDecisionOn(req, {
     router, hint, telemetry: deps.decisionTelemetry!, isCurrent: deps.isSessionCurrent, multiCard: deps.multiCard,
-    plan: (request, routeHint, planSignal) => legacy(routeHint, { ...request, offlineReferenceCompatibility: false }, false, planSignal, true),
+    plan: (request, routeHint, planSignal) => {
+      // Main-only has no classifier: the only route evidence is the rules, so a
+      // plan call for the *whole* user sentence must still try them first. A
+      // subset call (the clauses a hybrid pass left over) keeps them skipped so
+      // a leftover clause is never answered by rules that own another clause.
+      const wholeSentence = request.text === req.text && !isScopedSubtask(request.taskContext);
+      const skipFastRules = !(mainOnly && wholeSentence);
+      return legacy(routeHint, { ...request, offlineReferenceCompatibility: false }, false, planSignal, skipFastRules);
+    },
   }, signal) : legacy(hint);
   return adapterOnly || plannerOnly ? legacy() : observeDecision(req, deps, signal, execute);
 };
@@ -230,6 +249,16 @@ const runLegacyIntent = async (
     const deterministic = !hasImages && !continuation && !adapterOnly
       ? await planDeterministic(req.text, req.canvasContext) : null;
     if (deterministic) {
+      // A closed-form host operation resolved by the rules stays exclusive of an
+      // action envelope; the owner still applies it and reports a receipt. An
+      // unresolved/non-timer target is asked about, never submitted or announced.
+      if (deterministic.hostOperation) {
+        const problem = countdownControlIssue(deterministic.hostOperation, req.canvasContext)
+          ?? hostOperationIssue(deterministic.hostOperation, req.canvasContext, { allowUnloadedCountdownState: true });
+        if (problem) return { kind: "clarify", message: problem, usedProvider: "rules" };
+        report("rules", "completed", performance.now() - startedAt);
+        return { kind: "host-operation", hostOperation: deterministic.hostOperation, message: deterministic.say, usedProvider: "rules" };
+      }
       const envelope = assembleEnvelope(deterministic.actions, req.canvasContext.canvasId, deterministic.say);
       if (envelope) {
         report("rules", "completed", performance.now() - startedAt);

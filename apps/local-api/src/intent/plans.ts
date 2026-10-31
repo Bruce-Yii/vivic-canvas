@@ -1,4 +1,4 @@
-import type { Action, IntentRouteId } from "@vivic/contracts";
+import type { Action, HostOperation, IntentRouteId } from "@vivic/contracts";
 import type { CanvasContext } from "../schemas.js";
 import { CARD_CONTRACTS } from "../cards/index.js";
 import { newCardLayout } from "../cards/build.js";
@@ -22,6 +22,8 @@ export interface DeterministicPlan {
   /** One route per clause, in clause order. */
   routes: IntentRouteId[];
   say: string;
+  /** A closed-form host operation the rules resolved; exclusive of `actions`. */
+  hostOperation?: HostOperation;
 }
 
 const WEEKDAY: Record<string, number> = { 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 日: 7, 天: 7 };
@@ -187,6 +189,29 @@ export async function planNumbered(clauses: string[], ctx: CanvasContext, now = 
     say: `已创建 ${groups.reduce((sum, group) => sum + group.cardIds.length, 0)} 张卡片，请查看。` };
 }
 
+/** "暂停"/"继续" a named existing countdown: closed form, one card, no planner. */
+const COUNTDOWN_CONTROL = /^(?:请|帮我|给我|麻烦)?\s*(暂停|暂停一下|先暂停|停止|继续|恢复|继续计时|接着计时)\s*(?:一下)?\s*(.+?)\s*(?:的)?(?:倒计时|计时器|计时|定时器|提醒)$/u;
+const CONTROL_BLOCKER = /[，,；;？?]|然后|同时|顺便|并且|另外|要是|如果|不要|不用|别|吗|呢|删除|删掉|改成|改为|新建|创建|再来/u;
+
+/** The pause/resume host operation the user's own words and one card describe. */
+export function parseCountdownControl(text: string, ctx: CanvasContext): HostOperation | null {
+  const input = text.trim().replace(/[。！!]+$/u, "");
+  if (CONTROL_BLOCKER.test(input)) return null;
+  const match = input.match(COUNTDOWN_CONTROL);
+  if (!match) return null;
+  const verb = match[1]!;
+  const name = match[2]!.trim().replace(/^(?:这个|那个|这张|那张)/u, "").trim();
+  if (!name || name.length > 40) return null;
+  const timers = ctx.cards.filter(card => card.type === "CountdownCard" && (
+    card.id === name
+    || card.aliases?.some(alias => alias === name || alias.includes(name) || name.includes(alias))
+    || (typeof card.displayProps.title === "string" && (card.displayProps.title === name || card.displayProps.title.includes(name)))
+    || card.sourceDataSummary.reminderText === name));
+  // Ambiguity is not resolved by guessing: the planner/user picks the timer.
+  if (timers.length !== 1) return null;
+  return { kind: /暂停|停止/u.test(verb) ? "countdown.pause" : "countdown.resume", targetId: timers[0]!.id };
+}
+
 /** The single weekly-plan request the model used to answer with a question. */
 export async function planWeekly(text: string, ctx: CanvasContext, now = Date.now()): Promise<DeterministicPlan | null> {
   const request = parseWeeklyPlan(text, ctx, now);
@@ -238,10 +263,118 @@ function normalizeEnvelopeActions(actions: Action[]): Action[] {
     { type: "canvas.fit" }];
 }
 
+/** "加个待办" / "记个任务": the clause is only the command, not its content. */
+const BARE_TODO_APPEND = /^(?:再|顺便|另外|然后)?\s*(?:帮我|给我)?\s*(?:加|添加|新增|创建|新建|记|建|弄|搞|列)(?:一个|个|一条|一下|下)?\s*(?:待办|任务|待办项|todo|to-?do)(?:项|清单|列表)?$/iu;
+/** The content clause must be an item, not another operation. */
+const OPERATION_CLAUSE = /倒计时|计时器|计时|提醒|闹钟|天气|气温|搜索|查询|聚焦|删掉|删除|移除|显示全部|恢复原视图|撤销|重做|高亮|移动|挪|固定|打开|关闭|暂停|继续|放大|缩小/u;
+
+/** The item text of a "…, 加个待办" sentence, or null when it is not that shape. */
+export function parseTodoAppend(text: string): string | null {
+  const clauses = splitClauses(text);
+  if (clauses.length !== 2) return null;
+  const [content, command] = clauses as [string, string];
+  if (!BARE_TODO_APPEND.test(command.trim())) return null;
+  const item = content.trim().replace(/[，,；;。！!]+$/u, "");
+  // Keep the user's own words (an explicit time word belongs to the item text);
+  // never invent or rewrite content the planner would otherwise have written.
+  if (item.length < 2 || item.length > 160) return null;
+  if (OPERATION_CLAUSE.test(item)) return null;
+  return item;
+}
+
+/** "明天上午先把合同发给王经理，加个待办" → one TodoCard, no planner call. */
+export async function planTodoAppend(text: string, ctx: CanvasContext, now = Date.now()): Promise<DeterministicPlan | null> {
+  const item = parseTodoAppend(text);
+  if (!item) return null;
+  const working = contextFor(ctx);
+  const todo = CARD_CONTRACTS.todo!;
+  const built = await todo.build({ items: [item] }, working, new Date(now));
+  if (!Array.isArray(built) || !built.length) return null;
+  recordCards(built, working);
+  const cards = built.flatMap(action => action.type === "card.create" ? [action.card.type] : []);
+  // Both clauses belong to the one todo: the content clause carries the item and
+  // the trailing append clause is only its command, so provenance covers both.
+  return { actions: normalizeEnvelopeActions(built), routes: splitClauses(text).map(() => "todo" as const), say: "已记下这条待办。",
+    groups: [{ clause: 0, contract: "todo", cardIds: createdIds(built), cards, route: "todo" }] };
+}
+
+/** "聚焦会议记录，把标题改成首页改版讨论": the second clause names no card. */
+const FOCUS_CLAUSE = /^(?:请|帮我|给我|麻烦)?\s*(?:聚焦|聚焦到|选中|定位到|定位)\s*(.+)$/u;
+const TITLE_EDIT_CLAUSE = /^(?:请|帮我)?\s*(?:把|将)?\s*(?:这张卡片的|这张卡的|这张|它的|该卡片的|卡片的)?\s*标题\s*(?:改成|改为|设为|设置成|设成|换成|变成)\s*(.+)$/u;
+
+const titleOf = (card: CanvasContext["cards"][number]): string => {
+  const title = card.displayProps.title;
+  return typeof title === "string" ? title : "";
+};
+
+/** Resolve the single card a focus clause names; ambiguity is never guessed. */
+export function resolveFocusCard(text: string, ctx: CanvasContext): CanvasContext["cards"][number] | null {
+  const input = text.trim().replace(/[。！!]+$/u, "");
+  const match = input.match(FOCUS_CLAUSE);
+  if (!match) return null;
+  const name = match[1]!.trim().replace(/^(?:一下|到)/u, "").trim();
+  if (!name || name.length > 40 || /[，,；;。！!？?]/u.test(name)) return null;
+  const cards = ctx.cards.filter(card => card.id === name || titleOf(card) === name
+    || card.aliases?.some(alias => alias === name || alias === `${name}卡` || alias === `${name}卡片`));
+  return cards.length === 1 ? cards[0]! : null;
+}
+
+/** The focus+edit-title pair where only the first clause names the card. */
+export function planFocusEdit(text: string, ctx: CanvasContext): DeterministicPlan | null {
+  const clauses = splitClauses(text);
+  if (clauses.length !== 2) return null;
+  const card = resolveFocusCard(clauses[0]!, ctx);
+  if (!card || !["NoteCard", "TodoCard"].includes(card.type)) return null;
+  const edit = clauses[1]!.trim().replace(/[。！!]+$/u, "").match(TITLE_EDIT_CLAUSE);
+  if (!edit) return null;
+  const title = edit[1]!.trim();
+  if (!title || title.length > 80) return null;
+  const update: Action = card.type === "TodoCard"
+    ? { type: "card.update", targetId: card.id, displayProps: { title } }
+    // A note's visible heading is its text; the card editor already maps 标题 to it.
+    : { type: "card.update", targetId: card.id, displayProps: { text: title } };
+  const actions: Action[] = [...(ctx.stage === "STANDBY" ? [{ type: "stage.awaken" } as const] : []),
+    { type: "card.focus", targetId: card.id }, update];
+  return { actions, routes: ["focus", "edit"], say: "已聚焦这张卡片并改好标题。",
+    groups: [{ clause: 0, contract: "focus", cardIds: [], cards: [], route: "focus" },
+      { clause: 1, contract: "edit", cardIds: [], cards: [], route: "edit" }] };
+}
+
 /** Entry point shared by the rules fast path and the on-mode proposal path. */
 export async function planDeterministic(text: string, ctx: CanvasContext, now = Date.now()): Promise<DeterministicPlan | null> {
   const day = await planDay(text, ctx, now); if (day) return day;
   const clauses = splitClauses(text);
-  if (clauses.length > 1) return isNumberedList(text) ? planNumbered(clauses, ctx, now) : null;
-  return planWeekly(text, ctx, now);
+  if (clauses.length > 1) {
+    if (isNumberedList(text)) return planNumbered(clauses, ctx, now);
+    return await planTodoAppend(text, ctx, now) ?? planFocusEdit(text, ctx);
+  }
+  const weekly = await planWeekly(text, ctx, now);
+  if (weekly) return weekly;
+  // "暂停喝水倒计时" is one existing card and one closed-form host operation:
+  // the rules own the target, the owner still applies and reports it.
+  const control = parseCountdownControl(text, ctx);
+  // Narrow to the timer operations this entry point can resolve a target for.
+  if (control?.kind !== "countdown.pause" && control?.kind !== "countdown.resume") return null;
+  const targetId = control.targetId;
+  if (!targetId) return null;
+  // Never claim the timer was already paused/resumed: this is a proposal that
+  // still needs the owner's receipt. Name the resolved card instead.
+  const target = ctx.cards.find(card => card.id === targetId);
+  const label = (target?.aliases?.[0] ?? (target ? titleOf(target) : "")).slice(0, 40);
+  const verb = control.kind === "countdown.pause" ? "暂停" : "继续";
+  return { actions: [], groups: [], routes: ["edit"], hostOperation: control,
+    say: label ? `已提交「${label}」的${verb}，等待执行确认。` : `已提交计时${verb}，等待执行确认。` };
+}
+
+/** The target guard for a rules-resolved countdown host operation: the target
+ *  must still be a loaded CountdownCard. Null means "proposal may proceed";
+ *  otherwise the caller must ask instead of submitting anything. */
+export function countdownControlIssue(operation: HostOperation, ctx: CanvasContext): string | null {
+  const verb = operation.kind === "countdown.resume" ? "继续" : "暂停";
+  if (operation.kind !== "countdown.pause" && operation.kind !== "countdown.resume") return null;
+  if (!operation.targetId) return `没有找到要${verb}的计时卡片，请指明卡名。`;
+  const target = ctx.cards.find(card => card.id === operation.targetId);
+  if (!target) return `没有找到要${verb}的计时卡片，请指明卡名。`;
+  if (target.type !== "CountdownCard") return `「${target.aliases?.[0] ?? target.id}」不是计时卡片，请指明要${verb}的计时。`;
+  return null;
 }
