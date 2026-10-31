@@ -27,6 +27,7 @@ export const noteContract = defineCardContract({
     // keeps an actual command after a quoted negation visible to the guard.
     const unquoted = body.replace(/“[^”]*”|‘[^’]*’|「[^」]*」|『[^』]*』|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`[^`]*`/gu, "引文");
     if (/[“”‘’「」『』"]|如果|要是|除非|假如|否则/u.test(unquoted)) return null;
+    if (/(?:然后|随后|顺便|同时|接着|另外|并且|再|[，,；;\n。])\s*(?:再)?(?:过|等).*(?:叫我|喊我|提醒我)/u.test(unquoted)) return null;
     if (/(?:然后|随后|顺便|同时|接着|另外|并且|并|再|[，,；;\n。])\s*(?:(?:请帮我|帮我|给我|请)\s*)?(?:再|先|也)?\s*(?:把|将|创建|新建|添加|新增|设|倒计时|提醒|记一下|记下来|记个|生成|聚焦|高亮|删除|删掉|移除|清空|显示|恢复|撤销|重做|移动|固定|取消|暂停|继续|修改|改(?:一下|下|成|为)|打开|关闭|搜索|查一下|保存)/u.test(unquoted)) return null;
     if (/^(?:(?:请帮我|帮我|请)\s*)?(?:把|将)(?:这|那|原|已有|现有).*?(?:卡|便签|便笺|待办).*?(?:改|修改|删除|移动|固定)/u.test(unquoted)) return null;
     if (/(?:不要|别|不用|无需)\s*(?:记|保存|创建|新建|添加|设|倒计时|显示|恢复|删除|执行)/u.test(unquoted)) return null;

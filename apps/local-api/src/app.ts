@@ -633,14 +633,14 @@ export const createApp = (deps: AppDeps) => {
       event: "intent.stage", requestId, stage: event.stage, state: event.status,
       ...(event.elapsedMs !== undefined ? { elapsedMs: Math.round(event.elapsedMs) } : {}),
     });
-    const execute = (signal: AbortSignal, onStage = observeStage) => {
-      const pipeline: PipelineDeps = { credentials, stepfun, search, data, decision, onStage, travel: deps.travel,
+    const execute = (signal: AbortSignal, onStage = observeStage, streamFeedback = false) => {
+      const pipeline: PipelineDeps = { credentials, stepfun, search, data, decision, onStage, streamFeedback, travel: deps.travel,
       router: requestRouter, onDecisionTrace: deps.onDecisionTrace,
       decisionTelemetry: { plannerCalls: 0, directClauses: 0 },
       slotPlanning: requestRouter?.mode === "shadow" || requestRouter?.mode === "on",
       isSessionCurrent: () => version === providerRevision,
       ...(activeProvider === "gpt" ? { planner: { provider: "gpt" as const, connected: gpt.status().connected,
-        generate: (messages, signal) => gpt.generate(messages, signal), isCurrent: () => gpt.isCurrent(gptVersion) } } : {}),
+        generate: (messages, signal, onTextDelta) => gpt.generate(messages, signal, onTextDelta), isCurrent: () => gpt.isCurrent(gptVersion) } } : {}),
       };
       const intent = { ...parsed.data, tracePath: c.req.header("x-vivic-trace-path") === "task" ? "task" as const : "browser" as const,
         ...(installedDefinitions ? { installedDefinitions, extensionDefinitions: undefined } : {}),
@@ -681,7 +681,7 @@ export const createApp = (deps: AppDeps) => {
             delivery = delivery.then(async () => {
               if (!signal.aborted && !stream.closed) await stream.writeSSE({ event: "progress", data: JSON.stringify({ requestId, ...event }) });
             }).catch(() => controller.abort());
-          });
+          }, true);
           const wire = IntentResponseSchema.safeParse(result);
           await delivery;
           if (!signal.aborted && !stream.closed) await stream.writeSSE({ event: "result", data: JSON.stringify(wire.success

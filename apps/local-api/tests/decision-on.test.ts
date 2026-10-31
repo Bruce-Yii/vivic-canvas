@@ -29,8 +29,9 @@ describe("approved on-mode contract execution", () => {
     expect(ActionEnvelopeSchema.safeParse(r.envelope).success).toBe(true);
     expect(r.trace).toMatchObject({ mode: "on", plannerCalls: 0, directClauses: 1 });
     expect(f.generate).not.toHaveBeenCalled();
-    expect(f.router.routeUtterance).toHaveBeenCalledTimes(1);
-    expect(r.usedProvider).toBe("decision");
+    expect(f.router.routeUtterance).not.toHaveBeenCalled();
+    expect(r.trace?.decisions[0]?.source).toBe("rules");
+    expect(r.usedProvider).toBe("rules");
     if (cardType) expect(created(r).map(card => card.type)).toEqual([cardType]);
   });
   it("creates a note and countdown atomically with a single camera fit and no planner", async () => {
@@ -49,7 +50,7 @@ describe("approved on-mode contract execution", () => {
     expect(r.trace).toMatchObject({ mode: "on", directClauses: 2, plannerCalls: 0 });
     expect(ctx).toEqual(original);
     expect(f.generate).not.toHaveBeenCalled();
-    expect(f.router.routeUtterance).toHaveBeenCalledTimes(2);
+    expect(f.router.routeUtterance).not.toHaveBeenCalled();
   });
   it("fills only the unparsed clause, then merges it with the deterministic clause", async () => {
     const f = setup(text => /便签/.test(text) ? "note" : "countdown", { slots: { seconds: 300, text: "休息" } });
@@ -76,7 +77,7 @@ describe("approved on-mode contract execution", () => {
   });
   it.each([.79, .3])("does not fall back to fast legacy rules below the direct confidence gate %s", async probability => {
     const f = setup("countdown", { slots: { seconds: 3000 } }, probability);
-    const r = await runIntent({ text: "倒计时50分钟", canvasContext: context() }, f.deps);
+    const r = await runIntent({ text: "过五分钟叫我休息", canvasContext: context() }, f.deps);
     if (probability < .5) {
       // The low-confidence planner chooses from the top three contracts.
       expect(f.generate).toHaveBeenCalled();
@@ -107,9 +108,9 @@ describe("approved on-mode contract execution", () => {
     vi.mocked(f.router.routeUtterance).mockResolvedValue(null);
     const r = await runIntent({ text: "倒计时50分钟", canvasContext: context() }, f.deps);
     expect(r.kind).toBe("envelope");expect(f.generate).not.toHaveBeenCalled();
-    expect(f.router.routeUtterance).toHaveBeenCalledTimes(1);
-    expect(r.trace).toMatchObject({ status: "failed", plannerCalls: 0, directClauses: 0 });
-    expect(r.usedProvider).toBe("rules-offline");
+    expect(f.router.routeUtterance).not.toHaveBeenCalled();
+    expect(r.trace).toMatchObject({ status: "complete", plannerCalls: 0, directClauses: 1 });
+    expect(r.usedProvider).toBe("rules");
   });
   it("keeps nonliteral router-outage requests in the slots planner", async () => {
     const f=setup("countdown",{contract:"countdown",slots:{seconds:300,text:"休息"}});

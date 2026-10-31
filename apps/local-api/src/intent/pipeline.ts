@@ -40,6 +40,7 @@ import { runSlotPlanner } from "./slotPlanner.js";
 import { applyOutputChannels, normalizeOutputChannels } from "./channels.js";
 import { splitClauses } from "../decision/split.js";
 import { runDecisionOn } from "../decision/on.js";
+import { feedbackReader, FEEDBACK_PROMPT, withoutFeedback } from "./feedback.js";
 
 export interface IntentRequest { text: string; canvasContext: CanvasContext; attachments?: Attachment[]; continuation?: { utterance: string; question: string }; deviceLocation?: DevicePosition; extensionDefinitions?: unknown[]; task?: DecisionTaskRequest; taskContext?: unknown;
   /** Internal task-manager opt-in, never accepted from the HTTP request schema. */
@@ -72,7 +73,7 @@ export interface IntentResult {
 export interface PipelineDeps {
   travel?: TravelProvider;
   /** Metadata only. Observer failures must never affect a user's request. */
-  onStage?: (event: { stage: "rules" | "data" | "search" | "decision" | "planner" | "validation" | "travel" | "total"; status: "started" | "completed" | "failed"; elapsedMs?: number }) => void;
+  onStage?: (event: { stage: "rules" | "data" | "search" | "decision" | "planner" | "validation" | "travel" | "total"; status: "started" | "completed" | "failed"; elapsedMs?: number; feedback?: string }) => void;
   decision?: Pick<DecisionManager, "score">;
   router?: IntentRouter;
   /** Preserve the same on-mode router through the task wrapper without observing twice. */
@@ -87,9 +88,11 @@ export interface PipelineDeps {
   credentials: CredentialStore;
   stepfun: StepfunDeps;
   onPlannerCall?: (attempt: number) => void;
+  /** Only the authenticated SSE transport opts in; ordinary JSON clients retain their request format. */
+  streamFeedback?: boolean;
   search?: { webSearch: (query: string, signal?: AbortSignal) => Promise<SearchEvidence[]>;
     fetchContent?: (url: string, signal?: AbortSignal, article?: boolean) => Promise<FetchEvidence> };
-  planner?: { provider: "gpt"; connected: boolean; generate: (messages: ChatMessage[], signal?: AbortSignal) => Promise<StepfunResult<unknown>>; isCurrent: () => boolean; };
+  planner?: { provider: "gpt"; connected: boolean; generate: (messages: ChatMessage[], signal?: AbortSignal, onTextDelta?: (delta: string) => void) => Promise<StepfunResult<unknown>>; isCurrent: () => boolean; };
   isSessionCurrent?: () => boolean;
   data?: { handleDataIntent: (text: string, context: CanvasContext, signal?: AbortSignal, position?: DevicePosition) => Promise<IntentResult | null>;
     locale?: (position?: DevicePosition, signal?: AbortSignal) => Promise<{ kind: "locale"; name: string; admin1?: string; country?: string; country_code?: string; basis: "device" | "network" } | { kind: "clarify" | "error"; message: string }> };
@@ -165,6 +168,20 @@ const runLegacyIntent = async (
   const plannerCall = (attempt: number) => {
     if (deps.decisionTelemetry) deps.decisionTelemetry.plannerCalls++;
     deps.onPlannerCall?.(attempt);
+  };
+  let feedbackPublished = false;
+  const generate = async (messages: ChatMessage[], credential: NonNullable<ReturnType<CredentialStore["getSecret"]>> | undefined, maxTokens: number) => {
+    const onTextDelta = feedbackReader(text => {
+      if (feedbackPublished || budget.signal.aborted || deps.isSessionCurrent?.() === false
+        || (deps.planner ? !deps.planner.isCurrent() : deps.credentials.getSecret() !== credential)) return;
+      feedbackPublished = true;
+      try { deps.onStage?.({ stage: "planner", status: "started", feedback: text }); } catch { /* advisory */ }
+    });
+    const input = deps.streamFeedback ? messages.map(message => message.role === "system" ? { ...message, content: message.content + FEEDBACK_PROMPT } : message) : messages;
+    const result = await measured("planner", () => deps.planner ? deps.planner.generate(input, budget.signal, deps.streamFeedback ? onTextDelta : undefined)
+      : chatJson(credential!, input, { ...deps.stepfun, signal: budget.signal }, { maxTokens, ...(deps.streamFeedback ? { onTextDelta } : {}) }));
+    budget.signal.throwIfAborted();
+    return result.ok ? { ...result, value: withoutFeedback(result.value) } : result;
   };
   try {
     budget.signal.throwIfAborted();
@@ -307,8 +324,7 @@ const runLegacyIntent = async (
         allowTargetCandidates: deps.executionRouter?.mode === "on",
         generate: async (messages, attempt) => {
           plannerCall(attempt);
-          const result = await measured("planner", () => deps.planner ? deps.planner.generate(messages, budget.signal)
-            : chatJson(credential!, messages, { ...deps.stepfun, signal: budget.signal }, { maxTokens: 8192 }));
+          const result = await generate(messages, credential, 8192);
           budget.signal.throwIfAborted();
           return result;
         },
@@ -340,8 +356,7 @@ const runLegacyIntent = async (
       const messages: ChatMessage[] = [
         { role: "system", content: system }, { role: "user", content: user + feedback, ...(hasImages ? { images: req.attachments } : {}) },
       ];
-      const res = await measured("planner", () => deps.planner ? deps.planner.generate(messages, budget.signal)
-        : chatJson(credential!, messages, { ...deps.stepfun, signal: budget.signal }, { maxTokens: reminderMode ? 4096 : 8192 }));
+      const res = await generate(messages, credential, reminderMode ? 4096 : 8192);
       budget.signal.throwIfAborted();
       if ((deps.planner ? !deps.planner.isCurrent() : deps.credentials.getSecret() !== credential)
         || (deps.isSessionCurrent && !deps.isSessionCurrent())) return { kind: "error", message: "请求已取消：模型连接已变更。", usedProvider };

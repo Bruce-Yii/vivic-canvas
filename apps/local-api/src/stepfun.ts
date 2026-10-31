@@ -155,6 +155,91 @@ const retryAfterMs = (value: string | null): number => {
   return Number.isFinite(seconds) && seconds >= 0 ? Math.min(seconds * 1000, MAX_RETRY_AFTER_MS) : RETRY_DELAY_MS;
 };
 
+export interface ChatJsonOptions {
+  maxTokens?: number;
+  /** Raw content deltas only; callers must extract safe feedback before displaying them. */
+  onTextDelta?: ((delta: string) => void) & { reset?: () => void };
+}
+
+class InvalidChatStream extends Error {}
+
+/** Decode SSE framing before interpreting content; reasoning fields are never forwarded. */
+const readChatStream = async (response: Response, signal: AbortSignal, onTextDelta: (delta: string) => void): Promise<string> => {
+  if (!response.body) throw new InvalidChatStream();
+  const reader = response.body.getReader(), decoder = new TextDecoder("utf-8", { fatal: true });
+  let pending = "", data: string[] = [], content = "", finished = false, done = false;
+  const abort = () => { void reader.cancel().catch(() => undefined); };
+  signal.addEventListener("abort", abort, { once: true });
+  const dispatch = () => {
+    if (!data.length) return;
+    const value = data.join("\n");
+    data = [];
+    if (!value.trim()) return;
+    signal.throwIfAborted();
+    if (value.trim() === "[DONE]") {
+      if (!finished) throw new InvalidChatStream();
+      done = true;
+      return;
+    }
+    let payload: { choices?: Array<{ index?: number; finish_reason?: string | null; delta?: { content?: string | null } }> };
+    try { payload = JSON.parse(value); } catch { throw new InvalidChatStream(); }
+    if (!payload || !Array.isArray(payload.choices) || payload.choices.length > 1) throw new InvalidChatStream();
+    // An optional usage-only frame has no choices.
+    const choice = payload.choices[0];
+    if (!choice) return;
+    if (choice.index !== undefined && choice.index !== 0) throw new InvalidChatStream();
+    const text = choice.delta?.content;
+    if (text != null && typeof text !== "string") throw new InvalidChatStream();
+    if (text) {
+      if (finished) throw new InvalidChatStream();
+      content += text;
+      signal.throwIfAborted();
+      try { onTextDelta(text); } catch { /* Progress consumers cannot break inference. */ }
+      signal.throwIfAborted();
+    }
+    if (choice.finish_reason != null) {
+      if (choice.finish_reason !== "stop" || finished) throw new InvalidChatStream();
+      finished = true;
+    }
+  };
+  const line = (value: string) => {
+    if (!value) { dispatch(); return; }
+    if (value.startsWith(":")) return;
+    const colon = value.indexOf(":"), field = colon < 0 ? value : value.slice(0, colon);
+    if (field === "data") data.push(colon < 0 ? "" : value.slice(colon + 1).replace(/^ /, ""));
+  };
+  try {
+    signal.throwIfAborted();
+    while (!done) {
+      const next = await reader.read();
+      signal.throwIfAborted();
+      try { pending += decoder.decode(next.value, { stream: !next.done }); }
+      catch { throw new InvalidChatStream(); }
+      for (;;) {
+        const match = /[\r\n]/.exec(pending);
+        if (!match) break;
+        const index = match.index;
+        // A CR at a transport boundary may be the first half of CRLF.
+        if (pending[index] === "\r" && index === pending.length - 1 && !next.done) break;
+        const width = pending[index] === "\r" && pending[index + 1] === "\n" ? 2 : 1;
+        const value = pending.slice(0, index);
+        pending = pending.slice(index + width);
+        line(value);
+        if (done) break;
+      }
+      // EOF is not a completion marker. Incomplete framing, even with valid
+      // JSON text, is a dropped connection and retains the original retry.
+      if (next.done && !done) throw new TypeError("Incomplete model stream");
+    }
+    signal.throwIfAborted();
+    return content;
+  } finally {
+    signal.removeEventListener("abort", abort);
+    void reader.cancel().catch(() => undefined);
+    reader.releaseLock();
+  }
+};
+
 /**
  * One JSON-mode chat completion; the caller parses/validates the payload.
  * A dropped connection or a 429/5xx produced no answer, so it is attempted
@@ -165,7 +250,7 @@ export const chatJson = async (
   credential: StepfunCredential,
   messages: ChatMessage[],
   deps: StepfunDeps,
-  options?: { maxTokens?: number },
+  options?: ChatJsonOptions,
 ): Promise<StepfunResult<unknown>> => {
   const first = await chatJsonOnce(credential, messages, deps, options);
   if (first.ok || deps.signal?.aborted) return first;
@@ -180,7 +265,7 @@ const chatJsonOnce = async (
   credential: StepfunCredential,
   messages: ChatMessage[],
   deps: StepfunDeps,
-  options?: { maxTokens?: number },
+  options?: ChatJsonOptions,
 ): Promise<StepfunResult<unknown> & { retryAfterMs?: number }> => providerRequest("模型请求失败", deps, INFERENCE_TIMEOUT_MS, async (signal) => {
   const res = await (deps.fetchImpl ?? fetch)(`${deps.baseUrl.replace(/\/+$/, "")}/chat/completions`, {
     method: "POST",
@@ -198,6 +283,7 @@ const chatJsonOnce = async (
       ...(["step-3.5-flash-2603", "step-3.7-flash"].includes(credential.defaultModel)
         ? { reasoning_effort: "low" } : {}),
       ...(options?.maxTokens ? { max_tokens: options.maxTokens } : {}),
+      ...(options?.onTextDelta ? { stream: true } : {}),
     }),
     signal,
     redirect: "error",
@@ -206,6 +292,22 @@ const chatJsonOnce = async (
     const retryAfter = res.headers.get("retry-after");
     return { ok: false, code: "provider", status: res.status, error: await describeProviderError(res, credential.apiKey),
       ...(retryAfter ? { retryAfterMs: retryAfterMs(retryAfter) } : {}) };
+  }
+  if (options?.onTextDelta && res.headers.get("content-type")?.split(";")[0]?.trim().toLowerCase() === "text/event-stream") {
+    let content: string;
+    try {
+      signal.throwIfAborted();
+      try { options.onTextDelta.reset?.(); } catch { /* Progress consumers cannot break inference. */ }
+      content = await readChatStream(res, signal, options.onTextDelta);
+    }
+    catch (error) {
+      signal.throwIfAborted();
+      if (!(error instanceof InvalidChatStream)) throw error;
+      return { ok: false, code: "invalid-response", error: "模型服务返回了不完整或无效的流式响应" };
+    }
+    if (!content.trim()) return { ok: false, code: "invalid-response", error: "模型没有返回内容" };
+    try { return { ok: true, value: parseModelJson(content) }; }
+    catch { return { ok: false, code: "invalid-response", error: "模型返回了非 JSON 内容" }; }
   }
   // A body cut off mid-read is a network failure, not a malformed answer.
   const raw = await res.text();

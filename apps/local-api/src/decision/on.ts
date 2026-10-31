@@ -23,6 +23,14 @@ interface OnDeps {
   plan(request: IntentRequest, hint: Promise<PlannerRouteHint | null> | undefined, signal: AbortSignal): Promise<IntentResult>;
 }
 type Row = DecisionTrace["decisions"][number];
+/** Reuse the approved contracts before paying for classification. This grants
+ * no new route, target or execution permission; the normal builder still runs. */
+export function literalRoute(text: string, context: IntentRequest["canvasContext"], router: IntentRouter): IntentRouteId | undefined {
+  if (/不要|不用|别|如果|要是|什么意思|解释|不想|不需要|如何|怎么|是否|能否|[？?]|(?:吗|么)[。！!]?\s*$/.test(text)) return;
+  const matches = Object.values(CARD_CONTRACTS).filter(contract => router.directRoutes?.has(contract.id as IntentRouteId)
+    && contract.parse?.(text, context) != null);
+  if (matches.length === 1) return matches[0]!.id as IntentRouteId;
+}
 /** Approved routes may build proposals; the real owner/task executor still commits them. */
 export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: AbortSignal): Promise<IntentResult> {
   const budget = createBudget(INTENT_BUDGET_MS, [signal]);
@@ -55,7 +63,7 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
     } else rows = hint.all ? await budget.run(() => hint.all!) : clauses.length === 1
       ? [{ text: clauses[0]!, ...hint.result, failed: false }] : [];
     check();
-    const protectedText = /不要|不用|别|如果|要是|什么意思|解释|不想|不需要/.test(req.text);
+    const protectedText = /不要|不用|别|如果|要是|什么意思|解释|不想|不需要|如何|怎么|是否|能否|[？?]|(?:吗|么)[。！!]?\s*$/.test(req.text);
     if (!protectedText) {
       const index = rows.findIndex(row => row.probability >= .8 && row.target && "ambiguous" in row.target);
       const target = rows[index]?.target;
@@ -70,7 +78,7 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
     let context: CardBuildContext = { ...req.canvasContext, cards: [...req.canvasContext.cards], focusHistory: [...req.canvasContext.focusHistory] };
     const actions: Action[] = [];
     let directClauses = 0;
-    let usedProvider: IntentResult["usedProvider"] = ruleFallback ? "rules-offline" : "decision";
+    let usedProvider: IntentResult["usedProvider"] = ruleFallback ? "rules-offline" : rows.every(row => row.source === "rules") ? "rules" : "decision";
     for (const row of rows) {
       check();
       const contract = CARD_CONTRACTS[row.route!];

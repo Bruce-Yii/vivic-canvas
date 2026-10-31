@@ -121,6 +121,7 @@ export const ControlApp = () => {
     feedbackTimer: ReturnType<typeof setTimeout>;
     expiresAt: number;
     text: string;
+    modelFeedback?: string;
   } | null>(null);
   const reminderQueue = useRef<ReminderNotice[]>([]);
   useEffect(() => {
@@ -459,7 +460,7 @@ export const ControlApp = () => {
           if (isCurrent()) void speakShortFeedback("我看看", { requestId: `${requestId}:checking`, signal: controller.signal });
         }, 300),
         slowTimer: setTimeout(() => {
-          if (!isCurrent()) return;
+          if (!isCurrent() || pending.current!.modelFeedback) return;
           const text = "响应较慢，仍在处理…";
           pending.current!.text = text;
           setFeedback(text);
@@ -486,7 +487,17 @@ export const ControlApp = () => {
             attachments, continuation, deviceLocation,
             onProgress: event => {
               if (!isCurrent() || event.status !== "started" || event.stage === "total") return;
-              const text = intentStageLabel(event.stage);
+              const current = pending.current!;
+              // The first complete model sentence stays visible until this request finishes.
+              // It is transient activity, so it cannot invalidate a pending canvas version.
+              if (current.modelFeedback) return;
+              const text = event.stage === "planner" && event.feedback ? event.feedback : intentStageLabel(event.stage);
+              if (event.stage === "planner" && event.feedback) {
+                current.modelFeedback = text;
+                clearTimeout(current.slowTimer);
+                clearTimeout(current.feedbackTimer);
+                cancelShortFeedback(requestId);
+              }
               pending.current!.text = text;
               setFeedback(text);
               host.setActivity(requestId, { requestId, text, expiresAt, phase: "thinking" });

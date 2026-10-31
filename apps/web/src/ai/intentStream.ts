@@ -7,6 +7,7 @@ export const IntentProgressSchema = z.object({
   stage: z.enum(["rules", "data", "search", "decision", "planner", "validation", "travel", "total"]),
   status: z.enum(["started", "completed", "failed"]),
   elapsedMs: z.number().finite().nonnegative().optional(),
+  feedback: z.string().trim().min(1).max(80).optional(),
 });
 export type IntentProgress = z.infer<typeof IntentProgressSchema>;
 export const intentStageLabel = (stage: IntentProgress["stage"]): string => ({

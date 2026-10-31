@@ -42,7 +42,7 @@ describe("on-mode HTTP task and clarification integration", () => {
     const ctx={...context(creates.map(c=>({id:c.id,type:c.type,displayProps:c.displayProps,sourceDataSummary:c.sourceData,layout:c.layout}))),version:2};
     const receipt=await f.post({text:"倒计时50分钟",canvasContext:ctx,task:{id:r.task!.id,receipt:{executionId:r.task!.executionId,status:"succeeded",createdCardIds:creates.map(c=>c.id)}}});
     expect(receipt.task?.status).toBe("completed");expect(receipt.envelope).toBeUndefined();
-    expect(f.router.routeUtterance).toHaveBeenCalledTimes(1);expect(f.model).not.toHaveBeenCalled();
+    expect(f.router.routeUtterance).not.toHaveBeenCalled();expect(f.model).not.toHaveBeenCalled();
   });
   it("asks for confirmation before an explicit named deletion without a main model", async () => {
     const f=setup(),ctx=context([card("a","读书笔记")]);

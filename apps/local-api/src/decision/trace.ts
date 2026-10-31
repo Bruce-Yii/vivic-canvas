@@ -6,6 +6,7 @@ import { splitClauses } from "./split.js";
 import { resolveTarget } from "./target.js";
 import type { TargetResult } from "./target.js";
 import { isBuiltinRoute, type RouteResult } from "./router.js";
+import { literalRoute } from "./on.js";
 
 /** The planner shares the observer's first RPC and target lookup. */
 export interface PlannerRouteHint {
@@ -22,7 +23,7 @@ const target = z.union([z.strictObject({ targetId: z.string().max(128) }),
   })).max(40) })]);
 const decision = z.strictObject({ text: z.string().max(500), route: route.nullable(),
   probability: z.number().min(0).max(1), probabilities: z.record(z.string(), z.number().min(0).max(1)),
-  none: z.boolean(), latencyMs: z.number().nonnegative(), failed: z.boolean(), target: target.optional() });
+  none: z.boolean(), latencyMs: z.number().nonnegative(), failed: z.boolean(), target: target.optional(), source: z.enum(["rules", "decision"]).optional() });
 export const DecisionTraceSchema = z.strictObject({
   id: z.string().max(128), mode: z.enum(["shadow", "on"]), status: z.enum(["pending", "complete", "failed"]),
   taskId: z.string().max(128).optional(),
@@ -60,11 +61,15 @@ export async function observeDecision(req: IntentRequest, deps: PipelineDeps, si
     for (const text of clauses) {
       const clauseStarted = performance.now();
       try {
-        const value = await router.routeUtterance(text, shadowContext, controller.signal);
+        if (router.mode === "on") controller.signal.throwIfAborted();
+        const exact = router.mode === "on" && !req.attachments?.length && !req.continuation && !req.resolvedTargetId && !req.resolvedTargets
+          ? literalRoute(text, shadowContext, router) : undefined;
+        const value = exact ? { route: exact, probability: 1, probabilities: { [exact]: 1 }, none: false,
+          latencyMs: performance.now() - clauseStarted } : await router.routeUtterance(text, shadowContext, controller.signal);
         const targetPromise = value?.route && isBuiltinRoute(value.route) ? resolveTarget(text, shadowContext, value.route, router, controller.signal) : Promise.resolve(undefined);
         if (!output.length) publishHint({ result: value, target: targetPromise, all });
         const selected = await targetPromise;
-        output.push(value ? { text, ...value, failed: false, ...(selected ? { target: selected } : {}) }
+        output.push(value ? { text, ...value, source: exact ? "rules" : "decision", failed: false, ...(selected ? { target: selected } : {}) }
           : { text, route: null, probability: 0, probabilities: {}, none: true, latencyMs: Math.round(performance.now() - clauseStarted), failed: true });
         if (value?.route === "focus" && value.probability >= .8 && selected && "targetId" in selected) {
           shadowContext = { ...shadowContext, focusHistory: [...shadowContext.focusHistory, selected.targetId].slice(-20) };

@@ -263,17 +263,18 @@ export class GptProvider {
    * so one more attempt inside the same deadline costs nothing the user would
    * miss. Invalid JSON and other refusals are never retried here.
    */
-  async #completeWithRetry(connection: Connection, messages: ChatMessage[], signal: AbortSignal, deadline: number): Promise<StepfunResult<unknown>> {
-    const first = await this.#complete(connection, messages, signal);
+  async #completeWithRetry(connection: Connection, messages: ChatMessage[], signal: AbortSignal, deadline: number, onTextDelta?: (delta: string) => void): Promise<StepfunResult<unknown>> {
+    const first = await this.#complete(connection, messages, signal, onTextDelta);
     if (first.ok || first.code !== "network" || signal.aborted || Date.now() > deadline - GPT_RETRY_MIN_REMAINING_MS) return first;
     try { await delay(GPT_RETRY_DELAY_MS, undefined, { signal }); } catch { return first; }
-    return this.#complete(connection, messages, signal);
+    return this.#complete(connection, messages, signal, onTextDelta);
   }
-  async #complete(connection: Connection, messages: ChatMessage[], signal: AbortSignal): Promise<StepfunResult<unknown>> {
+  async #complete(connection: Connection, messages: ChatMessage[], signal: AbortSignal, onTextDelta?: ((delta: string) => void) & { reset?: () => void }): Promise<StepfunResult<unknown>> {
     let completed = false;
     let httpStatus: number | undefined;
     let text: string;
     try {
+      try { onTextDelta?.reset?.(); } catch { /* observation is advisory */ }
       this.#lastTraffic = Date.now();
       const result = await connection.runtime.complete(connection.model, { messages: messages.map(message => message.role === "user" ? {
         role: "user" as const, timestamp: Date.now(), content: message.images?.length
@@ -287,6 +288,10 @@ export class GptProvider {
           return { ...value, text: { format: { type: "json_object" } } };
         },
         onProviderStreamEvent(event) {
+          if (!signal.aborted && event && typeof event === "object" && "type" in event && event.type === "response.output_text.delta"
+            && "delta" in event && typeof event.delta === "string") {
+            try { onTextDelta?.(event.delta); } catch { /* progress is advisory */ }
+          }
           if (event && typeof event === "object" && "type" in event && event.type === "response.completed" && "response" in event && event.response && typeof event.response === "object") {
             completed = "status" in event.response && event.response.status === "completed" && !("error" in event.response && event.response.error);
           }
@@ -308,12 +313,12 @@ export class GptProvider {
     try { return { ok: true, value: JSON.parse(text) as unknown }; }
     catch { return { ok: false, code: "invalid-response", error: "GPT 未返回可验证的 JSON 结果" }; }
   }
-  async generate(messages: ChatMessage[], parent?: AbortSignal): Promise<StepfunResult<unknown>> {
+  async generate(messages: ChatMessage[], parent?: AbortSignal, onTextDelta?: (delta: string) => void): Promise<StepfunResult<unknown>> {
     const c = this.#connection; if (!c) return { ok: false, code: "provider", error: "GPT 未连接" };
     const version = this.#version; const controller = new AbortController(); this.#requests.add(controller);
     const signal = AbortSignal.any([controller.signal, AbortSignal.timeout(GPT_REQUEST_TIMEOUT_MS), ...(parent ? [parent] : [])]);
     try {
-      const result = await this.#completeWithRetry(c, messages, signal, Date.now() + GPT_REQUEST_TIMEOUT_MS);
+      const result = await this.#completeWithRetry(c, messages, signal, Date.now() + GPT_REQUEST_TIMEOUT_MS, onTextDelta);
       return this.isCurrent(version) ? result : { ok: false, code: "cancelled", error: "GPT 连接已变更，旧结果已丢弃" };
     } finally { this.#requests.delete(controller); }
   }
