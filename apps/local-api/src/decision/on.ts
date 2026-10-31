@@ -12,6 +12,7 @@ import { scheduledReminderIntent } from "../intent/scheduledReminders.js";
 import { looksLikeDateCountdown } from "../scenes/index.js";
 import { splitClauses } from "./split.js";
 import { resolveTarget } from "./target.js";
+import { numberedChoiceQuestion } from "./confirmation.js";
 import { isBuiltinRoute, type IntentRouter } from "./router.js";
 import type { ClauseBuild, ClausePlan, PlannerRouteHint, DecisionTrace } from "./trace.js";
 
@@ -273,11 +274,11 @@ export async function runDecisionOn(req: IntentRequest, deps: OnDeps, signal?: A
       const index = rows.findIndex(row => row.probability >= .8 && row.target && "ambiguous" in row.target);
       const target = rows[index]?.target;
       if (target && "ambiguous" in target) {
-        // The message and the clickable payload must be the same five candidates.
-        const shown = target.ambiguous.slice(0, 5);
+        // The question text and the clickable payload must be the same candidates,
+        // including the length cap, so no chip can appear without its line.
+        const choice = numberedChoiceQuestion("你要操作哪一张？", target.ambiguous.map((card, i) => ({ ...card, number: i + 1 })));
         return { kind: "clarify", usedProvider: "decision",
-          message: `你要操作哪一张？${shown.map((card, i) => `${i + 1}. ${card.label}`).join(" ")}`.slice(0, 180),
-          targetCandidates: shown, targetClause: index };
+          message: choice.message, targetCandidates: choice.candidates, targetClause: index };
       }
     }
     if (rows.length !== clauses.length) return await fallback();
