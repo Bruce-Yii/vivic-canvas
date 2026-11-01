@@ -99,7 +99,7 @@ const invalid = (result: ToolCallPlan) => {
 };
 
 describe("tool surface", () => {
-  it("declares the twenty-two tools exactly once, each with a description and a parameter schema", () => {
+  it("declares the twenty-one tools exactly once, each with a description and a parameter schema", () => {
     const names = TOOL_DEFINITIONS.map(definition => definition.function.name);
     expect(names).toEqual([
       "create_countdown",
@@ -107,7 +107,6 @@ describe("tool surface", () => {
       "create_note",
       "create_weekly_plan",
       "create_schedule",
-      "create_from_template",
       "create_scene_card",
       "create_chart",
       "create_notification",
@@ -444,26 +443,6 @@ describe("one tool call per contract", () => {
     expect(undone).toContain("一个宿主操作");
   });
 
-
-  it("create_from_template builds the template's real card type", async () => {
-    const result = await plan([{ name: "create_from_template", arguments: {
-      template_id: "meeting_minutes",
-      fields: { topics: ["预算评审"], decisions: ["先按 A 方案推进"] },
-    } }]);
-    expect(result.kind).toBe("envelope");
-    expect(result.routes).toEqual(["generate"]);
-    expect(result.created).toHaveLength(1);
-    expect(result.created[0]!.cardType).toBe("NoteCard");
-    expect(envelope(result).actions.map(action => action.type)).toContain("card.create");
-  });
-
-  it("create_from_template rejects unknown templates and asks for missing required fields", async () => {
-    const unknown = invalid(await plan([{ name: "create_from_template", arguments: { template_id: "nope", fields: {} } }]));
-    expect(unknown).toContain("未知模板");
-    const missing = await plan([{ name: "create_from_template", arguments: { template_id: "meeting_minutes", fields: {} } }]);
-    expect(missing.kind).toBe("clarify");
-    expect(missing.message).toContain("会议");
-  });
 
   it("create_scene_card builds any registered scene card", async () => {
     const quote = await plan([{ name: "create_scene_card", arguments: { scene_id: "quote_note", data: { text: "慢慢来，比较快" } } }]);

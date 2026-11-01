@@ -103,8 +103,6 @@ export interface LocalApiConfig {
   streamFeedback?: boolean;
   /** Local experiment: conversational tool calling instead of classifier/planner. Default off. */
   toolCalls?: boolean;
-  /** Emit NoteCard.sections only when the deployed frontend contract understands it. */
-  sections?: boolean;
   /** Keyless search egress: `auto` (env > OS proxy), `direct`, or a proxy URL. Unset = direct. */
   searchProxy?: string;
   /** Optional independent DEC-01 provider; unset preserves Kev-only behavior. */
@@ -184,9 +182,6 @@ export const loadConfig = (
     searchEnabled: env.VIVIC_SEARCH_ENABLED !== "false",
     streamFeedback: streamFeedbackEnabled(env.VIVIC_STREAM_FEEDBACK),
     toolCalls: env.VIVIC_TOOL_CALLS === "on",
-    // Default off: the current live runtime only accepts text/bullets. Turn on
-    // only after the frontend release ships the sections contract.
-    sections: env.VIVIC_SECTIONS === "on",
     searchProxy: env.VIVIC_SEARCH_PROXY?.trim() || "auto",
     decisionProviderUrl: env.VIVIC_DECISION_PROVIDER_URL?.trim() || undefined,
     decisionProviderFallbackUrl: env.VIVIC_DECISION_PROVIDER_FALLBACK_URL?.trim() || undefined,

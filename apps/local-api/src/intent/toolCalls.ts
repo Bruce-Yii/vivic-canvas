@@ -1,7 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { ActionEnvelopeSchema, SCENE_IDS, type Action, type HostOperation, type IntentRouteId } from "@vivic/contracts";
-import { CARD_TEMPLATES, buildTemplateActions } from "../cards/templates.js";
 
 import type { CanvasContext } from "../schemas.js";
 import { CARD_CONTRACTS } from "../cards/index.js";
@@ -61,7 +60,6 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   { type: "function", function: { name: "create_note", description: "创建便笺/笔记。用户说记一下、记下、记录、便笺、笔记时用这个；不要把这类内容建成待办。text 是正文。", parameters: { type: "object", additionalProperties: false, required: ["text"], properties: { text: { type: "string" } } } } },
   { type: "function", function: { name: "create_weekly_plan", description: "创建周计划/健身计划/学习计划等按周安排，topic 为计划主题。", parameters: { type: "object", additionalProperties: false, required: ["topic"], properties: { topic: { type: "string" } } } } },
   { type: "function", function: { name: "create_schedule", description: "创建一个日程/会议/约定，title 为事项；有星期或钟点时填 day/time，不确定不要编。", parameters: { type: "object", additionalProperties: false, required: ["title"], properties: { title: { type: "string" }, day: { type: "string", description: "如 周四、下周一；没有不填" }, time: { type: "string", description: "如 上午9点；没有不填" } } } } },
-  { type: "function", function: { name: "create_from_template", description: "用办公模板创建结构化卡片（会议纪要/周报/项目计划/待办清单/决策记录/复盘/阅读笔记/对比表）。template_id 必填，fields 按模板字段填；不要编造用户未提供的事实。", parameters: { type: "object", additionalProperties: false, required: ["template_id", "fields"], properties: { template_id: { type: "string", enum: CARD_TEMPLATES.map(template => template.id) }, fields: { type: "object", additionalProperties: true } } } } },
   { type: "function", function: { name: "create_scene_card", description: "创建 21 种场景卡之一（路线图/柱状图/时间线/金句/照片故事/运动流水/目标进度/习惯打卡/书籍/月历/对比表/网页收藏/照片纪念/通知/文献/图库/新闻/日程/待办/倒计时；travel_offers 需走旅行查询，不要用本工具）。scene_id 必须是枚举之一；data 按该场景字段填（如 title/items/events/points/phases/slides），日期用 YYYY-MM-DD，时间用 HH:MM，数值/链接/日期必须来自用户原话，不能编。", parameters: { type: "object", additionalProperties: false, required: ["scene_id", "data"], properties: { scene_id: { type: "string", enum: SCENE_IDS }, data: { type: "object", additionalProperties: true } } } } },
   { type: "function", function: { name: "create_chart", description: "把用户给的一组数值做成图表。用户说柱状图/折线图/饼图或给出「名称+数值」序列时用这个；points 的 y 必须是用户原话里的数，不要反问数据、不要走表格。", parameters: { type: "object", additionalProperties: false, required: ["chartKind", "points"], properties: { chartKind: { type: "string", enum: ["bar", "line", "pie"] }, points: { type: "array", minItems: 1, items: { type: "object", additionalProperties: false, required: ["x", "y"], properties: { x: { type: "string" }, y: { type: "number" } } } }, title: { type: "string" } } } } },
   { type: "function", function: { name: "create_notification", description: "创建单条通知卡。title 必填，body 为内容，level 取 info/success/warning/error；用户说「重要/紧急」用 warning，「完成」用 success，「故障」用 error。", parameters: { type: "object", additionalProperties: false, required: ["title"], properties: { title: { type: "string" }, body: { type: "string" }, level: { type: "string", enum: ["info", "success", "warning", "error"] } } } } },
@@ -107,7 +105,6 @@ export const TOOL_CATALOG: ToolCapability[] = [
   { name: "create_note", capability: "note", directEligible: true, targeted: false, destructive: false, needsConfirm: false, extension: false },
   { name: "create_weekly_plan", capability: "generate", directEligible: false, targeted: false, destructive: false, needsConfirm: false, extension: false },
   { name: "create_schedule", capability: "generate", directEligible: false, targeted: false, destructive: false, needsConfirm: false, extension: false },
-  { name: "create_from_template", capability: "generate", directEligible: false, targeted: false, destructive: false, needsConfirm: false, extension: false },
   { name: "create_scene_card", capability: "generate", directEligible: false, targeted: false, destructive: false, needsConfirm: false, extension: false },
   { name: "create_chart", capability: "generate", directEligible: false, targeted: false, destructive: false, needsConfirm: false, extension: false },
   { name: "create_notification", capability: "generate", directEligible: false, targeted: false, destructive: false, needsConfirm: false, extension: false },
@@ -133,10 +130,6 @@ const WeeklyArgs = z.strictObject({ topic: z.string().trim().min(1).max(40) });
 const ScheduleArgs = z.strictObject({ title: z.string().trim().min(1).max(80), day: z.string().trim().max(8).optional(), time: z.string().trim().max(16).optional() });
 const FocusCardArgs = z.strictObject({ card_id: z.string().trim().min(1).max(128) });
 const UndoArgs = z.strictObject({ redo: z.boolean().optional() });
-const TemplateArgs = z.strictObject({
-  template_id: z.string().trim().min(1).max(64),
-  fields: z.record(z.string(), z.unknown()),
-});
 const SceneCardArgs = z.strictObject({
   scene_id: z.enum(SCENE_IDS),
   data: z.record(z.string(), z.unknown()),
@@ -257,8 +250,7 @@ const placeSceneCards = (actions: Action[], working: CardBuildContext): Action[]
 const missingRequired = (error: z.ZodError): boolean =>
   error.issues.some(issue => issue.code === "invalid_type" && String((issue as { received?: unknown }).received) === "undefined");
 
-export async function planFromToolCalls(calls: ToolCall[], ctx: CanvasContext, now = Date.now(), utterance = "",
-  options: { sections?: boolean } = {}): Promise<ToolCallPlan> {
+export async function planFromToolCalls(calls: ToolCall[], ctx: CanvasContext, now = Date.now(), utterance = ""): Promise<ToolCallPlan> {
   const issues: string[] = [];
   const routes: IntentRouteId[] = [];
   const actions: Action[] = [];
@@ -374,18 +366,6 @@ export async function planFromToolCalls(calls: ToolCall[], ctx: CanvasContext, n
         if (!built.ok) return fail(`日程场景构建失败：${built.issue}`);
         const placed = placeSceneCards(built.actions, working);
         push(placed, call.name, "generate");
-        break;
-      }
-      case "create_from_template": {
-        const parsed = TemplateArgs.safeParse(call.arguments);
-        if (!parsed.success) return fail("参数不合法");
-        const built = buildTemplateActions(parsed.data.template_id, parsed.data.fields, working, now, { sections: options.sections === true });
-        if (!built.ok) {
-          issues.push(`#${index + 1} ${call.name}: ${built.issue}`);
-          return built.issue.includes("未知模板") ? fail(built.issue)
-            : need(TEMPLATE_ASK[parsed.data.template_id] ?? "这个模板还缺一点信息，能补充一下吗？");
-        }
-        push(built.actions, call.name, "generate");
         break;
       }
       case "create_scene_card": {
@@ -576,7 +556,6 @@ export const TOOL_FEEDBACK_PHRASES: Record<string, string> = {
   create_note: "我来记下",
   create_weekly_plan: "我来安排周计划",
   create_schedule: "我来安排日程",
-  create_from_template: "我来套用模板",
   create_scene_card: "我来做这张卡",
   create_chart: "我来画图表",
   create_notification: "我来发通知",
@@ -597,17 +576,6 @@ export const TOOL_FEEDBACK_PHRASES: Record<string, string> = {
 export const toolFeedbackPhrase = (name: string): string => TOOL_FEEDBACK_PHRASES[name] ?? "我正在处理";
 
 /** System prompt for the tool layer: host facts only, no card schemas. */
-const TEMPLATE_ASK: Record<string, string> = {
-  meeting_minutes: "会议议题是什么？参会人、结论、待办有的话也可以一起说。",
-  weekly_report: "本周完成了哪些事？下周计划也可以一起说。",
-  project_plan: "这个项目分几个阶段、每个阶段叫什么？",
-  todo_checklist: "要记哪些待办？",
-  decision_record: "要决定什么？有哪些选项、最后选了哪个？",
-  retrospective: "这次复盘的主题是什么？做得好/待改进/下一步各有哪些？",
-  reading_note: "书名是什么？读到哪、有什么笔记？",
-  comparison_table: "要对比哪些方案、看哪些指标？",
-};
-
 const SCENE_ASK: Record<string, string> = {
   data_visualization: "这张图表要展示哪些数据点？",
   historical_timeline: "时间线里有哪些事件和日期？",
@@ -629,17 +597,6 @@ const SCENE_ASK: Record<string, string> = {
   photo_gallery: "要展示哪些图片？",
   countdown: "这个倒计时的标题和目标日期是什么？",
 };
-
-const TEMPLATE_FIELDS = [
-  "meeting_minutes: topics* (1-4条), attendees?, decisions?, actions?, title?",
-  "weekly_report: done* (1-30条), next?, title?",
-  "project_plan: title*, phases*[{name*, period?, status?(planned|active|done), goal?, milestones?}]",
-  "todo_checklist: items* (1-30条), title?",
-  "decision_record: topic*, options* (2-4条), decision*, background?, reasons?",
-  "retrospective: topic*, wentWell* (1-3条), toImprove*, next*",
-  "reading_note: title*, notes* (1-8条), author?, status?, currentPage?, totalPages?, rating?",
-  "comparison_table: title*, options* (2-5), criteria*[{name*, values*, better?, unit?}], recommendation?, chosen?",
-].join("\n");
 
 const SCENE_FIELDS = [
   "countdown: title*, targetDate* (YYYY-MM-DD), targetTime?, note?",
@@ -710,8 +667,6 @@ export function buildToolSystemPrompt(ctx: CanvasContext): string {
     "6. 不要调用未提供的工具，不要在参数里放解释性长文。",
     "7. 图表优先用 create_chart，通知用 create_notification，习惯打卡用 create_habit；其余图表/对比/时间线/金句/书籍/运动流水/目标进度/月历/照片/文献/图库/新闻等场景卡用 create_scene_card；data 字段如下（* 为必填）：",
     SCENE_FIELDS,
-    "8. 会议纪要/周报/项目计划/决策记录/复盘/阅读笔记/待办清单/对比表用 create_from_template；fields 字段如下（* 为必填）：",
-    TEMPLATE_FIELDS,
     "9. 缺必填参数时不要猜、也不要用 create_note 顶替，直接 clarify 问一句；一句话多个动作必须返回多个工具调用，见下面的「多动作」示例。",
     "10. 用户给了几个阶段/事件就建几个，不要追问没提到的部分；今天/明天/本周/下周等相对日期按下面的今天换算成 YYYY-MM-DD，不要编造。",
     "11. 指代与位置：用户说“它/这张/那张/刚才那张”时优先取「最近聚焦」的卡；说“最左/最右/最上/最下/第一张/最后一张”时按卡片 @x,y 判断（x 最小=最左，y 最小=最上）。画布上有能唯一对上的卡就直接用它的 id，不要说“摘要里没有位置”或“指代不明”；只有真的对不上才 clarify。",

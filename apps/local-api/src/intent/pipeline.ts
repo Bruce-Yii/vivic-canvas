@@ -96,8 +96,6 @@ export interface PipelineDeps {
   compactContext?: boolean;
   /** Local experiment (`VIVIC_TOOL_CALLS=on`): one tool-calling turn replaces the classifier/planner. */
   toolCalls?: boolean;
-  /** Frontend understands NoteCard.sections; otherwise templates flatten to text. */
-  sections?: boolean;
   /** Tool calls running inside the host task manager: destructive proposals still get its confirmation gate. */
   toolCallsInTask?: boolean;
   routeHint?: Promise<PlannerRouteHint | null>;
@@ -466,7 +464,7 @@ const runLegacyIntent = async (
       });
       budget.signal.throwIfAborted();
       if (toolResult.ok) {
-        const plan = await planFromToolCalls(toolResult.value, req.canvasContext, Date.now(), req.text, { sections: deps.sections === true });
+        const plan = await planFromToolCalls(toolResult.value, req.canvasContext, Date.now(), req.text);
         if (plan.kind === "envelope" || plan.kind === "composite") {
           // Destructive tool proposals must pass the host task manager's frozen
           // confirmation; a direct (taskless) request never executes them. A

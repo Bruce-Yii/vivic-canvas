@@ -869,7 +869,6 @@ export const createApp = (deps: AppDeps) => {
       slotPlanning: requestRouter?.mode === "shadow" || requestRouter?.mode === "on",
       compactContext: online && mainProvider === "deepseek" ? true : undefined,
       toolCalls: config.toolCalls === true,
-      sections: config.sections === true,
       isSessionCurrent: () => version === providerRevision,
       planner: makePlanner(),
       };
