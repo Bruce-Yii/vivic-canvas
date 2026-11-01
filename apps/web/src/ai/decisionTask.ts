@@ -76,8 +76,14 @@ export async function runDecisionTask(options: DecisionTaskOptions): Promise<Dec
         } else {
           // No await between the lease/version check and the single owner mutation.
           const write = () => {
-            const outcome = result.envelope ? host.dispatch({ ...result.envelope, requestId: executionId, actions: focusResponseActions(result.envelope.actions, store.getState()) })
-              : executeHostOperation(host, store.getState(), result.hostOperation!, executionId);
+            // A composite turn applies the envelope (focus/view) first, then
+            // the single host operation (pin/move/arrange).
+            let outcome: { ok: boolean; error?: string } = result.envelope
+              ? host.dispatch({ ...result.envelope, requestId: executionId, actions: focusResponseActions(result.envelope.actions, store.getState()) })
+              : { ok: true };
+            if (outcome.ok && result.hostOperation) {
+              outcome = executeHostOperation(host, store.getState(), result.hostOperation, executionId);
+            }
             if (outcome.ok) {
               executed = true; applied = true;
               receipt.error = "更改已执行，保存结果尚未确认，请检查画布。";
@@ -86,7 +92,7 @@ export async function runDecisionTask(options: DecisionTaskOptions): Promise<Dec
             return outcome;
           };
           const outcome = options.withCommit ? options.withCommit(write) : write();
-          if (!outcome.ok) receipt.error = outcome.error.slice(0, 240);
+          if (!outcome.ok) receipt.error = (outcome.error ?? "执行器拒绝").slice(0, 240);
           else {
             lastMessage = result.hostOperation?.kind === "canvas.organize.preview" ? "已打开整理预览，请在电脑确认应用。"
               : result.hostOperation?.kind === "ambient.control" ? "已更新空间氛围。"

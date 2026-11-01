@@ -99,11 +99,13 @@ describe("DEC-01 real loopback HTTP integration", () => {
     expect(result).not.toHaveProperty("envelope");
   });
 
-  it("preserves the existing exact delete-all rule without sending it to a model", async () => {
+  it("recognizes the exact delete-all rule without a model and requires confirmation", async () => {
     const rig = await startRig(); const result = await rig.intent("删除所有卡片", notes(2));
-    expect(result).toMatchObject({ kind: "envelope", usedProvider: "rules" });
-    if (result.kind !== "envelope" || !result.envelope) throw new Error("Expected the existing exact rule");
-    expect(result.envelope.actions).toEqual([{ type: "cards.delete", targetIds: ["TEST-note-1", "TEST-note-2"] }]);
+    // The rule still matches deterministically (0 model calls), but a destructive
+    // batch never executes without the host confirmation gate.
+    expect(result).toMatchObject({ kind: "clarify", usedProvider: "rules" });
+    expect(result.message).toContain("确认");
+    expect(result.envelope).toBeUndefined();
     expect(rig.calls).toHaveLength(0);
   });
 

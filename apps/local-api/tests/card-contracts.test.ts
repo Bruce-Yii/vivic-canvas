@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { ActionSchema, CardRecordSchema, HostOperationSchema, type Action, type CardRecord } from "@vivic/contracts";
+import { ActionSchema, CardRecordSchema, HostOperationSchema, cardTargets, type Action, type CardRecord } from "@vivic/contracts";
 import { CARD_CONTRACTS, getCardContract } from "../src/cards/index.js";
 import type { CardBuildContext } from "../src/cards/types.js";
 import { actionExecutionIssue } from "../src/intent/validation.js";
@@ -74,6 +74,16 @@ describe("builtin card contract registry and slot boundaries", () => {
     ["note", {}], ["note", { text: " " }], ["note", { text: "长".repeat(501) }],
     ["note", { bullets: [] }], ["note", { bullets: Array(6).fill("TEST") }],
     ["note", { bullets: ["长".repeat(181)] }], ["note", { text: "TEST", bullets: ["TEST"] }],
+    ["note", { sections: [] }],
+    ["note", { sections: Array.from({ length: 5 }, () => ({ title: "TEST", items: ["TEST"] })) }],
+    ["note", { sections: [{ title: " ", items: ["TEST"] }] }],
+    ["note", { sections: [{ title: "长".repeat(41), items: ["TEST"] }] }],
+    ["note", { sections: [{ title: "TEST", items: [] }] }],
+    ["note", { sections: [{ title: "TEST", items: Array(7).fill("TEST") }] }],
+    ["note", { sections: [{ title: "TEST", items: ["长".repeat(181)] }] }],
+    ["note", { sections: [{ title: "TEST", items: ["TEST"], injected: true }] }],
+    ["note", { sections: [{ title: "TEST", items: ["TEST"] }], text: "TEST" }],
+    ["note", { sections: [{ title: "TEST", items: ["TEST"] }], bullets: ["TEST"] }],
     ["answer", { headline: "", summary: "TEST" }],
     ["answer", { ...samples.answer, keyPoints: Array(6).fill("TEST") }],
     ["answer", { ...samples.answer, summaryBy: "source" }],
@@ -186,6 +196,47 @@ describe("host-generated cards pass the real persistence and execution schemas",
     expect(createdCard(await actionsFor("note", samples.note)).displayProps).toEqual(samples.note);
     const bullets = ["TEST 第一条", "TEST 第二条\n内部换行"];
     expect(createdCard(await actionsFor("note", { bullets })).displayProps).toEqual({ bullets });
+  });
+
+  it("builds structured notes with labeled sections and reserves a standard card", async () => {
+    const sections = [
+      { title: "议题", items: ["预算复盘", "排期"] },
+      { title: "结论", items: ["延到下周"] },
+    ];
+    const card = createdCard(await actionsFor("note", { sections }));
+    expect(card.displayProps).toEqual({ sections });
+    expect(card.variant).toBe("standard");
+    expect(card.layout.width).toBe(340);
+    expect(card.layout.height).toBeGreaterThanOrEqual(220);
+    expect(card.layout.height).toBeLessThanOrEqual(420);
+  });
+
+  it("keeps legacy text+bullet notes valid while sections stay exclusive", () => {
+    const record = {
+      id: "TEST-note", type: "NoteCard" as const, variant: "minimal" as const, sources: [], sourceData: {},
+      layout: { x: 0, y: 0, width: 320, height: 120, pinned: false },
+      metadata: { createdAt: now.toISOString(), updatedAt: now.toISOString() },
+    };
+    const sections = [{ title: "议题", items: ["TEST"] }];
+    expect(CardRecordSchema.safeParse({ ...record, displayProps: { text: "TEST", bullets: ["TEST"] } }).success).toBe(true);
+    expect(CardRecordSchema.safeParse({ ...record, displayProps: { sections } }).success).toBe(true);
+    expect(CardRecordSchema.safeParse({ ...record, displayProps: { text: "TEST", sections } }).success).toBe(false);
+    expect(CardRecordSchema.safeParse({ ...record, displayProps: { bullets: ["TEST"], sections } }).success).toBe(false);
+  });
+
+  it("anchors every section heading and line for subcard editing", async () => {
+    const card = createdCard(await actionsFor("note", { sections: [
+      { title: "议题", items: ["预算复盘", "排期"] },
+      { title: "结论", items: ["延到下周"] },
+    ] }));
+    const targets = cardTargets(card);
+    expect(targets.map(target => target.itemId)).toEqual([
+      undefined, "section:1", "section:1:item:1", "section:1:item:2",
+      "section:2", "section:2:item:1",
+    ]);
+    expect(targets[0]!.label).toBe("议题");
+    expect(targets.find(target => target.itemId === "section:2:item:1")?.label).toBe("延到下周");
+    expect(targets.every(target => target.itemId === undefined || Boolean(target.anchor))).toBe(true);
   });
 
   it("builds knowledge answers without an article, using NewsCard and an honest AI attribution", async () => {

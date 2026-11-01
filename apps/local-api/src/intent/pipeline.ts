@@ -9,6 +9,7 @@ import { chatJson, type StepfunDeps, type ChatMessage, type StepfunResult } from
 import { INTENT_BUDGET_MS, PLAN_MAX_TOKENS, type MainProvider } from "../config.js";
 import { buildSystemPrompt, buildReminderSystemPrompt, buildUserPrompt } from "./prompt.js";
 import { matchRules } from "./rules.js";
+import { chartFastPath } from "./chartFast.js";
 import { providerRecoveryHint } from "../providerError.js";
 import { createBudget } from "./budget.js";
 import { buildReminderActions, isReminderCreation, parseEnumeratedReminders, ReminderPlanSchema, reminderCoverageIssue } from "./reminders.js";
@@ -40,6 +41,8 @@ import { runSlotPlanner } from "./slotPlanner.js";
 import { applyOutputChannels, normalizeOutputChannels } from "./channels.js";
 import { splitClauses } from "../decision/split.js";
 import { planDeterministic, countdownControlIssue } from "./plans.js";
+import { buildToolSystemPrompt, planFromToolCalls, TOOL_DEFINITIONS, toolFeedbackPhrase } from "./toolCalls.js";
+import { requestToolCalls, streamToolCalls } from "./toolTransport.js";
 import { runDecisionOn, multiCardMode, type MultiCardMode } from "../decision/on.js";
 import { feedbackReader, FEEDBACK_PROMPT, withoutFeedback } from "./feedback.js";
 
@@ -66,6 +69,8 @@ export interface IntentResult {
   envelope?: z.infer<typeof ActionEnvelopeSchema>;
   message?: string;
   suggestions?: string[];
+  /** Diagnostic: this turn was produced by the conversational tool-calling path. */
+  toolCalls?: boolean;
   usedProvider?: "rules" | "stepfun" | "gpt" | "deepseek" | "rules-offline" | "search" | "decision";
   trace?: DecisionTrace;
   /** Internal clarification handoff; the task manager removes it from the wire. */
@@ -89,6 +94,12 @@ export interface PipelineDeps {
   skipFastRules?: boolean;
   slotPlanning?: boolean;
   compactContext?: boolean;
+  /** Local experiment (`VIVIC_TOOL_CALLS=on`): one tool-calling turn replaces the classifier/planner. */
+  toolCalls?: boolean;
+  /** Frontend understands NoteCard.sections; otherwise templates flatten to text. */
+  sections?: boolean;
+  /** Tool calls running inside the host task manager: destructive proposals still get its confirmation gate. */
+  toolCallsInTask?: boolean;
   routeHint?: Promise<PlannerRouteHint | null>;
   /** Same trace id may arrive pending then complete; persistence must upsert it. */
   onDecisionTrace?: (request: IntentRequest, trace: DecisionTrace, result: IntentResult) => void | Promise<void>;
@@ -245,7 +256,24 @@ const runLegacyIntent = async (
     const hasImages = Boolean(req.attachments?.length);
     if (!plannerOnly) {
     report("rules", "started");
+    // Slot gates must run before the deterministic plan fast path: otherwise
+    // "健身计划" is synthesized before we notice the missing days/duration.
+    const gateDuration = /(?:\d+|[一二两三四五六七八九十百半]+)\s*(?:分钟|分|小时|时|秒|钟头|minutes?|mins?)/iu;
+    const gateCountdown = /倒计时/u.test(req.text) && /(设|做|建|来|要|开|加|启动)/u.test(req.text)
+      && !/(暂停|继续|取消|删除|停止|恢复)/u.test(req.text);
+    if (deps.toolCalls && !hasImages && !continuation && gateCountdown && !gateDuration.test(req.text)) {
+      return { kind: "clarify", message: "倒计时设多长时间？", usedProvider: "rules" };
+    }
+    const gateFitness = /计划/u.test(req.text) && /健身|减肥|跑步|训练/u.test(req.text)
+      && !/周[一二三四五六日天]|每天|每周|早上|上午|下午|晚上|\d+\s*(?:点|小时|分钟|公里|组|次|天)/u.test(req.text);
+    if (deps.toolCalls && !hasImages && !continuation && gateFitness) {
+      return { kind: "clarify", message: "下周想练哪几天、每次多久？", usedProvider: "rules" };
+    }
     // Preserve the deployed all-or-nothing numbered-list / weekly-plan path.
+    // A numbered list ("1. … 2. … 3. …") or an explicit weekly-plan request
+    // that the existing literal contracts and scene builder can build
+    // end-to-end is deterministic: no classifier or planner call, and no
+    // partial commit of only the first item.
     const deterministic = !hasImages && !continuation && !adapterOnly
       ? await planDeterministic(req.text, req.canvasContext) : null;
     if (deterministic) {
@@ -277,8 +305,36 @@ const runLegacyIntent = async (
     const ruleHit = hasImages || continuation || deps.skipFastRules ? null : matchRules(req.text, req.canvasContext);
     report("rules", "completed", performance.now() - startedAt);
     if (ruleHit) {
+      // Destructive rule hits must pass the host task manager's frozen
+      // confirmation; a taskless direct request never deletes on a rule match.
+      const destructive = ruleHit.actions.some(action => action.type === "card.delete" || action.type === "cards.delete");
+      if (destructive && !deps.toolCallsInTask) {
+        return { kind: "clarify", message: "删除/清空需要确认：请在控制页确认要删除的卡片后再执行。", usedProvider: "rules" };
+      }
       const envelope = assembleEnvelope(ruleHit.actions, req.canvasContext.canvasId, ruleHit.spokenText);
       budget.signal.throwIfAborted();
+      if (envelope) return { kind: "envelope", envelope, usedProvider: "rules" };
+    }
+    // Slot gate before any model/planner turn: a countdown request without a
+    // duration anywhere in the utterance must stop the whole sentence.
+    const durationHint = /(?:\d+|[一二两三四五六七八九十百半]+)\s*(?:分钟|分|小时|时|秒|钟头|minutes?|mins?)/iu;
+    const wantsCountdown = /倒计时/u.test(req.text) && /(设|做|建|来|要|开|加|启动)/u.test(req.text)
+      && !/(暂停|继续|取消|删除|停止|恢复)/u.test(req.text);
+    if (deps.toolCalls && !hasImages && !continuation && wantsCountdown && !durationHint.test(req.text)) {
+      return { kind: "clarify", message: "倒计时设多长时间？", usedProvider: "rules" };
+    }
+    // A fitness/training plan with no days or duration must be asked about,
+    // not silently synthesized by the planner.
+    const wantsFitnessPlan = /计划/u.test(req.text) && /健身|减肥|跑步|训练/u.test(req.text)
+      && !/周[一二三四五六日天]|每天|每周|早上|上午|下午|晚上|\d+\s*(?:点|小时|分钟|公里|组|次|天)/u.test(req.text);
+    if (deps.toolCalls && !hasImages && !continuation && wantsFitnessPlan) {
+      return { kind: "clarify", message: "下周想练哪几天、每次多久？", usedProvider: "rules" };
+    }
+    // Exact chart grammar with all points already in the sentence: build it
+    // directly instead of letting the table/planner path ask for data again.
+    const chart = deps.toolCalls && !hasImages && !continuation && !adapterOnly ? chartFastPath(req.text, req.canvasContext, Date.now()) : null;
+    if (chart) {
+      const envelope = assembleEnvelope(chart, req.canvasContext.canvasId, "图表已生成");
       if (envelope) return { kind: "envelope", envelope, usedProvider: "rules" };
     }
     const travelDemo = !hasImages && !continuation && !adapterOnly ? parseTravelDemo(req.text) : null;
@@ -378,6 +434,60 @@ const runLegacyIntent = async (
     }
     usedProvider = deps.planner?.provider
       ?? (deps.mainProvider === "deepseek" || deps.stepfun.provider === "deepseek" ? "deepseek" : "stepfun");
+    // Experimental conversational tool-calling path (`VIVIC_TOOL_CALLS=on`).
+    // Rules/data/search above stay authoritative; this only replaces the
+    // classifier/planner for requests that need understanding. Transport or
+    // mapping failures fall through to the proven planner instead of dropping
+    // the turn.
+    if (deps.toolCalls && credential && (!req.taskContext || deps.toolCallsInTask) && !hasImages && !continuation && !adapterOnly && !plannerOnly) {
+      const toolMessages: ChatMessage[] = [
+        { role: "system", content: buildToolSystemPrompt(req.canvasContext) },
+        { role: "user", content: req.text },
+      ];
+      plannerCall(1);
+      // Stream the tool choice: the first tool name is a real, model-decided
+      // route and can be shown as an in-progress line long before the arguments
+      // are complete. Nothing is committed until the full call validates.
+      const toolResult = await measured("planner", async () => {
+        const streamed = await streamToolCalls(credential, toolMessages,
+          { ...deps.stepfun, signal: budget.signal }, TOOL_DEFINITIONS, { maxTokens: 512 }, {
+            onToolName: name => {
+              if (!deps.streamFeedback) return;
+              if (deps.decisionTelemetry && deps.decisionTelemetry.firstFeedbackMs === undefined) {
+                deps.decisionTelemetry.firstFeedbackMs = Math.round(performance.now() - startedAt);
+              }
+              try { deps.onStage?.({ stage: "planner", status: "started", feedback: toolFeedbackPhrase(name), feedbackSource: "model" }); } catch { /* progress is advisory */ }
+            },
+          });
+        if (streamed.ok) return streamed;
+        // A gateway that ignores `stream` still works: one non-streaming retry.
+        return requestToolCalls(credential, toolMessages,
+          { ...deps.stepfun, signal: budget.signal }, TOOL_DEFINITIONS, { maxTokens: 512 });
+      });
+      budget.signal.throwIfAborted();
+      if (toolResult.ok) {
+        const plan = await planFromToolCalls(toolResult.value, req.canvasContext, Date.now(), req.text, { sections: deps.sections === true });
+        if (plan.kind === "envelope" || plan.kind === "composite") {
+          // Destructive tool proposals must pass the host task manager's frozen
+          // confirmation; a direct (taskless) request never executes them. A
+          // composite still carries actions, so the same gate applies.
+          const destructive = plan.actions.some(action => action.type === "card.delete" || action.type === "cards.delete");
+          if (destructive && !deps.toolCallsInTask) {
+            return { kind: "clarify", message: "删除需要确认：请在控制页确认要删除的卡片后再执行。", usedProvider, toolCalls: true };
+          }
+          const envelope = assembleEnvelope(plan.actions, req.canvasContext.canvasId, plan.say);
+          if (envelope) return plan.kind === "composite" && plan.hostOperation
+            ? { kind: "envelope", envelope, hostOperation: plan.hostOperation, usedProvider, toolCalls: true }
+            : { kind: "envelope", envelope, usedProvider, toolCalls: true };
+        } else if (plan.kind === "clarify") {
+          return { kind: "clarify", message: plan.message!, usedProvider, toolCalls: true };
+        } else if (plan.kind === "host-operation" && plan.hostOperation) {
+          return { kind: "host-operation", hostOperation: plan.hostOperation, usedProvider, toolCalls: true };
+        }
+        // `chat` and invalid plans fall through on purpose: chat still needs the
+        // proven planner's answer, and a rejected tool plan must not lose the turn.
+      }
+    }
     // "生日倒计时" / "距离考试还有 30 天" are date countdown cards, not minute timers.
     const reminderMode = !hasImages && !continuation && !req.taskContext && isReminderCreation(req.text) && !looksLikeDateCountdown(req.text);
     // A single explicit trigger with an enumerated item list ("五分钟后提醒我

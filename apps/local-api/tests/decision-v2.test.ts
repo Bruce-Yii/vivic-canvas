@@ -213,9 +213,32 @@ describe("versioned decision task execution", () => {
     expect(hostOperationIssue({ kind: "countdown.pause", targetId: "timer" }, emptyContext([timer]))).not.toBeNull();
     expect(exactHostOperation("解释‘撤销’")).toBeNull(); expect(exactHostOperation("不要撤销")).toBeNull();
   });
+  it("refuses a composite that deletes plus another operation instead of freezing only the delete", async () => {
+    // Relaxing envelope+operation must not let a second operation ride along on
+    // a confirmation question that only asks about the deletion.
+    const tasks = new DecisionTaskManager({ gate: { executionEnabled: false } });
+    const request = req("删掉读书笔记，然后整理一下布局");
+    const result = await tasks.run(request, { safetyMode: true, legacy: async () => ({
+      kind: "envelope", usedProvider: "rules",
+      envelope: ActionEnvelopeSchema.parse({ schemaVersion: "0.6", requestId: "composite-delete", canvasId: request.canvasContext.canvasId,
+        actions: [{ type: "card.delete", targetId: "note-1" }] }),
+      hostOperation: { kind: "canvas.arrange" },
+    }) });
+    expect(result.kind).toBe("clarify");
+    expect(result.message).toContain("单独");
+    expect(result.envelope).toBeUndefined();
+    expect(result.hostOperation).toBeUndefined();
+  });
   it("keeps the host union separate from the legacy envelope", () => {
     expect(HostOperationSchema.safeParse({ kind: "card.move", targetId: "n", direction: "left", x: 10 }).success).toBe(false);
     expect(IntentResponseSchema.safeParse({ kind: "host-operation", hostOperation: { kind: "history.undo" }, envelope: { schemaVersion: "0.6", requestId: "x", canvasId: "c1", actions: [{ type: "canvas.fit" }] } }).success).toBe(false);
+    // A composite turn is an envelope plus exactly one host operation; the
+    // response is still an envelope because the host applies its actions first.
+    const composite = { kind: "envelope" as const,
+      envelope: { schemaVersion: "0.6" as const, requestId: "x", canvasId: "c1", actions: [{ type: "card.focus" as const, targetId: "note-1" }] },
+      hostOperation: { kind: "card.pin" as const, targetId: "note-1", pinned: true } };
+    expect(IntentResponseSchema.safeParse(composite).success).toBe(true);
+    expect(IntentResponseSchema.safeParse({ kind: "envelope", hostOperation: composite.hostOperation }).success).toBe(false);
   });
   it("connects the native task and receipt through the actual API in online mode", async () => {
     const provider = scripted(focusChoices);

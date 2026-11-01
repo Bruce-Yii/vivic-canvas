@@ -41,6 +41,7 @@ import { DecisionManager } from "./decision/manager.js";
 import { DecisionRouter, HttpDecisionProvider, decisionTimeout, type DecisionProvider } from "./decision/provider.js";
 import { HttpNativeV2Provider, type NativeV2Provider } from "./decision/nativeV2.js";
 import { DecisionTaskManager } from "./decision/taskV2.js";
+import { classifyDeletionConfirmation } from "./decision/confirmIntent.js";
 import type { PreferenceStore } from "./preferences.js";
 import { TravelQuerySchema } from "@vivic/contracts";
 import { buildTravelCard, demoTravelProvider, queryTravel, type TravelProvider } from "./providers/travel.js";
@@ -867,6 +868,8 @@ export const createApp = (deps: AppDeps) => {
       decisionTelemetry: { plannerCalls: 0, directClauses: 0 },
       slotPlanning: requestRouter?.mode === "shadow" || requestRouter?.mode === "on",
       compactContext: online && mainProvider === "deepseek" ? true : undefined,
+      toolCalls: config.toolCalls === true,
+      sections: config.sections === true,
       isSessionCurrent: () => version === providerRevision,
       planner: makePlanner(),
       };
@@ -940,10 +943,19 @@ export const createApp = (deps: AppDeps) => {
           // Without a route hint the planner proposal still goes through the same
           // freeze; no configured model must never mean "delete immediately".
           safetyMode: true, routeHint,
+          // Semantic confirmation: the model decides whether the reply means
+          // confirm / cancel / unclear; regex grammar is only the offline fallback.
+          classifyConfirmation: async (question, reply, confirmSignal) => {
+            const credential = mainCredentials.getSecret();
+            if (!credential) return undefined;
+            try { return await classifyDeletionConfirmation(credential, mainModel, question, reply, confirmSignal); }
+            catch { return undefined; }
+          },
           legacy: (request, taskSignal, plannerOnly) => runIntent({ ...request,
             offlineReferenceCompatibility: request.offlineReferenceCompatibility === true
               && (online || !configuredProvider && !deps.decision && !decision.status().enabled),
-          }, { ...pipeline, routeHint, executionRouter: requestRouter, router: undefined, onDecisionTrace: undefined }, taskSignal, false, plannerOnly),
+          }, { ...pipeline, routeHint, executionRouter: requestRouter, router: undefined, onDecisionTrace: undefined,
+            ...(config.toolCalls === true ? { toolCallsInTask: true } : {}) }, taskSignal, false, plannerOnly),
           isCurrent: () => version === providerRevision,
           tools: {
             weather: (city, canvasContext, taskSignal) => runIntent({ text: `${city}天气`, canvasContext, deviceLocation: parsed.data.deviceLocation }, { ...pipeline, decision: undefined }, taskSignal, true),

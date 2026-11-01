@@ -115,8 +115,7 @@ export const IntentResultSchema = z.object({
     basis: z.enum(["device", "network"]), answer: z.string() }).optional(),
   usedProvider: z.enum(["rules", "stepfun", "deepseek", "gpt", "rules-offline", "search", "decision"]).optional(),
 }).refine(result => result.kind !== "envelope" || Boolean(result.envelope), "缺少已校验的操作")
-  .refine(result => result.kind !== "host-operation" || Boolean(result.hostOperation && result.task?.status === "awaiting_execution"), "缺少宿主操作任务")
-  .refine(result => !(result.envelope && result.hostOperation), "操作类型冲突");
+  .refine(result => result.kind !== "host-operation" || Boolean(result.hostOperation && result.task?.status === "awaiting_execution"), "缺少宿主操作任务");
 
 /** Progress is advisory. Only one complete, schema-valid result leaves this parser. */
 export async function readIntentStream(response: Response, onProgress: (event: IntentProgress) => void, signal?: AbortSignal) {

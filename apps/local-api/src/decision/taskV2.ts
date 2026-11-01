@@ -36,8 +36,10 @@ export interface TaskRunDeps {
   /** Enabled by the host only for decision mode on; retained for this task's lifetime. */
   safetyMode?: boolean;
   routeHint?: Promise<PlannerRouteHint | null>;
+  /** Semantic confirmation; absent falls back to the deterministic grammar. */
+  classifyConfirmation?: (question: string, reply: string, signal?: AbortSignal) => Promise<"confirm" | "cancel" | "unclear" | undefined>;
 }
-interface Options { provider?: NativeV2Provider; gate?: Partial<NativeGate>; now?: () => number; maxSteps?: number; maxActiveMs?: number; ttlMs?: number }
+interface Options { provider?: NativeV2Provider; gate?: Partial<NativeGate>; now?: () => number; maxSteps?: number; maxActiveMs?: number; ttlMs?: number; maxTasks?: number }
 const question = (instructions: string, criteria: Record<string, string>): NativeQuestion => ({ type: "choice", instructions, criteria });
 // 22 values + two unresolved signals + native none fit the pinned 26-letter readout.
 const CANDIDATE_GROUP = 22;
@@ -81,8 +83,11 @@ export class DecisionTaskManager {
     return this.result(task, result);
   }
   private execute(task: Task, proposal: IntentResult, confirmed = false): IntentResult {
-    if (Boolean(proposal.envelope) === Boolean(proposal.hostOperation)) throw new Error("invalid_execution");
+    if (!proposal.envelope && !proposal.hostOperation) throw new Error("invalid_execution");
     if (task.safetyMode && !confirmed && deletionTargets(proposal).length) {
+      // A composite delete must not smuggle its second operation through a
+      // confirmation question that only mentions the deletion.
+      if (proposal.hostOperation) return this.clarify(task, "这条指令包含删除和其他操作，请先单独发送删除；本次未执行任何操作。");
       const confirmation = freezeDeletion(proposal, task.context);
       if (!confirmation) return this.clarify(task, "删除目标或画布范围已失效，请重新发送；本次未执行任何操作。");
       task.deleteConfirmation = confirmation;
@@ -105,9 +110,22 @@ export class DecisionTaskManager {
     }
     if (!task) {
       if (request.task?.receipt) return { kind: "error", message: "任务已结束或服务已重启，不能重放旧执行结果。" };
-      if (this.tasks.size >= 128) {
-        for (const [key, old] of this.tasks) if (this.now() - old.createdAt > (this.options.ttlMs ?? 10 * 60_000)) { old.controller.abort(); this.tasks.delete(key); }
-        if (this.tasks.size >= 128) return { kind: "error", message: "会话任务较多，请稍后重试。" };
+      // Bound memory without turning a long acceptance run into a hard outage:
+      // 1) drop expired tasks; 2) if still full, evict oldest terminal tasks;
+      // only then refuse. Default is high enough for hundreds of taskless turns.
+      const maxTasks = Math.max(16, this.options.maxTasks ?? 512);
+      if (this.tasks.size >= maxTasks) {
+        const ttl = this.options.ttlMs ?? 10 * 60_000;
+        for (const [key, old] of this.tasks) if (this.now() - old.createdAt > ttl) { old.controller.abort(); this.tasks.delete(key); }
+        if (this.tasks.size >= maxTasks) {
+          // Never turn "a long acceptance run" into a hard outage: evict the
+          // oldest idle task (any status) before refusing a new one.
+          const idle = [...this.tasks.entries()]
+            .filter(([, old]) => !old.busy)
+            .sort((a, b) => a[1].createdAt - b[1].createdAt);
+          while (this.tasks.size >= maxTasks && idle.length) this.tasks.delete(idle.shift()![0]);
+        }
+        if (this.tasks.size >= maxTasks) return { kind: "error", message: "会话任务较多，请稍后重试。" };
       }
       task = { id, originalGoal: request.text, input: request.text, canvasId: request.canvasContext.canvasId, step: 0, phase: "user_input",
         createdAt: this.now(), activeMs: 0, controller: new AbortController(), status: "awaiting_clarification", mode: this.options.provider ? "native-v2" : "legacy-fallback",
@@ -145,7 +163,15 @@ export class DecisionTaskManager {
           if (signal?.aborted || task.controller.signal.aborted) return this.terminal(task, "cancelled", "删除已取消，未执行任何操作。");
           if (deps.isCurrent && !deps.isCurrent()) return this.terminal(task, "failed", "模型连接已变更，删除已取消。");
           if (task.activeMs >= (this.options.maxActiveMs ?? 90_000)) return this.terminal(task, "failed", "任务处理超时，删除已取消。");
-          if (!confirmsDeletion(request.text)) return this.terminal(task, "cancelled", "删除已取消，未执行任何操作。");
+          // Ask the model what the reply means; only an explicit "confirm" unlocks
+          // execution. Deterministic grammar is the offline fallback.
+          const decision = deps.classifyConfirmation
+            ? await deps.classifyConfirmation(confirmation.question, request.text, signal)
+            : undefined;
+          if (signal?.aborted || task.controller.signal.aborted) return this.terminal(task, "cancelled", "删除已取消，未执行任何操作。");
+          if (decision === "cancel") return this.terminal(task, "cancelled", "删除已取消，未执行任何操作。");
+          if (decision === "unclear") return this.clarify(task, confirmation.question);
+          if (decision === undefined && !confirmsDeletion(request.text)) return this.terminal(task, "cancelled", "删除已取消，未执行任何操作。");
           if (!deletionStillCurrent(confirmation, task.context)) return this.terminal(task, "cancelled", "画布或删除目标已变更，请重新发起并确认；本次未执行任何操作。");
           task.deleteConfirmation = undefined;
           return this.execute(task, confirmation.proposal, true);

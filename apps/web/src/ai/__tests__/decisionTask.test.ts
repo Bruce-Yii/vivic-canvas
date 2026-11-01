@@ -151,6 +151,57 @@ describe("owner decision tasks with real in-memory persistence and simulated mod
     expect(move).toHaveBeenCalledOnce(); expect(requests()).toHaveLength(2);
   });
 
+  it("applies the envelope before the host operation when one response carries both", async () => {
+    const { host, store, run, seed } = await setup(); await seed(note("shopping"));
+    // "先聚焦购物清单，再把它固定住": both parts arrive in the same validated
+    // response, so the focus must land before the pin executes.
+    const order: string[] = [];
+    const dispatch = host.dispatch.bind(host);
+    vi.spyOn(host, "dispatch").mockImplementation(raw => {
+      const envelope = raw as ActionEnvelope;
+      order.push(envelope.actions.map(action => action.type).join(","));
+      return dispatch(raw);
+    });
+    const pin = host.setCardPinned.bind(host);
+    let focusAtPin: string[] = [];
+    vi.spyOn(host, "setCardPinned").mockImplementation((cardId, pinned, canvasId) => {
+      order.push(`pin:${cardId}`);
+      focusAtPin = [...store.getState().focusHistory];
+      return pin(cardId, pinned, canvasId);
+    });
+    reply((_text, context, _signal, _attachments, _continuation, _location, _progress, request) => request?.receipt ? terminal(request.id) : ({
+      kind: "envelope",
+      task: task(request!.id, "awaiting_execution", { executionId: "focus-pin", canvasVersion: context.version! }),
+      envelope: { schemaVersion: "0.6", requestId: "envelope-focus-pin", canvasId: context.canvasId,
+        actions: [{ type: "card.focus", targetId: "shopping" }] },
+      hostOperation: { kind: "card.pin", targetId: "shopping", pinned: true },
+    }));
+    expect(await run()).toMatchObject({ task: { status: "completed" }, executed: true });
+    expect(order).toEqual(["card.focus", "pin:shopping"]);
+    expect(focusAtPin).toEqual(["shopping"]);
+    expect(store.getState().focusHistory).toEqual(["shopping"]);
+    expect(store.getState().cards.find(card => card.record.id === "shopping")!.record.layout.pinned).toBe(true);
+    expect(requests()[1]![7]!.receipt).toEqual({ executionId: "focus-pin", status: "succeeded", createdCardIds: [] });
+  });
+
+  it("keeps a composite failure receipt when the host operation is rejected after the envelope", async () => {
+    const { store, run, seed } = await setup(); await seed(note("pinned", 0, true));
+    // A pin of an already-pinned card is rejected by the host. The envelope
+    // focus still lands (view state), but the receipt must not claim success.
+    reply((_text, context, _signal, _attachments, _continuation, _location, _progress, request) => request?.receipt ? terminal(request.id, "failed") : ({
+      kind: "envelope",
+      task: task(request!.id, "awaiting_execution", { executionId: "focus-pin-fails", canvasVersion: context.version! }),
+      envelope: { schemaVersion: "0.6", requestId: "envelope-focus-pin-fails", canvasId: context.canvasId,
+        actions: [{ type: "card.focus", targetId: "pinned" }] },
+      hostOperation: { kind: "card.move", targetId: "pinned", direction: "right" },
+    }));
+    const result = await run();
+    expect(result).toMatchObject({ task: { status: "failed" }, executed: false });
+    expect(requests()[1]![7]!.receipt).toMatchObject({ executionId: "focus-pin-fails", status: "failed" });
+    expect(store.getState().focusHistory).toEqual(["pinned"]);
+    expect(store.getState().cards[0]!.record.layout).toMatchObject({ pinned: true });
+  });
+
   it("refuses stale canvas versions and reports a failed receipt while retaining the user's newer edit", async () => {
     const { host, store, db, canvasId, run, seed } = await setup();
     const late = deferred<IntentResult>();

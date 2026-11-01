@@ -14,18 +14,25 @@ export interface DeleteConfirmation {
 
 /** Internal planner fields must never cross the task manager's public boundary. */
 export function publicIntentResult(result: IntentResult): IntentResult {
-  const { kind, envelope, hostOperation, task, locale, message, suggestions, usedProvider, trace } = result;
+  const { kind, envelope, hostOperation, task, locale, message, suggestions, usedProvider, trace, toolCalls } = result;
   return { kind,
     ...(envelope === undefined ? {} : { envelope }), ...(hostOperation === undefined ? {} : { hostOperation }),
     ...(task === undefined ? {} : { task }), ...(locale === undefined ? {} : { locale }),
     ...(message === undefined ? {} : { message }), ...(suggestions === undefined ? {} : { suggestions }),
     ...(usedProvider === undefined ? {} : { usedProvider }), ...(trace === undefined ? {} : { trace }),
+    ...(toolCalls === undefined ? {} : { toolCalls }),
   };
 }
 
-/** An affirmative must occupy the whole utterance; corrections are never consent. */
-export const confirmsDeletion = (text: string): boolean =>
-  /^(?:确定|确认|确定删除|确认删除|是|是的|删吧|删除吧|好|好的|可以|同意|可以删除|同意删除)[。！!]?$/u.test(text.trim());
+/** An affirmative must occupy the whole utterance; corrections are never consent.
+ * Natural short confirmations are accepted ("嗯/好/行/可以/删吧/删掉吧/确认删掉"…),
+ * but any negation, correction, extra instruction, question or partial scope is not. */
+export const confirmsDeletion = (text: string): boolean => {
+  const input = text.trim().replace(/[。！!，,.\s]+$/u, "");
+  if (!input) return false;
+  if (/不|别|取消|算了|保留|等一下|稍等|先|改|换|只删|删一半|吗|呢|？|\?/u.test(input)) return false;
+  return /^(?:确定|确认|确定删除|确认删除|是|是的|对|对的|嗯+|好|好的|好呀|行|可以|可以删|可以删除|同意|同意删除|没问题|ok|okay|删|删除|删吧|删除吧|删掉|删掉吧|删了吧|执行|动手吧|就这样|就这么办|确认删掉)$/iu.test(input);
+};
 
 /** Narrow affirmative deletion grammar, used only to prepare a second-turn confirmation. */
 export function standaloneDeletion(text: string): "one" | "all" | undefined {

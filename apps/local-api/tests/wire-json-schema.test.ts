@@ -65,4 +65,12 @@ describe("published JSON contracts stay aligned with the runtime", () => {
     assertBoth(envelope([{ type: "card.create", card: note }]), false);
     assertBoth(envelope([{ type: "card.create", card: { ...note, displayProps: { text: "原文" } } }]), true);
   });
+
+  it("accepts structured notes but never sections mixed with text or bullets", () => {
+    const sections = [{ title: "议题", items: ["预算复盘"] }];
+    const note = { ...timer({}), type: "NoteCard", sourceData: {}, displayProps: { sections } };
+    assertBoth(envelope([{ type: "card.create", card: note }]), true);
+    assertBoth(envelope([{ type: "card.create", card: { ...note, displayProps: { sections, text: "原文" } } }]), false);
+    assertBoth(envelope([{ type: "card.create", card: { ...note, displayProps: { sections, bullets: ["原文"] } } }]), false);
+  });
 });

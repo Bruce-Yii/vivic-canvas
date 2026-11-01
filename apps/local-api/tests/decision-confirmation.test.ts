@@ -70,7 +70,7 @@ describe("on-mode deletion confirmation freezes the whole proposal", () => {
     expect(legacy).toHaveBeenCalledTimes(1);
   });
 
-  it.each(["确定", "是", "是的。", "删吧", "确认删除！"])("executes only the frozen proposal after the entire affirmative %s", async text => {
+  it.each(["确定", "是", "是的。", "删吧", "确认删除！", "嗯", "嗯嗯", "好", "好呀", "行", "可以", "可以删", "没问题", "OK", "对的", "删除", "删掉", "删掉吧", "删了吧", "确认删掉"])("executes only the frozen proposal after the entire affirmative %s", async text => {
     const tasks = manager(), legacy = vi.fn(async () => deletePlan()), deps = safeDeps(legacy);
     const first = await tasks.run(request(), deps);
     const confirmed = await tasks.run(reply(first, text), deps);
@@ -80,13 +80,47 @@ describe("on-mode deletion confirmation freezes the whole proposal", () => {
     expect(await tasks.run(reply(first, text), deps)).toEqual(confirmed);
   });
 
-  it.each(["不", "取消", "算了", "确定但不要删便笺", "确定，然后删除全部", "是吗", "删吧？", "1", "请先聚焦"])("cancels without partial execution for %s", async text => {
+  it.each(["不", "取消", "算了", "确定但不要删便笺", "确定，然后删除全部", "是吗", "删吧？", "1", "请先聚焦", "先别删", "不要删", "等一下", "保留这张", "改成删待办", "删一半", "别删了"])("cancels without partial execution for %s", async text => {
     const tasks = manager(), legacy = vi.fn(async () => deletePlan()), deps = safeDeps(legacy);
     const first = await tasks.run(request(), deps), cancelled = await tasks.run(reply(first, text), deps);
     withheld(cancelled); expect(cancelled.task?.status).toBe("cancelled");
     expect(await tasks.run(reply(first, "确定"), deps)).toEqual(cancelled);
     expect(legacy).toHaveBeenCalledTimes(1);
   });
+
+  it("uses the model's semantic confirmation instead of the keyword list", async () => {
+    const tasks = manager(), legacy = vi.fn(async () => deletePlan());
+    const classify = vi.fn(async (question: string, reply: string) => { void question; void reply; return "confirm" as const; });
+    const deps = { ...safeDeps(legacy), classifyConfirmation: classify };
+    const first = await tasks.run(request(), deps);
+    // "行吧就它" is not in the deterministic grammar; the model understands it.
+    const confirmed = await tasks.run(reply(first, "行吧就它"), deps);
+    expect(confirmed.envelope).toEqual(deletePlan().envelope);
+    expect(classify).toHaveBeenCalledTimes(1);
+    expect(classify.mock.calls[0]![0]).toContain("读书笔记");
+    expect(classify.mock.calls[0]![1]).toBe("行吧就它");
+  });
+
+  it("model cancel overrides a phrase the deterministic grammar would accept", async () => {
+    const tasks = manager(), legacy = vi.fn(async () => deletePlan());
+    const deps = { ...safeDeps(legacy), classifyConfirmation: vi.fn(async () => "cancel" as const) };
+    const first = await tasks.run(request(), deps);
+    const cancelled = await tasks.run(reply(first, "嗯嗯"), deps);
+    withheld(cancelled); expect(cancelled.task?.status).toBe("cancelled");
+    expect(legacy).toHaveBeenCalledTimes(1);
+  });
+
+  it("model unclear re-asks the same question instead of executing", async () => {
+    const tasks = manager(), legacy = vi.fn(async () => deletePlan());
+    const deps = { ...safeDeps(legacy), classifyConfirmation: vi.fn(async () => "unclear" as const) };
+    const first = await tasks.run(request(), deps);
+    const again = await tasks.run(reply(first, "这张是哪个"), deps);
+    withheld(again); expect(again.kind).toBe("clarify");
+    expect(again.task?.status).toBe("awaiting_clarification");
+    expect(again.message).toBe(first.message);
+    expect(legacy).toHaveBeenCalledTimes(1);
+  });
+
 
   it("holds updates, creation and deletion together until confirmation", async () => {
     const actions: Action[] = [

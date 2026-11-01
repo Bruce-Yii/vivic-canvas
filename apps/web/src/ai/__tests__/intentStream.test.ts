@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { readIntentStream } from "../intentStream";
+import { readIntentStream, IntentResultSchema } from "../intentStream";
 
 const response = (chunks: string[]) => new Response(new ReadableStream({ start(controller) {
   chunks.forEach(chunk => controller.enqueue(new TextEncoder().encode(chunk))); controller.close();
@@ -46,6 +46,19 @@ describe("bounded SSE intent parser", () => {
     controller.abort();
     await expect(reading).rejects.toThrow();
     expect(onProgress).not.toHaveBeenCalled();
+  });
+  it("accepts one validated envelope that also carries a host operation", async () => {
+    const envelope = { schemaVersion: "0.6", requestId: "r1", canvasId: "c1", actions: [{ type: "card.focus", targetId: "card-1" }] };
+    const parsed = IntentResultSchema.parse({ kind: "envelope", envelope,
+      hostOperation: { kind: "card.pin", targetId: "card-1", pinned: true } });
+    expect(parsed.hostOperation).toEqual({ kind: "card.pin", targetId: "card-1", pinned: true });
+    expect(await readIntentStream(Response.json({ kind: "envelope", envelope,
+      hostOperation: { kind: "card.pin", targetId: "card-1", pinned: true } }), () => {}))
+      .toMatchObject({ kind: "envelope", envelope, hostOperation: { kind: "card.pin" } });
+    // The envelope is still mandatory for kind envelope, and a host-only
+    // response still needs its task receipt.
+    expect(() => IntentResultSchema.parse({ kind: "envelope", hostOperation: { kind: "card.pin", targetId: "card-1", pinned: true } })).toThrow();
+    expect(() => IntentResultSchema.parse({ kind: "host-operation", hostOperation: { kind: "card.pin", targetId: "card-1", pinned: true } })).toThrow();
   });
   it("accepts JSON test/backward-compatible responses and honors cancellation", async () => {
     expect(await readIntentStream(Response.json({ kind: "unknown", message: "TEST" }), () => {})).toMatchObject({ kind: "unknown" });
