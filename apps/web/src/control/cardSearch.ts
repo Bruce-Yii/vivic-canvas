@@ -14,7 +14,8 @@ const sceneStrings = (value: unknown, out: string[] = []): string[] => {
 };
 
 export const cardSearchText = (card: CardRecord): string[] => [cardTitle(card), ...(card.metadata.aliases ?? []),
-  ...(card.type === "NoteCard" ? [card.displayProps.text ?? "", ...(card.displayProps.bullets ?? [])]
+  ...(card.type === "NoteCard" ? [card.displayProps.text ?? "", ...(card.displayProps.bullets ?? []),
+    ...(card.displayProps.sections ?? []).flatMap(section => [section.title, ...section.items])]
     : card.type === "TodoCard" ? card.displayProps.items.map(item => item.text)
     : card.type === "CountdownCard" ? [card.sourceData.reminderText ?? "", card.sourceData.event?.title ?? "", card.sourceData.event?.note ?? ""]
     : card.type === "SearchResultCard" ? [card.displayProps.title, card.displayProps.summary]
@@ -31,7 +32,8 @@ export function cardMatches(card: CardRecord, query: string): boolean {
 
 export const cardSearchSummary = (card: CardRecord): string => (card.type === "SearchResultCard" ? card.displayProps.summary
   : card.type === "TodoCard" ? card.displayProps.items.map(item => item.text).join(" · ")
-  : card.type === "NoteCard" ? [card.displayProps.text, ...(card.displayProps.bullets ?? [])].filter(Boolean).join(" · ")
+  : card.type === "NoteCard" ? [card.displayProps.text, ...(card.displayProps.bullets ?? []),
+    ...(card.displayProps.sections ?? []).flatMap(section => [section.title, ...section.items])].filter(Boolean).join(" · ")
   : card.type === "CountdownCard" ? card.sourceData.event ? `${card.sourceData.event.title} · ${card.sourceData.event.date}` : card.sourceData.reminderText ?? "纯数字计时器"
   : sceneOfCard(card) ? sceneStrings(card.displayProps).slice(1, 4).join(" · ") || CARD_TYPE_LABELS[card.type]
   : CARD_TYPE_LABELS[card.type]);

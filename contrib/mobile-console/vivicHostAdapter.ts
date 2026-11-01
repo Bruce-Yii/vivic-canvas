@@ -78,8 +78,21 @@ function visibleCard(record: ExistingCard["record"], isOfficeDefinition?: (ref: 
     }
     case "NoteCard": {
       const bullets = list(p.bullets).map(value => item(value)).filter(row => row.text);
+      // Sectioned notes are one note, not a list: each section title becomes the
+      // meta of its first line so a paired phone shows the same structure
+      // instead of the "暂无内容" empty state. Only visible strings are copied.
+      const sectionRows: NonNullable<CardPreview["items"]> = [];
+      for (const value of list(p.sections, 4)) {
+        const section = fields(value), heading = headline(section.title);
+        list(section.items, 6).forEach((entry, index) => {
+          if (typeof entry === "string" && entry) sectionRows.push(item(entry, index === 0 && heading ? [heading] : []));
+        });
+      }
       title = headline(p.text) || bullets[0]?.text.slice(0, 160) || title;
-      preview = { kind: "text", body: text(p.text), ...(bullets.length ? { items: bullets } : {}) }; break;
+      preview = sectionRows.length
+        ? { kind: "text", items: sectionRows }
+        : { kind: "text", body: text(p.text), ...(bullets.length ? { items: bullets } : {}) };
+      break;
     }
     case "TodoCard": {
       const rows = items(p.items, row => item(row.text, [], row.done));

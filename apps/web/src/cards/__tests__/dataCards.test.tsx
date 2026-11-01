@@ -4,6 +4,8 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { CardRecordSchema, type CardRecord } from "@/contracts";
 import { VivicCard } from "../VivicCard";
+import { SubcardEditorContext } from "../SubcardEditorContext";
+import { CARD_INNER_HEIGHT } from "../metrics";
 import type { ChartCard, WeatherCard } from "../dataCardTypes";
 import { testCards } from "./fixtures";
 
@@ -189,5 +191,71 @@ describe("data card renderers", () => {
     expect(host.textContent).toContain("TEST fourth line");
     expect(host.textContent).toContain("TEST bullet two");
     expect(host.querySelector("button")).toBeNull();
+  });
+
+  it("renders structured note sections with labeled headings and variant-aware clipping", async () => {
+    const sections = [
+      { title: "议题", items: ["预算复盘", "排期"] },
+      { title: "结论", items: ["延到下周"] },
+    ];
+    const record = { ...testCards.NoteCard, displayProps: { sections } };
+    await render(<VivicCard record={record} />);
+    expect([...host.querySelectorAll("[data-vivic-note-section-title]")].map(node => node.textContent)).toEqual(["议题", "结论"]);
+    expect([...host.querySelectorAll("[data-vivic-note-section] [data-aui='text']")].map(node => node.textContent))
+      .toEqual(["预算复盘", "排期", "延到下周"]);
+    expect(host.textContent).not.toContain("TEST note");
+    const surface = host.firstElementChild as HTMLElement;
+    expect(surface.getAttribute("data-vivic-note-layout")).toBe("sections");
+    expect(surface.className).toContain("break-words");
+    expect(parseFloat(surface.style.maxHeight)).toBe(84);
+    await render(<VivicCard record={{ ...record, variant: "standard" }} />);
+    expect(parseFloat((host.firstElementChild as HTMLElement).style.maxHeight)).toBe(record.layout.height - CARD_INNER_HEIGHT);
+    await render(<VivicCard record={{ ...record, variant: "expanded" }} />);
+    expect((host.firstElementChild as HTMLElement).style.maxHeight).toBe("");
+    expect(host.querySelector("button")).toBeNull();
+    expect(record.displayProps).toEqual({ sections });
+  });
+
+  it("marks clipped folded notes with +N and never marks expanded", async () => {
+    const sections = Array.from({ length: 4 }, (_, section) => ({
+      title: `TEST区${section + 1}`,
+      items: Array.from({ length: 6 }, (_, item) => `TEST条目${section + 1}-${item + 1}`),
+    }));
+    const record = { ...testCards.NoteCard, variant: "standard" as const, layout: { ...testCards.NoteCard.layout, height: 420 }, displayProps: { sections } };
+    await render(<VivicCard record={record} />);
+    const more = host.querySelector<HTMLElement>("[data-vivic-note-overflow]")!;
+    expect(more).not.toBeNull();
+    expect(more.textContent).toMatch(/^\+\d+$/);
+    // The marker counts exactly the lines hidden under it, and matches its own data attribute.
+    expect(Number(more.textContent!.slice(1))).toBeGreaterThan(0);
+    expect(Number(more.textContent!.slice(1))).toBe(Number(more.dataset.vivicNoteOverflow));
+    expect(host.querySelectorAll("[data-vivic-note-clipped]")).toHaveLength(Number(more.dataset.vivicNoteOverflow));
+    // Folding only annotates the clip; every line stays rendered for reading and editing.
+    expect(host.querySelectorAll("[data-vivic-note-section-title]")).toHaveLength(4);
+    expect(host.querySelectorAll("[data-vivic-note-section] li")).toHaveLength(24);
+    await render(<VivicCard record={{ ...record, variant: "expanded" }} />);
+    expect(host.querySelector("[data-vivic-note-overflow]")).toBeNull();
+    expect(host.querySelectorAll("[data-vivic-note-clipped]")).toHaveLength(0);
+    expect((host.firstElementChild as HTMLElement).style.maxHeight).toBe("");
+    // A plain note with more lines than the folded box shows its own +N.
+    await render(<VivicCard record={testCards.NoteCard} />);
+    expect(host.querySelector("[data-vivic-note-overflow]")?.textContent).toMatch(/^\+\d+$/);
+    expect(host.querySelectorAll("[data-vivic-note-clipped]")).toHaveLength(Number(host.querySelector<HTMLElement>("[data-vivic-note-overflow]")!.dataset.vivicNoteOverflow));
+    // A short standard note fits, so no marker is invented.
+    await render(<VivicCard record={{ ...testCards.NoteCard, variant: "standard", displayProps: { text: "TEST short" } }} />);
+    expect(host.querySelector("[data-vivic-note-overflow]")).toBeNull();
+    expect(host.querySelectorAll("[data-vivic-note-clipped]")).toHaveLength(0);
+  });
+
+  it("keeps every section heading and line editable through SubcardAnchor", async () => {
+    const record = {
+      ...testCards.NoteCard,
+      displayProps: { sections: [{ title: "议题", items: ["预算复盘", "排期"] }, { title: "结论", items: ["延到下周"] }] },
+    };
+    await render(<SubcardEditorContext.Provider value={{ editable: true, dispatch: () => true }}>
+      <VivicCard record={record} />
+    </SubcardEditorContext.Provider>);
+    expect([...host.querySelectorAll("[data-vivic-subcard-trigger]")].map(node => node.getAttribute("data-vivic-subcard-trigger")))
+      .toEqual(["section:1", "section:1:item:1", "section:1:item:2", "section:2", "section:2:item:1"]);
   });
 });

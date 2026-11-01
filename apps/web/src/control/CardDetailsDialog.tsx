@@ -46,6 +46,7 @@ export function CardDetailsReader({ children }: { children: ReactNode }) {
             {card?.type === "NoteCard" && <>
               {renderVivicSpec({ _type: "Markdown", value: card.displayProps.text ?? "" })}
               {!!card.displayProps.bullets?.length && renderVivicSpec({ _type: "Markdown", value: card.displayProps.bullets.map(text => `- ${text}`).join("\n") })}
+              {!!card.displayProps.sections?.length && renderVivicSpec({ _type: "Markdown", value: card.displayProps.sections.map(section => `### ${section.title}\n${section.items.map(item => `- ${item}`).join("\n")}`).join("\n\n") })}
               {connectedText && <details open className="mt-5 border-t border-border pt-3"><summary className="text-xs opacity-60">服务查询原文{connected?.truncated === true ? " · 已截取" : ""}</summary>
                 {renderVivicSpec({ _type: "Markdown", value: connectedText })}</details>}
             </>}

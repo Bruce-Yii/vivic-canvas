@@ -12,6 +12,19 @@ describe("current-card search text", () => {
     expect(cardMatches({ ...testCards.TodoCard, displayProps: { items: [{ id: "1", text: "买菜", done: false }, { id: "2", text: "整理资料", done: false }] } }, "zlzl")).toBe(true);
     expect(cardMatches({ ...testCards.CountdownCard, sourceData: { ...testCards.CountdownCard.sourceData, reminderText: "喝水" } }, "heshui")).toBe(true);
   });
+  it("matches section titles and items of a structured note", () => {
+    const structured = { ...testCards.NoteCard, displayProps: { sections: [
+      { title: "议题", items: ["预算复盘", "排期"] },
+      { title: "结论", items: ["延到下周"] },
+    ] } };
+    expect(cardMatches(structured, "议题")).toBe(true);
+    expect(cardMatches(structured, "yusuan")).toBe(true);
+    expect(cardMatches(structured, "paiqi")).toBe(true);
+    expect(cardMatches(structured, "延到下周")).toBe(true);
+    expect(cardMatches(structured, "不相关的内容xyz")).toBe(false);
+    expect(cardSearchSummary(structured)).toContain("预算复盘");
+    expect(cardSearchSummary(structured)).toContain("结论");
+  });
   it("keeps empty query and rejects unrelated words", () => {
     expect(cardMatches(note, "  ")).toBe(true);
     expect(cardMatches(note, "不相关的内容xyz")).toBe(false);

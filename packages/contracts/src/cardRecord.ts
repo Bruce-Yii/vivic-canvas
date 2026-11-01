@@ -84,6 +84,16 @@ export const WeatherCardSchema = z.strictObject({
   sourceData: OpenSourceData,
 });
 
+/** One labeled block in a structured note: a short heading plus 1–6 plain lines. */
+export const NoteSectionSchema = z.strictObject({
+  title: z.string().trim().min(1).max(40),
+  items: z.array(z.string().trim().min(1).max(180)).min(1).max(6),
+});
+
+/** Structured notes stay inside the existing NoteCard: no new CardType. */
+export const NoteSectionsSchema = z.array(NoteSectionSchema).min(1).max(4);
+export type NoteSection = z.infer<typeof NoteSectionSchema>;
+
 export const NoteCardSchema = z.strictObject({
   ...CommonShape,
   type: z.literal("NoteCard"),
@@ -91,9 +101,15 @@ export const NoteCardSchema = z.strictObject({
     .strictObject({
       text: z.string().max(500).optional(),
       bullets: z.array(z.string().max(180)).max(5).optional(),
+      sections: NoteSectionsSchema.optional(),
     })
-    .refine((v) => v.text !== undefined || v.bullets !== undefined, {
-      message: "NoteCard needs text or bullets",
+    .refine((v) => v.text !== undefined || v.bullets !== undefined || v.sections !== undefined, {
+      message: "NoteCard needs text, bullets or sections",
+    })
+    // Structured sections are a new card shape; text+bullets stay accepted so
+    // cards written before sections existed still load unchanged.
+    .refine((v) => v.sections === undefined || (v.text === undefined && v.bullets === undefined), {
+      message: "NoteCard sections cannot be combined with text or bullets",
     }),
   sourceData: OpenSourceData,
 });

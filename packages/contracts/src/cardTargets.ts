@@ -43,7 +43,7 @@ const sceneTitle = (card: CardRecord): string | undefined => {
 
 export const cardTitle = (card: CardRecord): string => card.metadata.aliases?.[0]
   || (card.type === "CountdownCard" ? card.sourceData.event?.title ?? card.sourceData.reminderText : undefined)
-  || (card.type === "NoteCard" ? card.displayProps.text || card.displayProps.bullets?.[0] : undefined)
+  || (card.type === "NoteCard" ? card.displayProps.text || card.displayProps.bullets?.[0] || card.displayProps.sections?.[0]?.title : undefined)
   || sceneTitle(card)
   || (card.type === "TodoCard" ? card.displayProps.items[0]?.text : undefined)
   || (card.type === "SearchResultCard" ? card.displayProps.title : undefined)
@@ -56,6 +56,16 @@ export const cardTargets = (card: CardRecord): CardTarget[] => {
   if (card.type === "NoteCard") {
     if (card.displayProps.text) rows.push(...card.displayProps.text.split("\n").map((line, i) => ({ itemId: `line:${i + 1}`, anchor: fingerprint(line), label: line || "空行" })));
     rows.push(...(card.displayProps.bullets ?? []).map((line, i) => ({ itemId: `bullet:${i + 1}`, anchor: fingerprint(line), label: line })));
+    // Sections are positional too: the anchor binds a section heading or one
+    // of its lines to its original content, so an edit detaches instead of
+    // attaching the expansion to a different row.
+    (card.displayProps.sections ?? []).forEach((section, sectionIndex) => {
+      const sectionId = `section:${sectionIndex + 1}`;
+      rows.push({ itemId: sectionId, anchor: fingerprint(section.title), label: section.title });
+      rows.push(...section.items.map((line, itemIndex) => ({
+        itemId: `${sectionId}:item:${itemIndex + 1}`, anchor: fingerprint(line), label: line,
+      })));
+    });
   }
   return [{ label: cardTitle(card) }, ...rows];
 };

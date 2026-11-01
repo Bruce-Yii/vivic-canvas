@@ -1,5 +1,5 @@
-import { lazy, Suspense, useRef, useState, type PointerEvent } from "react";
-import { CardRecordSchema, cardTitle, type CardRecord, type HostedSpaceCommand } from "@vivic/contracts";
+import { lazy, Suspense, useRef, useState, type FormEvent, type PointerEvent } from "react";
+import { CardRecordSchema, cardTitle, NoteSectionsSchema, type CardRecord, type HostedSpaceCommand, type NoteSection } from "@vivic/contracts";
 import { HarkIcon, HarkSurface } from "@/components/hark/HarkPrimitives";
 import { CardActionsContext, CardModeContext } from "@/cards/scene/cardContext";
 import { SubcardEditorContext, SubcardThemeContext } from "@/cards/SubcardEditorContext";
@@ -34,7 +34,15 @@ export function HostedCardBoard({ cards, version, theme, busy, focusedId, notice
       {cards.map(card => <HostedCard key={card.id} card={card} version={version} busy={busy} focused={focusedId === card.id} onFocus={() => onFocus(card.id)} onCommand={onCommand} onEdit={() => setEditing({ card, expectedVersion: version })} onOpenFile={() => assets.openFile(card)} />)}
       {!cards.length && <div className="hosted-space-empty"><h2>留一点空间给想法</h2><p>新建便笺、待办或提醒，也可以告诉 Vivic 你想做什么。</p></div>}
     </div></div>
-    {editing && <NoteEditor card={editing.card} busy={busy} notice={notice} onClose={() => setEditing(null)} onSave={async text => { const card = editing.card, command: HostedSpaceCommand = card.type === "NoteCard" ? { type: "card.update", cardId: card.id, displayProps: { text } } : { type: "card.update", cardId: card.id, sourceData: { reminderText: text } }; return onCommand(command, undefined, editing.expectedVersion); }} />}
+    {editing && <NoteEditor card={editing.card} busy={busy} notice={notice} onClose={() => setEditing(null)} onSave={async value => {
+      const card = editing.card;
+      const command: HostedSpaceCommand = card.type === "NoteCard"
+        ? { type: "card.update", cardId: card.id, displayProps: "sections" in value ? { sections: value.sections } : { text: value.text } }
+        : { type: "card.update", cardId: card.id, sourceData: { reminderText: "text" in value ? value.text : "" } };
+      // A rejected command must reach the editor as a visible failure, never
+      // close the dialog as if the note had been saved.
+      return onCommand(command, undefined, editing.expectedVersion).catch(() => false);
+    }} />}
   </CardActionsContext></CardModeContext></SubcardEditorContext></SubcardThemeContext>;
 }
 function HostedCard({ card, version, busy, focused, onFocus, onCommand, onEdit, onOpenFile }: { card: CardRecord; version: number; busy: boolean; focused: boolean; onFocus(): void; onCommand: HostedCardCommand; onEdit(): void; onOpenFile(): void }) {
@@ -68,8 +76,71 @@ function HostedCard({ card, version, busy, focused, onFocus, onCommand, onEdit, 
     {card.variant !== "expanded" && card.type !== "FileCard" && <button className="hosted-card-expand hark-icon-button" aria-label={`展开：${title}`} disabled={busy} onClick={() => void onCommand({ type: "card.update", cardId: card.id, variant: "expanded" }, undefined, version)}><HarkIcon name="expand" /></button>}
   </HarkSurface>;
 }
-function NoteEditor({ card, busy, notice, onClose, onSave }: { card: CardRecord; busy: boolean; notice: string; onClose(): void; onSave(text: string): Promise<boolean> }) {
+type NoteEditorValue = { text: string } | { sections: NoteSection[] };
+const NOTE_SAVE_FAILED = "保存未成功，内容仍保留在此处，请重试。";
+
+/**
+ * One note shape at a time: text cards keep text, section cards edit their
+ * headings and lines in place. Validation happens before dispatch, and a
+ * rejected save keeps the dialog and the draft visible instead of closing as
+ * if nothing happened.
+ */
+function NoteEditor({ card, busy, notice, onClose, onSave }: { card: CardRecord; busy: boolean; notice: string; onClose(): void; onSave(value: NoteEditorValue): Promise<boolean> }) {
+  const sectionsMode = card.type === "NoteCard" && Boolean(card.displayProps.sections?.length);
   const [text, setText] = useState(card.type === "NoteCard" ? card.displayProps.text ?? card.displayProps.bullets?.join("\n") ?? "" : card.type === "CountdownCard" ? card.sourceData.reminderText ?? "" : "");
+  const [sections, setSections] = useState<NoteSection[]>(() => sectionsMode && card.type === "NoteCard"
+    ? (card.displayProps.sections ?? []).map(section => ({ title: section.title, items: [...section.items] })) : []);
+  const [failure, setFailure] = useState("");
   const revision = useRef(0);
-  return <HostedDialog title="编辑卡片" onClose={onClose}><form className="hosted-form" onSubmit={event => { event.preventDefault(); const started = revision.current; if (text.trim() && !busy) void onSave(text.trim()).then(ok => { if (ok && started === revision.current) onClose(); }); }}><label>内容<textarea aria-label="编辑卡片内容" value={text} onChange={event => { revision.current++; setText(event.target.value); }} maxLength={card.type === "NoteCard" ? 500 : 160} rows={7} /></label>{notice && <p role="status" className="hosted-muted">{notice}</p>}<button className="hosted-primary" disabled={busy || !text.trim()}>保存</button></form></HostedDialog>;
+  const edit = (change: () => void) => { revision.current += 1; setFailure(""); change(); };
+  const editSection = (index: number, change: (section: NoteSection) => NoteSection) => edit(() =>
+    setSections(current => current.map((section, position) => position === index ? change(section) : section)));
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    if (busy) return;
+    const started = revision.current;
+    const settle = (saved: boolean) => {
+      if (!saved) { setFailure(NOTE_SAVE_FAILED); return; }
+      if (started === revision.current) onClose();
+    };
+    if (sectionsMode) {
+      const candidate = sections
+        .map(section => ({ title: section.title.trim(), items: section.items.map(item => item.trim()).filter(Boolean) }))
+        .filter(section => section.title || section.items.length);
+      const parsed = NoteSectionsSchema.safeParse(candidate);
+      if (!parsed.success) { setFailure("请填写 1–4 个分区，每个分区标题必填、至少 1 条内容，每区最多 6 条。"); return; }
+      void onSave({ sections: parsed.data }).then(settle).catch(() => setFailure(NOTE_SAVE_FAILED));
+    } else {
+      if (!text.trim()) { setFailure("内容不能为空。"); return; }
+      void onSave({ text: text.trim() }).then(settle).catch(() => setFailure(NOTE_SAVE_FAILED));
+    }
+  };
+  return <HostedDialog title="编辑卡片" onClose={onClose}><form className="hosted-form" data-hosted-note-editor={sectionsMode ? "sections" : "text"} onSubmit={submit}>
+    {sectionsMode ? <div className="flex min-w-0 flex-col gap-3">
+      {sections.map((section, sectionIndex) => <fieldset key={sectionIndex} className="m-0 flex min-w-0 flex-col gap-2 rounded-2xl border border-[var(--hark-stroke)] p-3"
+        data-hosted-note-section={sectionIndex + 1}>
+        <legend className="px-1 text-[13px] leading-5 text-[var(--hark-secondary)]">分区 {sectionIndex + 1}</legend>
+        <input aria-label={`分区 ${sectionIndex + 1} 标题`} value={section.title} maxLength={40} placeholder="分区标题"
+          onChange={event => { const value = event.target.value; editSection(sectionIndex, current => ({ ...current, title: value })); }} />
+        {section.items.map((item, itemIndex) => <div key={itemIndex} className="flex min-w-0 items-center gap-1">
+          <input aria-label={`分区 ${sectionIndex + 1} 第 ${itemIndex + 1} 条`} value={item} maxLength={180} placeholder="条目" className="min-w-0 flex-1"
+            onChange={event => { const value = event.target.value; editSection(sectionIndex, current => ({ ...current, items: current.items.map((entry, position) => position === itemIndex ? value : entry) })); }} />
+          <button type="button" className="hark-icon-button shrink-0" aria-label={`删除分区 ${sectionIndex + 1} 第 ${itemIndex + 1} 条`} disabled={busy || section.items.length < 2}
+            onClick={() => editSection(sectionIndex, current => ({ ...current, items: current.items.filter((_, position) => position !== itemIndex) }))}><HarkIcon name="trash" /></button>
+        </div>)}
+        <div className="flex flex-wrap items-center gap-1">
+          {section.items.length < 6 && <button type="button" className="hosted-quiet" disabled={busy}
+            onClick={() => editSection(sectionIndex, current => ({ ...current, items: [...current.items, ""] }))}>添加条目</button>}
+          {sections.length > 1 && <button type="button" className="hosted-quiet" aria-label={`删除分区 ${sectionIndex + 1}`} disabled={busy}
+            onClick={() => edit(() => setSections(current => current.filter((_, position) => position !== sectionIndex)))}>删除分区</button>}
+        </div>
+      </fieldset>)}
+      {sections.length < 4 && <button type="button" className="hosted-quiet self-start" disabled={busy}
+        onClick={() => edit(() => setSections(current => [...current, { title: "", items: [""] }]))}>添加分区</button>}
+    </div> : <label>内容<textarea aria-label="编辑卡片内容" value={text} maxLength={card.type === "NoteCard" ? 500 : 160} rows={7}
+      onChange={event => { const value = event.target.value; revision.current += 1; setFailure(""); setText(value); }} /></label>}
+    {failure && <p role="alert" className="hosted-error" data-hosted-note-error>{failure}</p>}
+    {notice && <p role="status" className="hosted-muted">{notice}</p>}
+    <button className="hosted-primary" disabled={busy || (!sectionsMode && !text.trim())}>保存</button>
+  </form></HostedDialog>;
 }

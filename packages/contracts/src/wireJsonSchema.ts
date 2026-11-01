@@ -21,7 +21,11 @@ export function createWireJsonSchemas() {
           properties: { schedule: { not: { type: "null" } }, condition: { not: { type: "null" } } },
         };
       }
-      if (zodSchema === NoteCardSchema) jsonSchema.anyOf = [{ required: ["text"] }, { required: ["bullets"] }].map(rule => ({
+      if (zodSchema === NoteCardSchema) jsonSchema.anyOf = [
+        { required: ["text"], not: { required: ["sections"] } },
+        { required: ["bullets"], not: { required: ["sections"] } },
+        { required: ["sections"], not: { anyOf: [{ required: ["text"] }, { required: ["bullets"] }] } },
+      ].map(rule => ({
         required: ["displayProps"], properties: { displayProps: rule },
       }));
       if (zodSchema === ReminderConditionSchema) {

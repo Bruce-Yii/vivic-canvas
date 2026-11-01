@@ -61,6 +61,12 @@ export function hostedCardHeight(record: CardRecord): number {
   }
   if (record.type === "NoteCard" && record.variant === "expanded") {
     const chars = Math.max(1, Math.floor((width - 84) / 16));
+    if (record.displayProps.sections?.length) {
+      const content = record.displayProps.sections.reduce((sum, section) =>
+        sum + Math.max(1, Math.ceil(section.title.length / chars)) * 22 + 4
+          + section.items.reduce((itemSum, item) => itemSum + Math.max(1, Math.ceil(item.length / chars)) * 28 + 4, 0), 0);
+      return Math.max(record.layout.height, inner + content);
+    }
     const lines = [record.displayProps.text ?? "", ...(record.displayProps.bullets ?? [])].reduce((sum, text) =>
       sum + text.split("\n").reduce((count, line) => count + Math.max(1, Math.ceil(line.length / chars)), 0), 0);
     return Math.max(record.layout.height, inner + lines * 28 + (record.displayProps.bullets?.length ?? 0) * 8);

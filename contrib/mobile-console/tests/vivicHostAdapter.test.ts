@@ -68,6 +68,28 @@ describe("explicit visible-content sharing", () => {
     expect(snapshot).toMatchObject({ cardCount: 1, cardsTruncated: false });
   });
 
+  it("projects structured note sections instead of leaving a paired phone empty", () => {
+    const snapshot = projection(record("NoteCard", {
+      sections: [
+        { title: "议题", items: ["预算复盘", "排期"], hidden: "NOT_VISIBLE_SENTINEL" },
+        { title: "结论", items: ["延到下周"] },
+      ],
+    }));
+    const preview = snapshot.cards[0]!.preview!;
+    expect(preview).toMatchObject({ kind: "text" });
+    // Section titles stay attached to their first line; text/bullets are empty
+    // for this card shape, so body must not be invented.
+    expect(preview.body).toBeUndefined();
+    expect(preview.items).toEqual([
+      { text: "预算复盘", meta: "议题" },
+      { text: "排期" },
+      { text: "延到下周", meta: "结论" },
+    ]);
+    // The card is still a note, not a section heading.
+    expect(snapshot.cards[0]!.title).toBe("便笺");
+    expect(JSON.stringify(snapshot)).not.toContain("NOT_VISIBLE_SENTINEL");
+  });
+
   it("includes only the explicitly visible countdown source fields", () => {
     const snapshot = projection(record("CountdownCard", {}, { targetAt: "2099-01-01T00:00:00.000Z", reminderText: "检查烤箱", apiKey: "SOURCE_SENTINEL", condition: { text: "PRIVATE_CONDITION" } }));
     expect(snapshot.cards[0]).toMatchObject({ title: "检查烤箱", preview: { kind: "metric" } });

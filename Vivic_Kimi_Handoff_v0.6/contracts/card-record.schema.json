@@ -1268,6 +1268,36 @@
                 "type": "string",
                 "maxLength": 180
               }
+            },
+            "sections": {
+              "minItems": 1,
+              "maxItems": 4,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  },
+                  "items": {
+                    "minItems": 1,
+                    "maxItems": 6,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 180
+                    }
+                  }
+                },
+                "required": [
+                  "title",
+                  "items"
+                ],
+                "additionalProperties": false
+              }
             }
           },
           "additionalProperties": false
@@ -1298,7 +1328,12 @@
             "displayProps": {
               "required": [
                 "text"
-              ]
+              ],
+              "not": {
+                "required": [
+                  "sections"
+                ]
+              }
             }
           }
         },
@@ -1310,7 +1345,38 @@
             "displayProps": {
               "required": [
                 "bullets"
-              ]
+              ],
+              "not": {
+                "required": [
+                  "sections"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "required": [
+            "displayProps"
+          ],
+          "properties": {
+            "displayProps": {
+              "required": [
+                "sections"
+              ],
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "text"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "bullets"
+                    ]
+                  }
+                ]
+              }
             }
           }
         }
